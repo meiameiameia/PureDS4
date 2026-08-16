@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Configuration;
 using System;
+using System.Globalization;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
@@ -30,7 +31,31 @@ namespace DS4WindowsTests
     [TestClass]
     public class AppSettingsTests
     {
+        private const string LAST_CHECKED_FORMAT = "MM/dd/yyyy HH:mm:ss";
+        private const string LAST_CHECKED_SERIALIZED_VALUE = "12/05/2023 00:24:15";
+
         private string appSettingsXml = string.Empty;
+
+        private sealed class CultureScope : IDisposable
+        {
+            private readonly CultureInfo originalCulture;
+            private readonly CultureInfo originalUICulture;
+
+            public CultureScope(string cultureName)
+            {
+                originalCulture = CultureInfo.CurrentCulture;
+                originalUICulture = CultureInfo.CurrentUICulture;
+                CultureInfo culture = CultureInfo.GetCultureInfo(cultureName);
+                CultureInfo.CurrentCulture = culture;
+                CultureInfo.CurrentUICulture = culture;
+            }
+
+            public void Dispose()
+            {
+                CultureInfo.CurrentCulture = originalCulture;
+                CultureInfo.CurrentUICulture = originalUICulture;
+            }
+        }
 
         public AppSettingsTests()
         {
@@ -132,8 +157,41 @@ namespace DS4WindowsTests
             dto.MapTo(tempStore);
 
             // Check settings
-            DateTime.TryParse(dto.LastCheckString, out DateTime tempLastChecked);
+            Assert.IsTrue(DateTime.TryParseExact(dto.LastCheckString,
+                LAST_CHECKED_FORMAT, CultureInfo.InvariantCulture,
+                DateTimeStyles.None, out DateTime tempLastChecked));
             Assert.AreEqual(tempLastChecked, tempStore.lastChecked);
+        }
+
+        [DataTestMethod]
+        [DataRow("en-US")]
+        [DataRow("pt-BR")]
+        [DataRow("de-DE")]
+        public void LastCheckedRoundTripsUsingInvariantFormat(string cultureName)
+        {
+            using CultureScope cultureScope = new CultureScope(cultureName);
+            XmlSerializer serializer = new XmlSerializer(typeof(AppSettingsDTO));
+            DateTime expectedLastChecked = DateTime.ParseExact(
+                LAST_CHECKED_SERIALIZED_VALUE, LAST_CHECKED_FORMAT,
+                CultureInfo.InvariantCulture, DateTimeStyles.None);
+
+            using StringReader reader = new StringReader(appSettingsXml);
+            AppSettingsDTO source = (AppSettingsDTO)serializer.Deserialize(reader);
+            Assert.AreEqual(expectedLastChecked, source.LastChecked);
+
+            BackingStore store = new BackingStore();
+            source.MapTo(store);
+            Assert.AreEqual(expectedLastChecked, store.lastChecked);
+
+            AppSettingsDTO roundTrip = new AppSettingsDTO();
+            roundTrip.MapFrom(store);
+            Assert.AreEqual(LAST_CHECKED_SERIALIZED_VALUE,
+                roundTrip.LastCheckString);
+
+            using StringWriter writer = new StringWriter();
+            serializer.Serialize(writer, roundTrip);
+            StringAssert.Contains(writer.ToString(),
+                $"<LastChecked>{LAST_CHECKED_SERIALIZED_VALUE}</LastChecked>");
         }
 
         [TestMethod]

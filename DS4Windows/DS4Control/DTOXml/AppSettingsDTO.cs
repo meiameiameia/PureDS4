@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,6 +33,8 @@ namespace DS4WinWPF.DS4Control.DTOXml
     [XmlRoot("Profile")]
     public class AppSettingsDTO : IDTO<BackingStore>
     {
+        private const string LAST_CHECKED_FORMAT = "MM/dd/yyyy HH:mm:ss";
+
         //private XmlDocument tempDoc = new XmlDocument();
 
         //[XmlAnyElement("ConfigDataComment")]
@@ -249,10 +252,13 @@ namespace DS4WinWPF.DS4Control.DTOXml
         [XmlElement("LastChecked")]
         public string LastCheckString
         {
-            get => LastChecked.ToString("MM/dd/yyyy HH:mm:ss");
+            get => LastChecked.ToString(LAST_CHECKED_FORMAT,
+                CultureInfo.InvariantCulture);
             set
             {
-                if (DateTime.TryParse(value, out DateTime temp))
+                if (DateTime.TryParseExact(value, LAST_CHECKED_FORMAT,
+                    CultureInfo.InvariantCulture, DateTimeStyles.None,
+                    out DateTime temp) || DateTime.TryParse(value, out temp))
                 {
                     LastChecked = temp;
                 }
