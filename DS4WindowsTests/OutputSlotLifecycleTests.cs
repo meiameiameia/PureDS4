@@ -304,6 +304,35 @@ namespace DS4WindowsTests
         }
 
         [TestMethod]
+        public void TryBindInputCanSkipPermanentReuseWhenRequested()
+        {
+            OutputSlotManager manager = new();
+            OutputDevice[] runtimeOutputs = NewRuntimeOutputs(manager);
+            RecordingOutputDevice permanentOutput = new(OutContType.ViiperDS4);
+            manager.DeferredPlugin(permanentOutput, -1, string.Empty, runtimeOutputs,
+                OutContType.ViiperDS4);
+            OutSlotDevice permanentSlot = manager.GetOutSlotDevice(permanentOutput);
+            permanentSlot.CurrentReserveStatus = OutSlotDevice.ReserveStatus.Permanent;
+            RecordingOutputDevice dynamicOutput = new(OutContType.ViiperDS4);
+            int factoryCalls = 0;
+
+            bool bound = manager.TryBindInput(1, "DS4", runtimeOutputs,
+                OutContType.ViiperDS4, () =>
+                {
+                    factoryCalls++;
+                    return dynamicOutput;
+                }, out OutSlotDevice slotDevice, allowPermanentSlotReuse: false);
+
+            Assert.IsTrue(bound);
+            Assert.AreEqual(1, factoryCalls);
+            Assert.AreNotSame(permanentSlot, slotDevice);
+            Assert.AreSame(dynamicOutput, runtimeOutputs[1]);
+            Assert.AreEqual(OutSlotDevice.InputBound.Unbound,
+                permanentSlot.CurrentInputBound);
+            Assert.AreEqual(2, manager.NumAttachedDevices);
+        }
+
+        [TestMethod]
         public void TryBindInputConnectionFailureLeavesNoPublishedState()
         {
             OutputSlotManager manager = new();

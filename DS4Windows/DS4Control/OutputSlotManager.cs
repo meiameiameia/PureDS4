@@ -304,19 +304,24 @@ namespace DS4Windows
 
         internal bool TryBindInput(int inIdx, string inDisplayString,
             OutputDevice[] outdevs, OutContType contType,
-            Func<OutputDevice> createOutput, out OutSlotDevice slotDevice)
+            Func<OutputDevice> createOutput, out OutSlotDevice slotDevice,
+            bool allowPermanentSlotReuse = true)
         {
             contType = contType.Normalize();
-            slotDevice = FindExistUnboundSlotType(contType);
-            if (slotDevice != null)
+            slotDevice = null;
+            if (allowPermanentSlotReuse)
             {
-                slotDevice.CurrentInputBound = OutSlotDevice.InputBound.Bound;
-                outdevs[inIdx] = slotDevice.OutputDevice;
-                slotDevice.CurrentType = contType;
-                return true;
+                slotDevice = FindExistUnboundSlotType(contType);
+                if (slotDevice != null)
+                {
+                    slotDevice.CurrentInputBound = OutSlotDevice.InputBound.Bound;
+                    outdevs[inIdx] = slotDevice.OutputDevice;
+                    slotDevice.CurrentType = contType;
+                    return true;
+                }
             }
 
-            if (FindEmptySlot() == -1)
+            if (FindOpenSlot() == null)
             {
                 return false;
             }

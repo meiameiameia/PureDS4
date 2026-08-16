@@ -1712,11 +1712,12 @@ namespace DS4Windows
             Global.outDevTypeTemp[index] = Global.outDevTypeTemp[index].Normalize();
             StartupDiag($"PluginOutDev enter index={index} contType={contType} useDInputOnly={useDInputOnly[index]} profileDInputOnly={getDInputOnly(index)}");
 
-            OutSlotDevice slotDevice = null;
-            if (!getDInputOnly(index))
+            bool profileDInputOnly = getDInputOnly(index);
+            OutSlotDevice existingSlot = null;
+            if (!profileDInputOnly)
             {
-                slotDevice = outputslotMan.FindExistUnboundSlotType(contType);
-                StartupDiag($"PluginOutDev existingSlot index={index} found={slotDevice != null} slot={(slotDevice != null ? slotDevice.Index + 1 : 0)}");
+                existingSlot = outputslotMan.FindExistUnboundSlotType(contType);
+                StartupDiag($"PluginOutDev existingSlot index={index} found={existingSlot != null} slot={(existingSlot != null ? existingSlot.Index + 1 : 0)}");
             }
 
             if (useDInputOnly[index])
@@ -1724,30 +1725,25 @@ namespace DS4Windows
                 EnsureHidHideForVirtualOutput(index, device, contType);
 
                 bool success = false;
+                OutSlotDevice slotDevice = null;
+                OutSlotDevice candidateSlot = null;
                 if (ViiperOutDevice.IsViiperType(contType))
                 {
                     activeOutDevType[index] = contType;
-                    if (slotDevice == null)
+                    candidateSlot = existingSlot ?? outputslotMan.FindOpenSlot();
+                    bool bindingSucceeded = outputslotMan.TryBindInput(index,
+                        $"{device.DisplayName} [{device.MacAddress}]", outputDevices,
+                        contType, () => EstablishOutDevice(index, contType), out slotDevice,
+                        allowPermanentSlotReuse: !profileDInputOnly);
+                    if (!bindingSucceeded && candidateSlot != null)
                     {
-                        slotDevice = outputslotMan.FindOpenSlot();
-                        if (slotDevice != null)
-                        {
-                            OutputDevice tempViiper = EstablishOutDevice(index, contType);
-                            outputslotMan.DeferredPlugin(tempViiper, index,
-                                $"{device.DisplayName} [{device.MacAddress}]", outputDevices, contType);
-                            success = true;
-                        }
-                        else
-                        {
-                            LogDebug("Failed. No open output slot found");
-                        }
+                        slotDevice = candidateSlot;
                     }
-                    else
+
+                    success = bindingSucceeded || candidateSlot != null;
+                    if (!success && candidateSlot == null)
                     {
-                        slotDevice.CurrentInputBound = OutSlotDevice.InputBound.Bound;
-                        outputDevices[index] = slotDevice.OutputDevice;
-                        slotDevice.CurrentType = contType;
-                        success = true;
+                        LogDebug("Failed. No open output slot found");
                     }
                 }
 
@@ -1760,7 +1756,7 @@ namespace DS4Windows
                 else
                 {
                     LogDebug("Failed. No output device was associated");
-                    StartupDiag($"PluginOutDev failed index={index} success={success} slotNull={slotDevice == null} slotOutputNull={slotDevice?.OutputDevice == null}");
+                    StartupDiag($"PluginOutDev failed index={index} success={success} slotNull={candidateSlot == null} slotOutputNull={candidateSlot?.OutputDevice == null}");
                 }
             }
             else
