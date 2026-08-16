@@ -23,8 +23,8 @@ Never turn build success, protocol tests, a component health check, or test coun
 - UI tasks must report the exact disposable validation executable. Automated visual evidence is valid only when the running process path is explicitly verified to match that executable. Final visual validation is performed manually by the owner.
 - `Dev\current` is the latest owner-approved and committed milestone. `Dev\rollback` is the immediately previous owner-approved milestone. Disposable validation publishes never become the daily driver.
 - Promotion sequence: build/tests → disposable publish → owner validation → commit/push → promote.
-- `RunDS4Windows` should normally remain pointed at `Dev\current`.
-- If updating the privileged scheduled task returns `E_ACCESSDENIED`, stop and request owner elevation rather than attempting to bypass UAC.
+- `RunDS4Windows` is persistent host-level infrastructure and remains pointed at `Dev\current`. Normal build, validation, promotion, rollback, cleanup, and release work must never recreate or retarget it, including to a disposable or versioned publish. Promote a validated build by replacing `Dev\current`, then manually smoke-test that canonical runtime.
+- `RunVIIPER` is likewise host infrastructure and must not be modified by normal development or promotion work.
 
 ## Repository and stack
 
