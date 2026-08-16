@@ -20,6 +20,21 @@
     <SolidColorBrush x:Key="SuccessColor" Color="#FF41D56A" />
     <SolidColorBrush x:Key="DangerColor" Color="#FFE2555F" />
 
+    <!-- Opt-in classic-derived foundation. These semantic tokens intentionally do
+         not replace legacy control colors until each surface is migrated. -->
+    <SolidColorBrush x:Key="ClassicWorkspaceBrush" Color="#FF1A2026" />
+    <SolidColorBrush x:Key="ClassicSurfaceBrush" Color="#FF222A31" />
+    <SolidColorBrush x:Key="ClassicSelectedSurfaceBrush" Color="#FF2D3A45" />
+    <SolidColorBrush x:Key="ClassicDividerBrush" Color="#FF3D4852" />
+    <SolidColorBrush x:Key="ClassicPrimaryTextBrush" Color="#FFE7ECEF" />
+    <SolidColorBrush x:Key="ClassicSecondaryTextBrush" Color="#FFAAB5BD" />
+    <SolidColorBrush x:Key="ClassicDisabledTextBrush" Color="#FF6E7982" />
+    <SolidColorBrush x:Key="ClassicAccentBrush" Color="#FF6A9DC4" />
+    <SolidColorBrush x:Key="ClassicFocusBrush" Color="#FF8AB4D6" />
+    <SolidColorBrush x:Key="ClassicReadyBrush" Color="#FF66B783" />
+    <SolidColorBrush x:Key="ClassicWarningBrush" Color="#FFD9A65A" />
+    <SolidColorBrush x:Key="ClassicErrorBrush" Color="#FFD77A7A" />
+
     <system:String x:Key="KeyImageImg">key-solid_white.png</system:String>
     <system:String x:Key="CancelImg">cancel_white.png</system:String>
     <system:String x:Key="CheckedImg">checked_white.png</system:String>

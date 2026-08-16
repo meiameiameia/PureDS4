@@ -7,7 +7,65 @@
         This dictionary only owns layout and component geometry. Theme colors live in
         DefaultTheme.xaml and DarkTheme.xaml so the existing runtime theme switch keeps
         working without rebuilding any views.
+
+        BridgeCardStyle and the larger Bridge component styles below are transitional
+        resources for unmigrated screens. New screen work should use the opt-in classic
+        foundation styles instead of extending those card-oriented patterns.
     -->
+
+    <!-- Minimal classic-derived foundation. It is deliberately opt-in: applying it
+         globally would restyle Settings, Profiles, and specialist tools mid-migration. -->
+    <Style x:Key="ClassicCompactButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonStyle}">
+        <Setter Property="Background" Value="{DynamicResource ClassicSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ClassicDividerBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ClassicPrimaryTextBrush}" />
+        <Setter Property="Padding" Value="10,4" />
+        <Setter Property="MinHeight" Value="28" />
+    </Style>
+
+    <Style x:Key="ClassicToolbarButtonStyle" TargetType="Button" BasedOn="{StaticResource ClassicCompactButtonStyle}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Padding" Value="8,3" />
+        <Setter Property="MinHeight" Value="26" />
+    </Style>
+
+    <Style x:Key="ClassicCompactComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource ComboBoxStyle}">
+        <Setter Property="MinHeight" Value="28" />
+        <Setter Property="MinWidth" Value="110" />
+        <Setter Property="Foreground" Value="{DynamicResource ClassicPrimaryTextBrush}" />
+    </Style>
+
+    <Style x:Key="ClassicCompactCheckBoxStyle" TargetType="CheckBox" BasedOn="{StaticResource CheckBoxStyle}">
+        <Setter Property="Foreground" Value="{DynamicResource ClassicPrimaryTextBrush}" />
+        <Setter Property="Margin" Value="0,2" />
+    </Style>
+
+    <Style x:Key="ClassicSectionHeadingStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource ClassicPrimaryTextBrush}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Margin" Value="0,0,0,6" />
+    </Style>
+
+    <Style x:Key="ClassicTableHeaderStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource ClassicSecondaryTextBrush}" />
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style x:Key="ClassicPropertyGroupStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource ClassicSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ClassicDividerBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="Padding" Value="10,8" />
+    </Style>
+
+    <Style x:Key="ClassicStatusStripStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource ClassicSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ClassicDividerBrush}" />
+        <Setter Property="BorderThickness" Value="0,1,0,0" />
+        <Setter Property="Padding" Value="8,3" />
+    </Style>
 
     <Style x:Key="BridgeCardStyle" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource CardBackgroundColor}" />
