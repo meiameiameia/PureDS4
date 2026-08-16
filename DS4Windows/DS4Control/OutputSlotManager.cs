@@ -302,6 +302,65 @@ namespace DS4Windows
             //queuedTasks--;
         }
 
+        internal bool TryBindInput(int inIdx, string inDisplayString,
+            OutputDevice[] outdevs, OutContType contType,
+            Func<OutputDevice> createOutput, out OutSlotDevice slotDevice)
+        {
+            contType = contType.Normalize();
+            slotDevice = FindExistUnboundSlotType(contType);
+            if (slotDevice != null)
+            {
+                slotDevice.CurrentInputBound = OutSlotDevice.InputBound.Bound;
+                outdevs[inIdx] = slotDevice.OutputDevice;
+                slotDevice.CurrentType = contType;
+                return true;
+            }
+
+            if (FindEmptySlot() == -1)
+            {
+                return false;
+            }
+
+            OutputDevice outputDevice = createOutput?.Invoke();
+            if (outputDevice == null)
+            {
+                return false;
+            }
+
+            DeferredPlugin(outputDevice, inIdx, inDisplayString, outdevs, contType);
+            slotDevice = GetOutSlotDevice(outputDevice);
+            return slotDevice != null &&
+                slotDevice.CurrentInputBound == OutSlotDevice.InputBound.Bound;
+        }
+
+        internal bool TryUnbindInput(OutputDevice outputDevice, int inIdx,
+            OutputDevice[] outdevs, bool force = false)
+        {
+            if (inIdx >= 0 && inIdx < outdevs.Length)
+            {
+                outdevs[inIdx] = null;
+            }
+
+            OutSlotDevice slotDevice = GetOutSlotDevice(outputDevice);
+            if (slotDevice == null ||
+                slotDevice.CurrentAttachedStatus != OutSlotDevice.AttachedStatus.Attached)
+            {
+                return false;
+            }
+
+            if (slotDevice.CurrentReserveStatus == OutSlotDevice.ReserveStatus.Dynamic ||
+                force)
+            {
+                DeferredRemoval(outputDevice, inIdx, outdevs);
+                return GetOutSlotDevice(outputDevice) == null;
+            }
+
+            slotDevice.CurrentInputBound = OutSlotDevice.InputBound.Unbound;
+            outputDevice.ResetState();
+            outputDevice.RemoveFeedbacks();
+            return true;
+        }
+
         public OutSlotDevice FindOpenSlot()
         {
             OutSlotDevice temp = null;
