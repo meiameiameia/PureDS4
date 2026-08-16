@@ -148,7 +148,6 @@ namespace DS4WinWPF.DS4Forms
             logvm = new LogViewModel(App.rootHub);
             //logListView.ItemsSource = logvm.LogItems;
             logListView.DataContext = logvm;
-            lastMsgLb.DataContext = lastLogMsg;
             ProcessPriorityComboBox.ItemsSource = ProcessPriorityClasses;
 
             profileListHolder.Refresh();
@@ -203,8 +202,7 @@ namespace DS4WinWPF.DS4Forms
                 uacImg.Visibility = Visibility.Collapsed;
             }
 
-            noContLb.Content = string.Format(Strings.NoControllersConnected,
-                ControlService.CURRENT_DS4_CONTROLLER_LIMIT);
+            noContLb.Content = "No controllers connected";
 
             autoProfileHolder = autoProfControl.AutoProfileHolder;
             autoProfControl.SetupDataContext(profileListHolder);
@@ -1288,6 +1286,42 @@ Suspend support not enabled.", true);
             ChangeService();
         }
 
+        private void ToolsMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem { Tag: string destination }) return;
+
+            TabItem target = destination switch
+            {
+                "overview" => overviewTab,
+                "audio" => audioHapticsTab,
+                "trigger" => triggerLabTab,
+                "auto" => autoProfilesTab,
+                "slots" => outputSlotsTab,
+                "log" => logTab,
+                _ => null,
+            };
+
+            if (target != null)
+            {
+                target.Visibility = Visibility.Visible;
+                mainTabCon.SelectedItem = target;
+            }
+        }
+
+        private void ToolsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button { ContextMenu: { } menu } button)
+            {
+                menu.PlacementTarget = button;
+                menu.IsOpen = true;
+            }
+        }
+
+        private void HomeDisconnectBtn_Click(object sender, RoutedEventArgs e)
+        {
+            mainWinVM.SelectedController?.RequestDisconnect();
+        }
+
         public async void ChangeService()
         {
             StartStopBtn.IsEnabled = false;
@@ -1334,14 +1368,6 @@ Suspend support not enabled.", true);
                 return;
             }
 
-            if (mainTabCon.SelectedItem == settingsTab)
-            {
-                lastMsgLb.Visibility = Visibility.Hidden;
-            }
-            else
-            {
-                lastMsgLb.Visibility = Visibility.Visible;
-            }
         }
 
         private void SupportPayPalBtn_Click(object sender, RoutedEventArgs e)

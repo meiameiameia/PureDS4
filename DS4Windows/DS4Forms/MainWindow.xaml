@@ -14,7 +14,7 @@
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         xml:lang="en-US"
         mc:Ignorable="d"
-        Title="DS4Windows" Height="760" Width="1180" Closing="MainDS4Window_Closing" Closed="MainDS4Window_Closed" StateChanged="MainDS4Window_StateChanged" SizeChanged="MainDS4Window_SizeChanged" LocationChanged="MainDS4Window_LocationChanged" MinWidth="940" MinHeight="620"
+        Title="DS4Windows" Height="660" Width="1024" Closing="MainDS4Window_Closing" Closed="MainDS4Window_Closed" StateChanged="MainDS4Window_StateChanged" SizeChanged="MainDS4Window_SizeChanged" LocationChanged="MainDS4Window_LocationChanged" MinWidth="720" MinHeight="480"
         UseLayoutRounding="True" SnapsToDevicePixels="True"
         Style="{DynamicResource WindowStyle}">
     <Window.Resources>
@@ -32,20 +32,27 @@
             </tb:TaskbarIcon.ContextMenu>-->
         </tb:TaskbarIcon>
 
-        <StackPanel DockPanel.Dock="Bottom" Height="38" VerticalAlignment="Bottom" Background="{DynamicResource SidebarBackgroundColor}">
-            <DockPanel Height="38" Margin="10,0,10,0">
+        <StackPanel DockPanel.Dock="Bottom" Height="30" VerticalAlignment="Bottom" Background="{DynamicResource SidebarBackgroundColor}">
+            <DockPanel Height="30" Margin="8,0,8,0">
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                    <Button x:Name="aboutBtn" BorderThickness="0" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF3881D8"
-                            Style="{StaticResource NoBGHoverBtn}" Click="AboutBtn_Click">
-                        <TextBlock Text="{lex:Loc HotkeysAbout}" TextDecorations="Underline" Foreground="{DynamicResource AccentColor}" Cursor="Hand" x:Uid="hotkeysText" />
-                    </Button>
-                    <Button x:Name="StartStopBtn" Content="{lex:Loc StartText}" Margin="10,0,4,0" Click="StartStopBtn_Click" MinWidth="76" Height="28" Foreground="White" Style="{StaticResource BridgePrimaryButtonStyle}" Padding="12,2" />
+                    <Button x:Name="StartStopBtn" Content="{lex:Loc StartText}" Margin="8,3,0,3" Click="StartStopBtn_Click" MinWidth="52" Height="24"
+                            Style="{StaticResource BridgeSecondaryButtonStyle}" Padding="8,1" />
                 </StackPanel>
-                <Label x:Name="lastMsgLb" Content="{Binding Message}" ToolTip="{Binding Message}" Foreground="{Binding Color}" Margin="4,0,2,0" />
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Controller: " Foreground="{DynamicResource MutedForegroundColor}" />
+                    <TextBlock Text="{Binding SelectedControllerConnection}" Foreground="{DynamicResource MutedForegroundColor}" />
+                    <TextBlock Text="  ·  Profile: " Foreground="{DynamicResource MutedForegroundColor}" />
+                    <TextBlock Text="{Binding CurrentProfileName}" Foreground="{DynamicResource MutedForegroundColor}"
+                               TextTrimming="CharacterEllipsis" MaxWidth="160" />
+                    <TextBlock Text=" · " Foreground="{DynamicResource MutedForegroundColor}" />
+                    <TextBlock Text="{Binding SelectedControllerStartupTitle}" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AccentColor}" TextTrimming="CharacterEllipsis" MaxWidth="220" />
+                </StackPanel>
             </DockPanel>
         </StackPanel>
-        <TabControl x:Name="mainTabCon" DockPanel.Dock="Top" SelectionChanged="MainTabCon_SelectionChanged" Style="{StaticResource BridgeMainTabControlStyle}">
-            <TabItem x:Name="overviewTab" Header="Overview" Tag="&#xE80F;" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
+        <Grid DockPanel.Dock="Top">
+            <TabControl x:Name="mainTabCon" SelectedIndex="1" SelectionChanged="MainTabCon_SelectionChanged" Style="{StaticResource BridgeMainTabControlStyle}">
+            <TabItem x:Name="overviewTab" Header="Quick controls" Tag="&#xE80F;" Visibility="Collapsed" Style="{StaticResource BridgeHiddenToolTabItemStyle}" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
                 <local:ControllerOverviewControl x:Name="controllerOverviewControl"
                                                  EditProfileRequested="ControllerOverview_EditProfileRequested"
                                                  ControllerDetailsRequested="ControllerOverview_ControllerDetailsRequested"
@@ -53,10 +60,42 @@
                                                  DisconnectRequested="ControllerOverview_DisconnectRequested" />
             </TabItem>
 
-            <TabItem x:Name="controllersTab" Header="{lex:Loc Controllers}" Tag="&#xE7FC;" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
-                <Grid>
-                    <Label x:Name="noContLb" Visibility="Hidden" Content="{lex:Loc NoControllersConnected}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                    <ListView x:Name="controllerLV" ItemsSource="{Binding ControllerCol}" SelectionMode="Single"
+            <TabItem x:Name="controllersTab" Header="Home" Tag="&#xE7FC;" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
+                <Grid Margin="12,10,12,8">
+                    <Grid.Resources>
+                        <Style x:Key="HomeInspectorStyle" TargetType="Border">
+                            <Setter Property="Margin" Value="0,1,0,0" />
+                            <Setter Property="Padding" Value="8,6" />
+                            <Setter Property="Background" Value="{DynamicResource RaisedBackgroundColor}" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
+                            <Setter Property="BorderThickness" Value="0,0,0,1" />
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}}}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" Margin="8,0,8,4" IsHitTestVisible="False">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*" MinWidth="180" />
+                            <ColumnDefinition Width="Auto" MinWidth="60" />
+                            <ColumnDefinition Width="1.25*" MinWidth="110" />
+                            <ColumnDefinition Width="1.25*" MinWidth="115" />
+                            <ColumnDefinition Width="Auto" MinWidth="78" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="CONTROLLER" Style="{StaticResource BridgeColumnHeaderStyle}" />
+                        <TextBlock Grid.Column="1" Text="BATTERY" Style="{StaticResource BridgeColumnHeaderStyle}" />
+                        <TextBlock Grid.Column="2" Text="ACTIVE PROFILE" Style="{StaticResource BridgeColumnHeaderStyle}" />
+                        <TextBlock Grid.Column="3" Text="PROTECTION" Style="{StaticResource BridgeColumnHeaderStyle}" />
+                        <TextBlock Grid.Column="4" Text="ACTIONS" Style="{StaticResource BridgeColumnHeaderStyle}" />
+                    </Grid>
+                    <ListView x:Name="controllerLV" Grid.Row="1" ItemsSource="{Binding ControllerCol}" SelectionMode="Single"
                               SelectedIndex="{Binding CurrentIndex, Mode=OneWayToSource}" Margin="0"
                               SelectedItem="{Binding DataContext.SelectedController, RelativeSource={RelativeSource AncestorType={x:Type Window}}, Mode=TwoWay}"
                               ItemContainerStyle="{StaticResource BridgeControllerCardItemStyle}"
@@ -70,85 +109,66 @@
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <Grid>
+                                    <Grid Grid.Row="0" MinHeight="56">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="2*" MinWidth="180" />
+                                            <ColumnDefinition Width="Auto" MinWidth="60" />
+                                            <ColumnDefinition Width="1.25*" MinWidth="110" />
+                                            <ColumnDefinition Width="1.25*" MinWidth="115" />
+                                            <ColumnDefinition Width="Auto" MinWidth="78" />
                                         </Grid.ColumnDefinitions>
-                                        <Border Width="116" Height="72" Margin="0,0,14,0" CornerRadius="5"
-                                                Background="{DynamicResource RaisedBackgroundColor}"
-                                                BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
-                                                Visibility="{Binding HasControllerArtwork, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                            <Image Source="{Binding ControllerImageSource}" Stretch="Uniform"
-                                                   Width="108" Height="66" Margin="4"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" />
-                                        </Border>
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                            <TextBlock x:Name="idColumnTxtB" Text="{Binding IdText, Mode=OneWay}"
-                                                       ToolTip="{Binding TooltipIDText, Mode=OneWay}"
-                                                       ToolTipOpening="IdColumnTxtB_ToolTipOpening" Tag="{Binding DevIndex, Mode=OneTime}"
-                                                       FontSize="15" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                                            <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
-                                                <Image x:Name="contStatusImg" Source="{Binding StatusSource}" Stretch="Uniform"
-                                                       Width="18" Height="18" Margin="0,0,6,0"
-                                                       ToolTip="Right click to disconnect wireless"
-                                                       MouseRightButtonUp="ContStatusImg_MouseRightButtonUp" Tag="{Binding DevIndex}" />
-                                                <Image Source="{Binding ExclusiveSource}" Width="13" Height="13" Margin="0,0,5,0"
-                                                       ToolTip="{Binding IsExclusiveText}" />
-                                                <TextBlock Text="{Binding IsExclusiveText}" FontSize="11"
-                                                           Foreground="{DynamicResource MutedForegroundColor}" />
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="58" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border Width="52" Height="38" Margin="0,0,6,0"
+                                                    Background="{DynamicResource RaisedBackgroundColor}"
+                                                    BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
+                                                    Visibility="{Binding HasControllerArtwork, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <Image Source="{Binding ControllerImageSource}" Stretch="Uniform"
+                                                       Width="48" Height="34" Margin="2"
+                                                       RenderOptions.BitmapScalingMode="HighQuality" />
+                                            </Border>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock x:Name="idColumnTxtB" Text="{Binding IdText, Mode=OneWay}"
+                                                           ToolTip="{Binding TooltipIDText, Mode=OneWay}"
+                                                           ToolTipOpening="IdColumnTxtB_ToolTipOpening" Tag="{Binding DevIndex, Mode=OneTime}"
+                                                           FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                    <Image x:Name="contStatusImg" Source="{Binding StatusSource}" Stretch="Uniform"
+                                                           Width="14" Height="14" Margin="0,0,5,0"
+                                                           ToolTip="Right click to disconnect wireless"
+                                                           MouseRightButtonUp="ContStatusImg_MouseRightButtonUp" Tag="{Binding DevIndex}" />
+                                                    <TextBlock Text="{Binding ConnectionText}" FontSize="11"
+                                                               Foreground="{DynamicResource MutedForegroundColor}" />
+                                                </StackPanel>
                                             </StackPanel>
+                                        </Grid>
+                                        <TextBlock Grid.Column="1" Text="{Binding BatteryState, Mode=OneWay}" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource SuccessColor}" VerticalAlignment="Center" />
+                                        <ComboBox Grid.Column="2" x:Name="selectProfCombo" Style="{StaticResource BridgeProfileComboBoxStyle}"
+                                                  Height="28" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                                  ItemsSource="{Binding ProfileListCol}" SelectedIndex="{Binding SelectedIndex}"
+                                                  Tag="{Binding DevIndex, Mode=OneTime}"
+                                                  Visibility="{Binding PrimaryDevice, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                  SelectionChanged="SelectProfCombo_SelectionChanged" KeyDown="SelectProfCombo_KeyDown">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Name,Mode=OneWay,FallbackValue=''}"
+                                                               TextTrimming="CharacterEllipsis" ToolTip="{Binding Name}" />
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="{Binding ExclusiveSource}" Width="14" Height="14" Margin="0,0,5,0"
+                                                   ToolTip="{Binding IsExclusiveText}" />
+                                            <TextBlock Text="{Binding IsExclusiveText}" FontSize="11" TextTrimming="CharacterEllipsis"
+                                                       Foreground="{DynamicResource MutedForegroundColor}" />
                                         </StackPanel>
-                                    </Grid>
-                                    <Border Grid.Column="1" Background="{DynamicResource RaisedBackgroundColor}"
-                                            BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
-                                            CornerRadius="3" Padding="10,5" VerticalAlignment="Top">
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="Battery " Foreground="{DynamicResource MutedForegroundColor}" />
-                                            <TextBlock Text="{Binding BatteryState, Mode=OneWay}" FontWeight="SemiBold"
-                                                       Foreground="{DynamicResource SuccessColor}" />
-                                        </StackPanel>
-                                    </Border>
-
-                                    <Separator Grid.Row="1" Grid.ColumnSpan="2" Margin="0,15,0,14"
-                                               Background="{DynamicResource BorderColor}" />
-
-                                    <Grid Grid.Row="2" Grid.ColumnSpan="2">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel>
-                                            <TextBlock Text="ACTIVE PROFILE" FontSize="10" FontWeight="Bold"
-                                                       Foreground="{DynamicResource MutedForegroundColor}" Margin="0,0,0,5" />
-                                            <ComboBox x:Name="selectProfCombo" Style="{StaticResource BridgeProfileComboBoxStyle}"
-                                                      HorizontalAlignment="Left"
-                                                      ItemsSource="{Binding ProfileListCol}" SelectedIndex="{Binding SelectedIndex}"
-                                                      Tag="{Binding DevIndex, Mode=OneTime}"
-                                                      Visibility="{Binding PrimaryDevice, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                      SelectionChanged="SelectProfCombo_SelectionChanged" KeyDown="SelectProfCombo_KeyDown">
-                                                <ComboBox.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <TextBlock Text="{Binding Name,Mode=OneWay,FallbackValue=''}"
-                                                                   TextTrimming="CharacterEllipsis" ToolTip="{Binding Name}" />
-                                                    </DataTemplate>
-                                                </ComboBox.ItemTemplate>
-                                            </ComboBox>
-                                        </StackPanel>
-                                        <CheckBox Grid.Column="1" Content="{lex:Loc LinkProfileId}" IsChecked="{Binding LinkedProfile}"
-                                                  IsEnabled="{Binding PrimaryDevice}" Margin="12,20,12,0" VerticalAlignment="Center"
-                                                  ToolTip="Use the same profile whenever this physical controller reconnects." />
-                                        <xctk:SplitButton Grid.Column="2" x:Name="ProfEditSBtn" Content="{lex:Loc Edit}"
-                                                          MinWidth="84" Height="34" Margin="0,18,10,0"
+                                        <xctk:SplitButton Grid.Column="4" x:Name="ProfEditSBtn" Content="{lex:Loc Edit}"
+                                                          MinWidth="70" Height="28" Margin="8,0,0,0"
                                                           Visibility="{Binding PrimaryDevice, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                           Tag="{Binding DevIndex, Mode=OneTime}" Click="ProfEditSBtn_Click" VerticalAlignment="Center">
                                             <xctk:SplitButton.DropDownContent>
@@ -156,27 +176,47 @@
                                                         Tag="{Binding DevIndex, Mode=OneTime}" Click="NewProfBtn_Click" />
                                             </xctk:SplitButton.DropDownContent>
                                         </xctk:SplitButton>
-                                        <StackPanel Grid.Column="3" HorizontalAlignment="Right">
-                                            <TextBlock Text="LIGHTBAR" FontSize="10" FontWeight="Bold"
-                                                       Foreground="{DynamicResource MutedForegroundColor}" Margin="0,0,0,5" />
-                                            <Button x:Name="LightColorBtn" Width="116" Height="34"
-                                                    Background="{Binding LightColor, Mode=OneWay}" BorderBrush="{DynamicResource BorderColor}"
-                                                    Tag="{Binding DevIndex, Mode=OneTime}" Click="LightColorBtn_Click"
-                                                    ToolTip="Choose a temporary lightbar color" />
-                                        </StackPanel>
                                     </Grid>
+                                    <Border Grid.Row="1" Style="{StaticResource HomeInspectorStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="1.15*" />
+                                                <ColumnDefinition Width="1.65*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="GAME OUTPUT" Style="{StaticResource BridgeColumnHeaderStyle}" />
+                                                <TextBlock Text="{Binding DataContext.SelectedOutputControllerName, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                           FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="READINESS" Style="{StaticResource BridgeColumnHeaderStyle}" />
+                                                <TextBlock Text="{Binding DataContext.SelectedControllerStartupTitle, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                           FontWeight="SemiBold" Foreground="{DynamicResource AccentColor}" />
+                                                <TextBlock Text="{Binding DataContext.SelectedControllerStartupDetail, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                           FontSize="11" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource MutedForegroundColor}" />
+                                            </StackPanel>
+                                            <Button Grid.Column="2" Content="Disconnect" MinHeight="28" Margin="10,4,0,0"
+                                                    VerticalAlignment="Center" Click="HomeDisconnectBtn_Click"
+                                                    Visibility="{Binding IsWireless, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                        </Grid>
+                                    </Border>
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
+                    <Label x:Name="noContLb" Grid.Row="1" Panel.ZIndex="1" Visibility="Hidden"
+                           Background="{DynamicResource SurfaceBackgroundColor}"
+                           HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                           FontWeight="SemiBold" />
                 </Grid>
             </TabItem>
 
-            <TabItem x:Name="audioHapticsTab" Header="Audio Haptics" Tag="&#xE767;" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
+            <TabItem x:Name="audioHapticsTab" Header="Audio Haptics" Tag="&#xE767;" Visibility="Collapsed" Style="{StaticResource BridgeHiddenToolTabItemStyle}" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
                 <local:AudioHapticsControl x:Name="audioHapticsControl" SettingsChanged="ProfileFeatureControl_SettingsChanged" />
             </TabItem>
 
-            <TabItem x:Name="triggerLabTab" Header="Trigger Lab" Tag="TriggerPair" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
+            <TabItem x:Name="triggerLabTab" Header="Trigger Lab" Tag="TriggerPair" Visibility="Collapsed" Style="{StaticResource BridgeHiddenToolTabItemStyle}" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
                 <local:TriggerLabControl x:Name="triggerLabControl" SettingsChanged="ProfileFeatureControl_SettingsChanged" />
             </TabItem>
 
@@ -440,12 +480,12 @@
                     </Border>
                 </Grid>
             </TabItem>
-            <TabItem Header="{lex:Loc AutoProfiles}" Tag="&#xE823;" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
+            <TabItem x:Name="autoProfilesTab" Header="{lex:Loc AutoProfiles}" Tag="&#xE823;" Visibility="Collapsed" Style="{StaticResource BridgeHiddenToolTabItemStyle}" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
                 <local:AutoProfiles x:Name="autoProfControl">
 
                 </local:AutoProfiles>
             </TabItem>
-            <TabItem Header="{lex:Loc OutputSlots}" Tag="&#xE950;" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
+            <TabItem x:Name="outputSlotsTab" Header="{lex:Loc OutputSlots}" Tag="&#xE950;" Visibility="Collapsed" Style="{StaticResource BridgeHiddenToolTabItemStyle}" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
                 <local:OutputSlotManagerControl x:Name="slotManControl">
 
                 </local:OutputSlotManagerControl>
@@ -766,7 +806,7 @@
                 </ScrollViewer>
 
             </TabItem>
-            <TabItem x:Name="logTab" Header="{lex:Loc Log}" Tag="&#xE9D9;">
+            <TabItem x:Name="logTab" Header="{lex:Loc Log}" Tag="&#xE9D9;" Visibility="Collapsed" Style="{StaticResource BridgeHiddenToolTabItemStyle}">
                 <DockPanel>
                     <DockPanel Height="20" DockPanel.Dock="Bottom" Margin="4,8">
                         <Button x:Name="exportLogBtn" Content="{lex:Loc Export}" HorizontalAlignment="Left" Padding="20,1" Click="ExportLogBtn_Click" />
@@ -796,5 +836,22 @@
             </TabItem>
 
         </TabControl>
-    </DockPanel>
+            <Button x:Name="toolsBtn" Content="Tools ▾" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,3,8,3" Padding="12,2"
+                    Height="27" Style="{StaticResource BridgeToolMenuButtonStyle}" Click="ToolsButton_Click">
+                <Button.ContextMenu>
+                    <ContextMenu Placement="Bottom" StaysOpen="False" MinWidth="180">
+                        <MenuItem Header="Quick controls" Tag="overview" Click="ToolsMenuItem_Click" />
+                        <Separator />
+                        <MenuItem Header="Audio Haptics" Tag="audio" Click="ToolsMenuItem_Click" />
+                        <MenuItem Header="Trigger Lab" Tag="trigger" Click="ToolsMenuItem_Click" />
+                        <MenuItem Header="Auto Profiles" Tag="auto" Click="ToolsMenuItem_Click" />
+                        <MenuItem Header="Output Slots" Tag="slots" Click="ToolsMenuItem_Click" />
+                        <Separator />
+                        <MenuItem Header="Log" Tag="log" Click="ToolsMenuItem_Click" />
+                        <MenuItem Header="Hotkeys and About" Click="AboutBtn_Click" />
+                    </ContextMenu>
+                </Button.ContextMenu>
+            </Button>
+    </Grid>
+</DockPanel>
 </Window>

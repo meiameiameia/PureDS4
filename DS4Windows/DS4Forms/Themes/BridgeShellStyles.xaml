@@ -15,7 +15,7 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="4" />
         <Setter Property="Padding" Value="18" />
-        <Setter Property="Margin" Value="0,0,0,14" />
+        <Setter Property="Margin" Value="0,0,0,2" />
     </Style>
 
     <Style x:Key="BridgeSectionTitleStyle" TargetType="TextBlock">
@@ -49,7 +49,8 @@
     </Style>
 
     <Style x:Key="BridgeProfileComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource ComboBoxStyle}">
-        <Setter Property="Width" Value="196" />
+        <Setter Property="Width" Value="Auto" />
+        <Setter Property="MinWidth" Value="110" />
         <Setter Property="Height" Value="42" />
         <Setter Property="MaxDropDownHeight" Value="280" />
         <Setter Property="Foreground" Value="{DynamicResource ForegroundColor}" />
@@ -183,24 +184,33 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="0" />
-        <Setter Property="Margin" Value="0,0,0,14" />
+        <Setter Property="Margin" Value="0,0,0,2" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListViewItem">
-                    <Border x:Name="Card"
-                            Background="{DynamicResource CardBackgroundColor}"
-                            BorderBrush="{DynamicResource BorderColor}"
-                            BorderThickness="1"
-                            CornerRadius="4"
-                            Padding="18">
-                        <ContentPresenter />
-                    </Border>
+                    <Grid>
+                        <Border x:Name="Card"
+                                Background="{DynamicResource SurfaceBackgroundColor}"
+                                BorderBrush="{DynamicResource BorderColor}"
+                                BorderThickness="0,0,0,1"
+                                Padding="8,7">
+                            <ContentPresenter />
+                        </Border>
+                        <Border x:Name="SelectionIndicator" Width="3" Background="{DynamicResource AccentColor}"
+                                HorizontalAlignment="Left" Visibility="Collapsed" />
+                        <Border x:Name="FocusRing" BorderBrush="{DynamicResource AccentColor}" BorderThickness="1"
+                                Visibility="Collapsed" IsHitTestVisible="False" />
+                    </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Card" Property="BorderBrush" Value="{DynamicResource AccentColor}" />
+                            <Setter TargetName="Card" Property="Background" Value="{DynamicResource RaisedBackgroundColor}" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="Card" Property="BorderBrush" Value="{DynamicResource SuccessColor}" />
+                            <Setter TargetName="Card" Property="Background" Value="{DynamicResource RaisedBackgroundColor}" />
+                            <Setter TargetName="SelectionIndicator" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter TargetName="FocusRing" Property="Visibility" Value="Visible" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -241,7 +251,7 @@
         </Setter>
     </Style>
 
-    <Style x:Key="BridgeNavigationTabItemStyle" TargetType="TabItem">
+    <Style x:Key="BridgeLegacyNavigationTabItemStyle" TargetType="TabItem">
         <Setter Property="Foreground" Value="{DynamicResource MutedForegroundColor}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -395,9 +405,9 @@
         </Setter>
     </Style>
 
-    <Style x:Key="BridgeMainTabControlStyle" TargetType="TabControl">
+    <Style x:Key="BridgeLegacyMainTabControlStyle" TargetType="TabControl">
         <Setter Property="TabStripPlacement" Value="Left" />
-        <Setter Property="ItemContainerStyle" Value="{StaticResource BridgeNavigationTabItemStyle}" />
+        <Setter Property="ItemContainerStyle" Value="{StaticResource BridgeLegacyNavigationTabItemStyle}" />
         <Setter Property="Background" Value="{DynamicResource SurfaceBackgroundColor}" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -690,6 +700,97 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <!-- Classic-derived main shell: compact task tabs and a plain work surface. -->
+    <Style x:Key="BridgeNavigationTabItemStyle" TargetType="TabItem">
+        <Setter Property="Foreground" Value="{DynamicResource MutedForegroundColor}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="Padding" Value="14,7" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabItem">
+                    <Border x:Name="TabChrome" Background="{TemplateBinding Background}"
+                            BorderBrush="Transparent" BorderThickness="0,0,0,2"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter ContentSource="Header" RecognizesAccessKey="True"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="TabChrome" Property="Background" Value="{DynamicResource RaisedBackgroundColor}" />
+                            <Setter Property="Foreground" Value="{DynamicResource ForegroundColor}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="TabChrome" Property="BorderBrush" Value="{DynamicResource AccentColor}" />
+                            <Setter Property="Foreground" Value="{DynamicResource ForegroundColor}" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter TargetName="TabChrome" Property="BorderBrush" Value="{DynamicResource AccentColor}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Tool tabs use the existing TabControl content path without taking a
+         permanent place in the primary navigation strip. -->
+    <Style x:Key="BridgeHiddenToolTabItemStyle" TargetType="TabItem"
+           BasedOn="{StaticResource BridgeNavigationTabItemStyle}">
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabItem">
+                    <Border Visibility="Collapsed" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="BridgeMainTabControlStyle" TargetType="TabControl">
+        <Setter Property="TabStripPlacement" Value="Top" />
+        <Setter Property="ItemContainerStyle" Value="{StaticResource BridgeNavigationTabItemStyle}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceBackgroundColor}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabControl">
+                    <Grid Background="{DynamicResource SurfaceBackgroundColor}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Border Background="{DynamicResource SidebarBackgroundColor}"
+                                BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1">
+                            <TabPanel IsItemsHost="True" KeyboardNavigation.TabNavigation="Once" />
+                        </Border>
+                        <ContentPresenter Grid.Row="1" ContentSource="SelectedContent" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="BridgeToolMenuButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonStyle}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundColor}" />
+    </Style>
+
+    <Style x:Key="BridgeColumnHeaderStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource MutedForegroundColor}" />
+        <Setter Property="Margin" Value="0,0,8,0" />
     </Style>
 
     <Style x:Key="BridgeProfileTabItemStyle" TargetType="TabItem">
