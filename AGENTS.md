@@ -17,6 +17,15 @@ Controller correctness and reliability come first, followed by latency consisten
 
 Never turn build success, protocol tests, a component health check, or test count into a hardware/runtime claim. Record exactly what was exercised.
 
+## Visual validation and dogfood runtime
+
+- Computer-use or GUI launcher automation is not authoritative for DS4Windows visual validation because it may launch the installed legacy executable from `C:\Program Files\DS4Windows` instead of the requested disposable build.
+- UI tasks must report the exact disposable validation executable. Automated visual evidence is valid only when the running process path is explicitly verified to match that executable. Final visual validation is performed manually by the owner.
+- `Dev\current` is the latest owner-approved and committed milestone. `Dev\rollback` is the immediately previous owner-approved milestone. Disposable validation publishes never become the daily driver.
+- Promotion sequence: build/tests → disposable publish → owner validation → commit/push → promote.
+- `RunDS4Windows` should normally remain pointed at `Dev\current`.
+- If updating the privileged scheduled task returns `E_ACCESSDENIED`, stop and request owner elevation rather than attempting to bypass UAC.
+
 ## Repository and stack
 
 - Baseline: annotated tag `upstream-baseline`, commit `3579450dc8f50a74d9532e711249589c732c460b`.
