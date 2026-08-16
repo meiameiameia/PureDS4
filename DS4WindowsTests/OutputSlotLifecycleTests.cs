@@ -437,6 +437,27 @@ namespace DS4WindowsTests
         }
 
         [TestMethod]
+        public void TryUnbindInputForceDestroysPermanentOutput()
+        {
+            List<string> calls = new();
+            OutputSlotManager manager = new();
+            OutputDevice[] runtimeOutputs = NewRuntimeOutputs(manager);
+            RecordingOutputDevice output = new(OutContType.ViiperDS4, calls);
+
+            Assert.IsTrue(manager.TryBindInput(0, "DS4", runtimeOutputs,
+                OutContType.ViiperDS4, () => output, out OutSlotDevice slotDevice));
+            slotDevice.CurrentReserveStatus = OutSlotDevice.ReserveStatus.Permanent;
+
+            Assert.IsTrue(manager.TryUnbindInput(output, 0, runtimeOutputs, force: true));
+
+            CollectionAssert.AreEqual(new[] { "connect", "feedbacks", "disconnect" },
+                calls);
+            Assert.IsNull(runtimeOutputs[0]);
+            Assert.IsNull(manager.GetOutSlotDevice(output));
+            Assert.AreEqual(1, output.DisconnectCount);
+        }
+
+        [TestMethod]
         public void TryUnbindInputIsSafeAfterDynamicTeardownAndForMissingOutput()
         {
             OutputSlotManager manager = new();
