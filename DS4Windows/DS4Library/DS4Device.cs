@@ -207,10 +207,9 @@ namespace DS4Windows
         // due to hardware.
         internal const int WARN_INTERVAL_BT = 500;
         internal const int WARN_INTERVAL_USB = 100;
-        // Maximum values for battery level when no USB cable is connected
-        // and when a USB cable is connected
+        // Retained for the inherited DualSense parser, which has its own
+        // battery decoding. DS4 decoding uses DS4BatteryStatusDecoder.
         internal const int BATTERY_MAX = 8;
-        internal const int BATTERY_MAX_USB = 11;
         public const string BLANK_SERIAL = "00:00:00:00:00:00";
         public const byte SERIAL_FEATURE_ID = 18;
         protected HidDevice hDevice;
@@ -250,6 +249,8 @@ namespace DS4Windows
         protected bool timeoutExecuted;
         protected bool timeoutEvent;
         protected int battery;
+        private DS4BatteryStatus batteryStatus;
+        private readonly DS4BatteryPresentationStabilizer batteryPresentation = new();
         public DateTime lastActive = DateTime.UtcNow;
         public DateTime firstActive = DateTime.UtcNow;
         protected bool charging;
@@ -566,6 +567,11 @@ namespace DS4Windows
         {
             return charging;
         }
+
+        internal DS4BatteryStatus BatteryStatus => batteryStatus;
+        internal event EventHandler BatteryStatusChanged;
+        internal DS4BatteryPresentation BatteryPresentation => batteryPresentation.Current;
+        internal event EventHandler BatteryPresentationChanged;
 
         protected long lastTimeElapsed = 0;
         public long getLastTimeElapsed()
@@ -1409,9 +1415,6 @@ namespace DS4Windows
                 bool syncWriteReport = true;
                 bool forceWrite = false;
 
-                int maxBatteryValue = 0;
-                int tempBattery = 0;
-                bool tempCharging = charging;
                 uint tempStamp = 0;
                 double elapsedDeltaTime = 0.0;
                 uint tempDelta = 0;
@@ -1690,28 +1693,42 @@ namespace DS4Windows
                     if ((this.featureSet & VidPidFeatureSet.NoBatteryReading) == 0)
                     {
                         tempByte = inputReport[30];
-                        tempCharging = (tempByte & 0x10) != 0;
-                        if (tempCharging != charging)
+                        DS4BatteryStatusReading batteryReading =
+                            DS4BatteryStatusDecoder.Decode(tempByte);
+                        if (batteryReading.CableConnected != charging)
                         {
-                            charging = tempCharging;
+                            // Retain the legacy cable-connected meaning for existing
+                            // non-presentation consumers of Charging.
+                            charging = batteryReading.CableConnected;
                             ChargingChanged?.Invoke(this, EventArgs.Empty);
                         }
 
-                        maxBatteryValue = charging ? BATTERY_MAX_USB : BATTERY_MAX;
-                        tempBattery = (tempByte & 0x0f) * 100 / maxBatteryValue;
-                        tempBattery = Math.Min(tempBattery, 100);
-                        if (tempBattery != battery)
+                        if (batteryReading.HasCapacity &&
+                            batteryReading.Capacity != battery)
                         {
-                            battery = tempBattery;
+                            battery = batteryReading.Capacity;
                             BatteryChanged?.Invoke(this, EventArgs.Empty);
                         }
 
+                        if (batteryReading.Status != batteryStatus)
+                        {
+                            batteryStatus = batteryReading.Status;
+                            BatteryStatusChanged?.Invoke(this, EventArgs.Empty);
+                        }
+
+                        DS4BatteryPresentation previousBatteryPresentation =
+                            batteryPresentation.Current;
+                        DS4BatteryPresentation currentBatteryPresentation =
+                            batteryPresentation.Update(batteryReading, utcNow);
+                        if (currentBatteryPresentation != previousBatteryPresentation)
+                        {
+                            BatteryPresentationChanged?.Invoke(this, EventArgs.Empty);
+                        }
+
                         cState.Battery = (byte)battery;
-                        //Debug.WriteLine("CURRENT BATTERY: " + (inputReport[30] & 0x0f) + " | " + tempBattery + " | " + battery);
                         if (tempByte != priorInputReport30)
                         {
                             priorInputReport30 = tempByte;
-                            //Debug.WriteLine(MacAddress.ToString() + " " + System.DateTime.UtcNow.ToString("o") + "> power subsystem octet: 0x" + inputReport[30].ToString("x02"));
                         }
                     }
                     else
@@ -2654,6 +2671,7 @@ namespace DS4Windows
         protected void RunRemoval()
         {
             ResetBluetoothControllerClock();
+            batteryPresentation.Reset();
             Removal?.Invoke(this, EventArgs.Empty);
         }
 

@@ -501,6 +501,12 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 return;
             }
 
+            if (PrimaryDs4HasNonNumericBatteryPresentation())
+            {
+                IconSource = $"{Global.RESOURCES_PREFIX}/DS4W.ico";
+                return;
+            }
+
             IconSource = percentage switch
             {
                 < 10 => $"{Global.RESOURCES_PREFIX}/0.ico",
@@ -516,6 +522,25 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 100 => $"{Global.RESOURCES_PREFIX}/100.ico",
                 _ => $"{Global.RESOURCES_PREFIX}/DS4W.ico"
             };
+        }
+
+        private bool PrimaryDs4HasNonNumericBatteryPresentation()
+        {
+            foreach (DS4Device device in controlService.DS4Controllers)
+            {
+                DS4BatteryPresentation presentation = device?.BatteryPresentation ?? default;
+                if (device?.PrimaryDevice == true &&
+                    device.DeviceType == DS4Windows.InputDevices.InputDeviceType.DS4 &&
+                    (presentation.IsSettling ||
+                     presentation.Status == DS4BatteryStatus.Charging ||
+                     presentation.Status == DS4BatteryStatus.ChargingUnavailable ||
+                     presentation.Status == DS4BatteryStatus.ChargingError))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void ExitMenuItem_Click(object sender, System.Windows.RoutedEventArgs e)

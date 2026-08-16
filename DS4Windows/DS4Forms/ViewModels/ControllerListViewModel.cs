@@ -309,8 +309,21 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         {
             get
             {
-                string temp = $"{device.Battery}%{(device.Charging ? "+" : "")}";
-                return temp;
+                if (!IsDualShock4)
+                {
+                    return $"{device.Battery}%{(device.Charging ? "+" : "")}";
+                }
+
+                DS4BatteryPresentation presentation = device.BatteryPresentation;
+                return presentation.Status switch
+                {
+                    DS4BatteryStatus.Charging => "Charging",
+                    DS4BatteryStatus.Full => "Full",
+                    DS4BatteryStatus.ChargingUnavailable => "Charging unavailable",
+                    DS4BatteryStatus.ChargingError => "Charging error",
+                    _ when presentation.IsSettling || !presentation.HasCapacity => "...",
+                    _ => $"~{presentation.Capacity}%",
+                };
             }
         }
         public event EventHandler BatteryStateChanged;
@@ -479,6 +492,8 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             uiCapabilities = ControllerUiCapabilities.ForDevice(device);
             device.BatteryChanged += (sender, e) => BatteryStateChanged?.Invoke(this, e);
             device.ChargingChanged += (sender, e) => BatteryStateChanged?.Invoke(this, e);
+            device.BatteryStatusChanged += (sender, e) => BatteryStateChanged?.Invoke(this, e);
+            device.BatteryPresentationChanged += (sender, e) => BatteryStateChanged?.Invoke(this, e);
             device.MacAddressChanged += (sender, e) => IdTextChanged?.Invoke(this, e);
             this.devIndex = devIndex;
             this.selectedProfile = profile;

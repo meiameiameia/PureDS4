@@ -3208,23 +3208,32 @@ namespace DS4Windows
             DS4Device d = DS4Controllers[index];
             if (d != null)
             {
-                string battery;
                 if (!d.IsAlive())
-                    battery = "...";
+                    return "...";
+
+                if (d.DeviceType == InputDevices.InputDeviceType.DS4)
+                {
+                    DS4BatteryPresentation presentation = d.BatteryPresentation;
+                    return presentation.Status switch
+                    {
+                        DS4BatteryStatus.Charging => "Charging",
+                        DS4BatteryStatus.Full => DS4WinWPF.Properties.Resources.Full,
+                        DS4BatteryStatus.ChargingUnavailable => "Charging unavailable",
+                        DS4BatteryStatus.ChargingError => "Charging error",
+                        _ when presentation.IsSettling || !presentation.HasCapacity => "...",
+                        _ => $"~{presentation.Capacity}%",
+                    };
+                }
 
                 if (d.isCharging())
                 {
                     if (d.getBattery() >= 100)
-                        battery = DS4WinWPF.Properties.Resources.Full;
-                    else
-                        battery = d.getBattery() + "%+";
-                }
-                else
-                {
-                    battery = d.getBattery() + "%";
+                        return DS4WinWPF.Properties.Resources.Full;
+
+                    return d.getBattery() + "%+";
                 }
 
-                return battery;
+                return d.getBattery() + "%";
             }
             else
                 return DS4WinWPF.Properties.Resources.NA;
