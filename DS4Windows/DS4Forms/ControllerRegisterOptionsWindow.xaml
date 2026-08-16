@@ -26,7 +26,7 @@
                           IsChecked="{Binding UseMoonlight}"
                           ToolTip="Accept every supported virtual controller created while Sunshine is running. DS4Windows' own VIIPER outputs are always excluded." />
                 <TextBlock>
-                    <Hyperlink NavigateUri="https://github.com/schmaldeo/DS4Windows/blob/moonlight/doc/moonlight_support.md"
+                    <Hyperlink NavigateUri="https://github.com/builtbyperez/ds4windows-reworked/blob/main/docs/moonlight_support.md"
                                RequestNavigate="Hyperlink_RequestNavigate">
                         About virtual controller support
                     </Hyperlink>
