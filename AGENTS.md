@@ -6,6 +6,12 @@ This is a maintainable DS4Windows derivative for a solo product owner. Lead with
 
 Controller correctness and reliability come first, followed by latency consistency, maintainability, understandable architecture, testability, setup experience, and reversibility. Architectural elegance alone is not a reason to change working code.
 
+## Milestone execution
+
+- Execute validated roadmap milestones autonomously; do not require ChatGPT Web between ordinary engineering milestones.
+- Stop at genuine owner, visual, hardware, product, or architectural gates. Before a materially different next milestone, recommend the suitable Codex model and reasoning level; recommend a switch if investigation materially changes the complexity.
+- Do not create AI-specific task, context, plan, result, handoff, roadmap, or metadata files/directories, and do not duplicate transient conversation context in the repository. Repository documentation must be independently useful product or engineering documentation.
+
 ## Product direction and validation truth
 
 - DualShock 4 is the reference hardware. Bluetooth and USB are intended supported paths; only Bluetooth detection/input has been owner-validated from this baseline so far.
