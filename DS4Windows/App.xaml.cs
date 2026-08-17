@@ -145,23 +145,6 @@ namespace DS4WinWPF
             runShutdown = true;
             skipSave = true;
 
-            if (StartupMethods.TryRunTaskRefreshHelper(e.Args,
-                    out int startupTaskExitCode))
-            {
-                runShutdown = false;
-                Current.Shutdown(startupTaskExitCode);
-                return;
-            }
-
-            if (DS4Windows.ViiperSetupManager.
-                TryRunStartupTaskRegistrationHelper(e.Args,
-                    out int viiperTaskExitCode))
-            {
-                runShutdown = false;
-                Current.Shutdown(viiperTaskExitCode);
-                return;
-            }
-
             if (DS4Windows.ViiperSetupManager.
                 TryRunElevatedInstallerHost(e.Args,
                     out int viiperInstallerExitCode))
@@ -216,11 +199,6 @@ namespace DS4WinWPF
             {
                 return;
             }
-
-            // Do this before the single-instance probe. Opening a portable
-            // copy while another instance is active must still make the
-            // portable executable the user's explicit startup choice.
-            StartupMethods.RetargetExistingTaskToCurrentExecutable();
 
             try
             {
@@ -379,8 +357,6 @@ namespace DS4WinWPF
             // elevation itself, so DS4Windows does not need to stay elevated.
             if (Environment.Is64BitProcess)
             {
-                DS4Windows.ViiperSetupManager.
-                    RefreshSelectedStartupTaskOnLaunch();
                 // Keep the UI and repair diagnostics available when the
                 // backend is unhealthy. Virtual output already fails closed
                 // at its own readiness gate; exiting here made an install

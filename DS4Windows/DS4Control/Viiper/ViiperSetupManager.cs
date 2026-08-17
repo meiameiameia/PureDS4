@@ -165,10 +165,6 @@ namespace DS4Windows
             "FakerInput_0.1.0_x64.msi";
         private const string TerminateForeignViiperArgument =
             "--terminate-foreign-viiper";
-        private const string RegisterViiperTaskArgument =
-            "--register-viiper-startup-task";
-        private const string RemoveViiperTaskArgument =
-            "--remove-viiper-startup-task";
         private const string ViiperStartupTaskName = "RunVIIPER";
         private const int ForeignViiperHelperTimeoutMilliseconds = 15000;
         private const string UsbipRelativePath = @"USBip\usbip.exe";
@@ -413,8 +409,6 @@ namespace DS4Windows
             {
                 case DS4WinWPF.DS4Forms.ViiperSetupPromptDecision.
                     InstallStandard:
-                    DS4WinWPF.StartupMethods.
-                        RetargetExistingTaskToCurrentExecutable();
                     LaunchInstaller(status, owner);
                     // Do not terminate a running settings UI merely because
                     // the user selected an installation mode. The elevated
@@ -425,8 +419,6 @@ namespace DS4Windows
 
                 case DS4WinWPF.DS4Forms.ViiperSetupPromptDecision.
                     InstallPortable:
-                    DS4WinWPF.StartupMethods.
-                        RetargetExistingTaskToCurrentExecutable();
                     LaunchInstaller(status, owner,
                         portableInstallation: true);
                     return false;
@@ -463,43 +455,6 @@ namespace DS4Windows
             return status != null &&
                 !string.IsNullOrWhiteSpace(status.UsbipVersion) &&
                 !status.UsbipInstalled;
-        }
-
-        public static void RefreshSelectedStartupTaskOnLaunch()
-        {
-            string canonicalPath = GetCanonicalViiperExePath();
-            string selectedPath = ResolveRuntimeViiperPath(canonicalPath,
-                Global.PreferredViiperPath,
-                FindAlternativeViiperPath(canonicalPath));
-
-            if (IsSelectableViiperExecutable(selectedPath))
-            {
-                PersistPreferredViiperPath(selectedPath, canonicalPath);
-            }
-
-            if (!DS4WinWPF.StartupMethods.IsRunAtStartupEnabled())
-            {
-                RemoveViiperStartupTask(requestElevation: true);
-                return;
-            }
-
-            if (!IsSelectableViiperExecutable(selectedPath))
-            {
-                return;
-            }
-
-            if (!EnsureViiperStartupTask(selectedPath,
-                    requestElevation: true))
-            {
-                return;
-            }
-
-            PersistPreferredViiperPath(selectedPath, canonicalPath);
-        }
-
-        public static void RefreshSelectedStartupTaskAfterRunAtStartupChange()
-        {
-            RefreshSelectedStartupTaskOnLaunch();
         }
 
         public static bool LaunchInstaller(ViiperPrerequisiteStatus status = null,
@@ -692,68 +647,6 @@ namespace DS4Windows
                     exitCode == 0 ? MessageBoxImage.Warning :
                         MessageBoxImage.Error);
             }));
-        }
-
-        public static bool TryRunStartupTaskRegistrationHelper(string[] args,
-            out int exitCode)
-        {
-            exitCode = 1;
-            bool register = args != null && args.Length == 3 &&
-                string.Equals(args[0], RegisterViiperTaskArgument,
-                    StringComparison.Ordinal);
-            bool remove = args != null && args.Length == 2 &&
-                string.Equals(args[0], RemoveViiperTaskArgument,
-                    StringComparison.Ordinal);
-            if (!register && !remove)
-            {
-                return false;
-            }
-
-            try
-            {
-                string targetUserSid = Encoding.UTF8.GetString(
-                    Convert.FromBase64String(args[register ? 2 : 1]));
-                string currentUserSid = WindowsIdentity.GetCurrent().User?.
-                    Value;
-                if (!Global.IsAdministrator() ||
-                    !string.Equals(currentUserSid, targetUserSid,
-                        StringComparison.OrdinalIgnoreCase))
-                {
-                    exitCode = 5;
-                    return true;
-                }
-
-                if (remove)
-                {
-                    DeleteViiperStartupTask();
-                    exitCode = ViiperStartupTaskExists() ? 1 : 0;
-                }
-                else
-                {
-                    string viiperPath = Encoding.UTF8.GetString(
-                        Convert.FromBase64String(args[1]));
-                    if (!IsSelectableViiperExecutable(viiperPath))
-                    {
-                        exitCode = 5;
-                        return true;
-                    }
-
-                    RegisterViiperStartupTask(viiperPath);
-                    exitCode = IsViiperStartupTaskValid(viiperPath, out _)
-                        ? 0
-                        : 1;
-                }
-            }
-            catch (FormatException)
-            {
-                exitCode = 87;
-            }
-            catch
-            {
-                exitCode = 1;
-            }
-
-            return true;
         }
 
         public static bool TryRunElevatedInstallerHost(string[] args,
@@ -1487,17 +1380,11 @@ namespace DS4Windows
 
         private static string GetNativeProgramFilesPath()
         {
-            // ProgramW6432 remains the native 64-bit Program Files directory
-            // even if an x86 process is inspecting the x64-only VIIPER setup.
-            string programFiles = Environment.GetEnvironmentVariable(
-                "ProgramW6432");
-            if (string.IsNullOrWhiteSpace(programFiles))
-            {
-                programFiles = Environment.GetFolderPath(
-                    Environment.SpecialFolder.ProgramFiles);
-            }
-
-            return Path.GetFullPath(programFiles);
+            // VIIPER is supported only by the x64 build. Use Windows' known
+            // Program Files location rather than an inherited environment
+            // variable that a caller can override before elevation.
+            return Path.GetFullPath(Environment.GetFolderPath(
+                Environment.SpecialFolder.ProgramFiles));
         }
 
         private static string TryResolveAccountSid(string account)
@@ -1588,190 +1475,6 @@ namespace DS4Windows
                     ex.Message;
                 return false;
             }
-        }
-
-        private static bool EnsureViiperStartupTask(string viiperPath,
-            bool requestElevation)
-        {
-            if (!IsSelectableViiperExecutable(viiperPath))
-            {
-                return false;
-            }
-
-            if (IsViiperStartupTaskValid(viiperPath, out _))
-            {
-                return true;
-            }
-
-            try
-            {
-                if (Global.IsAdministrator())
-                {
-                    RegisterViiperStartupTask(viiperPath);
-                    return IsViiperStartupTaskValid(viiperPath, out _);
-                }
-
-                if (!requestElevation ||
-                    string.IsNullOrWhiteSpace(Global.exelocation))
-                {
-                    return false;
-                }
-
-                string currentUserSid = WindowsIdentity.GetCurrent().User?.
-                    Value;
-                if (string.IsNullOrWhiteSpace(currentUserSid))
-                {
-                    return false;
-                }
-
-                ProcessStartInfo startInfo = new ProcessStartInfo
-                {
-                    FileName = Global.exelocation,
-                    UseShellExecute = true,
-                    Verb = "runas",
-                };
-                startInfo.ArgumentList.Add(RegisterViiperTaskArgument);
-                startInfo.ArgumentList.Add(Convert.ToBase64String(
-                    Encoding.UTF8.GetBytes(Path.GetFullPath(viiperPath))));
-                startInfo.ArgumentList.Add(Convert.ToBase64String(
-                    Encoding.UTF8.GetBytes(currentUserSid)));
-                using Process process = Process.Start(startInfo);
-                if (process == null || !process.WaitForExit(15000) ||
-                    process.ExitCode != 0)
-                {
-                    return false;
-                }
-
-                return IsViiperStartupTaskValid(viiperPath, out _);
-            }
-            catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
-            {
-                return false;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        private static bool RemoveViiperStartupTask(bool requestElevation)
-        {
-            if (!ViiperStartupTaskExists())
-            {
-                return true;
-            }
-
-            try
-            {
-                if (Global.IsAdministrator())
-                {
-                    DeleteViiperStartupTask();
-                    return !ViiperStartupTaskExists();
-                }
-
-                if (!requestElevation ||
-                    string.IsNullOrWhiteSpace(Global.exelocation))
-                {
-                    return false;
-                }
-
-                string currentUserSid = WindowsIdentity.GetCurrent().User?.
-                    Value;
-                if (string.IsNullOrWhiteSpace(currentUserSid))
-                {
-                    return false;
-                }
-
-                ProcessStartInfo startInfo = new ProcessStartInfo
-                {
-                    FileName = Global.exelocation,
-                    UseShellExecute = true,
-                    Verb = "runas",
-                };
-                startInfo.ArgumentList.Add(RemoveViiperTaskArgument);
-                startInfo.ArgumentList.Add(Convert.ToBase64String(
-                    Encoding.UTF8.GetBytes(currentUserSid)));
-                using Process process = Process.Start(startInfo);
-                return process != null && process.WaitForExit(15000) &&
-                    process.ExitCode == 0 && !ViiperStartupTaskExists();
-            }
-            catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
-            {
-                return false;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        private static bool ViiperStartupTaskExists()
-        {
-            try
-            {
-                using TaskService service = new TaskService();
-                using Microsoft.Win32.TaskScheduler.Task task =
-                    service.GetTask(@"\" + ViiperStartupTaskName);
-                return task != null;
-            }
-            catch
-            {
-                return true;
-            }
-        }
-
-        private static void DeleteViiperStartupTask()
-        {
-            using TaskService service = new TaskService();
-            Microsoft.Win32.TaskScheduler.Task task =
-                service.GetTask(@"\" + ViiperStartupTaskName);
-            if (task != null)
-            {
-                task.Dispose();
-                service.RootFolder.DeleteTask(ViiperStartupTaskName);
-            }
-        }
-
-        private static void RegisterViiperStartupTask(string viiperPath)
-        {
-            string fullPath = Path.GetFullPath(viiperPath);
-            string workingDirectory = Path.GetDirectoryName(fullPath);
-            string currentUserSid = WindowsIdentity.GetCurrent().User?.Value ??
-                throw new InvalidOperationException(
-                    "Windows did not provide the current account SID.");
-            using TaskService service = new TaskService();
-            Microsoft.Win32.TaskScheduler.Task existing =
-                service.GetTask(@"\" + ViiperStartupTaskName);
-            if (existing != null)
-            {
-                existing.Dispose();
-                service.RootFolder.DeleteTask(ViiperStartupTaskName);
-            }
-
-            TaskDefinition definition = service.NewTask();
-            // A generic logon trigger plus an exact-SID interactive principal
-            // avoids Task Scheduler's ambiguous UserId lookup when a local
-            // account and its computer have the same name.
-            definition.Triggers.Add(new LogonTrigger());
-            definition.Actions.Add(new ExecAction(fullPath, "server",
-                workingDirectory));
-            definition.Principal.UserId = currentUserSid;
-            definition.Principal.LogonType =
-                TaskLogonType.InteractiveToken;
-            definition.Principal.RunLevel = TaskRunLevel.Highest;
-            definition.Settings.StopIfGoingOnBatteries = false;
-            definition.Settings.DisallowStartIfOnBatteries = false;
-            definition.Settings.ExecutionTimeLimit = TimeSpan.Zero;
-            definition.Settings.MultipleInstances =
-                Microsoft.Win32.TaskScheduler.TaskInstancesPolicy.IgnoreNew;
-            definition.Settings.AllowDemandStart = true;
-            // Priority 7 is Task Scheduler's default and maps to below-normal
-            // CPU priority plus low I/O and memory priority.  The virtual USB
-            // audio producer must not be starved by unrelated foreground CPU
-            // work, so give the backend a high (never realtime) task priority.
-            definition.Settings.Priority = ProcessPriorityClass.High;
-            service.RootFolder.RegisterTaskDefinition(
-                ViiperStartupTaskName, definition);
         }
 
         internal static bool IsExactViiperExecutablePath(string candidatePath,

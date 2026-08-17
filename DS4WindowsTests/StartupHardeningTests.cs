@@ -5,6 +5,7 @@ using NLog.Targets;
 using NLog.Targets.Wrappers;
 using System;
 using System.IO;
+using System.Reflection;
 
 namespace DS4Windows.Tests
 {
@@ -71,6 +72,24 @@ namespace DS4Windows.Tests
             Assert.IsNull(LoggerHolder.FindFileTarget(null));
             Assert.IsNull(LoggerHolder.FindFileTarget(
                 new LoggingConfiguration()));
+        }
+
+        [TestMethod]
+        public void RuntimeDoesNotExposeScheduledTaskMutationHelpers()
+        {
+            const BindingFlags callable = BindingFlags.Public |
+                BindingFlags.NonPublic | BindingFlags.Static;
+
+            Assert.IsNull(typeof(StartupMethods).GetMethod(
+                "RetargetExistingTaskToCurrentExecutable", callable));
+            Assert.IsNull(typeof(StartupMethods).GetMethod(
+                "WriteTaskEntry", callable));
+            Assert.IsNull(typeof(StartupMethods).GetMethod(
+                "DeleteTaskEntry", callable));
+            Assert.IsNull(typeof(ViiperSetupManager).GetMethod(
+                "TryRunStartupTaskRegistrationHelper", callable));
+            Assert.IsNull(typeof(ViiperSetupManager).GetMethod(
+                "RefreshSelectedStartupTaskOnLaunch", callable));
         }
     }
 }

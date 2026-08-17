@@ -36,7 +36,6 @@ using System.Management;
 using NonFormTimer = System.Timers.Timer;
 using System.Runtime.InteropServices;
 using System.ComponentModel;
-using HttpProgress;
 using System.Windows.Threading;
 
 using DS4WinWPF.DS4Forms.ViewModels;
@@ -279,6 +278,11 @@ namespace DS4WinWPF.DS4Forms
 #if !BETA_VERSION
             tempTask = Task.Delay(100).ContinueWith(_ =>
             {
+                if (!UpdateAuthorityPolicy.ProductUpdatesEnabled)
+                {
+                    return;
+                }
+
                 int checkwhen = Global.CheckWhen;
                 if (checkwhen > 0 && DateTime.Now >= Global.LastChecked + TimeSpan.FromHours(checkwhen))
                 {
@@ -312,114 +316,10 @@ namespace DS4WinWPF.DS4Forms
 
         private void DisplayUpdaterWindow(string version)
         {
-            MessageBoxResult result = MessageBoxResult.No;
-            Dispatcher.Invoke(() =>
-            {
-                var updaterWin = new UpdaterWindow(version);
-                updaterWin.ShowDialog();
-                result = updaterWin.Result;
-            });
-
-            if (result == MessageBoxResult.Yes)
-            {
-                bool launch = true;
-                launch = mainWinVM.RunUpdaterCheck(launch, out string newUpdaterVersion);
-
-                if (launch)
-                {
-                    launch = mainWinVM.LauchDS4Updater(version);
-                }
-
-                if (launch)
-                {
-                    RequestApplicationShutdown();
-                }
-                else
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        MessageBox.Show(Properties.Resources.PleaseDownloadUpdater);
-                        if (!string.IsNullOrEmpty(newUpdaterVersion))
-                        {
-                            Util.StartProcessHelper(
-                                $"https://github.com/hbashton/DS4Updater/releases/tag/v{newUpdaterVersion}");
-                        }
-                    });
-                }
-            }
-        }
-
-        private void Check_Version(bool showstatus = false)
-        {
-            string version = Global.exeversion;
-            string newversion = string.Empty;
-            string versionFilePath = Path.Combine(Global.appdatapath, "version.txt");
-            ulong lastVersionNum = Global.LastVersionCheckedNum;
-            //ulong lastVersion = Global.CompileVersionNumberFromString("2.1.1");
-
-            bool versionFileExists = File.Exists(versionFilePath);
-            if (versionFileExists)
-            {
-                newversion = File.ReadAllText(versionFilePath).Trim();
-                //newversion = "2.1.3";
-            }
-
-            ulong newversionNum = !string.IsNullOrEmpty(newversion) ?
-                Global.CompileVersionNumberFromString(newversion) : 0;
-
-            if (!string.IsNullOrWhiteSpace(newversion) && version.CompareTo(newversion) != 0 &&
-                lastVersionNum < newversionNum)
-            {
-                MessageBoxResult result = MessageBoxResult.No;
-                Dispatcher.Invoke(() =>
-                {
-                    UpdaterWindow updaterWin = new UpdaterWindow(newversion);
-                    updaterWin.ShowDialog();
-                    result = updaterWin.Result;
-                });
-
-                if (result == MessageBoxResult.Yes)
-                {
-                    bool launch = true;
-                    launch = mainWinVM.RunUpdaterCheck(launch, out string newUpdaterVersion);
-
-                    if (launch)
-                    {
-                        launch = mainWinVM.LauchDS4Updater(newversion);
-                    }
-
-                    if (launch)
-                    {
-                        RequestApplicationShutdown();
-                    }
-                    else
-                    {
-                        Dispatcher.Invoke(() =>
-                        {
-                            MessageBox.Show(Properties.Resources.PleaseDownloadUpdater);
-                            if (!string.IsNullOrEmpty(newUpdaterVersion))
-                            {
-                                Util.StartProcessHelper($"https://github.com/hbashton/DS4Updater/releases/tag/v{newUpdaterVersion}");
-                            }
-                        });
-                    }
-                }
-                else
-                {
-                    if (versionFileExists)
-                        File.Delete(versionFilePath);
-                }
-            }
-            else
-            {
-                if (versionFileExists)
-                    File.Delete(versionFilePath);
-
-                if (showstatus)
-                {
-                    Dispatcher.Invoke(() => MessageBox.Show(Properties.Resources.UpToDate, "DS4Windows Updater"));
-                }
-            }
+            Dispatcher.Invoke(() => MessageBox.Show(
+                UpdateAuthorityPolicy.DisabledMessage,
+                "DS4Windows Reworked updates",
+                MessageBoxButton.OK, MessageBoxImage.Information));
         }
 
         private void TrayIconVM_RequestMinimize(object sender, EventArgs e)
@@ -2507,22 +2407,7 @@ Suspend support not enabled.", true);
 
         private void CheckUpdatesBtn_Click(object sender, RoutedEventArgs e)
         {
-            Task.Run(() =>
-            {
-                try
-                {
-                    if (Changelog.CheckNewerReleaseExists(out string releaseTag, false))
-                        DisplayUpdaterWindow(releaseTag);
-                    else
-                        Dispatcher.Invoke(() => MessageBox.Show(Properties.Resources.UpToDate, "DS4Windows Updater"));
-                }
-                catch
-                {
-                    Dispatcher.Invoke(() => MessageBox.Show(Strings.FailedToRetrieveLatestVersion, "DS4Windows Updater"));
-                    // bubble the exception up to allow to see what's wrong in the log
-                    throw;
-                }
-            });
+            DisplayUpdaterWindow(string.Empty);
         }
 
         private void ImportProfBtn_Click(object sender, RoutedEventArgs e)

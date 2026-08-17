@@ -17,12 +17,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
-using System.Text;
 using Microsoft.Win32.TaskScheduler;
 using Task = Microsoft.Win32.TaskScheduler.Task;
 
@@ -31,104 +29,7 @@ namespace DS4WinWPF
     [System.Security.SuppressUnmanagedCodeSecurity]
     public static class StartupMethods
     {
-        private const string RefreshTaskArgument =
-            "--refresh-ds4windows-startup-task";
         public static string lnkpath = Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\DS4Windows.lnk";
-
-        public static bool TryRunTaskRefreshHelper(string[] args,
-            out int exitCode)
-        {
-            exitCode = 1;
-            if (args == null || args.Length != 2 ||
-                !string.Equals(args[0], RefreshTaskArgument,
-                    StringComparison.Ordinal))
-            {
-                return false;
-            }
-
-            string targetUserSid;
-            try
-            {
-                targetUserSid = Encoding.UTF8.GetString(
-                    Convert.FromBase64String(args[1]));
-            }
-            catch
-            {
-                exitCode = 87;
-                return true;
-            }
-
-            string currentUserSid = WindowsIdentity.GetCurrent().User?.Value;
-            if (!DS4Windows.Global.IsAdministrator() ||
-                !string.Equals(currentUserSid, targetUserSid,
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                exitCode = 5;
-                return true;
-            }
-
-            try
-            {
-                WriteTaskEntry();
-                exitCode = 0;
-            }
-            catch
-            {
-                exitCode = 1;
-            }
-
-            return true;
-        }
-
-        public static void RetargetExistingTaskToCurrentExecutable()
-        {
-            try
-            {
-                using TaskService ts = new TaskService();
-                using Task task = ts.GetTask(@"\RunDS4Windows");
-                if (task == null || TaskTargetsCurrentExecutable(task))
-                {
-                    return;
-                }
-
-                if (DS4Windows.Global.IsAdministrator())
-                {
-                    WriteTaskEntry();
-                    return;
-                }
-
-                ProcessStartInfo startInfo = new ProcessStartInfo
-                {
-                    FileName = DS4Windows.Global.exelocation,
-                    UseShellExecute = true,
-                    Verb = "runas",
-                };
-                startInfo.ArgumentList.Add(RefreshTaskArgument);
-                string currentUserSid = WindowsIdentity.GetCurrent()
-                    .User?.Value;
-                if (string.IsNullOrWhiteSpace(currentUserSid))
-                {
-                    return;
-                }
-                startInfo.ArgumentList.Add(Convert.ToBase64String(
-                    Encoding.UTF8.GetBytes(currentUserSid)));
-                using Process process = Process.Start(startInfo);
-                if (process == null)
-                {
-                    return;
-                }
-                process.WaitForExit(15000);
-            }
-            catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
-            {
-                // The portable copy remains usable when the user declines UAC;
-                // only the existing startup task keeps its previous target.
-            }
-            catch
-            {
-                // Startup task repair must never prevent controller startup.
-            }
-        }
 
         public static bool HasStartProgEntry()
         {
@@ -203,16 +104,6 @@ namespace DS4WinWPF
             }
         }
 
-        public static void DeleteOldTaskEntry()
-        {
-            using TaskService ts = new TaskService();
-            using Task tasker = ts.GetTask(@"\RunDS4Windows");
-            if (tasker != null && !TaskTargetsCurrentExecutable(tasker))
-            {
-                ts.RootFolder.DeleteTask("RunDS4Windows");
-            }
-        }
-
         public static bool CanWriteStartEntry()
         {
             bool result = false;
@@ -222,50 +113,6 @@ namespace DS4WinWPF
             }
 
             return result;
-        }
-
-        public static void WriteTaskEntry()
-        {
-            DeleteTaskEntry();
-
-            TaskService ts = new TaskService();
-            TaskDefinition td = ts.NewTask();
-            string currentUserSid = WindowsIdentity.GetCurrent().User?.Value ??
-                throw new InvalidOperationException(
-                    "Windows did not provide the current account SID.");
-            // Leave the trigger user-neutral and bind the principal to the
-            // exact SID. This avoids Task Scheduler's ambiguous UserId name
-            // lookup when the computer and local account share a name while
-            // retaining the same interactive-user security boundary.
-            td.Triggers.Add(new LogonTrigger());
-            string dir = DS4Windows.Global.exedirpath;
-            td.Actions.Add(new ExecAction(
-                DS4Windows.Global.exelocation, "-m", dir));
-
-            td.Principal.UserId = currentUserSid;
-            td.Principal.LogonType = TaskLogonType.InteractiveToken;
-            td.Principal.RunLevel = TaskRunLevel.Highest;
-            td.Settings.StopIfGoingOnBatteries = false;
-            td.Settings.DisallowStartIfOnBatteries = false;
-            td.Settings.ExecutionTimeLimit = TimeSpan.Zero;
-            td.Settings.MultipleInstances = TaskInstancesPolicy.IgnoreNew;
-            td.Settings.AllowDemandStart = true;
-            // Task Scheduler defaults new tasks to BELOW_NORMAL (priority 7),
-            // including low I/O and memory priority.  That can starve the
-            // controller media producer during a CPU spike before DS4Windows
-            // has a chance to raise its own process priority.
-            td.Settings.Priority = ProcessPriorityClass.High;
-            ts.RootFolder.RegisterTaskDefinition("RunDS4Windows", td);
-        }
-
-        public static void DeleteTaskEntry()
-        {
-            TaskService ts = new TaskService();
-            Task tasker = ts.GetTask(@"\RunDS4Windows");
-            if (tasker != null)
-            {
-                ts.RootFolder.DeleteTask("RunDS4Windows");
-            }
         }
 
         public static bool CheckStartupExeLocation()

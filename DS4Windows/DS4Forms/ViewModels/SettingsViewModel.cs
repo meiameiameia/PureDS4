@@ -91,6 +91,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
         private bool canWriteTask;
         public bool CanWriteTask { get => canWriteTask; }
+        public bool CanChangeRunAtStartup => !runStartTask;
 
         public ImageSource uacSource;
         public ImageSource UACSource { get => uacSource; }
@@ -497,7 +498,10 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             }
 
             runAtStartup = runStartProg || runStartTask;
-            canWriteTask = DS4Windows.Global.IsAdministrator();
+            // RunDS4Windows is host-owned infrastructure. The application may
+            // inspect it, but only the per-user Startup shortcut remains an
+            // application-managed startup option.
+            canWriteTask = false;
 
             if (!runAtStartup)
             {
@@ -529,15 +533,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     }
                 }
             }
-            else if (runAtStartup && runStartTask)
-            {
-                if (canWriteTask)
-                {
-                    StartupMethods.DeleteOldTaskEntry();
-                    StartupMethods.WriteTaskEntry();
-                }
-            }
-
             if (runAtStartup)
             {
                 showRunStartPanel = Visibility.Visible;
@@ -547,7 +542,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
             RunAtStartupChanged += SettingsViewModel_RunAtStartupChanged;
             RunStartProgChanged += SettingsViewModel_RunStartProgChanged;
-            RunStartTaskChanged += SettingsViewModel_RunStartTaskChanged;
             FakeExeNameChanged += SettingsViewModel_FakeExeNameChanged;
             FakeExeNameChangeCompare += SettingsViewModel_FakeExeNameChangeCompare;
             UseUdpSmoothingChanged += SettingsViewModel_UseUdpSmoothingChanged;
@@ -607,27 +601,11 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             }
         }
 
-        private void SettingsViewModel_RunStartTaskChanged(object sender, EventArgs e)
-        {
-            if (runStartTask)
-            {
-                StartupMethods.WriteTaskEntry();
-                ViiperSetupManager.
-                    RefreshSelectedStartupTaskAfterRunAtStartupChange();
-            }
-            else
-            {
-                StartupMethods.DeleteTaskEntry();
-            }
-        }
-
         private void SettingsViewModel_RunStartProgChanged(object sender, EventArgs e)
         {
             if (runStartProg)
             {
                 StartupMethods.WriteStartProgEntry();
-                ViiperSetupManager.
-                    RefreshSelectedStartupTaskAfterRunAtStartupChange();
             }
             else
             {
@@ -645,9 +623,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             else
             {
                 StartupMethods.DeleteStartProgEntry();
-                StartupMethods.DeleteTaskEntry();
-                ViiperSetupManager.
-                    RefreshSelectedStartupTaskAfterRunAtStartupChange();
             }
         }
 

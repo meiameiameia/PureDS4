@@ -3522,6 +3522,13 @@ namespace DS4Windows
         {
             releaseTag = string.Empty;
 
+            if (!UpdateAuthorityPolicy.ProductUpdatesEnabled)
+            {
+                _newerVersionAvailable = false;
+                _latestReleaseTag = string.Empty;
+                return false;
+            }
+
             if (allowCached && _newerVersionAvailable is not null)
             {
                 releaseTag = _latestReleaseTag;

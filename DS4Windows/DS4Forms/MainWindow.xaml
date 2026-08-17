@@ -560,7 +560,7 @@
                             <StackPanel>
                         <local:LanguagePackControl Margin="{StaticResource spaceMargin}" />
                         <CheckBox x:Name="runAtStartCk" Content="{lex:Loc RunAtStartup}" Margin="{StaticResource spaceMargin}"
-                              IsChecked="{Binding RunAtStartup}"
+                              IsChecked="{Binding RunAtStartup}" IsEnabled="{Binding CanChangeRunAtStartup}"
                               ToolTip="{lex:Loc Resources:RunAtStartup}" Click="RunAtStartCk_Click"
                               Style="{StaticResource ClassicCompactCheckBoxStyle}" />
                         <GroupBox x:Name="runAsGroupBox" Header="{lex:Loc RunAs}" BorderThickness="2" Visibility="{Binding ShowRunStartPanel}"
@@ -615,10 +615,11 @@
                             </ComboBox>
                         </StackPanel>
                         <CheckBox Content="{lex:Loc CheckUpdateStartup}" Margin="{StaticResource spaceMargin}"
-                              IsChecked="{Binding CheckForUpdates}" ToolTip="Periodically check GitHub for a newer DS4Windows release."
+                              IsChecked="{Binding CheckForUpdates}" IsEnabled="False"
+                              ToolTip="Automatic product updates are disabled until an independent signed update channel is available."
                               Style="{StaticResource ClassicCompactCheckBoxStyle}" />
                         <StackPanel x:Name="checkEveryOptionsStack" Orientation="Horizontal" Margin="{StaticResource spaceMargin}"
-                                IsEnabled="{Binding CheckForUpdates}">
+                                IsEnabled="False">
                             <Label Content="{lex:Loc CheckEvery}" />
                             <xctk:IntegerUpDown d:IsHidden="True" Value="{Binding CheckEvery}" MinWidth="30" Margin="8,0,0,0"
                                             ButtonSpinnerLocation="Right" Increment="1" Maximum="30" Minimum="0" />

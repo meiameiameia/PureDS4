@@ -441,20 +441,5 @@ namespace DS4Windows.Tests
             Assert.AreEqual(87, exitCode);
         }
 
-        [TestMethod]
-        public void StartupTaskHelperRecognizesRemovalAndRejectsBadSid()
-        {
-            Assert.IsFalse(ViiperSetupManager.
-                TryRunStartupTaskRegistrationHelper(
-                    new[] { "--not-the-helper" }, out _));
-            Assert.IsTrue(ViiperSetupManager.
-                TryRunStartupTaskRegistrationHelper(
-                    new[]
-                    {
-                        "--remove-viiper-startup-task",
-                        "not-base64",
-                    }, out int exitCode));
-            Assert.AreEqual(87, exitCode);
-        }
     }
 }
