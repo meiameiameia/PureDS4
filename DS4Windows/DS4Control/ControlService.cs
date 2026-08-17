@@ -49,6 +49,10 @@ namespace DS4Windows
         private readonly object hidHideSessionLock = new object();
         private readonly HashSet<string> hidHideSessionManagedInstanceIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<string> hidHidePersistentManagedInstanceIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private HashSet<string> hidHideBaselineBlacklist;
+        private HidHideOwnershipJournal hidHideOwnershipJournal;
+        private bool hidHideTransientRunStarted;
+        private bool hidHideRecoveryReported;
         private readonly object steamInputReclaimLock = new object();
         private readonly Dictionary<string, DateTime> steamInputReclaimAttempts =
             new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
@@ -834,6 +838,8 @@ namespace DS4Windows
                     }
 
 
+                    HidHideOwnershipJournal ownershipJournal =
+                        GetHidHideOwnershipJournal();
                     List<string> dosPaths = hidHideDevice.GetWhitelist();
 
                     int maxPathCheckLength = 512;
@@ -865,18 +871,42 @@ namespace DS4Windows
                     // Need to trim starting '\\' from path2 or Path.Combine will
                     // treat it as an absolute path and only return path2
                     string realPath = Path.Combine(dosDrivePath, partial.TrimStart('\\'));
-                    bool exists = dosPaths.Contains(realPath);
+                    bool exists = HidHideOwnershipPolicy.Contains(dosPaths,
+                        realPath);
                     if (!exists && AddExe)
                     {
+                        if (!ownershipJournal.IsReliable)
+                        {
+                            StartupDiag($"HidHide did not add {ExeName} to the whitelist because ownership cannot be recorded safely");
+                            return;
+                        }
+
                         LogDebug($"{ExeName} not found in HidHide whitelist. Adding to list");
                         dosPaths.Add(realPath);
-                        hidHideDevice.SetWhitelist(dosPaths);
+                        if (hidHideDevice.SetWhitelist(dosPaths) &&
+                            !ownershipJournal.RecordWhitelistEntry(realPath))
+                        {
+                            dosPaths.RemoveAll(path => string.Equals(path,
+                                realPath, StringComparison.OrdinalIgnoreCase));
+                            hidHideDevice.SetWhitelist(dosPaths);
+                            StartupDiag($"HidHide rolled back the {ExeName} whitelist entry because ownership could not be recorded");
+                        }
                     }
                     if (exists && !AddExe)
                     {
+                        if (!ownershipJournal.OwnsWhitelistEntry(realPath))
+                        {
+                            StartupDiag($"HidHide preserved the pre-existing {ExeName} whitelist entry because DS4Windows did not create it");
+                            return;
+                        }
+
                         LogDebug($"{ExeName} found in HidHide whitelist. Removing from list");
-                        dosPaths.Remove(realPath);
-                        hidHideDevice.SetWhitelist(dosPaths);
+                        dosPaths.RemoveAll(path => string.Equals(path,
+                            realPath, StringComparison.OrdinalIgnoreCase));
+                        if (hidHideDevice.SetWhitelist(dosPaths))
+                        {
+                            ownershipJournal.ForgetWhitelistEntry(realPath);
+                        }
                     }
                 }
             }
@@ -986,6 +1016,45 @@ namespace DS4Windows
             }
         }
 
+        private HidHideOwnershipJournal GetHidHideOwnershipJournal()
+        {
+            if (hidHideOwnershipJournal == null)
+            {
+                string appDataRoot = Global.appdatapath;
+                if (string.IsNullOrWhiteSpace(appDataRoot))
+                {
+                    appDataRoot = Path.Combine(Environment.GetFolderPath(
+                        Environment.SpecialFolder.ApplicationData),
+                        "DS4Windows");
+                }
+
+                hidHideOwnershipJournal = new HidHideOwnershipJournal(
+                    Path.Combine(appDataRoot,
+                        HidHideOwnershipJournal.FileName));
+                hidHideOwnershipJournal.Load();
+            }
+
+            if (!hidHideRecoveryReported &&
+                (!hidHideOwnershipJournal.IsReliable ||
+                 hidHideOwnershipJournal.RecoveryRequired))
+            {
+                hidHideRecoveryReported = true;
+                string detail = hidHideOwnershipJournal.IsReliable
+                    ? string.Join(", ", hidHideOwnershipJournal.
+                        UnresolvedPersistentBlacklistEntries)
+                    : "the ownership journal could not be read";
+                string message =
+                    "HidHide recovery is required. DS4Windows preserved " +
+                    "uncertain global configuration instead of removing it. " +
+                    $"Review HidHide Configuration Client and {hidHideOwnershipJournal.Path}. " +
+                    $"Details: {detail}.";
+                StartupDiag(message);
+                AppLogger.LogToGui(message, true);
+            }
+
+            return hidHideOwnershipJournal;
+        }
+
         /// <summary>
         /// Adds the device to HidHide while the DS4Windows service is running.
         /// Stop releases managed entries and Start acquires them again.
@@ -1010,6 +1079,29 @@ namespace DS4Windows
                 {
                     if (!hidHideDevice.IsOpen()) return false;
 
+                    HidHideOwnershipJournal ownershipJournal =
+                        GetHidHideOwnershipJournal();
+                    List<string> currentBlacklist = hidHideDevice.GetBlacklist()
+                        .Where(item => !string.IsNullOrWhiteSpace(item))
+                        .ToList();
+
+                    lock (hidHideSessionLock)
+                    {
+                        if (!hidHideTransientRunStarted)
+                        {
+                            if (!ownershipJournal.BeginTransientRun())
+                            {
+                                StartupDiag("HidHide session was not changed because its ownership journal is unavailable");
+                                return false;
+                            }
+
+                            hidHideTransientRunStarted = true;
+                            hidHideBaselineBlacklist = new HashSet<string>(
+                                currentBlacklist,
+                                StringComparer.OrdinalIgnoreCase);
+                        }
+                    }
+
                     bool active = hidHideDevice.GetActiveState();
                     lock (hidHideSessionLock)
                     {
@@ -1023,9 +1115,18 @@ namespace DS4Windows
                             StartupDiag($"HidHide failed to enable cloaking for {dev.DisplayName} ({instanceId})");
                             return false;
                         }
+
+                        if (!ownershipJournal.RecordActiveStateEnabled())
+                        {
+                            hidHideDevice.SetActiveState(false);
+                            StartupDiag($"HidHide rolled back cloaking for {dev.DisplayName} because active-state ownership could not be recorded");
+                            return false;
+                        }
                     }
 
-                    if (!alreadyManaged && !AdoptPersistentHidHideBlacklist(hidHideDevice, instanceId, dev))
+                    if (!alreadyManaged &&
+                        !HidHideOwnershipPolicy.Contains(currentBlacklist,
+                            instanceId))
                     {
                         if (hidHideDevice.AddSessionBlacklist(new List<string> { instanceId }))
                         {
@@ -1036,10 +1137,16 @@ namespace DS4Windows
 
                             LogDebug($"HidHide session hiding enabled for {dev.DisplayName} ({instanceId})", false);
                         }
-                        else if (!EnsurePersistentHidHideBlacklist(hidHideDevice, instanceId, dev))
+                        else if (!EnsurePersistentHidHideBlacklist(
+                            hidHideDevice, currentBlacklist, instanceId, dev,
+                            ownershipJournal))
                         {
                             return false;
                         }
+                    }
+                    else if (!alreadyManaged)
+                    {
+                        StartupDiag($"HidHide preserved pre-existing blacklist ownership for {dev.DisplayName} ({instanceId})");
                     }
 
                     UpdateHidHideAttributes();
@@ -1053,40 +1160,19 @@ namespace DS4Windows
             }
         }
 
-        private bool AdoptPersistentHidHideBlacklist(HidHideAPIDevice hidHideDevice, string instanceId, DS4Device dev)
+        private bool EnsurePersistentHidHideBlacklist(
+            HidHideAPIDevice hidHideDevice, List<string> currentBlacklist,
+            string instanceId, DS4Device dev,
+            HidHideOwnershipJournal ownershipJournal)
         {
-            bool exists = hidHideDevice.GetBlacklist()
-                .Any(item => string.Equals(item, instanceId, StringComparison.OrdinalIgnoreCase));
-
-            if (!exists) return false;
-
-            lock (hidHideSessionLock)
+            List<string> instances = HidHideOwnershipPolicy.AddIfMissing(
+                currentBlacklist, instanceId, out bool added);
+            if (!added)
             {
-                hidHidePersistentManagedInstanceIds.Add(instanceId);
-            }
-
-            StartupDiag($"HidHide adopted existing blacklist entry for {dev.DisplayName} ({instanceId})");
-            return true;
-        }
-
-        private bool EnsurePersistentHidHideBlacklist(HidHideAPIDevice hidHideDevice, string instanceId, DS4Device dev)
-        {
-            List<string> instances = hidHideDevice.GetBlacklist()
-                .Where(item => !string.IsNullOrWhiteSpace(item))
-                .ToList();
-
-            if (instances.Any(item => string.Equals(item, instanceId, StringComparison.OrdinalIgnoreCase)))
-            {
-                lock (hidHideSessionLock)
-                {
-                    hidHidePersistentManagedInstanceIds.Add(instanceId);
-                }
-
-                StartupDiag($"HidHide persistent blacklist already contains {instanceId}");
+                StartupDiag($"HidHide preserved pre-existing persistent blacklist entry {instanceId}");
                 return true;
             }
 
-            instances.Add(instanceId);
             if (!hidHideDevice.SetBlacklist(instances))
             {
                 StartupDiag($"HidHide persistent blacklist fallback failed for {dev.DisplayName} ({instanceId})");
@@ -1096,6 +1182,19 @@ namespace DS4Windows
             lock (hidHideSessionLock)
             {
                 hidHidePersistentManagedInstanceIds.Add(instanceId);
+            }
+
+            if (!ownershipJournal.RecordPersistentBlacklistEntry(instanceId))
+            {
+                List<string> rollback = HidHideOwnershipPolicy.RemoveOwned(
+                    instances, new[] { instanceId }, out _);
+                hidHideDevice.SetBlacklist(rollback);
+                lock (hidHideSessionLock)
+                {
+                    hidHidePersistentManagedInstanceIds.Remove(instanceId);
+                }
+                StartupDiag($"HidHide rolled back persistent hiding for {dev.DisplayName} because ownership could not be recorded");
+                return false;
             }
 
             LogDebug($"HidHide persistent hiding enabled for {dev.DisplayName} ({instanceId})", false);
@@ -1278,19 +1377,23 @@ namespace DS4Windows
                     }
 
                     bool persistentReleased = persistentIds.Count == 0;
+                    List<string> releasedPersistentIds = new List<string>();
+                    List<string> blacklistAfterCleanup = null;
                     if (persistentIds.Count > 0)
                     {
                         List<string> instances = hidHideDevice.GetBlacklist()
                             .Where(item => !string.IsNullOrWhiteSpace(item))
                             .ToList();
 
-                        int removed = instances.RemoveAll(item =>
-                            persistentIds.Any(managed => string.Equals(managed, item, StringComparison.OrdinalIgnoreCase)));
-
-                        persistentReleased = removed == 0 || hidHideDevice.SetBlacklist(instances);
-                        if (removed > 0 && persistentReleased)
+                        blacklistAfterCleanup = HidHideOwnershipPolicy.
+                            RemoveOwned(instances, persistentIds,
+                                out releasedPersistentIds);
+                        persistentReleased = releasedPersistentIds.Count == 0 ||
+                            hidHideDevice.SetBlacklist(blacklistAfterCleanup);
+                        if (releasedPersistentIds.Count > 0 &&
+                            persistentReleased)
                         {
-                            StartupDiag($"Released {removed} DS4Windows-managed HidHide blacklist entries");
+                            StartupDiag($"Released {releasedPersistentIds.Count} DS4Windows-created HidHide blacklist entries");
                         }
                         else if (!persistentReleased)
                         {
@@ -1301,11 +1404,30 @@ namespace DS4Windows
                     bool activeStateRestored = restoreActiveState != false;
                     if (restoreActiveState == false)
                     {
-                        activeStateRestored = hidHideDevice.SetActiveState(false);
+                        blacklistAfterCleanup ??= hidHideDevice.GetBlacklist()
+                            .Where(item => !string.IsNullOrWhiteSpace(item))
+                            .ToList();
+                        bool safeToRestore = sessionReleased &&
+                            persistentReleased &&
+                            HidHideOwnershipPolicy.CanRestoreInactiveState(
+                                hidHideBaselineBlacklist,
+                                blacklistAfterCleanup);
+                        activeStateRestored = safeToRestore &&
+                            hidHideDevice.SetActiveState(false);
                         if (!activeStateRestored)
                         {
-                            StartupDiag("HidHide cloaking state restore failed; cleanup will be retried");
+                            StartupDiag(safeToRestore
+                                ? "HidHide cloaking state restore failed; cleanup will be retried"
+                                : "HidHide cloaking remained enabled because global state changed during this run; recovery is required");
                         }
+                    }
+
+                    if (hidHideOwnershipJournal != null)
+                    {
+                        hidHideOwnershipJournal.CompleteTransientRun(
+                            persistentReleased ? persistentIds :
+                                Array.Empty<string>(),
+                            activeStateRestored);
                     }
 
                     lock (hidHideSessionLock)
@@ -1325,6 +1447,8 @@ namespace DS4Windows
                             hidHidePersistentManagedInstanceIds.Count == 0)
                         {
                             hidHideActiveStateBeforeManagedSession = null;
+                            hidHideBaselineBlacklist = null;
+                            hidHideTransientRunStarted = false;
                         }
                     }
 
