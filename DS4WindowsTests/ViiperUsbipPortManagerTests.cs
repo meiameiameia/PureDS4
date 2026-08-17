@@ -21,26 +21,23 @@ namespace DS4WindowsTests
             };
 
             string result = ViiperUsbipPortManager.FindUsbipPath(
-                @"C:\Program Files", @"C:\Program Files",
-                @"C:\Program Files (x86)", @"C:\old-usbip",
+                @"C:\Program Files", @"C:\Program Files (x86)",
                 existing.Contains);
 
             Assert.AreEqual(canonical, result);
         }
 
         [TestMethod]
-        public void PathCopyIsUsedOnlyWhenCanonicalInstallIsMissing()
+        public void PathCopyIsRejectedWhenCanonicalInstallIsMissing()
         {
             string pathCopy = Path.Combine(@"C:\portable-usbip", "usbip.exe");
 
             string result = ViiperUsbipPortManager.FindUsbipPath(
-                @"C:\Program Files", @"C:\Program Files",
-                @"C:\Program Files (x86)",
-                @"C:\missing;""C:\portable-usbip""",
+                @"C:\Program Files", @"C:\Program Files (x86)",
                 candidate => string.Equals(candidate, pathCopy,
                     StringComparison.OrdinalIgnoreCase));
 
-            Assert.AreEqual(pathCopy, result);
+            Assert.IsNull(result);
         }
 
         [TestMethod]

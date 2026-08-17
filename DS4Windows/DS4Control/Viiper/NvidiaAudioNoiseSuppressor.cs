@@ -132,19 +132,11 @@ namespace DS4Windows
 
         private static RuntimeFiles DiscoverRuntime()
         {
-            var roots = new List<string>
-            {
-                Environment.GetEnvironmentVariable(
-                    "NVIDIA_MAXINE_AFX_SDK_DIR"),
-                Environment.GetEnvironmentVariable("NVAFX_SDK_DIR"),
-                Path.Combine(AppContext.BaseDirectory, "NVIDIA Audio Effects"),
-                Path.Combine(Environment.GetFolderPath(
+            IReadOnlyList<string> roots = GetTrustedRuntimeRoots(
+                Environment.GetFolderPath(
                     Environment.SpecialFolder.ProgramFiles),
-                    "NVIDIA Corporation", "NVIDIA Audio Effects SDK"),
-                Path.Combine(Environment.GetFolderPath(
-                    Environment.SpecialFolder.ProgramFiles),
-                    "NVIDIA Corporation", "Maxine"),
-            };
+                Environment.GetFolderPath(
+                    Environment.SpecialFolder.ProgramFilesX86));
 
             foreach (string root in roots.Where(item =>
                          !string.IsNullOrWhiteSpace(item)).Distinct(
@@ -155,6 +147,21 @@ namespace DS4Windows
             }
 
             return default;
+        }
+
+        internal static IReadOnlyList<string> GetTrustedRuntimeRoots(
+            string programFiles, string programFilesX86)
+        {
+            return new[] { programFiles, programFilesX86 }
+                .Where(root => !string.IsNullOrWhiteSpace(root))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .SelectMany(root => new[]
+                {
+                    Path.Combine(root, "NVIDIA Corporation",
+                        "NVIDIA Audio Effects SDK"),
+                    Path.Combine(root, "NVIDIA Corporation", "Maxine"),
+                })
+                .ToList();
         }
 
         private static RuntimeFiles FindRuntime(string root)

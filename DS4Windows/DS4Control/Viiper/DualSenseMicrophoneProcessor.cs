@@ -316,6 +316,7 @@ namespace DS4Windows
 
             public RnnoiseSuppressor()
             {
+                NativeLibraryTrust.EnsureApplicationResolver();
                 if (NativeMethods.rnnoise_get_frame_size() != FrameSize)
                 {
                     throw new InvalidOperationException("The RNNoise frame size is not 480 samples.");

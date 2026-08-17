@@ -61,7 +61,18 @@ namespace DS4Windows.DS4Control
 
         public override bool Connect()
         {
-            return fakerInput.Connect();
+            try
+            {
+                NativeLibraryTrust.EnsureFakerInputResolver();
+                return fakerInput.Connect();
+            }
+            catch (Exception ex) when (ex is DllNotFoundException ||
+                ex is BadImageFormatException ||
+                ex is EntryPointNotFoundException ||
+                ex is InvalidOperationException)
+            {
+                return false;
+            }
         }
 
         public override bool Disconnect()

@@ -5716,14 +5716,13 @@ namespace DS4Windows
         private static string FindUsbipPath()
         {
             return FindUsbipPath(
-                Environment.GetEnvironmentVariable("ProgramW6432"),
                 Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                 Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-                Environment.GetEnvironmentVariable("PATH"), File.Exists);
+                File.Exists);
         }
 
-        internal static string FindUsbipPath(string programW6432,
-            string programFiles, string programFilesX86, string pathValue,
+        internal static string FindUsbipPath(string programFiles,
+            string programFilesX86,
             Func<string, bool> fileExists)
         {
             if (fileExists == null)
@@ -5735,7 +5734,6 @@ namespace DS4Windows
                 StringComparer.OrdinalIgnoreCase);
             foreach (string root in new[]
             {
-                programW6432,
                 programFiles,
                 programFilesX86,
             })
@@ -5746,22 +5744,6 @@ namespace DS4Windows
                 }
 
                 string candidate = Path.Combine(root.Trim().Trim('"'), "USBip",
-                    "usbip.exe");
-                if (visited.Add(candidate) && fileExists(candidate))
-                {
-                    return candidate;
-                }
-            }
-
-            foreach (string folder in (pathValue ?? string.Empty).
-                Split(Path.PathSeparator))
-            {
-                if (string.IsNullOrWhiteSpace(folder))
-                {
-                    continue;
-                }
-
-                string candidate = Path.Combine(folder.Trim().Trim('"'),
                     "usbip.exe");
                 if (visited.Add(candidate) && fileExists(candidate))
                 {
