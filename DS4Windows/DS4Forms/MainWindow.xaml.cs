@@ -1310,6 +1310,44 @@ Suspend support not enabled.", true);
             }
         }
 
+        private async void HomeRecoverControllerBtn_Click(object sender,
+            RoutedEventArgs e)
+        {
+            if (sender is not Button { Tag: string instanceId } button ||
+                string.IsNullOrWhiteSpace(instanceId))
+            {
+                return;
+            }
+
+            button.IsEnabled = false;
+            try
+            {
+                ControllerExposureRecoveryResult result =
+                    await App.rootHub.RecoverControllerExposureAsync(
+                        instanceId);
+                if (!result.Succeeded)
+                {
+                    MessageBox.Show(this, result.Detail,
+                        "Controller recovery",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                App.rootHub.LogDebug(
+                    $"Controller recovery failed: {ex.Message}", true);
+                MessageBox.Show(this,
+                    "Controller handling could not be recovered. " +
+                    "It has been left stopped where possible. " + ex.Message,
+                    "Controller recovery", MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+            finally
+            {
+                button.IsEnabled = true;
+            }
+        }
+
         private void ControllerExposureSessionsChanged(object sender,
             EventArgs e) => RefreshControllerExposureSessions();
 

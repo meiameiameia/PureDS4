@@ -294,8 +294,14 @@ namespace DS4WindowsTests
         [TestMethod]
         public void ServiceResetReturnsCoordinatorToManagedDefault()
         {
-            ControllerExposureTransitionCoordinator coordinator =
-                NativeCoordinator();
+            RecordingOperations operations = new();
+            operations.Fail("ReleasePhysicalHandle", "handle busy");
+            operations.Fail("CreateVirtualOutputs", "output unavailable");
+            ControllerExposureTransitionCoordinator coordinator = new();
+            ControllerExposureTransitionResult failed =
+                coordinator.TransitionTo(
+                    ControllerExposureMode.NativePhysical, operations);
+            Assert.IsTrue(failed.Status.NeedsRecovery);
 
             coordinator.ResetToManagedVirtual();
 
@@ -448,6 +454,120 @@ namespace DS4WindowsTests
             }, operations.Calls);
         }
 
+        [TestMethod]
+        public void RecoveryWorkflowStopsBeforeRestartingManagedService()
+        {
+            RecordingRecoveryOperations operations = new();
+
+            ControllerExposureRecoveryResult result =
+                ControllerExposureRecoveryWorkflow.Recover(
+                    recoveryRequired: true, operations);
+
+            Assert.IsTrue(result.Succeeded);
+            CollectionAssert.AreEqual(new[]
+            {
+                "StopAndReset",
+                "StartManagedService",
+            }, operations.Calls);
+        }
+
+        [TestMethod]
+        public void RecoveryWorkflowRefusesHealthyStateWithoutMutation()
+        {
+            RecordingRecoveryOperations operations = new();
+
+            ControllerExposureRecoveryResult result =
+                ControllerExposureRecoveryWorkflow.Recover(
+                    recoveryRequired: false, operations);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(0, operations.Calls.Count);
+            StringAssert.Contains(result.Detail, "does not require");
+        }
+
+        [TestMethod]
+        public void RecoveryWorkflowDoesNotRestartAfterStopFailure()
+        {
+            RecordingRecoveryOperations operations = new();
+            operations.Fail("StopAndReset", "cleanup blocked");
+
+            ControllerExposureRecoveryResult result =
+                ControllerExposureRecoveryWorkflow.Recover(
+                    recoveryRequired: true, operations);
+
+            Assert.IsFalse(result.Succeeded);
+            CollectionAssert.AreEqual(new[] { "StopAndReset" },
+                operations.Calls);
+            StringAssert.Contains(result.Detail, "cleanup blocked");
+        }
+
+        [TestMethod]
+        public void RecoveryWorkflowReportsSafeStopWhenRestartFails()
+        {
+            RecordingRecoveryOperations operations = new();
+            operations.Fail("StartManagedService", "backend unavailable");
+
+            ControllerExposureRecoveryResult result =
+                ControllerExposureRecoveryWorkflow.Recover(
+                    recoveryRequired: true, operations);
+
+            Assert.IsFalse(result.Succeeded);
+            CollectionAssert.AreEqual(new[]
+            {
+                "StopAndReset",
+                "StartManagedService",
+            }, operations.Calls);
+            StringAssert.Contains(result.Detail.ToLowerInvariant(),
+                "cleanup completed");
+            StringAssert.Contains(result.Detail, "backend unavailable");
+        }
+
+        [TestMethod]
+        public void RecoveryPostconditionRequiresOriginalController()
+        {
+            ControllerExposureOperationResult result =
+                ControllerExposureRecoveryPostcondition.Evaluate(
+                    controllerPresent: false, outputConnected: false,
+                    OutContType.None, OutContType.X360);
+
+            Assert.IsFalse(result.Succeeded);
+            StringAssert.Contains(result.Error, "did not reconnect");
+        }
+
+        [TestMethod]
+        public void RecoveryPostconditionRequiresConnectedVirtualOutput()
+        {
+            ControllerExposureOperationResult result =
+                ControllerExposureRecoveryPostcondition.Evaluate(
+                    controllerPresent: true, outputConnected: false,
+                    OutContType.X360, OutContType.X360);
+
+            Assert.IsFalse(result.Succeeded);
+            StringAssert.Contains(result.Error, "did not become ready");
+        }
+
+        [TestMethod]
+        public void RecoveryPostconditionRequiresRequestedOutputType()
+        {
+            ControllerExposureOperationResult result =
+                ControllerExposureRecoveryPostcondition.Evaluate(
+                    controllerPresent: true, outputConnected: true,
+                    OutContType.DS4, OutContType.X360);
+
+            Assert.IsFalse(result.Succeeded);
+        }
+
+        [TestMethod]
+        public void RecoveryPostconditionAcceptsReadyManagedVirtualState()
+        {
+            ControllerExposureOperationResult result =
+                ControllerExposureRecoveryPostcondition.Evaluate(
+                    controllerPresent: true, outputConnected: true,
+                    OutContType.X360, OutContType.X360);
+
+            Assert.IsTrue(result.Succeeded);
+        }
+
         private static ControllerExposureTransitionCoordinator NativeCoordinator()
         {
             ControllerExposureTransitionCoordinator coordinator = new();
@@ -517,6 +637,32 @@ namespace DS4WindowsTests
                     throw exception;
                 }
 
+                return failures.TryGetValue(operation, out string error)
+                    ? ControllerExposureOperationResult.Failure(error)
+                    : ControllerExposureOperationResult.Success();
+            }
+        }
+
+        private sealed class RecordingRecoveryOperations :
+            IControllerExposureRecoveryOperations
+        {
+            private readonly Dictionary<string, string> failures =
+                new(StringComparer.Ordinal);
+
+            internal List<string> Calls { get; } = new();
+
+            internal void Fail(string operation, string error) =>
+                failures[operation] = error;
+
+            public ControllerExposureOperationResult StopAndReset() =>
+                Run(nameof(StopAndReset));
+
+            public ControllerExposureOperationResult StartManagedService() =>
+                Run(nameof(StartManagedService));
+
+            private ControllerExposureOperationResult Run(string operation)
+            {
+                Calls.Add(operation);
                 return failures.TryGetValue(operation, out string error)
                     ? ControllerExposureOperationResult.Failure(error)
                     : ControllerExposureOperationResult.Success();

@@ -95,6 +95,110 @@ namespace DS4Windows
         internal ControllerExposureStatus Status { get; }
     }
 
+    internal readonly struct ControllerExposureRecoveryResult
+    {
+        internal ControllerExposureRecoveryResult(bool succeeded,
+            string detail)
+        {
+            Succeeded = succeeded;
+            Detail = detail ?? string.Empty;
+        }
+
+        internal bool Succeeded { get; }
+        internal string Detail { get; }
+    }
+
+    internal interface IControllerExposureRecoveryOperations
+    {
+        ControllerExposureOperationResult StopAndReset();
+        ControllerExposureOperationResult StartManagedService();
+    }
+
+    /// <summary>
+    /// Converges an uncertain exposure state through the normal service
+    /// shutdown and startup paths. Recovery never clears the terminal state
+    /// without first running the cleanup that restores physical containment,
+    /// retires outputs, closes handles, and clears device reservations.
+    /// </summary>
+    internal static class ControllerExposureRecoveryWorkflow
+    {
+        internal static ControllerExposureRecoveryResult Recover(
+            bool recoveryRequired,
+            IControllerExposureRecoveryOperations operations)
+        {
+            if (!recoveryRequired)
+            {
+                return Failure(
+                    "This controller does not require exposure recovery.");
+            }
+            if (operations == null)
+            {
+                throw new ArgumentNullException(nameof(operations));
+            }
+
+            ControllerExposureOperationResult stopResult = Invoke(
+                operations.StopAndReset);
+            if (!stopResult.Succeeded)
+            {
+                return Failure("Controller handling could not be stopped " +
+                    $"safely. {stopResult.Error}");
+            }
+
+            ControllerExposureOperationResult startResult = Invoke(
+                operations.StartManagedService);
+            if (!startResult.Succeeded)
+            {
+                return Failure("Exposure cleanup completed, but Managed / " +
+                    "Virtual could not be restored. " +
+                    startResult.Error);
+            }
+
+            return new ControllerExposureRecoveryResult(true,
+                "Controller handling restarted in Managed / Virtual.");
+        }
+
+        private static ControllerExposureOperationResult Invoke(
+            Func<ControllerExposureOperationResult> operation)
+        {
+            try
+            {
+                return operation();
+            }
+            catch (Exception ex)
+            {
+                return ControllerExposureOperationResult.Failure(
+                    $"{ex.GetType().Name}: {ex.Message}");
+            }
+        }
+
+        private static ControllerExposureRecoveryResult Failure(
+            string detail) => new ControllerExposureRecoveryResult(false,
+                detail);
+    }
+
+    internal static class ControllerExposureRecoveryPostcondition
+    {
+        internal static ControllerExposureOperationResult Evaluate(
+            bool controllerPresent, bool outputConnected,
+            OutContType actualOutputType, OutContType expectedOutputType)
+        {
+            if (!controllerPresent)
+            {
+                return ControllerExposureOperationResult.Failure(
+                    "The controller did not reconnect after recovery.");
+            }
+            if (!outputConnected || actualOutputType.Normalize() !=
+                    expectedOutputType.Normalize())
+            {
+                return ControllerExposureOperationResult.Failure(
+                    "The controller reconnected, but its Managed / Virtual " +
+                    "output did not become ready.");
+            }
+
+            return ControllerExposureOperationResult.Success();
+        }
+    }
+
     /// <summary>
     /// Serializes the safety-critical ordering between physical containment and
     /// virtual output. It has no direct dependency on HID, HidHide, or VIIPER so

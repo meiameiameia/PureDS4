@@ -11,7 +11,8 @@ namespace DS4Windows
     {
         internal ControllerExposureSessionInfo(string instanceId,
             string displayName, string connection, int slotNumber,
-            string modeTitle, string detail, bool canReturnToManaged)
+            string modeTitle, string detail, bool canReturnToManaged,
+            bool canRecover)
         {
             InstanceId = instanceId ?? string.Empty;
             DisplayName = displayName ?? "Controller";
@@ -20,6 +21,7 @@ namespace DS4Windows
             ModeTitle = modeTitle ?? string.Empty;
             Detail = detail ?? string.Empty;
             CanReturnToManaged = canReturnToManaged;
+            CanRecover = canRecover;
         }
 
         public string InstanceId { get; }
@@ -30,6 +32,7 @@ namespace DS4Windows
         public string ModeTitle { get; }
         public string Detail { get; }
         public bool CanReturnToManaged { get; }
+        public bool CanRecover { get; }
     }
 
     public partial class ControlService
@@ -90,6 +93,72 @@ namespace DS4Windows
 
             public ControllerExposureOperationResult CreateVirtualOutputs() =>
                 service.CreateControllerExposureVirtualOutputs(session);
+        }
+
+        private sealed class LiveControllerExposureRecoveryOperations :
+            IControllerExposureRecoveryOperations
+        {
+            private readonly ControlService service;
+            private readonly ControllerExposureRuntimeSession session;
+
+            internal LiveControllerExposureRecoveryOperations(
+                ControlService service,
+                ControllerExposureRuntimeSession session)
+            {
+                this.service = service;
+                this.session = session;
+            }
+
+            public ControllerExposureOperationResult StopAndReset() =>
+                service.StopCore(showlog: true, immediateUnplug: true)
+                    ? ControllerExposureOperationResult.Success()
+                    : ControllerExposureOperationResult.Failure(
+                        "The controller service did not stop.");
+
+            public ControllerExposureOperationResult StartManagedService()
+            {
+                string failure = string.Empty;
+                try
+                {
+                    if (!service.StartCore(showlog: true) ||
+                        !service.running)
+                    {
+                        failure = "The controller service did not restart.";
+                    }
+                    else
+                    {
+                        ControllerExposureOperationResult verification =
+                            service.VerifyRecoveredManagedVirtual(session);
+                        if (!verification.Succeeded)
+                        {
+                            failure = verification.Error;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    failure = $"The controller service restart failed: " +
+                        $"{ex.GetType().Name}: {ex.Message}";
+                }
+
+                if (string.IsNullOrWhiteSpace(failure))
+                {
+                    return ControllerExposureOperationResult.Success();
+                }
+
+                try
+                {
+                    service.StopCore(showlog: true, immediateUnplug: true);
+                    failure += " Controller handling was left stopped safely.";
+                }
+                catch (Exception ex)
+                {
+                    failure += " Cleanup after the failed restart also " +
+                        $"failed: {ex.GetType().Name}: {ex.Message}";
+                }
+
+                return ControllerExposureOperationResult.Failure(failure);
+            }
         }
 
         private readonly object controllerExposureSessionLock = new object();
@@ -162,6 +231,95 @@ namespace DS4Windows
             {
                 controllerExposureTransitionGate.Release();
             }
+        }
+
+        internal async Task<ControllerExposureRecoveryResult>
+            RecoverControllerExposureAsync(string instanceId)
+        {
+            if (!await controllerExposureTransitionGate.WaitAsync(0)
+                    .ConfigureAwait(false))
+            {
+                return new ControllerExposureRecoveryResult(false,
+                    "Another controller exposure transition is still in progress.");
+            }
+
+            try
+            {
+                return await Task.Run(() =>
+                {
+                    lock (serviceLifecycleLock)
+                    {
+                        return RecoverControllerExposureCore(instanceId);
+                    }
+                }).ConfigureAwait(false);
+            }
+            finally
+            {
+                controllerExposureTransitionGate.Release();
+            }
+        }
+
+        private ControllerExposureRecoveryResult
+            RecoverControllerExposureCore(string instanceId)
+        {
+            ControllerExposureRuntimeSession session;
+            lock (controllerExposureSessionLock)
+            {
+                controllerExposureSessions.TryGetValue(instanceId ??
+                    string.Empty, out session);
+            }
+
+            if (session == null || session.PreferredSlot < 0 ||
+                session.PreferredSlot >= controllerExposureTransitions.Length)
+            {
+                return new ControllerExposureRecoveryResult(false,
+                    "The controller recovery session is no longer available.");
+            }
+
+            ControllerExposureStatus status =
+                controllerExposureTransitions[session.PreferredSlot].Status;
+            StartupDiag($"Controller exposure recovery requested " +
+                $"instance={session.InstanceId} slot={session.PreferredSlot} " +
+                $"stage={status.Stage}");
+            ControllerExposureRecoveryResult result =
+                ControllerExposureRecoveryWorkflow.Recover(
+                    status.NeedsRecovery,
+                    new LiveControllerExposureRecoveryOperations(this,
+                        session));
+            LogDebug(result.Succeeded
+                ? $"Recovered {session.DisplayName} to Managed / Virtual."
+                : $"Could not recover {session.DisplayName}: {result.Detail}",
+                !result.Succeeded);
+            return result;
+        }
+
+        private ControllerExposureOperationResult
+            VerifyRecoveredManagedVirtual(
+                ControllerExposureRuntimeSession session)
+        {
+            int recoveredIndex = -1;
+            for (int index = 0; index < DS4Controllers.Length; index++)
+            {
+                DS4Device candidate = DS4Controllers[index];
+                string candidateId = Global.GetInstanceIdFromDevicePath(
+                    candidate?.HidDevice?.DevicePath ?? string.Empty);
+                if (string.Equals(candidateId, session.InstanceId,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    recoveredIndex = index;
+                    break;
+                }
+            }
+
+            bool controllerPresent = recoveredIndex >= 0;
+            ViiperOutDevice output = controllerPresent
+                ? outputDevices[recoveredIndex] as ViiperOutDevice : null;
+            OutContType actualOutputType = controllerPresent
+                ? Global.activeOutDevType[recoveredIndex]
+                : OutContType.None;
+            return ControllerExposureRecoveryPostcondition.Evaluate(
+                controllerPresent, output?.IsRuntimeConnected == true,
+                actualOutputType, session.OutputType);
         }
 
         private ControllerExposureTransitionResult
@@ -371,11 +529,16 @@ namespace DS4Windows
                 : status.Mode == ControllerExposureMode.NativePhysical
                     ? "NATIVE PHYSICAL"
                     : "MANAGED / VIRTUAL";
+            string detail = status.NeedsRecovery
+                ? status.Detail + " Select Recover controller to safely " +
+                    "restart controller handling for all connected " +
+                    "controllers and restore Managed / Virtual."
+                : status.Detail;
             return new ControllerExposureSessionInfo(session.InstanceId,
                 session.DisplayName, session.Connection,
-                session.PreferredSlot + 1, title, status.Detail,
+                session.PreferredSlot + 1, title, detail,
                 status.Mode == ControllerExposureMode.NativePhysical &&
-                status.IsReady);
+                status.IsReady, status.NeedsRecovery);
         }
 
         private void LogControllerExposureResult(

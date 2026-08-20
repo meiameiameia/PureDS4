@@ -248,8 +248,14 @@
                                                 MinHeight="28" Margin="12,0,0,0"
                                                 VerticalAlignment="Center"
                                                 Tag="{Binding InstanceId}"
-                                                IsEnabled="{Binding CanReturnToManaged}"
+                                                Visibility="{Binding CanReturnToManaged, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                 Click="HomeUseManagedBtn_Click" />
+                                        <Button Grid.Column="1" Content="Recover controller"
+                                                MinHeight="28" Margin="12,0,0,0"
+                                                VerticalAlignment="Center"
+                                                Tag="{Binding InstanceId}"
+                                                Visibility="{Binding CanRecover, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                Click="HomeRecoverControllerBtn_Click" />
                                     </Grid>
                                 </Border>
                             </DataTemplate>
