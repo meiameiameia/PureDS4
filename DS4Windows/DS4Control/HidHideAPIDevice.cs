@@ -17,7 +17,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using System;
+using System.ComponentModel;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
@@ -25,7 +27,13 @@ using DS4Windows;
 
 namespace DS4WinWPF.DS4Control
 {
-    class HidHideAPIDevice : IDisposable
+    internal interface IHidHideBlacklistDevice
+    {
+        List<string> GetBlacklist();
+        bool SetBlacklist(List<string> instances);
+    }
+
+    class HidHideAPIDevice : IDisposable, IHidHideBlacklistDevice
     {
         private const uint IOCTL_GET_WHITELIST = 0x80016000;
         private const uint IOCTL_SET_WHITELIST = 0x80016004;
@@ -60,12 +68,19 @@ namespace DS4WinWPF.DS4Control
 
         public bool GetActiveState()
         {
-            bool result = false;
+            TryGetActiveState(out bool result);
+            return result;
+        }
 
+        public bool TryGetActiveState(out bool state)
+        {
+            bool result = false;
+            bool succeeded;
             unsafe
             {
                 int bytesReturned = 0;
-                NativeMethods.DeviceIoControl(hidHideHandle.DangerousGetHandle(),
+                succeeded = NativeMethods.DeviceIoControl(
+                    hidHideHandle.DangerousGetHandle(),
                     HidHideAPIDevice.IOCTL_GET_ACTIVE,
                     IntPtr.Zero,
                     0,
@@ -73,11 +88,10 @@ namespace DS4WinWPF.DS4Control
                     1,
                     ref bytesReturned,
                     IntPtr.Zero);
-
-                //int error = Marshal.GetLastWin32Error();
+                succeeded &= bytesReturned == 1;
             }
-
-            return result;
+            state = result;
+            return succeeded;
         }
 
         public bool SetActiveState(bool state)
@@ -116,6 +130,12 @@ namespace DS4WinWPF.DS4Control
                 ref bytesReturned,
                 IntPtr.Zero);
 
+            if (!result && bytesReturned <= 0)
+            {
+                throw new Win32Exception(Marshal.GetLastWin32Error(),
+                    "HidHide persistent blacklist size query failed.");
+            }
+
             if (bytesReturned > 0)
             {
                 byte[] dataBuffer = new byte[bytesReturned];
@@ -123,22 +143,38 @@ namespace DS4WinWPF.DS4Control
                 bytesReturned = 0;
 
                 IntPtr buffer = Marshal.AllocHGlobal(requiredBytes);
+                try
+                {
+                    result = NativeMethods.DeviceIoControl(
+                        hidHideHandle.DangerousGetHandle(),
+                        HidHideAPIDevice.IOCTL_GET_BLACKLIST,
+                        IntPtr.Zero,
+                        0,
+                        buffer,
+                        requiredBytes,
+                        ref bytesReturned,
+                        IntPtr.Zero);
+                    if (!result)
+                    {
+                        throw new Win32Exception(Marshal.GetLastWin32Error(),
+                            "HidHide persistent blacklist read failed.");
+                    }
+                    if (bytesReturned < 0 || bytesReturned > requiredBytes ||
+                        bytesReturned % sizeof(char) != 0)
+                    {
+                        throw new InvalidDataException(
+                            "HidHide returned an invalid persistent blacklist payload.");
+                    }
 
-                result = NativeMethods.DeviceIoControl(hidHideHandle.DangerousGetHandle(),
-                    HidHideAPIDevice.IOCTL_GET_BLACKLIST,
-                    IntPtr.Zero,
-                    0,
-                    buffer,
-                    requiredBytes,
-                    ref bytesReturned,
-                    IntPtr.Zero);
-
-                //int error = Marshal.GetLastWin32Error();
-                Marshal.Copy(buffer, dataBuffer, 0, requiredBytes);
-                string tempstring = Encoding.Unicode.GetString(dataBuffer).TrimEnd(char.MinValue);
-                instances = tempstring.Split(char.MinValue).ToList();
-
-                Marshal.FreeHGlobal(buffer);
+                    Marshal.Copy(buffer, dataBuffer, 0, bytesReturned);
+                    string tempstring = Encoding.Unicode.GetString(dataBuffer,
+                        0, bytesReturned).TrimEnd(char.MinValue);
+                    instances = tempstring.Split(char.MinValue).ToList();
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(buffer);
+                }
             }
 
             return instances;
@@ -274,12 +310,19 @@ namespace DS4WinWPF.DS4Control
 
         public bool GetWhiteListInverseState()
         {
-            bool result = false;
+            TryGetWhiteListInverseState(out bool result);
+            return result;
+        }
 
+        public bool TryGetWhiteListInverseState(out bool state)
+        {
+            bool result = false;
+            bool succeeded;
             unsafe
             {
                 int bytesReturned = 0;
-                NativeMethods.DeviceIoControl(hidHideHandle.DangerousGetHandle(),
+                succeeded = NativeMethods.DeviceIoControl(
+                    hidHideHandle.DangerousGetHandle(),
                     HidHideAPIDevice.IOCTL_GET_WL_INVERT,
                     IntPtr.Zero,
                     0,
@@ -287,11 +330,10 @@ namespace DS4WinWPF.DS4Control
                     1,
                     ref bytesReturned,
                     IntPtr.Zero);
-
-                //int error = Marshal.GetLastWin32Error();
+                succeeded &= bytesReturned == 1;
             }
-
-            return result;
+            state = result;
+            return succeeded;
         }
 
         public bool SetWhitelistInverseState(bool state)

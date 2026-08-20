@@ -71,6 +71,9 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
         private ObservableCollection<CompositeDeviceModel> controllerCol = new();
 
+        public ObservableCollection<ControllerExposureSessionInfo>
+            NativePhysicalSessions { get; } = new();
+
         public MainWindowsViewModel()
         {
             _ = RefreshControllerAudioChoicesAsync();
@@ -88,6 +91,17 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         }
 
         public event EventHandler ControllerColChanged;
+
+        internal void ReplaceNativePhysicalSessions(
+            IEnumerable<ControllerExposureSessionInfo> sessions)
+        {
+            NativePhysicalSessions.Clear();
+            foreach (ControllerExposureSessionInfo session in
+                sessions ?? Array.Empty<ControllerExposureSessionInfo>())
+            {
+                NativePhysicalSessions.Add(session);
+            }
+        }
 
         public IReadOnlyList<OverviewOutputControllerChoice> OutputControllerChoices { get; } =
             new List<OverviewOutputControllerChoice>

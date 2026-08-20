@@ -80,5 +80,16 @@ namespace DS4WindowsTests
             Assert.IsTrue(status.NeedsAttention);
             Assert.IsFalse(status.IsReady);
         }
+
+        [TestMethod]
+        public void RuntimeSignalsDefaultToManagedVirtualExposure()
+        {
+            ControllerRuntimeSignals signals = Signals();
+
+            Assert.AreEqual(ControllerExposureMode.ManagedVirtual,
+                signals.ExposureMode);
+            Assert.AreEqual(ControllerExposureStage.ManagedVirtualReady,
+                signals.ExposureStage);
+        }
     }
 }

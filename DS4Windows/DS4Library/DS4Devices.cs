@@ -111,6 +111,91 @@ namespace DS4Windows
     public delegate void PrepareInitDelegate(DS4Device device);
     public delegate bool CheckPendingDevice(HidDevice device, VidPidInfo vidPidInfo);
 
+    internal static class NativePhysicalDeviceRegistry
+    {
+        private static readonly object registryLock = new object();
+        private static readonly HashSet<string> instanceIds =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private static readonly HashSet<string> devicePaths =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        internal static void Register(string instanceId, string devicePath)
+        {
+            lock (registryLock)
+            {
+                if (!string.IsNullOrWhiteSpace(instanceId))
+                {
+                    instanceIds.Add(instanceId);
+                }
+
+                if (!string.IsNullOrWhiteSpace(devicePath))
+                {
+                    devicePaths.Add(devicePath);
+                }
+            }
+        }
+
+        internal static void Unregister(string instanceId, string devicePath)
+        {
+            lock (registryLock)
+            {
+                if (!string.IsNullOrWhiteSpace(instanceId))
+                {
+                    instanceIds.Remove(instanceId);
+                }
+
+                if (!string.IsNullOrWhiteSpace(devicePath))
+                {
+                    devicePaths.Remove(devicePath);
+                }
+            }
+        }
+
+        internal static bool IsExcluded(string devicePath)
+        {
+            lock (registryLock)
+            {
+                if (instanceIds.Count == 0 && devicePaths.Count == 0)
+                {
+                    return false;
+                }
+
+                if (!string.IsNullOrWhiteSpace(devicePath) &&
+                    devicePaths.Contains(devicePath))
+                {
+                    return true;
+                }
+            }
+
+            string instanceId = string.IsNullOrWhiteSpace(devicePath)
+                ? string.Empty
+                : Global.GetInstanceIdFromDevicePath(devicePath);
+            lock (registryLock)
+            {
+                return !string.IsNullOrWhiteSpace(instanceId) &&
+                    instanceIds.Contains(instanceId);
+            }
+        }
+
+        internal static bool ContainsInstance(string instanceId)
+        {
+            lock (registryLock)
+            {
+                return !string.IsNullOrWhiteSpace(instanceId) &&
+                    instanceIds.Contains(instanceId);
+            }
+        }
+
+        internal static void Clear()
+        {
+            lock (registryLock)
+            {
+                instanceIds.Clear();
+                devicePaths.Clear();
+            }
+        }
+    }
+
     public class DS4Devices
     {
         // (HID device path, DS4Device)
@@ -425,6 +510,8 @@ namespace DS4Windows
             lock (Devices)
             {
                 IEnumerable<HidDevice> hDevices = HidDevices.EnumerateDS4(knownDevices);
+                hDevices = hDevices.Where(d =>
+                    !NativePhysicalDeviceRegistry.IsExcluded(d.DevicePath));
                 hDevices = hDevices.Where(d =>
                 {
                     VidPidInfo metainfo = knownDevices.Single(x => x.vid == d.Attributes.VendorId &&

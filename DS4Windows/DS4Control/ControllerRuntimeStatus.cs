@@ -33,7 +33,11 @@ namespace DS4Windows
             ControllerRuntimeLaneState speaker,
             ControllerRuntimeLaneState microphone,
             ControllerRuntimeLaneState audioHaptics,
-            string virtualControllerName)
+            string virtualControllerName,
+            ControllerExposureMode exposureMode =
+                ControllerExposureMode.ManagedVirtual,
+            ControllerExposureStage exposureStage =
+                ControllerExposureStage.ManagedVirtualReady)
         {
             PhysicalPresent = physicalPresent;
             PhysicalSynced = physicalSynced;
@@ -46,6 +50,8 @@ namespace DS4Windows
             Microphone = microphone;
             AudioHaptics = audioHaptics;
             VirtualControllerName = virtualControllerName ?? "virtual controller";
+            ExposureMode = exposureMode;
+            ExposureStage = exposureStage;
         }
 
         public bool PhysicalPresent { get; }
@@ -59,6 +65,8 @@ namespace DS4Windows
         public ControllerRuntimeLaneState Microphone { get; }
         public ControllerRuntimeLaneState AudioHaptics { get; }
         public string VirtualControllerName { get; }
+        public ControllerExposureMode ExposureMode { get; }
+        public ControllerExposureStage ExposureStage { get; }
     }
 
     public readonly struct ControllerStartupStatus : IEquatable<ControllerStartupStatus>

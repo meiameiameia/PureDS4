@@ -6,6 +6,35 @@ using System.Text.Json;
 
 namespace DS4Windows
 {
+    internal enum HidHideExternalSuspensionState
+    {
+        IntentRecorded = 0,
+        Suspended = 1,
+        RecoveryRequired = 2,
+    }
+
+    internal sealed class HidHideExternalSuspensionInfo
+    {
+        internal HidHideExternalSuspensionInfo(string instanceId, string runId,
+            HidHideExternalSuspensionState state, bool activeStateObserved,
+            bool inverseStateObserved, DateTimeOffset createdUtc)
+        {
+            InstanceId = instanceId ?? string.Empty;
+            RunId = runId ?? string.Empty;
+            State = state;
+            ActiveStateObserved = activeStateObserved;
+            InverseStateObserved = inverseStateObserved;
+            CreatedUtc = createdUtc;
+        }
+
+        internal string InstanceId { get; }
+        internal string RunId { get; }
+        internal HidHideExternalSuspensionState State { get; }
+        internal bool ActiveStateObserved { get; }
+        internal bool InverseStateObserved { get; }
+        internal DateTimeOffset CreatedUtc { get; }
+    }
+
     /// <summary>
     /// Records only HidHide entries that this application proved it created.
     /// Stale transient entries are deliberately moved to an unresolved set:
@@ -18,6 +47,7 @@ namespace DS4Windows
         private readonly string path;
         private JournalState state = new JournalState();
         private bool loaded;
+        private bool externalContainmentRecoveryRequired;
 
         internal HidHideOwnershipJournal(string path)
         {
@@ -28,9 +58,18 @@ namespace DS4Windows
         internal bool IsReliable { get; private set; } = true;
         internal bool RecoveryRequired =>
             state.UnresolvedPersistentBlacklistEntries.Count > 0 ||
-            state.ActiveStateRecoveryRequired;
+            state.ActiveStateRecoveryRequired ||
+            externalContainmentRecoveryRequired;
+        internal bool IsTransientRunInProgress => state.RunInProgress;
         internal IReadOnlyCollection<string> UnresolvedPersistentBlacklistEntries =>
             state.UnresolvedPersistentBlacklistEntries;
+        internal IReadOnlyCollection<HidHideExternalSuspensionInfo>
+            ExternalContainmentSuspensions => state.ExternalContainmentSuspensions
+                .Select(record => new HidHideExternalSuspensionInfo(
+                    record.InstanceId, record.RunId, record.State,
+                    record.ActiveStateObserved, record.InverseStateObserved,
+                    record.CreatedUtc))
+                .ToArray();
 
         internal bool Load()
         {
@@ -50,7 +89,14 @@ namespace DS4Windows
                 JournalState loadedState = JsonSerializer.Deserialize<JournalState>(
                     File.ReadAllText(path));
                 state = loadedState ?? new JournalState();
+                if (state.Version > 2)
+                {
+                    throw new InvalidDataException(
+                        "The HidHide ownership journal uses a newer schema.");
+                }
                 state.Normalize();
+                externalContainmentRecoveryRequired =
+                    state.ExternalContainmentSuspensions.Count > 0;
 
                 if (state.RunInProgress)
                 {
@@ -106,6 +152,84 @@ namespace DS4Windows
             }
 
             state.CurrentRunEnabledActiveState = true;
+            return Save();
+        }
+
+        internal bool RecordExternalContainmentSuspensionIntent(
+            string instanceId, bool activeStateObserved,
+            bool inverseStateObserved)
+        {
+            if (!Load() || string.IsNullOrWhiteSpace(instanceId) ||
+                state.ExternalContainmentSuspensions.Any(record =>
+                    string.Equals(record.InstanceId, instanceId,
+                        StringComparison.OrdinalIgnoreCase)))
+            {
+                return false;
+            }
+
+            state.ExternalContainmentSuspensions.Add(
+                new ExternalContainmentSuspensionRecord
+                {
+                    InstanceId = instanceId,
+                    RunId = string.IsNullOrWhiteSpace(state.RunId)
+                        ? Guid.NewGuid().ToString("N") : state.RunId,
+                    State = HidHideExternalSuspensionState.IntentRecorded,
+                    OriginalEntryPresent = true,
+                    ActiveStateObserved = activeStateObserved,
+                    InverseStateObserved = inverseStateObserved,
+                    CreatedUtc = DateTimeOffset.UtcNow,
+                    UpdatedUtc = DateTimeOffset.UtcNow,
+                });
+            return Save();
+        }
+
+        internal bool MarkExternalContainmentSuspended(string instanceId)
+        {
+            ExternalContainmentSuspensionRecord record = FindExternalSuspension(
+                instanceId);
+            if (record == null)
+            {
+                return false;
+            }
+
+            record.State = HidHideExternalSuspensionState.Suspended;
+            record.UpdatedUtc = DateTimeOffset.UtcNow;
+            return Save();
+        }
+
+        internal bool MarkExternalContainmentRecoveryRequired(string instanceId)
+        {
+            ExternalContainmentSuspensionRecord record = FindExternalSuspension(
+                instanceId);
+            if (record == null)
+            {
+                return false;
+            }
+
+            record.State = HidHideExternalSuspensionState.RecoveryRequired;
+            record.UpdatedUtc = DateTimeOffset.UtcNow;
+            externalContainmentRecoveryRequired = true;
+            return Save();
+        }
+
+        internal bool CompleteExternalContainmentSuspension(string instanceId)
+        {
+            if (!Load() || string.IsNullOrWhiteSpace(instanceId))
+            {
+                return false;
+            }
+
+            int removed = state.ExternalContainmentSuspensions.RemoveAll(record =>
+                string.Equals(record.InstanceId, instanceId,
+                    StringComparison.OrdinalIgnoreCase));
+            if (removed == 0)
+            {
+                return true;
+            }
+
+            externalContainmentRecoveryRequired =
+                state.ExternalContainmentSuspensions.Count > 0 &&
+                externalContainmentRecoveryRequired;
             return Save();
         }
 
@@ -171,7 +295,8 @@ namespace DS4Windows
                 bool hasState = state.RunInProgress ||
                     state.PersistentWhitelistEntries.Count > 0 ||
                     state.UnresolvedPersistentBlacklistEntries.Count > 0 ||
-                    state.ActiveStateRecoveryRequired;
+                    state.ActiveStateRecoveryRequired ||
+                    state.ExternalContainmentSuspensions.Count > 0;
                 if (!hasState)
                 {
                     if (File.Exists(path))
@@ -200,9 +325,22 @@ namespace DS4Windows
             }
         }
 
+        private ExternalContainmentSuspensionRecord FindExternalSuspension(
+            string instanceId)
+        {
+            if (!Load() || string.IsNullOrWhiteSpace(instanceId))
+            {
+                return null;
+            }
+
+            return state.ExternalContainmentSuspensions.FirstOrDefault(record =>
+                string.Equals(record.InstanceId, instanceId,
+                    StringComparison.OrdinalIgnoreCase));
+        }
+
         private sealed class JournalState
         {
-            public int Version { get; set; } = 1;
+            public int Version { get; set; } = 2;
             public string RunId { get; set; } = string.Empty;
             public bool RunInProgress { get; set; }
             public bool CurrentRunEnabledActiveState { get; set; }
@@ -213,6 +351,8 @@ namespace DS4Windows
                 NewSet();
             public HashSet<string> PersistentWhitelistEntries { get; set; } =
                 NewSet();
+            public List<ExternalContainmentSuspensionRecord>
+                ExternalContainmentSuspensions { get; set; } = new();
 
             public void Normalize()
             {
@@ -222,7 +362,24 @@ namespace DS4Windows
                     UnresolvedPersistentBlacklistEntries);
                 PersistentWhitelistEntries = NormalizeSet(
                     PersistentWhitelistEntries);
+                ExternalContainmentSuspensions ??= new();
+                if (ExternalContainmentSuspensions.Any(record =>
+                        record == null ||
+                        string.IsNullOrWhiteSpace(record.InstanceId) ||
+                        !record.OriginalEntryPresent))
+                {
+                    throw new InvalidDataException(
+                        "The external HidHide restore record is invalid.");
+                }
+                ExternalContainmentSuspensions =
+                    ExternalContainmentSuspensions
+                    .GroupBy(record => record.InstanceId,
+                        StringComparer.OrdinalIgnoreCase)
+                    .Select(group => group.OrderByDescending(record =>
+                        record.UpdatedUtc).First())
+                    .ToList();
                 RunId ??= string.Empty;
+                Version = Math.Max(Version, 2);
             }
 
             private static HashSet<string> NormalizeSet(IEnumerable<string> values) =>
@@ -232,6 +389,18 @@ namespace DS4Windows
 
             private static HashSet<string> NewSet() =>
                 new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        private sealed class ExternalContainmentSuspensionRecord
+        {
+            public string InstanceId { get; set; } = string.Empty;
+            public string RunId { get; set; } = string.Empty;
+            public HidHideExternalSuspensionState State { get; set; }
+            public bool OriginalEntryPresent { get; set; }
+            public bool ActiveStateObserved { get; set; }
+            public bool InverseStateObserved { get; set; }
+            public DateTimeOffset CreatedUtc { get; set; }
+            public DateTimeOffset UpdatedUtc { get; set; }
         }
     }
 

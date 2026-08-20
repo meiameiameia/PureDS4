@@ -212,6 +212,7 @@ namespace DS4WinWPF.DS4Forms
                 App.rootHub.OutputslotMan);
 
             SetupEvents();
+            RefreshControllerExposureSessions();
             foreach (CompositeDeviceModel controller in conLvViewModel.ControllerCol)
             {
                 PrepareControllerItem(controller);
@@ -371,6 +372,8 @@ namespace DS4WinWPF.DS4Forms
             App.rootHub.PreServiceStop += PrepareForServiceStop;
             App.rootHub.OutputslotMan.SlotAssigned += OutputSlot_RuntimeChanged;
             App.rootHub.OutputslotMan.SlotUnassigned += OutputSlot_RuntimeChanged;
+            App.rootHub.ControllerExposureSessionsChanged +=
+                ControllerExposureSessionsChanged;
             //root.rootHubtest.RunningChanged += ControlServiceChanged;
             conLvViewModel.ControllerCol.CollectionChanged += ControllerCol_CollectionChanged;
             AppLogger.TrayIconLog += ShowNotification;
@@ -1220,6 +1223,102 @@ Suspend support not enabled.", true);
         private void HomeDisconnectBtn_Click(object sender, RoutedEventArgs e)
         {
             mainWinVM.SelectedController?.RequestDisconnect();
+        }
+
+        private async void HomeUseNativeBtn_Click(object sender,
+            RoutedEventArgs e)
+        {
+            if (sender is not Button { Tag: int controllerIndex } button)
+            {
+                return;
+            }
+
+            button.IsEnabled = false;
+            try
+            {
+                MessageBoxResult consent = MessageBox.Show(this,
+                    "Native Physical temporarily stops virtual output and " +
+                    "exposes this controller directly to games. If an " +
+                    "external HidHide rule contains this controller, only " +
+                    "that exact rule will be suspended for this session and " +
+                    "restored when you return to Managed / Virtual or exit " +
+                    "DS4Windows.\n\nContinue?",
+                    "Use Native Physical", MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning, MessageBoxResult.No);
+                if (consent != MessageBoxResult.Yes)
+                {
+                    return;
+                }
+
+                ControllerExposureTransitionResult result =
+                    await App.rootHub.SetControllerExposureModeAsync(
+                        controllerIndex,
+                        ControllerExposureMode.NativePhysical,
+                        allowExternalContainmentSuspension: true);
+                if (!result.Succeeded)
+                {
+                    MessageBox.Show(this, result.Status.Detail,
+                        "Controller exposure",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                App.rootHub.LogDebug(
+                    $"Controller exposure failed: {ex.Message}", true);
+                MessageBox.Show(this, ex.Message, "Controller exposure",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                button.IsEnabled = true;
+            }
+        }
+
+        private async void HomeUseManagedBtn_Click(object sender,
+            RoutedEventArgs e)
+        {
+            if (sender is not Button { Tag: string instanceId } button ||
+                string.IsNullOrWhiteSpace(instanceId))
+            {
+                return;
+            }
+
+            button.IsEnabled = false;
+            try
+            {
+                ControllerExposureTransitionResult result =
+                    await App.rootHub.SetControllerExposureModeAsync(instanceId,
+                        ControllerExposureMode.ManagedVirtual);
+                if (!result.Succeeded)
+                {
+                    MessageBox.Show(this, result.Status.Detail,
+                        "Controller exposure",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                App.rootHub.LogDebug(
+                    $"Controller exposure failed: {ex.Message}", true);
+                MessageBox.Show(this, ex.Message, "Controller exposure",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                button.IsEnabled = true;
+            }
+        }
+
+        private void ControllerExposureSessionsChanged(object sender,
+            EventArgs e) => RefreshControllerExposureSessions();
+
+        private void RefreshControllerExposureSessions()
+        {
+            IReadOnlyList<ControllerExposureSessionInfo> sessions =
+                App.rootHub.GetControllerExposureSessions();
+            Dispatcher.BeginInvoke((Action)(() =>
+                mainWinVM.ReplaceNativePhysicalSessions(sessions)));
         }
 
         public async void ChangeService()

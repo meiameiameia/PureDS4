@@ -1,4 +1,5 @@
 using DS4Windows;
+using DS4WinWPF.DS4Control;
 
 namespace DS4WindowsTests
 {
@@ -57,6 +58,34 @@ namespace DS4WindowsTests
                 baseline, new[] { @"hid\baseline" }));
             Assert.IsFalse(HidHideOwnershipPolicy.CanRestoreInactiveState(
                 baseline, new[] { @"HID\BASELINE", @"HID\FOREIGN" }));
+        }
+
+        [TestMethod]
+        public void SessionMigrationAddsOnlyMissingOwnedEntries()
+        {
+            HidHideSessionMigrationPlan plan =
+                HidHideSessionMigrationPolicy.Create(
+                    new[] { @"HID\EXISTING", @"HID\PERSISTENT" },
+                    new[] { @"HID\SESSION", @"hid\persistent" },
+                    new[] { @"HID\PERSISTENT" });
+
+            Assert.IsTrue(plan.CanMigrate);
+            CollectionAssert.AreEqual(new[] { @"HID\SESSION" },
+                plan.EntriesToAdd.ToArray());
+        }
+
+        [TestMethod]
+        public void SessionMigrationFailsClosedOnForeignPersistentCollision()
+        {
+            HidHideSessionMigrationPlan plan =
+                HidHideSessionMigrationPolicy.Create(
+                    new[] { @"HID\SESSION" },
+                    new[] { @"hid\session" },
+                    Array.Empty<string>());
+
+            Assert.IsFalse(plan.CanMigrate);
+            Assert.AreEqual(0, plan.EntriesToAdd.Count);
+            StringAssert.Contains(plan.Error, "ownership changed");
         }
 
         [TestMethod]
@@ -163,12 +192,241 @@ namespace DS4WindowsTests
             }
         }
 
+        [TestMethod]
+        public void ExternalSuspensionIsDurableRestoreObligationNotOwnership()
+        {
+            string root = CreateTemporaryRoot();
+            string path = Path.Combine(root, HidHideOwnershipJournal.FileName);
+            const string external = @"HID\EXTERNAL";
+            try
+            {
+                HidHideOwnershipJournal active = new(path);
+                Assert.IsTrue(active.RecordExternalContainmentSuspensionIntent(
+                    external, activeStateObserved: true,
+                    inverseStateObserved: false));
+                Assert.IsTrue(active.MarkExternalContainmentSuspended(external));
+                Assert.IsFalse(active.RecoveryRequired,
+                    "A live session owns its restore path.");
+                Assert.AreEqual(HidHideExternalSuspensionState.Suspended,
+                    active.ExternalContainmentSuspensions.Single().State);
+                Assert.AreEqual(0,
+                    active.UnresolvedPersistentBlacklistEntries.Count);
+
+                HidHideOwnershipJournal recovered = new(path);
+                Assert.IsTrue(recovered.Load());
+                Assert.IsTrue(recovered.RecoveryRequired);
+                HidHideExternalSuspensionInfo suspension = recovered.
+                    ExternalContainmentSuspensions.Single();
+                Assert.AreEqual(external, suspension.InstanceId);
+                Assert.AreEqual(HidHideExternalSuspensionState.Suspended,
+                    suspension.State);
+                Assert.IsTrue(suspension.ActiveStateObserved);
+                Assert.IsFalse(suspension.InverseStateObserved);
+                Assert.AreEqual(0,
+                    recovered.UnresolvedPersistentBlacklistEntries.Count,
+                    "External configuration must never enter owned cleanup.");
+
+                Assert.IsTrue(recovered.
+                    CompleteExternalContainmentSuspension(external));
+                Assert.IsFalse(recovered.RecoveryRequired);
+                Assert.IsFalse(File.Exists(path));
+            }
+            finally
+            {
+                Directory.Delete(root, true);
+            }
+        }
+
+        [TestMethod]
+        public void DuplicateExternalSuspensionIntentFailsClosed()
+        {
+            string root = CreateTemporaryRoot();
+            string path = Path.Combine(root, HidHideOwnershipJournal.FileName);
+            try
+            {
+                HidHideOwnershipJournal journal = new(path);
+                Assert.IsTrue(journal.RecordExternalContainmentSuspensionIntent(
+                    @"HID\EXTERNAL", true, false));
+                Assert.IsFalse(journal.RecordExternalContainmentSuspensionIntent(
+                    @"hid\external", true, false));
+                Assert.AreEqual(1,
+                    journal.ExternalContainmentSuspensions.Count);
+            }
+            finally
+            {
+                Directory.Delete(root, true);
+            }
+        }
+
+        [TestMethod]
+        public void VerifiedMutationWritesIntentBeforeWholeListUpdate()
+        {
+            FakeBlacklistDevice device = new(
+                new[] { @"HID\EXTERNAL", @"HID\UNRELATED" });
+            bool intentRecorded = false;
+
+            HidHideBlacklistMutationResult result =
+                HidHideBlacklistMutationGateway.Mutate(device,
+                    current => HidHideBlacklistMutationGateway.RemoveExact(
+                        current, @"hid\external"),
+                    () =>
+                    {
+                        intentRecorded = true;
+                        device.Events.Add("intent");
+                        return true;
+                    }, useMachineMutex: false);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsTrue(result.Changed);
+            Assert.IsTrue(result.WriteAttempted);
+            Assert.IsTrue(intentRecorded);
+            CollectionAssert.AreEqual(
+                new[] { "read", "intent", "read", "write", "read" },
+                device.Events);
+            CollectionAssert.AreEqual(new[] { @"HID\UNRELATED" },
+                result.After.ToArray());
+        }
+
+        [TestMethod]
+        public void NoOpMutationDoesNotCreateRecoveryIntent()
+        {
+            FakeBlacklistDevice device = new(new[] { @"HID\UNRELATED" });
+            bool intentRecorded = false;
+
+            HidHideBlacklistMutationResult result =
+                HidHideBlacklistMutationGateway.Mutate(device,
+                    current => HidHideBlacklistMutationGateway.RemoveExact(
+                        current, @"HID\MISSING"),
+                    () => intentRecorded = true,
+                    useMachineMutex: false);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsFalse(result.Changed);
+            Assert.IsFalse(result.WriteAttempted);
+            Assert.IsFalse(intentRecorded);
+            Assert.AreEqual(0, device.WriteCount);
+        }
+
+        [TestMethod]
+        public void MachineMutationMutexIsAvailableToNormalProcess()
+        {
+            FakeBlacklistDevice device = new(new[] { @"HID\BASELINE" });
+
+            HidHideBlacklistMutationResult result =
+                HidHideBlacklistMutationGateway.Mutate(device,
+                    current => current.ToArray());
+
+            Assert.IsTrue(result.Succeeded, result.Error);
+            Assert.IsFalse(result.Changed);
+            Assert.AreEqual(0, device.WriteCount);
+        }
+
+        [TestMethod]
+        public void ConcurrentBlacklistChangeFailsBeforeWrite()
+        {
+            FakeBlacklistDevice device = new(new[] { @"HID\EXTERNAL" })
+            {
+                ChangeBeforeSecondRead = true,
+            };
+
+            HidHideBlacklistMutationResult result =
+                HidHideBlacklistMutationGateway.Mutate(device,
+                    current => HidHideBlacklistMutationGateway.RemoveExact(
+                        current, @"HID\EXTERNAL"),
+                    () => true, useMachineMutex: false);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsFalse(result.WriteAttempted);
+            Assert.AreEqual(0, device.WriteCount);
+            StringAssert.Contains(result.Error, "concurrently");
+            CollectionAssert.Contains(result.After.ToList(), @"HID\FOREIGN");
+        }
+
+        [TestMethod]
+        public void PostWriteVerificationRejectsUnexpectedDelta()
+        {
+            FakeBlacklistDevice device = new(new[] { @"HID\EXTERNAL" })
+            {
+                AddUnexpectedEntryAfterWrite = true,
+            };
+
+            HidHideBlacklistMutationResult result =
+                HidHideBlacklistMutationGateway.Mutate(device,
+                    current => HidHideBlacklistMutationGateway.RemoveExact(
+                        current, @"HID\EXTERNAL"),
+                    () => true, useMachineMutex: false);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.WriteAttempted);
+            Assert.IsTrue(result.Changed);
+            StringAssert.Contains(result.Error, "exact verified");
+            CollectionAssert.Contains(result.After.ToList(), @"HID\FOREIGN");
+        }
+
+        [TestMethod]
+        public void RecoveryAddsOnlyExactExternalEntryToFreshState()
+        {
+            FakeBlacklistDevice device = new(
+                new[] { @"HID\BASELINE", @"HID\FOREIGN" });
+
+            HidHideBlacklistMutationResult result =
+                HidHideBlacklistMutationGateway.Mutate(device,
+                    current => HidHideBlacklistMutationGateway.AddExact(
+                        current, @"HID\EXTERNAL"),
+                    useMachineMutex: false);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsTrue(result.Changed);
+            CollectionAssert.AreEquivalent(
+                new[] { @"HID\BASELINE", @"HID\FOREIGN", @"HID\EXTERNAL" },
+                result.After.ToArray());
+        }
+
         private static string CreateTemporaryRoot()
         {
             string root = Path.Combine(Path.GetTempPath(),
                 "DS4WindowsTests", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(root);
             return root;
+        }
+
+        private sealed class FakeBlacklistDevice : IHidHideBlacklistDevice
+        {
+            private List<string> entries;
+            private int readCount;
+
+            internal FakeBlacklistDevice(IEnumerable<string> entries)
+            {
+                this.entries = entries.ToList();
+            }
+
+            internal bool ChangeBeforeSecondRead { get; init; }
+            internal bool AddUnexpectedEntryAfterWrite { get; init; }
+            internal int WriteCount { get; private set; }
+            internal List<string> Events { get; } = new();
+
+            public List<string> GetBlacklist()
+            {
+                readCount++;
+                Events.Add("read");
+                if (ChangeBeforeSecondRead && readCount == 2)
+                {
+                    entries.Add(@"HID\FOREIGN");
+                }
+                return entries.ToList();
+            }
+
+            public bool SetBlacklist(List<string> instances)
+            {
+                Events.Add("write");
+                WriteCount++;
+                entries = instances.ToList();
+                if (AddUnexpectedEntryAfterWrite)
+                {
+                    entries.Add(@"HID\FOREIGN");
+                }
+                return true;
+            }
         }
     }
 }

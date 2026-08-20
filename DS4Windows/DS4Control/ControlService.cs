@@ -36,7 +36,7 @@ using static DS4Windows.Global;
 
 namespace DS4Windows
 {
-    public class ControlService
+    public partial class ControlService
     {
         private readonly DualSenseAudioPassthrough dualSenseAudioPassthrough = new DualSenseAudioPassthrough();
         private readonly DualShock4AudioPassthrough dualShock4AudioPassthrough = new DualShock4AudioPassthrough();
@@ -112,6 +112,10 @@ namespace DS4Windows
         private bool stickMouseFakerInputMissingNoticeShown = false;
         private readonly object outputKbmHandlerLock = new object();
         private readonly object serviceLifecycleLock = new object();
+        private readonly ControllerExposureTransitionCoordinator[]
+            controllerExposureTransitions =
+                new ControllerExposureTransitionCoordinator[
+                    MAX_DS4_CONTROLLER_COUNT];
 
         private ControlServiceDeviceOptions deviceOptions;
         public ControlServiceDeviceOptions DeviceOptions { get => deviceOptions; }
@@ -231,6 +235,8 @@ namespace DS4Windows
                 PreviousState[i] = new DS4State();
                 ExposedState[i] = new DS4StateExposed(CurrentState[i]);
                 oscState[i] = new DS4State();
+                controllerExposureTransitions[i] =
+                    new ControllerExposureTransitionCoordinator();
 
                 int tempDev = i;
                 Global.L2OutputSettings[i].TwoStageModeChanged += (sender, e) =>
@@ -1032,6 +1038,12 @@ namespace DS4Windows
                     Path.Combine(appDataRoot,
                         HidHideOwnershipJournal.FileName));
                 hidHideOwnershipJournal.Load();
+                if (hidHideOwnershipJournal.IsReliable &&
+                    hidHideOwnershipJournal.ExternalContainmentSuspensions.Count > 0)
+                {
+                    TryRestoreExternalContainmentSuspensions(
+                        hidHideOwnershipJournal, startupRecovery: true);
+                }
             }
 
             if (!hidHideRecoveryReported &&
@@ -1041,7 +1053,10 @@ namespace DS4Windows
                 hidHideRecoveryReported = true;
                 string detail = hidHideOwnershipJournal.IsReliable
                     ? string.Join(", ", hidHideOwnershipJournal.
-                        UnresolvedPersistentBlacklistEntries)
+                        UnresolvedPersistentBlacklistEntries.Concat(
+                            hidHideOwnershipJournal.
+                                ExternalContainmentSuspensions.Select(
+                                    suspension => suspension.InstanceId)))
                     : "the ownership journal could not be read";
                 string message =
                     "HidHide recovery is required. DS4Windows preserved " +
@@ -1066,6 +1081,22 @@ namespace DS4Windows
             string instanceId = Global.GetInstanceIdFromDevicePath(dev.HidDevice.DevicePath);
             if (string.IsNullOrEmpty(instanceId)) return false;
 
+            return EnsureHidHideForInstance(instanceId, dev.DisplayName,
+                preferPersistent: false);
+        }
+
+        private bool EnsureHidHideForInstance(string instanceId,
+            string displayName, bool preferPersistent)
+        {
+            if (!Global.hidHideInstalled ||
+                string.IsNullOrWhiteSpace(instanceId))
+            {
+                return false;
+            }
+
+            displayName = string.IsNullOrWhiteSpace(displayName)
+                ? "controller" : displayName;
+
             bool alreadyManaged;
             lock (hidHideSessionLock)
             {
@@ -1081,13 +1112,20 @@ namespace DS4Windows
 
                     HidHideOwnershipJournal ownershipJournal =
                         GetHidHideOwnershipJournal();
+                    if (!ownershipJournal.IsReliable ||
+                        ownershipJournal.RecoveryRequired)
+                    {
+                        StartupDiag("HidHide containment was not changed because recovery is required");
+                        return false;
+                    }
                     List<string> currentBlacklist = hidHideDevice.GetBlacklist()
                         .Where(item => !string.IsNullOrWhiteSpace(item))
                         .ToList();
 
                     lock (hidHideSessionLock)
                     {
-                        if (!hidHideTransientRunStarted)
+                        if (!hidHideTransientRunStarted ||
+                            !ownershipJournal.IsTransientRunInProgress)
                         {
                             if (!ownershipJournal.BeginTransientRun())
                             {
@@ -1112,14 +1150,14 @@ namespace DS4Windows
                     {
                         if (!hidHideDevice.SetActiveState(true))
                         {
-                            StartupDiag($"HidHide failed to enable cloaking for {dev.DisplayName} ({instanceId})");
+                            StartupDiag($"HidHide failed to enable cloaking for {displayName} ({instanceId})");
                             return false;
                         }
 
                         if (!ownershipJournal.RecordActiveStateEnabled())
                         {
                             hidHideDevice.SetActiveState(false);
-                            StartupDiag($"HidHide rolled back cloaking for {dev.DisplayName} because active-state ownership could not be recorded");
+                            StartupDiag($"HidHide rolled back cloaking for {displayName} because active-state ownership could not be recorded");
                             return false;
                         }
                     }
@@ -1128,17 +1166,18 @@ namespace DS4Windows
                         !HidHideOwnershipPolicy.Contains(currentBlacklist,
                             instanceId))
                     {
-                        if (hidHideDevice.AddSessionBlacklist(new List<string> { instanceId }))
+                        if (!preferPersistent && hidHideDevice.AddSessionBlacklist(
+                                new List<string> { instanceId }))
                         {
                             lock (hidHideSessionLock)
                             {
                                 hidHideSessionManagedInstanceIds.Add(instanceId);
                             }
 
-                            LogDebug($"HidHide session hiding enabled for {dev.DisplayName} ({instanceId})", false);
+                            LogDebug($"HidHide session hiding enabled for {displayName} ({instanceId})", false);
                         }
                         else if (!EnsurePersistentHidHideBlacklist(
-                            hidHideDevice, currentBlacklist, instanceId, dev,
+                            hidHideDevice, instanceId, displayName,
                             ownershipJournal))
                         {
                             return false;
@@ -1146,7 +1185,7 @@ namespace DS4Windows
                     }
                     else if (!alreadyManaged)
                     {
-                        StartupDiag($"HidHide preserved pre-existing blacklist ownership for {dev.DisplayName} ({instanceId})");
+                        StartupDiag($"HidHide preserved pre-existing blacklist ownership for {displayName} ({instanceId})");
                     }
 
                     UpdateHidHideAttributes();
@@ -1155,27 +1194,42 @@ namespace DS4Windows
             }
             catch (Exception ex)
             {
-                LogDebug($"HidHide session setup failed for {dev.DisplayName}: {ex.Message}", true);
+                LogDebug($"HidHide session setup failed for {displayName}: {ex.Message}", true);
                 return false;
             }
         }
 
         private bool EnsurePersistentHidHideBlacklist(
-            HidHideAPIDevice hidHideDevice, List<string> currentBlacklist,
-            string instanceId, DS4Device dev,
+            HidHideAPIDevice hidHideDevice, string instanceId,
+            string displayName,
             HidHideOwnershipJournal ownershipJournal)
         {
-            List<string> instances = HidHideOwnershipPolicy.AddIfMissing(
-                currentBlacklist, instanceId, out bool added);
-            if (!added)
+            bool ownershipRecorded = false;
+            HidHideBlacklistMutationResult mutation =
+                HidHideBlacklistMutationGateway.Mutate(hidHideDevice,
+                    current => HidHideBlacklistMutationGateway.AddExact(
+                        current, instanceId),
+                    () =>
+                    {
+                        ownershipRecorded = ownershipJournal.
+                            RecordPersistentBlacklistEntry(instanceId);
+                        return ownershipRecorded;
+                    });
+            if (mutation.Succeeded && !mutation.Changed)
             {
                 StartupDiag($"HidHide preserved pre-existing persistent blacklist entry {instanceId}");
                 return true;
             }
 
-            if (!hidHideDevice.SetBlacklist(instances))
+            if (!mutation.Succeeded)
             {
-                StartupDiag($"HidHide persistent blacklist fallback failed for {dev.DisplayName} ({instanceId})");
+                if (ownershipRecorded && !mutation.WriteAttempted)
+                {
+                    ownershipJournal.CompleteTransientRun(
+                        new[] { instanceId }, activeStateRestored: false);
+                }
+                StartupDiag($"HidHide persistent blacklist fallback failed " +
+                    $"for {displayName} ({instanceId}): {mutation.Error}");
                 return false;
             }
 
@@ -1184,20 +1238,7 @@ namespace DS4Windows
                 hidHidePersistentManagedInstanceIds.Add(instanceId);
             }
 
-            if (!ownershipJournal.RecordPersistentBlacklistEntry(instanceId))
-            {
-                List<string> rollback = HidHideOwnershipPolicy.RemoveOwned(
-                    instances, new[] { instanceId }, out _);
-                hidHideDevice.SetBlacklist(rollback);
-                lock (hidHideSessionLock)
-                {
-                    hidHidePersistentManagedInstanceIds.Remove(instanceId);
-                }
-                StartupDiag($"HidHide rolled back persistent hiding for {dev.DisplayName} because ownership could not be recorded");
-                return false;
-            }
-
-            LogDebug($"HidHide persistent hiding enabled for {dev.DisplayName} ({instanceId})", false);
+            LogDebug($"HidHide persistent hiding enabled for {displayName} ({instanceId})", false);
             return true;
         }
 
@@ -1345,6 +1386,12 @@ namespace DS4Windows
         {
             if (!Global.hidHideInstalled) return;
 
+            if (hidHideOwnershipJournal != null)
+            {
+                TryRestoreExternalContainmentSuspensions(
+                    hidHideOwnershipJournal, startupRecovery: false);
+            }
+
             List<string> sessionIds;
             List<string> persistentIds;
             bool? restoreActiveState;
@@ -1381,15 +1428,21 @@ namespace DS4Windows
                     List<string> blacklistAfterCleanup = null;
                     if (persistentIds.Count > 0)
                     {
-                        List<string> instances = hidHideDevice.GetBlacklist()
-                            .Where(item => !string.IsNullOrWhiteSpace(item))
-                            .ToList();
-
-                        blacklistAfterCleanup = HidHideOwnershipPolicy.
-                            RemoveOwned(instances, persistentIds,
-                                out releasedPersistentIds);
-                        persistentReleased = releasedPersistentIds.Count == 0 ||
-                            hidHideDevice.SetBlacklist(blacklistAfterCleanup);
+                        HidHideBlacklistMutationResult mutation =
+                            HidHideBlacklistMutationGateway.Mutate(
+                                hidHideDevice,
+                                current => HidHideBlacklistMutationGateway.
+                                    RemoveExact(current, persistentIds));
+                        persistentReleased = mutation.Succeeded;
+                        blacklistAfterCleanup = mutation.After.ToList();
+                        if (persistentReleased)
+                        {
+                            releasedPersistentIds = persistentIds.Where(id =>
+                                HidHideBlacklistMutationGateway.Contains(
+                                    mutation.Before, id) &&
+                                !HidHideBlacklistMutationGateway.Contains(
+                                    mutation.After, id)).ToList();
+                        }
                         if (releasedPersistentIds.Count > 0 &&
                             persistentReleased)
                         {
@@ -1461,28 +1514,29 @@ namespace DS4Windows
             }
         }
 
-        private void EnsureHidHideForVirtualOutput(int index, DS4Device device, OutContType contType)
+        private bool EnsureHidHideForVirtualOutput(int index,
+            DS4Device device, OutContType contType)
         {
             contType = contType.Normalize();
-            if (device == null || !DS4Devices.isExclusiveMode)
+            if (device == null)
             {
-                return;
+                return false;
             }
 
             if (!ViiperOutDevice.IsViiperType(contType))
             {
-                return;
+                return true;
             }
 
             if (EnsureHidHideSessionForDevice(device))
             {
                 ChangeExclusiveStatus(device);
                 StartupDiag($"HidHide virtual-output containment ready index={index} type={contType}");
+                return true;
             }
-            else if (ViiperOutDevice.IsViiperType(contType))
-            {
-                LogDebug($"VIIPER {contType} output is active but the physical {device.DisplayName} could not be hidden with HidHide. Games may detect both the physical controller and the virtual controller.", true);
-            }
+
+            LogDebug($"VIIPER {contType} output was not created because the physical {device.DisplayName} could not be contained with HidHide.", true);
+            return false;
         }
 
         /// <summary>
@@ -1521,20 +1575,23 @@ namespace DS4Windows
                         return;
                     }
 
-                    List<string> blacklist = hidHideDevice.GetBlacklist()
-                        .Where(item => !string.IsNullOrWhiteSpace(item))
-                        .ToList();
-                    int removed = blacklist.RemoveAll(item =>
-                        instanceIds.Contains(item));
-                    if (removed == 0)
+                    HidHideBlacklistMutationResult mutation =
+                        HidHideBlacklistMutationGateway.Mutate(hidHideDevice,
+                            current => HidHideBlacklistMutationGateway.
+                                RemoveExact(current, instanceIds));
+                    int removed = mutation.Before.Count(entry =>
+                        instanceIds.Contains(entry)) -
+                        mutation.After.Count(entry =>
+                            instanceIds.Contains(entry));
+                    if (mutation.Succeeded && removed == 0)
                     {
                         return;
                     }
 
-                    if (!hidHideDevice.SetBlacklist(blacklist))
+                    if (!mutation.Succeeded)
                     {
                         StartupDiag(
-                            $"HidHide failed to exempt {removed} VIIPER virtual Sony output entr{(removed == 1 ? "y" : "ies")}");
+                            $"HidHide failed to exempt VIIPER virtual Sony output entries: {mutation.Error}");
                         return;
                     }
 
@@ -1846,7 +1903,12 @@ namespace DS4Windows
 
             if (useDInputOnly[index])
             {
-                EnsureHidHideForVirtualOutput(index, device, contType);
+                if (!EnsureHidHideForVirtualOutput(index, device, contType))
+                {
+                    activeOutDevType[index] = OutContType.None;
+                    StartupDiag($"PluginOutDev blocked index={index} reason=physical-containment-unavailable");
+                    return;
+                }
 
                 bool success = false;
                 OutSlotDevice slotDevice = null;
@@ -1933,6 +1995,12 @@ namespace DS4Windows
         private bool StartCore(bool showlog)
         {
             StartupDiag($"ControlService.Start enter showlog={showlog} running={running} inServiceTask={inServiceTask} admin={Global.IsAdministrator()}");
+            if (Global.hidHideInstalled)
+            {
+                // Restore externally owned containment before controller
+                // discovery or any virtual-output work begins.
+                GetHidHideOwnershipJournal();
+            }
             inServiceTask = true;
             {
                 // Initialize output KBM handler at start of ControlService
@@ -2368,6 +2436,7 @@ namespace DS4Windows
             // controller handles are closed. Unrelated HidHide entries remain untouched.
             // Start will reacquire hiding as each managed controller is discovered again.
             ReleaseHidHideManagedDevices();
+            ResetControllerExposureSessionsForServiceStop();
             StartupDiag("ControlService.Stop before stopped events");
             ServiceStopped?.Invoke(this, EventArgs.Empty);
             RunningChanged?.Invoke(this, EventArgs.Empty);
@@ -2431,9 +2500,17 @@ namespace DS4Windows
                         continue;
                     }
 
+                    int preferredSlot =
+                        GetControllerExposurePreferredSlot(device);
                     for (int Index = 0, arlength = DS4Controllers.Length;
                         Index < arlength && Index < CURRENT_DS4_CONTROLLER_LIMIT; Index++)
                     {
+                        if ((preferredSlot >= 0 && Index != preferredSlot) ||
+                            IsControllerExposureSlotReserved(Index, device))
+                        {
+                            continue;
+                        }
+
                         if (DS4Controllers[Index] == null)
                         {
                             BeginPrepareConnectedInputController(device);
@@ -2564,8 +2641,17 @@ namespace DS4Windows
             if (profileLoaded || useAutoProfile)
             {
                 device.LightBarColor = getMainColor(index);
+                bool deferExposureProfileSetup =
+                    ShouldDeferControllerExposureProfileSetup(index, device);
+                RecordControllerExposureProfileReady(index, device,
+                    profileLoaded || useAutoProfile);
 
-                if (!getDInputOnly(index) && device.isSynced())
+                if (deferExposureProfileSetup)
+                {
+                    useDInputOnly[index] = true;
+                    Global.activeOutDevType[index] = OutContType.None;
+                }
+                else if (!getDInputOnly(index) && device.isSynced())
                 {
                     if (device.PrimaryDevice)
                     {
@@ -2591,13 +2677,16 @@ namespace DS4Windows
                     Global.activeOutDevType[index] = OutContType.None;
                 }
 
-                if (device.PrimaryDevice && device.OutputMapGyro)
+                if (!deferExposureProfileSetup && device.PrimaryDevice &&
+                    device.OutputMapGyro)
                 {
                     StartupDiag($"TouchPadOn begin index={index}");
                     TouchPadOn(index, device);
                     StartupDiag($"TouchPadOn end index={index}");
                 }
-                else if (device.JointDeviceSlotNumber != DS4Device.DEFAULT_JOINT_SLOT_NUMBER)
+                else if (!deferExposureProfileSetup &&
+                    device.JointDeviceSlotNumber !=
+                        DS4Device.DEFAULT_JOINT_SLOT_NUMBER)
                 {
                     int otherIdx = device.JointDeviceSlotNumber;
                     DS4Device tempDev = DS4Controllers[otherIdx];
@@ -2612,15 +2701,19 @@ namespace DS4Windows
                     }
                 }
 
-                StartupDiag($"CheckProfileOptions begin index={index}");
-                CheckProfileOptions(index, device);
-                StartupDiag($"CheckProfileOptions end index={index}");
-                StartupDiag($"SetupInitialHookEvents begin index={index}");
-                SetupInitialHookEvents(index, device);
-                StartupDiag($"SetupInitialHookEvents end index={index}");
+                if (!deferExposureProfileSetup)
+                {
+                    StartupDiag($"CheckProfileOptions begin index={index}");
+                    CheckProfileOptions(index, device);
+                    StartupDiag($"CheckProfileOptions end index={index}");
+                    StartupDiag($"SetupInitialHookEvents begin index={index}");
+                    SetupInitialHookEvents(index, device);
+                    StartupDiag($"SetupInitialHookEvents end index={index}");
+                }
             }
             else
             {
+                RecordControllerExposureProfileReady(index, device, false);
                 StartupDiag($"Controller prep profile not loaded index={index} profile=\"{ProfilePath[index]}\"");
             }
 
@@ -3424,42 +3517,59 @@ namespace DS4Windows
 
                 if (removingStatus)
                 {
-                    DeactivateGameBarCompatibilityOutput(ind);
-                    CurrentState[ind].Battery = PreviousState[ind].Battery = 0; // Reset for the next connection's initial status change.
-                    if (!useDInputOnly[ind])
+                    bool exposureRelease =
+                        controllerExposureTransitions[ind].Status.Stage ==
+                        ControllerExposureStage.ReleasingPhysicalHandle;
+                    if (exposureRelease)
                     {
-                        UnplugOutDev(ind, device);
-                    }
-                    else if (!device.PrimaryDevice)
-                    {
-                        OutputDevice outDev = outputDevices[ind];
-                        if (outDev != null)
-                        {
-                            outDev.RemoveFeedback(ind);
-                            outputDevices[ind] = null;
-                        }
+                        StartupDiag($"Controller exposure removal state cleanup begin index={ind}");
                     }
 
-                    // Use Task to reset device synth state and commit it
-                    Task.Run(() =>
+                    CurrentState[ind].Battery = PreviousState[ind].Battery = 0; // Reset for the next connection's initial status change.
+                    if (!exposureRelease)
                     {
-                        Mapping.Commit(ind);
-                    }).Wait();
+                        DeactivateGameBarCompatibilityOutput(ind);
+                        if (!useDInputOnly[ind])
+                        {
+                            UnplugOutDev(ind, device);
+                        }
+                        else if (!device.PrimaryDevice)
+                        {
+                            OutputDevice outDev = outputDevices[ind];
+                            if (outDev != null)
+                            {
+                                outDev.RemoveFeedback(ind);
+                                outputDevices[ind] = null;
+                            }
+                        }
+
+                        // Use Task to reset device synth state and commit it
+                        Task.Run(() =>
+                        {
+                            Mapping.Commit(ind);
+                        }).Wait();
+                    }
 
                     string removed = DS4WinWPF.Properties.Resources.ControllerWasRemoved.Replace("*Mac address*", (ind + 1).ToString());
-                    if (device.getBattery() <= 20 &&
+                    if (!exposureRelease && device.getBattery() <= 20 &&
                         device.getConnectionType() == ConnectionType.BT && !device.isCharging())
                     {
                         removed += ". " + DS4WinWPF.Properties.Resources.ChargeController;
                     }
 
-                    LogDebug(removed);
-                    AppLogger.LogToTray(removed);
-                    dualSenseAudioPassthrough.Stop(ind);
-                    dualShock4AudioPassthrough.Stop(ind);
-                    dualSenseMicrophonePassthrough.Stop();
-                    audioHapticsService.Stop(ind);
-                    DisconnectPlayStationFeatureOutput(ind);
+                    if (!exposureRelease)
+                    {
+                        LogDebug(removed);
+                        AppLogger.LogToTray(removed);
+                    }
+                    if (!exposureRelease)
+                    {
+                        dualSenseAudioPassthrough.Stop(ind);
+                        dualShock4AudioPassthrough.Stop(ind);
+                        dualSenseMicrophonePassthrough.Stop();
+                        audioHapticsService.Stop(ind);
+                        DisconnectPlayStationFeatureOutput(ind);
+                    }
                     /*Stopwatch sw = new Stopwatch();
                     sw.Start();
                     while (sw.ElapsedMilliseconds < XINPUT_UNPLUG_SETTLE_TIME)
@@ -3489,6 +3599,10 @@ namespace DS4Windows
                     inWarnMonitor[ind] = false;
                     useDInputOnly[ind] = true;
                     Global.activeOutDevType[ind] = OutContType.None;
+                    if (exposureRelease)
+                    {
+                        StartupDiag($"Controller exposure removal state cleanup end index={ind}");
+                    }
                     /* Leave up to Auto Profile system to change the following flags? */
                     //Global.useTempProfile[ind] = false;
                     //Global.tempprofilename[ind] = string.Empty;
@@ -3537,6 +3651,8 @@ namespace DS4Windows
             }
 
             DS4Device device = DS4Controllers[index];
+            ControllerExposureStatus exposureStatus =
+                controllerExposureTransitions[index].Status;
             bool physicalPresent = device != null && !device.IsRemoving;
             bool physicalSynced = physicalPresent && device.isSynced();
             bool physicalAlive = physicalSynced && device.IsAlive();
@@ -3630,7 +3746,8 @@ namespace DS4Windows
                 physicalSynced, physicalAlive, virtualRequired,
                 virtualConnected, virtualTypeMatches, advancedHaptics,
                 speaker, microphone, audioHaptics,
-                desiredType.ToDisplayName());
+                desiredType.ToDisplayName(), exposureStatus.Mode,
+                exposureStatus.Stage);
         }
 
         internal static bool ShouldUseGameBarControllerCompatibility(bool enabled,
@@ -4303,6 +4420,18 @@ namespace DS4Windows
                 if (device.PrimaryDevice && Global.UseIconChoice == TrayIconChoice.Battery)
                 {
                     InvokeBatteryChanged(cState.Battery);
+                }
+
+                ControllerExposureStatus exposureStatus =
+                    controllerExposureTransitions[ind].Status;
+                if (exposureStatus.Stage !=
+                    ControllerExposureStage.ManagedVirtualReady)
+                {
+                    if (startupReportDiag)
+                    {
+                        StartupDiag($"On_Report gated index={ind} stage={exposureStatus.Stage}");
+                    }
+                    return;
                 }
 
                 if (!device.PrimaryDevice)

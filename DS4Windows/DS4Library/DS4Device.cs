@@ -309,7 +309,13 @@ namespace DS4Windows
 
         protected bool exitOutputThread = false;
         public bool ExitOutputThread => exitOutputThread;
-        protected bool exitInputThread = false;
+        protected volatile bool exitInputThread = false;
+        private int nativeExposureReleaseRequested;
+        private int nativeExposureQuiesceRequested;
+        private readonly ManualResetEventSlim nativeExposureInputQuiesced =
+            new ManualResetEventSlim(false);
+        private readonly ManualResetEventSlim nativeExposureInputResume =
+            new ManualResetEventSlim(true);
         protected object exitLocker = new object();
         protected ExclusiveStatus exclusiveStatus = ExclusiveStatus.Shared;
 
@@ -1000,6 +1006,10 @@ namespace DS4Windows
                 try
                 {
                     exitInputThread = true;
+                    Interlocked.Exchange(ref nativeExposureQuiesceRequested,
+                        0);
+                    nativeExposureInputResume.Set();
+                    readWaitEv.Set();
                     //ds4Input.Interrupt();
                     if (!abortInputThread)
                     {
@@ -1015,6 +1025,146 @@ namespace DS4Windows
 
             ResetBluetoothControllerClock();
             StopOutputUpdate();
+        }
+
+        /// <summary>
+        /// Quiesces report processing while the physical device and its output
+        /// transport are still healthy. Virtual outputs can then be retired
+        /// without racing the reader's physical effect-write path.
+        /// </summary>
+        internal bool QuiesceForNativeExposure(TimeSpan inputStopTimeout,
+            out string error)
+        {
+            if (inputStopTimeout <= TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(inputStopTimeout));
+            }
+
+            if (ds4Input == null || !ds4Input.IsAlive)
+            {
+                error = "The physical input reader was not running.";
+                return false;
+            }
+
+            nativeExposureInputQuiesced.Reset();
+            nativeExposureInputResume.Reset();
+            Interlocked.Exchange(ref nativeExposureReleaseRequested, 1);
+            Interlocked.Exchange(ref nativeExposureQuiesceRequested, 1);
+            ControlService.StartupDiag(
+                $"Native exposure input quiesce begin mac={Mac} timeoutMs={inputStopTimeout.TotalMilliseconds:0}");
+            readWaitEv.Set();
+            bool quiesced = nativeExposureInputQuiesced.Wait(
+                inputStopTimeout);
+            ControlService.StartupDiag(
+                $"Native exposure input quiesce end mac={Mac} quiesced={quiesced}");
+            if (!quiesced)
+            {
+                Interlocked.Exchange(ref nativeExposureQuiesceRequested, 0);
+                Interlocked.Exchange(ref nativeExposureReleaseRequested, 0);
+                nativeExposureInputResume.Set();
+                readWaitEv.Set();
+                error = "The physical input reader did not quiesce within the safety timeout; Managed / Virtual was preserved.";
+                return false;
+            }
+
+            error = string.Empty;
+            return true;
+        }
+
+        /// <summary>
+        /// Releases an input reader that was quiesced before virtual-output
+        /// teardown, closes its fully drained physical HID handle, then uses
+        /// the normal removal notifications to clear controller state.
+        /// </summary>
+        internal bool ReleaseForNativeExposure(TimeSpan inputStopTimeout,
+            out string error)
+        {
+            if (inputStopTimeout <= TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(inputStopTimeout));
+            }
+
+            Interlocked.Exchange(ref nativeExposureReleaseRequested, 1);
+            exitInputThread = true;
+            Interlocked.Exchange(ref nativeExposureQuiesceRequested, 0);
+            nativeExposureInputResume.Set();
+            readWaitEv.Set();
+            ControlService.StartupDiag(
+                $"Native exposure input join begin mac={Mac} timeoutMs={inputStopTimeout.TotalMilliseconds:0}");
+            bool inputStopped = ds4Input == null || !ds4Input.IsAlive ||
+                ds4Input.Join(inputStopTimeout);
+            ControlService.StartupDiag(
+                $"Native exposure input join end mac={Mac} stopped={inputStopped}");
+            if (!inputStopped)
+            {
+                exitInputThread = false;
+                Interlocked.Exchange(ref nativeExposureReleaseRequested, 0);
+                nativeExposureInputResume.Set();
+                readWaitEv.Set();
+                error = "The quiesced physical input reader did not stop within the safety timeout; Managed / Virtual was preserved.";
+                return false;
+            }
+
+            ResetBluetoothControllerClock();
+            ControlService.StartupDiag(
+                $"Native exposure output stop begin mac={Mac}");
+            StopOutputUpdate();
+            ControlService.StartupDiag(
+                $"Native exposure output stop end mac={Mac}");
+            ControlService.StartupDiag(
+                $"Native exposure drained handle close begin mac={Mac}");
+            hDevice.CloseDeviceAfterIoDrained();
+            ControlService.StartupDiag(
+                $"Native exposure drained handle close end mac={Mac}");
+            ControlService.StartupDiag(
+                $"Native exposure removal notification begin mac={Mac}");
+            RunRemoval();
+            ControlService.StartupDiag(
+                $"Native exposure removal notification end mac={Mac}");
+
+            error = string.Empty;
+            return true;
+        }
+
+        internal bool ResumeAfterNativeExposureQuiesce()
+        {
+            exitInputThread = false;
+            Interlocked.Exchange(ref nativeExposureQuiesceRequested, 0);
+            Interlocked.Exchange(ref nativeExposureReleaseRequested, 0);
+            nativeExposureInputResume.Set();
+            readWaitEv.Set();
+            bool alive = ds4Input != null && ds4Input.IsAlive;
+            ControlService.StartupDiag(
+                $"Native exposure input resume mac={Mac} alive={alive}");
+            return alive;
+        }
+
+        private void NotifyRemovalFromInputThread()
+        {
+            if (ShouldSuppressNativeExposureInputRemoval())
+            {
+                nativeExposureInputQuiesced.Set();
+                return;
+            }
+
+            Removal?.Invoke(this, EventArgs.Empty);
+        }
+
+        private bool ShouldSuppressNativeExposureInputRemoval() =>
+            Volatile.Read(ref nativeExposureReleaseRequested) != 0 &&
+            ReferenceEquals(Thread.CurrentThread, ds4Input);
+
+        private void WaitForNativeExposureInputResume(string checkpoint)
+        {
+            if (Volatile.Read(ref nativeExposureQuiesceRequested) == 0)
+            {
+                return;
+            }
+
+            ControlService.StartupDiag(
+                $"Native exposure input quiesced mac={Mac} checkpoint={checkpoint}");
+            nativeExposureInputQuiesced.Set();
+            nativeExposureInputResume.Wait();
         }
 
         private void ResetBluetoothControllerClock()
@@ -1427,6 +1577,12 @@ namespace DS4Windows
 
                 while (!exitInputThread)
                 {
+                    WaitForNativeExposureInputResume("loop boundary");
+                    if (exitInputThread)
+                    {
+                        break;
+                    }
+
                     oldCharging = charging;
                     currerror = string.Empty;
 
@@ -1480,7 +1636,7 @@ namespace DS4Windows
                                     StopOutputUpdate();
                                     isDisconnecting = true;
                                     ResetBluetoothControllerClock();
-                                    Removal?.Invoke(this, EventArgs.Empty);
+                                    NotifyRemovalFromInputThread();
 
                                     return;
                                 }
@@ -1517,6 +1673,13 @@ namespace DS4Windows
                         }
                         else
                         {
+                            if (ShouldSuppressNativeExposureInputRemoval())
+                            {
+                                readWaitEv.Reset();
+                                nativeExposureInputQuiesced.Set();
+                                return;
+                            }
+
                             if (res == HidDevice.ReadStatus.WaitTimedOut)
                             {
                                 long lastInputTick = Interlocked.Read(
@@ -1577,13 +1740,12 @@ namespace DS4Windows
                                 //Log.LogToGui(Mac.ToString() + " disconnected due to read failure: " + winError, true);
                                 AppLogger.LogToGui(Mac.ToString() + " disconnected due to read failure: " + winError, true);
                             }
-
                             readWaitEv.Reset();
                             sendOutputReport(true, true); // Kick Windows into noticing the disconnection.
                             StopOutputUpdate();
                             isDisconnecting = true;
                             ResetBluetoothControllerClock();
-                            Removal?.Invoke(this, EventArgs.Empty);
+                            NotifyRemovalFromInputThread();
 
                             return;
                         }
@@ -1597,6 +1759,13 @@ namespace DS4Windows
                             conType == ConnectionType.BT ? READ_STREAM_TIMEOUT : uint.MaxValue);
                         if (res != HidDevice.ReadStatus.Success)
                         {
+                            if (ShouldSuppressNativeExposureInputRemoval())
+                            {
+                                readWaitEv.Reset();
+                                nativeExposureInputQuiesced.Set();
+                                return;
+                            }
+
                             if (res == HidDevice.ReadStatus.WaitTimedOut)
                             {
                                 AppLogger.LogToGui(Mac.ToString() + " disconnected due to timeout", true);
@@ -1607,12 +1776,11 @@ namespace DS4Windows
                                 Console.WriteLine($"{Mac} {DateTime.UtcNow.ToString("o")}> disconnect due to read failure: {winError.ToString("x8")}");
                                 //Log.LogToGui(Mac.ToString() + " disconnected due to read failure: " + winError, true);
                             }
-
                             readWaitEv.Reset();
                             StopOutputUpdate();
                             isDisconnecting = true;
                             ResetBluetoothControllerClock();
-                            Removal?.Invoke(this, EventArgs.Empty);
+                            NotifyRemovalFromInputThread();
 
                             return;
                         }
@@ -1620,6 +1788,19 @@ namespace DS4Windows
 
                     readWaitEv.Wait();
                     readWaitEv.Reset();
+
+                    WaitForNativeExposureInputResume("after HID read");
+
+                    if (exitInputThread)
+                    {
+                        if (Volatile.Read(ref nativeExposureReleaseRequested) != 0)
+                        {
+                            ControlService.StartupDiag(
+                                $"Native exposure input stop observed after HID read mac={Mac}");
+                        }
+
+                        break;
+                    }
 
                     curtime = Stopwatch.GetTimestamp();
                     testelapsed = curtime - oldtime;
@@ -1938,6 +2119,19 @@ namespace DS4Windows
 
                     if (fireReport && Report != null)
                         Report(this, EventArgs.Empty);
+
+                    WaitForNativeExposureInputResume("after report dispatch");
+
+                    if (exitInputThread)
+                    {
+                        if (Volatile.Read(ref nativeExposureReleaseRequested) != 0)
+                        {
+                            ControlService.StartupDiag(
+                                $"Native exposure input stop observed after report dispatch mac={Mac}");
+                        }
+
+                        break;
+                    }
 
                     sendOutputReport(syncWriteReport, forceWrite);
                     forceWrite = false;

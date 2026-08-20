@@ -80,6 +80,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0" Margin="8,0,8,4" IsHitTestVisible="False">
                         <Grid.ColumnDefinitions>
@@ -196,9 +197,16 @@
                                                 <TextBlock Text="{Binding DataContext.SelectedControllerStartupDetail, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                                                            FontSize="11" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource MutedForegroundColor}" />
                                             </StackPanel>
-                                            <Button Grid.Column="2" Content="Disconnect" MinHeight="28" Margin="10,4,0,0"
-                                                    VerticalAlignment="Center" Click="HomeDisconnectBtn_Click"
-                                                    Visibility="{Binding IsWireless, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="10,4,0,0"
+                                                        VerticalAlignment="Center">
+                                                <Button Content="Use Native Physical" MinHeight="28" Margin="0,0,6,0"
+                                                        Tag="{Binding DevIndex, Mode=OneTime}"
+                                                        Click="HomeUseNativeBtn_Click"
+                                                        Visibility="{Binding PrimaryDevice, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                <Button Content="Disconnect" MinHeight="28"
+                                                        Click="HomeDisconnectBtn_Click"
+                                                        Visibility="{Binding IsWireless, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                            </StackPanel>
                                         </Grid>
                                     </Border>
                                 </Grid>
@@ -209,6 +217,44 @@
                            Background="{DynamicResource SurfaceBackgroundColor}"
                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                            FontWeight="SemiBold" />
+                    <ItemsControl Grid.Row="2" ItemsSource="{Binding NativePhysicalSessions}"
+                                  Margin="0,8,0,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{DynamicResource RaisedBackgroundColor}"
+                                        BorderBrush="{DynamicResource BorderColor}"
+                                        BorderThickness="1" Padding="10,8" Margin="0,0,0,6">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding ModeTitle}" FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource AccentColor}" />
+                                                <TextBlock Text="  ·  " Foreground="{DynamicResource MutedForegroundColor}" />
+                                                <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" />
+                                                <TextBlock Text="  ·  " Foreground="{DynamicResource MutedForegroundColor}" />
+                                                <TextBlock Text="{Binding SlotText}" Foreground="{DynamicResource MutedForegroundColor}" />
+                                                <TextBlock Text="  ·  " Foreground="{DynamicResource MutedForegroundColor}" />
+                                                <TextBlock Text="{Binding Connection}" Foreground="{DynamicResource MutedForegroundColor}" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Detail}" Margin="0,3,10,0" FontSize="11"
+                                                       Foreground="{DynamicResource MutedForegroundColor}"
+                                                       TextWrapping="Wrap" />
+                                        </StackPanel>
+                                        <Button Grid.Column="1" Content="Use Managed / Virtual"
+                                                MinHeight="28" Margin="12,0,0,0"
+                                                VerticalAlignment="Center"
+                                                Tag="{Binding InstanceId}"
+                                                IsEnabled="{Binding CanReturnToManaged}"
+                                                Click="HomeUseManagedBtn_Click" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </Grid>
             </TabItem>
 

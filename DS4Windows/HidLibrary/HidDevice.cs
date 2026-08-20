@@ -172,6 +172,21 @@ namespace DS4Windows
 
         public void CloseDevice()
         {
+            CloseDevice(cancelPendingIo: true);
+        }
+
+        /// <summary>
+        /// Closes a device after every owner of overlapped I/O has already
+        /// stopped and drained its requests. This avoids issuing a redundant
+        /// whole-handle cancellation during the native-exposure transition.
+        /// </summary>
+        internal void CloseDeviceAfterIoDrained()
+        {
+            CloseDevice(cancelPendingIo: false);
+        }
+
+        private void CloseDevice(bool cancelPendingIo)
+        {
             SafeFileHandle handle;
             lock (handleLock)
             {
@@ -188,7 +203,7 @@ namespace DS4Windows
 
             try
             {
-                if (!handle.IsClosed && !handle.IsInvalid)
+                if (cancelPendingIo && !handle.IsClosed && !handle.IsInvalid)
                 {
                     NativeMethods.CancelIoEx(handle.DangerousGetHandle(), IntPtr.Zero);
                 }

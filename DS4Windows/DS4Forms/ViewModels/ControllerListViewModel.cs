@@ -194,14 +194,19 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             if (found != null)
             {
                 _colListLocker.EnterWriteLock();
-                controllerCol.Remove(found);
-                controllerDict.Remove(found.DevIndex);
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                try
                 {
-                    Global.Save();
-                });
+                    controllerCol.Remove(found);
+                    controllerDict.Remove(found.DevIndex);
+                }
+                finally
+                {
+                    _colListLocker.ExitWriteLock();
+                }
+
+                System.Windows.Application.Current.Dispatcher.BeginInvoke(
+                    (Action)(() => Global.Save()));
                 Global.linkedProfileCheck[found.DevIndex] = false;
-                _colListLocker.ExitWriteLock();
             }
         }
     }
