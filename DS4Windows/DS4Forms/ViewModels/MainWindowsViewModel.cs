@@ -159,6 +159,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         public event EventHandler SelectedControllerIsWirelessChanged;
         public event EventHandler SelectedOutputControllerChanged;
         public event EventHandler SelectedOutputControllerNameChanged;
+        public event EventHandler SelectedRuntimeOutputControllerNameChanged;
         public event EventHandler HapticStrengthPercentChanged;
         public event EventHandler SpeakerOutputEnabledChanged;
         public event EventHandler HeadsetOnlyAudioChanged;
@@ -293,6 +294,11 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 return "No emulated device";
             }
         }
+
+        public string SelectedRuntimeOutputControllerName =>
+            hasRuntimeSnapshot
+                ? lastRuntimeSnapshot.RuntimeOutputName
+                : "Not available";
 
         public int HapticStrengthPercent
         {
@@ -612,6 +618,8 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             SelectedControllerIsWirelessChanged?.Invoke(this, EventArgs.Empty);
             SelectedOutputControllerChanged?.Invoke(this, EventArgs.Empty);
             SelectedOutputControllerNameChanged?.Invoke(this, EventArgs.Empty);
+            SelectedRuntimeOutputControllerNameChanged?.Invoke(this,
+                EventArgs.Empty);
             HapticStrengthPercentChanged?.Invoke(this, EventArgs.Empty);
             SpeakerOutputEnabledChanged?.Invoke(this, EventArgs.Empty);
             HeadsetOnlyAudioChanged?.Invoke(this, EventArgs.Empty);
@@ -701,6 +709,11 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 SelectedOutputControllerNameChanged?.Invoke(this,
                     EventArgs.Empty);
                 RaiseMicrophoneCapabilityChanged();
+            }
+            if (previous.RuntimeOutputName != snapshot.RuntimeOutputName)
+            {
+                SelectedRuntimeOutputControllerNameChanged?.Invoke(this,
+                    EventArgs.Empty);
             }
             if (previous.HapticStrength != snapshot.HapticStrength)
             {
@@ -834,18 +847,24 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         private OverviewRuntimeSnapshot CreateRuntimeSnapshot(
             ControlService controlService)
         {
+            ControllerRuntimeSignals signals =
+                HasValidSelectedDevice && controlService != null
+                    ? controlService.GetControllerRuntimeSignals(
+                        selectedController.DevIndex)
+                    : new ControllerRuntimeSignals(false, false, false,
+                        false, false, false,
+                        ControllerRuntimeLaneState.NotRequired,
+                        ControllerRuntimeLaneState.NotRequired,
+                        ControllerRuntimeLaneState.NotRequired,
+                        ControllerRuntimeLaneState.NotRequired,
+                        "virtual controller");
             ControllerStartupStatus startupStatus =
-                ControllerRuntimeStatusPolicy.Evaluate(
-                    HasValidSelectedDevice && controlService != null
-                        ? controlService.GetControllerRuntimeSignals(
-                            selectedController.DevIndex)
-                        : new ControllerRuntimeSignals(false, false, false,
-                            false, false, false,
-                            ControllerRuntimeLaneState.NotRequired,
-                            ControllerRuntimeLaneState.NotRequired,
-                            ControllerRuntimeLaneState.NotRequired,
-                            ControllerRuntimeLaneState.NotRequired,
-                            "virtual controller"));
+                ControllerRuntimeStatusPolicy.Evaluate(signals);
+            string runtimeOutputName = !signals.VirtualRequired
+                ? "Physical input only"
+                : signals.VirtualConnected && signals.VirtualTypeMatches
+                    ? signals.ActiveVirtualControllerName
+                    : "Not available";
 
             return new OverviewRuntimeSnapshot(CurrentProfileName,
                 SelectedControllerConnection, SelectedControllerLatency,
@@ -856,7 +875,8 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 SpeakerVolumePercent,
                 HeadphoneVolumePercent, SpeakerCompressionIndex,
                 SpeakerBassBoostDb, MicrophoneVolumePercent,
-                MicrophoneNoiseSuppressionIndex, startupStatus);
+                MicrophoneNoiseSuppressionIndex, startupStatus,
+                runtimeOutputName);
         }
 
         private readonly struct OverviewRuntimeSnapshot
@@ -871,7 +891,8 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 int speakerVolume, int headphoneVolume,
                 int speakerCompression, int speakerBassBoost,
                 int microphoneVolume, int microphoneNoiseSuppression,
-                ControllerStartupStatus startupStatus)
+                ControllerStartupStatus startupStatus,
+                string runtimeOutputName = null)
             {
                 ProfileName = profileName;
                 Connection = connection;
@@ -893,6 +914,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 MicrophoneVolume = microphoneVolume;
                 MicrophoneNoiseSuppression = microphoneNoiseSuppression;
                 StartupStatus = startupStatus;
+                RuntimeOutputName = runtimeOutputName ?? "Not available";
             }
 
             public string ProfileName { get; }
@@ -913,6 +935,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             public int MicrophoneVolume { get; }
             public int MicrophoneNoiseSuppression { get; }
             public ControllerStartupStatus StartupStatus { get; }
+            public string RuntimeOutputName { get; }
         }
 
         public int MicrophoneNoiseSuppressionIndex

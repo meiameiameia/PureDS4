@@ -10,6 +10,14 @@ namespace DS4Windows
         Unavailable,
     }
 
+    public enum VirtualOutputBlockReason : byte
+    {
+        None,
+        PhysicalContainmentUnavailable,
+        NoAvailableOutputSlot,
+        OutputBindingFailed,
+    }
+
     public enum ControllerStartupStage : byte
     {
         Disconnected,
@@ -37,7 +45,10 @@ namespace DS4Windows
             ControllerExposureMode exposureMode =
                 ControllerExposureMode.ManagedVirtual,
             ControllerExposureStage exposureStage =
-                ControllerExposureStage.ManagedVirtualReady)
+                ControllerExposureStage.ManagedVirtualReady,
+            VirtualOutputBlockReason virtualOutputBlockReason =
+                VirtualOutputBlockReason.None,
+            string activeVirtualControllerName = null)
         {
             PhysicalPresent = physicalPresent;
             PhysicalSynced = physicalSynced;
@@ -52,6 +63,9 @@ namespace DS4Windows
             VirtualControllerName = virtualControllerName ?? "virtual controller";
             ExposureMode = exposureMode;
             ExposureStage = exposureStage;
+            VirtualOutputBlockReason = virtualOutputBlockReason;
+            ActiveVirtualControllerName = activeVirtualControllerName ??
+                string.Empty;
         }
 
         public bool PhysicalPresent { get; }
@@ -67,6 +81,8 @@ namespace DS4Windows
         public string VirtualControllerName { get; }
         public ControllerExposureMode ExposureMode { get; }
         public ControllerExposureStage ExposureStage { get; }
+        public VirtualOutputBlockReason VirtualOutputBlockReason { get; }
+        public string ActiveVirtualControllerName { get; }
     }
 
     public readonly struct ControllerStartupStatus : IEquatable<ControllerStartupStatus>
@@ -117,6 +133,17 @@ namespace DS4Windows
                 return new ControllerStartupStatus(
                     ControllerStartupStage.Connecting, "Connecting",
                     "Waiting for stable input from the physical controller.");
+            }
+
+            if (signals.VirtualRequired && !signals.VirtualConnected &&
+                signals.VirtualOutputBlockReason !=
+                    VirtualOutputBlockReason.None)
+            {
+                return new ControllerStartupStatus(
+                    ControllerStartupStage.Attention,
+                    "Virtual output unavailable",
+                    DescribeVirtualOutputBlock(
+                        signals.VirtualOutputBlockReason));
             }
 
             if (signals.VirtualRequired && !signals.VirtualConnected)
@@ -190,6 +217,21 @@ namespace DS4Windows
                         $"The enabled {laneName} could not be armed."),
                 _ => new ControllerStartupStatus(
                     ControllerStartupStage.Ready, "Ready", string.Empty),
+            };
+        }
+
+        private static string DescribeVirtualOutputBlock(
+            VirtualOutputBlockReason reason)
+        {
+            return reason switch
+            {
+                VirtualOutputBlockReason.PhysicalContainmentUnavailable =>
+                    "Virtual output was not created because physical-controller protection is unavailable.",
+                VirtualOutputBlockReason.NoAvailableOutputSlot =>
+                    "Virtual output was not created because no output slot is available.",
+                VirtualOutputBlockReason.OutputBindingFailed =>
+                    "Virtual output was not created because the output could not be bound to this controller.",
+                _ => "Virtual output was not created.",
             };
         }
     }

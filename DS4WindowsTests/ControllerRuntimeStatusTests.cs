@@ -91,5 +91,30 @@ namespace DS4WindowsTests
             Assert.AreEqual(ControllerExposureStage.ManagedVirtualReady,
                 signals.ExposureStage);
         }
+
+        [DataTestMethod]
+        [DataRow(VirtualOutputBlockReason.PhysicalContainmentUnavailable,
+            "physical-controller protection")]
+        [DataRow(VirtualOutputBlockReason.NoAvailableOutputSlot,
+            "no output slot")]
+        [DataRow(VirtualOutputBlockReason.OutputBindingFailed,
+            "could not be bound")]
+        public void BlockedVirtualOutputRequiresAttention(
+            VirtualOutputBlockReason reason, string detail)
+        {
+            ControllerRuntimeSignals signals = new(true, true, true, true,
+                false, false, ControllerRuntimeLaneState.NotRequired,
+                ControllerRuntimeLaneState.NotRequired,
+                ControllerRuntimeLaneState.NotRequired,
+                ControllerRuntimeLaneState.NotRequired, "Xbox 360",
+                virtualOutputBlockReason: reason);
+
+            ControllerStartupStatus status =
+                ControllerRuntimeStatusPolicy.Evaluate(signals);
+
+            Assert.IsTrue(status.NeedsAttention);
+            Assert.AreEqual("Virtual output unavailable", status.Title);
+            StringAssert.Contains(status.Detail, detail);
+        }
     }
 }

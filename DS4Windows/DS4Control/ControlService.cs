@@ -87,6 +87,8 @@ namespace DS4Windows
         private System.Threading.Timer gameBarStateTimer;
         private int gameBarStateUpdateGate = 0;
         public OutputDevice[] outputDevices = new OutputDevice[MAX_DS4_CONTROLLER_COUNT] { null, null, null, null, null, null, null, null };
+        private readonly VirtualOutputBlockReason[] virtualOutputBlockReasons =
+            new VirtualOutputBlockReason[MAX_DS4_CONTROLLER_COUNT];
         private OneEuroFilter3D[] udpEuroPairAccel = new OneEuroFilter3D[UdpServer.NUMBER_SLOTS]
         {
             new OneEuroFilter3D(), new OneEuroFilter3D(),
@@ -1883,6 +1885,7 @@ namespace DS4Windows
         public void PluginOutDev(int index, DS4Device device,
             OutContType requestedContType = OutContType.None)
         {
+            virtualOutputBlockReasons[index] = VirtualOutputBlockReason.None;
             OutContType contType = requestedContType == OutContType.None ?
                 Global.OutContType[index].Normalize() :
                 requestedContType.Normalize();
@@ -1906,6 +1909,8 @@ namespace DS4Windows
                 if (!EnsureHidHideForVirtualOutput(index, device, contType))
                 {
                     activeOutDevType[index] = OutContType.None;
+                    virtualOutputBlockReasons[index] =
+                        VirtualOutputBlockReason.PhysicalContainmentUnavailable;
                     StartupDiag($"PluginOutDev blocked index={index} reason=physical-containment-unavailable");
                     return;
                 }
@@ -1935,12 +1940,17 @@ namespace DS4Windows
 
                 if (success && slotDevice.OutputDevice != null)
                 {
+                    virtualOutputBlockReasons[index] =
+                        VirtualOutputBlockReason.None;
                     LogDebug($"Associated input controller #{index + 1} ({device.DisplayName}) to virtual {slotDevice.CurrentType.ToDisplayName()} Controller in{(slotDevice.PermanentType != OutContType.None ? " permanent" : "")} output slot #{slotDevice.Index + 1}");
                     useDInputOnly[index] = false;
                     StartupDiag($"PluginOutDev success index={index} slot={slotDevice.Index + 1} output={slotDevice.OutputDevice.GetDeviceType()}");
                 }
                 else
                 {
+                    virtualOutputBlockReasons[index] = candidateSlot == null
+                        ? VirtualOutputBlockReason.NoAvailableOutputSlot
+                        : VirtualOutputBlockReason.OutputBindingFailed;
                     LogDebug("Failed. No output device was associated");
                     StartupDiag($"PluginOutDev failed index={index} success={success} slotNull={candidateSlot == null} slotOutputNull={candidateSlot?.OutputDevice == null}");
                 }
@@ -1974,6 +1984,8 @@ namespace DS4Windows
                     outputDevices[index] = null;
                     activeOutDevType[index] = OutContType.None;
                     useDInputOnly[index] = true;
+                    virtualOutputBlockReasons[index] =
+                        VirtualOutputBlockReason.None;
                 }
             }
         }
@@ -3667,6 +3679,13 @@ namespace DS4Windows
                 viiperOutput?.IsRuntimeConnected == true;
             bool virtualTypeMatches = !virtualRequired ||
                 Global.activeOutDevType[index].Normalize() == desiredType;
+            VirtualOutputBlockReason virtualOutputBlockReason =
+                virtualRequired && !virtualConnected
+                    ? virtualOutputBlockReasons[index]
+                    : VirtualOutputBlockReason.None;
+            string activeVirtualControllerName = virtualConnected
+                ? Global.activeOutDevType[index].Normalize().ToDisplayName()
+                : string.Empty;
 
             bool advancedHapticsRequired = virtualRequired &&
                 (desiredType == OutContType.ViiperDualSense ||
@@ -3747,7 +3766,8 @@ namespace DS4Windows
                 virtualConnected, virtualTypeMatches, advancedHaptics,
                 speaker, microphone, audioHaptics,
                 desiredType.ToDisplayName(), exposureStatus.Mode,
-                exposureStatus.Stage);
+                exposureStatus.Stage, virtualOutputBlockReason,
+                activeVirtualControllerName);
         }
 
         internal static bool ShouldUseGameBarControllerCompatibility(bool enabled,

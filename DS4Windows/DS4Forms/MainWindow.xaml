@@ -187,7 +187,7 @@
                                             </Grid.ColumnDefinitions>
                                             <StackPanel>
                                                 <TextBlock Text="GAME OUTPUT" Style="{StaticResource BridgeColumnHeaderStyle}" />
-                                                <TextBlock Text="{Binding DataContext.SelectedOutputControllerName, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                <TextBlock Text="{Binding DataContext.SelectedRuntimeOutputControllerName, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                                                            FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="1">

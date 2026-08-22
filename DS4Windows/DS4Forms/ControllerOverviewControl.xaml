@@ -312,10 +312,10 @@
 
                     <Border Style="{StaticResource OverviewCardStyle}" Width="218" MinHeight="112" Margin="6">
                         <StackPanel>
-                            <TextBlock Text="EMULATED DEVICE" Style="{StaticResource OverviewEyebrowStyle}" />
+                            <TextBlock Text="ACTIVE GAME OUTPUT" Style="{StaticResource OverviewEyebrowStyle}" />
                             <TextBlock Margin="0,11,0,3" Style="{StaticResource OverviewValueStyle}"
-                                       Text="{Binding SelectedOutputControllerName}" />
-                             <TextBlock Text="Applied through the active profile"
+                                       Text="{Binding SelectedRuntimeOutputControllerName}" />
+                             <TextBlock Text="Current runtime state, not just the active profile setting"
                                         TextWrapping="Wrap"
                                        Foreground="{DynamicResource MutedForegroundColor}" />
                         </StackPanel>
