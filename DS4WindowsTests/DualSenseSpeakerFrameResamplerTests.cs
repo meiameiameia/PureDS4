@@ -8,6 +8,8 @@ namespace DS4Windows.Tests
     [TestClass]
     public class DualSenseSpeakerFrameResamplerTests
     {
+        private const int AllocationMeasurementWarmupIterations = 256;
+
         [TestMethod]
         public void V5RawSourceReceivesOneContinuous512To480Conversion()
         {
@@ -246,7 +248,7 @@ namespace DS4Windows.Tests
             float[] output = new float[
                 DualSenseReferenceSpeakerFrameResampler.OutputFrames * 2];
 
-            for (int warmup = 0; warmup < 4; warmup++)
+            for (int warmup = 0; warmup < AllocationMeasurementWarmupIterations; warmup++)
             {
                 converter.SetInputRateRatio(warmup % 2 == 0 ?
                     0.99965 : 1.00035);
@@ -487,8 +489,11 @@ namespace DS4Windows.Tests
                 DualSenseSpeakerFrameResampler.OutputFrames * 2];
             var converter = new DualSenseSpeakerFrameResampler();
 
-            ConvertOneOutputFrame(converter, source, output);
-            ConvertOneOutputFrame(converter, source, output);
+            for (int iteration = 0;
+                iteration < AllocationMeasurementWarmupIterations; iteration++)
+            {
+                ConvertOneOutputFrame(converter, source, output);
+            }
             long before = GC.GetAllocatedBytesForCurrentThread();
             for (int iteration = 0; iteration < 1000; iteration++)
             {
@@ -714,10 +719,12 @@ namespace DS4Windows.Tests
             int capacity = converter.GetMaximumOutputFrames(sourceFrames);
             float[] output = new float[capacity * 2];
 
-            converter.Convert(source, 0, source.Length, output, 0,
-                capacity);
-            converter.Convert(source, 0, source.Length, output, 0,
-                capacity);
+            for (int iteration = 0;
+                iteration < AllocationMeasurementWarmupIterations; iteration++)
+            {
+                converter.Convert(source, 0, source.Length, output, 0,
+                    capacity);
+            }
             long before = GC.GetAllocatedBytesForCurrentThread();
             for (int iteration = 0; iteration < 1000; iteration++)
             {
@@ -741,10 +748,12 @@ namespace DS4Windows.Tests
             int capacity = converter.GetMaximumOutputFrames(sourceFrames);
             float[] output = new float[capacity * 2];
 
-            converter.Convert(source, 0, source.Length, output, 0,
-                capacity);
-            converter.Convert(source, 0, source.Length, output, 0,
-                capacity);
+            for (int iteration = 0;
+                iteration < AllocationMeasurementWarmupIterations; iteration++)
+            {
+                converter.Convert(source, 0, source.Length, output, 0,
+                    capacity);
+            }
             long before = GC.GetAllocatedBytesForCurrentThread();
             for (int iteration = 0; iteration < 1000; iteration++)
             {

@@ -412,13 +412,36 @@ namespace DS4WindowsTests
                 "The transition did not reach the blocking operation.");
             try
             {
-                Task<ControllerExposureStatus> statusRead = Task.Run(() =>
-                    coordinator.Status);
-                Assert.IsTrue(statusRead.Wait(TimeSpan.FromSeconds(1)),
+                ControllerExposureStatus? observedStatus = null;
+                Exception statusReadFailure = null;
+                using ManualResetEventSlim statusReadCompleted = new(false);
+                Thread statusReader = new(() =>
+                {
+                    try
+                    {
+                        observedStatus = coordinator.Status;
+                    }
+                    catch (Exception ex)
+                    {
+                        statusReadFailure = ex;
+                    }
+                    finally
+                    {
+                        statusReadCompleted.Set();
+                    }
+                })
+                {
+                    IsBackground = true,
+                };
+                statusReader.Start();
+                Assert.IsTrue(statusReadCompleted.Wait(TimeSpan.FromSeconds(2)),
                     "Reading transition status waited for the active operation and can deadlock the UI dispatcher.");
+                Assert.IsNull(statusReadFailure);
                 Assert.AreEqual(
                     ControllerExposureStage.ReleasingPhysicalHandle,
-                    statusRead.Result.Stage);
+                    observedStatus.Value.Stage);
+                Assert.IsTrue(statusReader.Join(TimeSpan.FromSeconds(2)),
+                    "The completed status reader did not exit.");
             }
             finally
             {
