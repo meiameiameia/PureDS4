@@ -524,7 +524,7 @@
                                                        HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                         <StackPanel VerticalAlignment="Center">
-                                            <TextBlock Text="DS4Windows" FontSize="17" FontWeight="SemiBold"
+                                            <TextBlock Text="DS4Windows Reworked" FontSize="17" FontWeight="SemiBold"
                                                        Foreground="{DynamicResource ForegroundColor}" />
                                             <TextBlock Text="Controller companion" FontSize="10"
                                                        Foreground="{DynamicResource MutedForegroundColor}" />

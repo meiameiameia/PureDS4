@@ -22,20 +22,23 @@
 		     a SustainedLowLatency lease in the process. -->
 		<ServerGarbageCollection>false</ServerGarbageCollection>
 		<ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
-		<AssemblyVersion>5.0.3.0</AssemblyVersion>
-		<FileVersion>5.0.3.0</FileVersion>
-		<Version>5.0.3.0-dualsense-beta</Version>
-		<InformationalVersion>5.0.3.0 DualSense Beta</InformationalVersion>
+		<AssemblyVersion>5.1.0.0</AssemblyVersion>
+		<FileVersion>5.1.0.0</FileVersion>
+		<Version>5.1.0-beta.1</Version>
+		<InformationalVersion>5.1.0-beta.1</InformationalVersion>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 		<Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
 		<Platform Condition=" '$(Platform)' == '' ">x64</Platform>
-		<Copyright>Copyright © Scarlet.Crush Productions 2012, 2013; InhexSTER, HecticSeptic, electrobrains 2013, 2014; Jays2Kings 2013, 2014, 2015, 2016; Ryochan7 2017-2023, schmaldeo 2024</Copyright>
-		<Description>Sony DualShock 4 to Microsoft Xinput controller mapper</Description>
-		<Authors>hbashton</Authors>
-		<Company>hbashton</Company>
-		<PackageProjectUrl>https://github.com/hbashton/DS4Windows</PackageProjectUrl>
+		<Product>DS4Windows Reworked</Product>
+		<Title>DS4Windows Reworked</Title>
+		<AssemblyTitle>DS4Windows Reworked</AssemblyTitle>
+		<Copyright>Copyright © Scarlet.Crush Productions 2012, 2013; InhexSTER, HecticSeptic, electrobrains 2013, 2014; Jays2Kings 2013, 2014, 2015, 2016; Ryochan7 2017-2023; schmaldeo 2024; hbashton 2026; meiameiameia 2026</Copyright>
+		<Description>Dependable Windows controller mapping and virtual game output</Description>
+		<Authors>meiameiameia</Authors>
+		<Company>meiameiameia</Company>
+		<PackageProjectUrl>https://github.com/meiameiameia/ds4windows-reworked</PackageProjectUrl>
 		<PackageLicenseUrl>https://www.gnu.org/licenses/gpl-3.0.txt</PackageLicenseUrl>
-		<RepositoryUrl>https://github.com/hbashton/DS4Windows</RepositoryUrl>
+		<RepositoryUrl>https://github.com/meiameiameia/ds4windows-reworked</RepositoryUrl>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

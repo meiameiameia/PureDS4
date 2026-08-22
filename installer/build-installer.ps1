@@ -2,9 +2,9 @@
 param(
     [Parameter(Mandatory = $true)]
     [string]$PublishRoot,
-    [string]$ProductVersion = "5.0.3.0",
-    [string]$DisplayVersion = "5.0.3.0",
-    [string]$BundleVersion,
+    [string]$ProductVersion = "5.1.0",
+    [string]$DisplayVersion = "5.1.0-beta.1",
+    [string]$BundleVersion = "5.1.0-beta.1",
     [string]$OutputDirectory,
     [switch]$SkipApplicationPublish,
     [switch]$RequireSigning
@@ -186,7 +186,7 @@ $packageProject = Join-Path $repoRoot "installer\DS4Windows.Package\DS4Windows.P
     -p:PublishRoot=$publishPath
 if ($LASTEXITCODE -ne 0) { throw "DS4Windows MSI build failed." }
 
-$msiPath = Join-Path $repoRoot "installer\DS4Windows.Package\bin\x64\Release\DS4Windows_${ProductVersion}_x64.msi"
+$msiPath = Join-Path $repoRoot "installer\DS4Windows.Package\bin\x64\Release\DS4Windows-Reworked_${ProductVersion}_x64.msi"
 Invoke-SignAndVerify $msiPath
 $setupActionsHash = (Get-FileHash -LiteralPath $setupActions -Algorithm SHA256).Hash
 if ($setupActionsHash -notmatch '^[0-9A-F]{64}$') {
@@ -202,9 +202,9 @@ $bundleProject = Join-Path $repoRoot "installer\DS4Windows.Bundle\DS4Windows.Bun
     -p:ExtrasRoot=$extrasRoot
 if ($LASTEXITCODE -ne 0) { throw "DS4Windows Burn bundle build failed." }
 
-$builtInstaller = Join-Path $repoRoot "installer\DS4Windows.Bundle\bin\x64\Release\DS4Windows_${DisplayVersion}_Setup_x64.exe"
+$builtInstaller = Join-Path $repoRoot "installer\DS4Windows.Bundle\bin\x64\Release\DS4Windows-Reworked_${DisplayVersion}_Setup_x64.exe"
 New-Item -ItemType Directory -Path $outputPath -Force | Out-Null
-$finalInstaller = Join-Path $outputPath "DS4Windows_${DisplayVersion}_Setup_x64.exe"
+$finalInstaller = Join-Path $outputPath "DS4Windows-Reworked_${DisplayVersion}_Setup_x64.exe"
 $finalManifest = Join-Path $outputPath "package-manifest.json"
 $publishId = [Guid]::NewGuid().ToString("N")
 $pendingInstaller = $finalInstaller + ".pending-" + $publishId

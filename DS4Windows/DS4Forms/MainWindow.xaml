@@ -14,7 +14,7 @@
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         xml:lang="en-US"
         mc:Ignorable="d"
-        Title="DS4Windows" Height="660" Width="1024" Closing="MainDS4Window_Closing" Closed="MainDS4Window_Closed" StateChanged="MainDS4Window_StateChanged" SizeChanged="MainDS4Window_SizeChanged" LocationChanged="MainDS4Window_LocationChanged" MinWidth="720" MinHeight="480"
+        Title="DS4Windows Reworked" Height="660" Width="1024" Closing="MainDS4Window_Closing" Closed="MainDS4Window_Closed" StateChanged="MainDS4Window_StateChanged" SizeChanged="MainDS4Window_SizeChanged" LocationChanged="MainDS4Window_LocationChanged" MinWidth="720" MinHeight="480"
         UseLayoutRounding="True" SnapsToDevicePixels="True"
         Style="{DynamicResource WindowStyle}">
     <Window.Resources>
@@ -557,7 +557,7 @@
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsSelected" Value="True">
-                                            <Setter TargetName="CategoryChrome" Property="Background" Value="{DynamicResource ClassicSelectedBrush}" />
+                                            <Setter TargetName="CategoryChrome" Property="Background" Value="{DynamicResource ClassicSelectedSurfaceBrush}" />
                                             <Setter TargetName="CategoryChrome" Property="BorderBrush" Value="{DynamicResource ClassicAccentBrush}" />
                                             <Setter Property="Foreground" Value="{DynamicResource ClassicPrimaryTextBrush}" />
                                             <Setter Property="FontWeight" Value="SemiBold" />

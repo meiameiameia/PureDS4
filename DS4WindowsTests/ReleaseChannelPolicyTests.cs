@@ -97,6 +97,8 @@ namespace DS4WindowsTests
             Assert.IsTrue(ReleaseChannelPolicy.IsPrerelease(mislabeled));
             Assert.IsTrue(ReleaseChannelPolicy.IsPrereleaseBuild(
                 "5.0.0.0 DualSense Beta"));
+            Assert.IsTrue(ReleaseChannelPolicy.IsPrereleaseBuild(
+                "5.1.0-beta.1"));
         }
 
         [TestMethod]

@@ -3499,8 +3499,10 @@ namespace DS4Windows
 
     public class Changelog
     {
-        public const string GITHUB_RELEASES_API_URI = "https://api.github.com/repos/hbashton/DS4Windows/releases";
-        public const string GITHUB_LATEST_RELEASE_API_URI = "https://api.github.com/repos/hbashton/DS4Windows/releases/latest";
+        public const string GITHUB_RELEASES_API_URI =
+            ProductIdentity.ReleasesApiUrl;
+        public const string GITHUB_LATEST_RELEASE_API_URI =
+            ProductIdentity.ReleasesApiUrl + "/latest";
 
         private static bool? _newerVersionAvailable = null;
         private static Version _latestVersion;
@@ -3603,6 +3605,11 @@ namespace DS4Windows
         {
             Dictionary<Version, string> dict = new();
 
+            if (!UpdateAuthorityPolicy.ProductReleaseNotesEnabled)
+            {
+                return dict;
+            }
+
             if (!Version.TryParse(Global.exeversion, out var currentVersion)) return dict;
 
             var request = await App.requestClient.GetAsync(GITHUB_RELEASES_API_URI);
@@ -3627,6 +3634,11 @@ namespace DS4Windows
 
         public static async Task<string> GetChangelogMarkdown(bool allVersions = false)
         {
+            if (!UpdateAuthorityPolicy.ProductReleaseNotesEnabled)
+            {
+                return UpdateAuthorityPolicy.ReleaseNotesDisabledMarkdown;
+            }
+
             StringBuilder sb = new();
 
             // The Settings changelog asks for all versions. Stable releases

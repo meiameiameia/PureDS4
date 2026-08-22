@@ -284,23 +284,31 @@ def main() -> int:
         raise SystemExit(
             "The verified manifest must publish before the installer commit point."
         )
-    release_workflow = (
+    release_workflow_path = (
         args.bundle_source.parent.parent.parent
         / ".github"
         / "workflows"
         / "release.yml"
+    )
+    if release_workflow_path.exists():
+        raise SystemExit(
+            "Public release automation is not authorized until the signing "
+            "and provenance gates are complete."
+        )
+    ci_workflow = (
+        args.bundle_source.parent.parent.parent
+        / ".github"
+        / "workflows"
+        / "ci-build.yml"
     ).read_text(encoding="utf-8")
     for contract in [
-        'DS4W_SIGN_CERT_BASE64: ${{ secrets.DS4W_SIGN_CERT_BASE64 }}',
-        "DS4W_SIGNING_ENABLED=false",
-        '$firstPartyBinaries = @(".\\bin\\x64\\Release\\output\\DS4Windows.exe")',
-        "First-party release signing failed for $path.",
-        '$parameters.RequireSigning = $true',
-        "VIIPER is an immutable release input",
+        "Public release automation is intentionally absent",
+        'tags-ignore: [ "**" ]',
+        "Public tag builds are not authorized yet.",
     ]:
-        if contract not in release_workflow:
+        if contract not in ci_workflow:
             raise SystemExit(
-                "First-party release signing contract missing: " + contract
+                "Pre-release CI authorization contract missing: " + contract
             )
     if "Portable" in bundle or "InstallFolder" in bundle or "destination" in bundle.lower():
         raise SystemExit("The standard installer must not expose a portable or destination-selection path.")
@@ -547,7 +555,9 @@ def main() -> int:
         "GetInfrastructureActionsLogPath()",
         "viiper-setup-host.log",
         'startInfo.ArgumentList.Add("-Yes")',
-        "definition.Triggers.Add(new LogonTrigger())",
+        "definition.Triggers[0] is not LogonTrigger trigger",
+        "definition.Actions[0] is not ExecAction action",
+        "IsViiperStartupTaskValid(",
         "progress = new DS4WinWPF.DS4Forms.ViiperSetupProgress(",
         "progress.WaitForProcess(process)",
         'startInfo.ArgumentList.Add("-CorrelationId")',

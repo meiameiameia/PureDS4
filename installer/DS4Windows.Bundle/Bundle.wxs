@@ -2,15 +2,15 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
      xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
   <Bundle
-      Name="DS4Windows"
-      Manufacturer="DS4Windows"
+      Name="DS4Windows Reworked"
+      Manufacturer="meiameiameia"
       Version="$(var.BundleVersion)"
       UpgradeCode="BC70CCB1-AD65-42A0-B468-8A7278A37A62"
       Tag="DS4WindowsManagedV2"
       IconSourceFile="$(var.ExtrasRoot)\..\DS4Windows\DS4W.ico"
       Compressed="yes"
-      AboutUrl="https://github.com/hbashton/DS4Windows"
-      HelpUrl="https://github.com/hbashton/DS4Windows/issues">
+      AboutUrl="https://github.com/meiameiameia/ds4windows-reworked"
+      HelpUrl="https://github.com/meiameiameia/ds4windows-reworked/issues">
 
     <BootstrapperApplication SourceFile="$(var.BootstrapperRoot)\DS4Windows.Bootstrapper.exe" />
 

@@ -6,18 +6,18 @@ VIIPER 0.1.0, USB-IP 0.9.7.7, and optional HidHide/FakerInput packages.
 
 The installer intentionally has no portable mode or destination selector. The
 portable ZIP remains a separate CI artifact. The standard installer places
-VIIPER under protected `%ProgramFiles%\DS4Windows\VIIPER`. A portable
-DS4Windows package may instead use VIIPER from any location, but only when the
-executable is an exact SHA-256 match for the VIIPER build bundled with that
-DS4Windows release; its selected startup task is retargeted to that verified
-path. Program Files remains the recommended, tamper-resistant location.
+VIIPER under protected `%ProgramFiles%\DS4Windows\VIIPER`. A portable package
+may use a VIIPER executable only when it exactly matches the SHA-256 identity
+pinned by that Reworked build. Portable and release artifacts must never
+create or retarget the persistent `RunDS4Windows` or `RunVIIPER` tasks; the
+installer gate must enforce that boundary before public distribution.
 
 ```powershell
 .\installer\build-installer.ps1 `
   -PublishRoot .\bin\x64\Release\output `
-  -ProductVersion 5.0.3.0 `
-  -BundleVersion 5.0.3.0 `
-  -DisplayVersion 5.0.3.0 `
+  -ProductVersion 5.1.0 `
+  -BundleVersion 5.1.0-beta.1 `
+  -DisplayVersion 5.1.0-beta.1 `
   -SkipApplicationPublish
 ```
 
@@ -31,6 +31,10 @@ repair host records failures that occur before its helper starts in
 One transaction ID is preserved across Burn, setup actions, the infrastructure
 backend, and reboot resume so those logs can be correlated without timestamp
 guesswork.
+
+The output is named
+`DS4Windows-Reworked_5.1.0-beta.1_Setup_x64.exe` while the installed executable
+remains `DS4Windows.exe` for compatibility.
 
 Set `DS4W_SIGN_CERT_PATH`, `DS4W_SIGN_CERT_PASSWORD`, and optionally
 `DS4W_SIGN_TIMESTAMP_URL` to Authenticode-sign the application, setup hosts,

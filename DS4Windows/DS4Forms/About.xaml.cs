@@ -30,8 +30,8 @@ namespace DS4WinWPF.DS4Forms
         {
             InitializeComponent();
 
-            string version = $"{Global.exeDisplayVersion})";
-            headerLb.Content += version;
+            headerLb.Content = $"{ProductIdentity.Name} — " +
+                $"{ProductIdentity.Publisher} (Version {Global.exeDisplayVersion})";
         }
 
 
@@ -42,7 +42,7 @@ namespace DS4WinWPF.DS4Forms
 
         private void SourceLink_Click(object sender, RoutedEventArgs e)
         {
-            Util.StartProcessHelper("https://github.com/hbashton/DS4Windows");
+            Util.StartProcessHelper(ProductIdentity.RepositoryUrl);
         }
 
         private void Ryochan7Link_Click(object sender, RoutedEventArgs e)

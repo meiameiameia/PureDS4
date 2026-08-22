@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Package
-      Name="DS4Windows"
-      Manufacturer="DS4Windows"
+      Name="DS4Windows Reworked"
+      Manufacturer="meiameiameia"
       Version="$(var.ProductVersion)"
       UpgradeCode="65E808E3-D35A-4825-AE11-8D9415F16446"
       Scope="perMachine"
       InstallerVersion="500"
       Compressed="yes">
-    <SummaryInformation Description="DS4Windows controller configuration and VIIPER frontend" />
-    <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of DS4Windows is already installed." />
+    <SummaryInformation Description="DS4Windows Reworked controller mapping and virtual game output" />
+    <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of DS4Windows Reworked is already installed." />
     <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
 
     <Icon Id="DS4WindowsIcon" SourceFile="$(var.PublishRoot)\DS4Windows.exe" />
     <Property Id="ARPPRODUCTICON" Value="DS4WindowsIcon" />
-    <Property Id="ARPHELPLINK" Value="https://github.com/hbashton/DS4Windows" />
-    <Property Id="ARPURLINFOABOUT" Value="https://github.com/hbashton/DS4Windows" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/meiameiameia/ds4windows-reworked/issues" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/meiameiameia/ds4windows-reworked" />
 
     <StandardDirectory Id="ProgramFiles64Folder">
       <Directory Id="INSTALLFOLDER" Name="DS4Windows" />
@@ -26,7 +26,7 @@
       <RegistryValue Root="HKLM" Key="Software\DS4Windows" Name="Version" Value="[ProductVersion]" Type="string" />
     </Component>
 
-    <Feature Id="MainFeature" Title="DS4Windows" Level="1">
+    <Feature Id="MainFeature" Title="DS4Windows Reworked" Level="1">
       <ComponentGroupRef Id="PublishedFiles" />
       <ComponentRef Id="ManagedInstallRegistration" />
     </Feature>

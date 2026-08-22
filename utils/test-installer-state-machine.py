@@ -162,9 +162,9 @@ def main() -> None:
         "Continue in degraded mode",
         "ResolveRuntimeViiperPath(",
         "FindAlternativeViiperPath(canonicalViiperPath)",
-        "IsSelectableViiperExecutable(selectedPath)",
+        "alternativePath, IsSelectableViiperExecutable);",
+        "!isSelectable(candidate)",
         "FilesHaveSameSha256(normalized",
-        "PersistPreferredViiperPath(selectedPath, canonicalPath)",
     )
     require(
         setup_actions,

@@ -14,6 +14,9 @@ Controller correctness and reliability come first, followed by latency consisten
 
 ## Product direction and validation truth
 
+- Public product identity: **DS4Windows Reworked**, maintained and published by `meiameiameia` from `https://github.com/meiameiameia/ds4windows-reworked`. Preserve upstream attribution and GPL notices. The executable, configuration/storage paths, serialized formats, task names, IPC identities, install root, registry root, and existing installer upgrade codes remain on the established `DS4Windows` lineage until an explicit migration contract says otherwise.
+- The first public candidate version contract is display/Burn `5.1.0-beta.1`, MSI `5.1.0`, assembly/file `5.1.0.0`, and future tag `v5.1.0-beta.1`. This records identity only; it does not authorize a tag, release, or publication.
+
 - DualShock 4 is the reference hardware. Bluetooth and USB are intended supported paths; only Bluetooth has been owner-validated from this baseline so far (detection, physical input, Managed/Virtual readiness, and Native Physical mode transitions).
 - Preserve DualSense and DualSense Edge compatibility, but do not claim hardware validation: the owner has no DualSense hardware.
 - DS3 is a future compatibility candidate, with potential access to a genuine controller through the owner's friend for later manual validation. Existing ScpToolkit/ScpTools driver state and coexistence must be characterized before changing setup or runtime behavior; do not claim DS3 support until the real hardware path is validated.

@@ -8,10 +8,16 @@ namespace DS4Windows
     public static class UpdateAuthorityPolicy
     {
         public static readonly bool ProductUpdatesEnabled = false;
+        public static readonly bool ProductReleaseNotesEnabled = false;
 
         public const string DisabledMessage =
             "Product updates are temporarily disabled while an independent " +
-            "signed update channel is established. The upstream DS4Windows " +
-            "changelog is available for information only.";
+            "signed update channel is established.";
+
+        public const string ReleaseNotesDisabledMarkdown =
+            "## Release notes unavailable\n\n" +
+            "DS4Windows Reworked release notes will become available when " +
+            "the independent release channel is established. No upstream " +
+            "release feed is queried by this build.";
     }
 }

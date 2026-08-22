@@ -40,13 +40,22 @@ dotnet build DS4WindowsWPF.sln -c Debug -p:Platform=x64
 dotnet test DS4WindowsWPF.sln -c Debug -p:Platform=x64
 ```
 
-Derivative release packaging and the final installation path are not finalized
-yet.
+## Product and release identity
+
+The public product is **DS4Windows Reworked**, maintained under the
+`meiameiameia` alias. The executable and established DS4Windows configuration
+paths remain unchanged for compatibility. The first public candidate is
+`5.1.0-beta.1`; it is not authorized for publication until the remaining
+provenance, signing, installer, and release-validation gates are complete.
+
+See [`docs/RELEASE_CONTRACT.md`](docs/RELEASE_CONTRACT.md) for the version,
+upgrade, compatibility, artifact, and release-authority contract.
 
 ## Provenance and license
 
 The annotated `upstream-baseline` tag records the recoverable upstream starting
-point. The `main` branch is the derivative working line; `AGENTS.md` contains
-the canonical project guidance.
+point. The `main` branch is the derivative working line at
+<https://github.com/meiameiameia/ds4windows-reworked>; `AGENTS.md` contains the
+canonical project guidance.
 
 The project is licensed under GPLv3. See [`COPYING`](COPYING).

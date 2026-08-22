@@ -637,7 +637,8 @@ namespace DS4Windows.SetupActions
             Directory.CreateDirectory(resumeRoot);
             EnsureDirectoryPathHasNoReparsePoints(resumeRoot);
             ProtectResumeDirectory(resumeRoot, targetUser.Sid);
-            var stagedBundle = Path.Combine(resumeRoot, "DS4Windows_Setup_x64.exe");
+            var stagedBundle = Path.Combine(resumeRoot,
+                "DS4Windows-Reworked_Setup_x64.exe");
             if (!string.Equals(Path.GetFullPath(bundleSource),
                     Path.GetFullPath(stagedBundle),
                     StringComparison.OrdinalIgnoreCase))
@@ -656,7 +657,7 @@ namespace DS4Windows.SetupActions
             Directory.CreateDirectory(startupDirectory);
             EnsureDirectoryPathHasNoReparsePoints(startupDirectory);
             var shortcutPath = Path.Combine(startupDirectory,
-                "DS4Windows Setup Resume.lnk");
+                "DS4Windows Reworked Setup Resume.lnk");
             try
             {
                 CreateShortcut(shortcutPath, stagedBundle, "/repair",
@@ -730,7 +731,7 @@ namespace DS4Windows.SetupActions
             {
                 EnsureDirectoryPathHasNoReparsePoints(resumeRoot);
                 var stagedBundle = Path.Combine(resumeRoot,
-                    "DS4Windows_Setup_x64.exe");
+                    "DS4Windows-Reworked_Setup_x64.exe");
                 if (File.Exists(stagedBundle) &&
                     (File.GetAttributes(stagedBundle) &
                      FileAttributes.ReparsePoint) == 0)

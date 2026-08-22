@@ -76,7 +76,7 @@
                                        Style="{StaticResource BridgeSectionTitleStyle}"
                                        FontSize="20" />
                             <TextBlock x:Name="summaryText"
-                                       Text="Set up the verified components DS4Windows uses to make your controller available to games."
+                                       Text="Set up the verified components DS4Windows Reworked uses to make your controller available to games."
                                        Foreground="{DynamicResource MutedForegroundColor}"
                                        TextWrapping="Wrap" />
                         </StackPanel>
@@ -141,7 +141,7 @@
                             CornerRadius="6"
                             Padding="12"
                             Margin="0,0,0,16">
-                        <TextBlock Text="Keeping DS4Windows portable leaves this app exactly where it is. Game-output setup is still installed in protected Program Files. Standard setup moves only package-owned DS4Windows files. Profiles, settings, and unrecognized files are preserved."
+                        <TextBlock Text="Keeping DS4Windows Reworked portable leaves this app exactly where it is. Game-output setup is still installed in protected Program Files. Standard setup moves only package-owned DS4Windows files. Profiles, settings, and unrecognized files are preserved."
                                    Foreground="{DynamicResource MutedForegroundColor}"
                                    TextWrapping="Wrap" />
                     </Border>

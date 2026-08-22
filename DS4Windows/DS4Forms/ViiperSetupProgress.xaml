@@ -56,7 +56,7 @@
                                    Text="Setting up VIIPER"
                                    Style="{StaticResource BridgeSectionTitleStyle}"
                                    FontSize="20" />
-                        <TextBlock Text="DS4Windows is verifying the complete controller backend."
+                        <TextBlock Text="DS4Windows Reworked is verifying the complete controller backend."
                                    Foreground="{DynamicResource MutedForegroundColor}"
                                    TextWrapping="Wrap" />
                     </StackPanel>

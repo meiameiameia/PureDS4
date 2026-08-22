@@ -148,7 +148,7 @@ os.rename(target_dir, renamed_dir)
 
 # create a zip
 arch = target_dir.parents[1].name
-zip_name = f"DS4Windows_{version}_{arch}"
+zip_name = f"DS4Windows-Reworked_{version}_{arch}"
 target_zip_path = target_dir.parent / f"{zip_name}.zip"
 if target_zip_path.exists():
     os.remove(target_zip_path)
