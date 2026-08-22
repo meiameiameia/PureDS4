@@ -14,12 +14,13 @@ Controller correctness and reliability come first, followed by latency consisten
 
 ## Product direction and validation truth
 
-- DualShock 4 is the reference hardware. Bluetooth and USB are intended supported paths; only Bluetooth detection/input has been owner-validated from this baseline so far.
+- DualShock 4 is the reference hardware. Bluetooth and USB are intended supported paths; only Bluetooth has been owner-validated from this baseline so far (detection, physical input, Managed/Virtual readiness, and Native Physical mode transitions).
 - Preserve DualSense and DualSense Edge compatibility, but do not claim hardware validation: the owner has no DualSense hardware.
-- DS3, Joy-Con, Switch Pro, third-party controllers, and other inherited families are not initial priorities. Preserve them until their value, coupling, maintenance cost, and validation feasibility support an explicit product decision.
+- DS3 is a future compatibility candidate, with potential access to a genuine controller through the owner's friend for later manual validation. Existing ScpToolkit/ScpTools driver state and coexistence must be characterized before changing setup or runtime behavior; do not claim DS3 support until the real hardware path is validated.
+- Joy-Con, Switch Pro, third-party controllers, and other inherited families are not initial priorities. Preserve them until their value, coupling, maintenance cost, and validation feasibility support an explicit product decision.
 - The first dependable product journey is a normal Windows user reaching working in-game controller output without learning VIIPER, USB-IP, HidHide internals, hashes, or installation modes. Do not weaken integrity or identity checks to simplify setup.
-- Owner-validated baseline: the locally built app launches; a DS4 connects over Bluetooth, is detected, supplies physical input, and works with **Continue without virtual output**.
-- Not yet owner-validated: DS4 over USB; creation of a VIIPER virtual controller; Xbox 360 output; the complete physical-input → mapping → virtual-output path; Forza Horizon 6 with this build; output disconnect/reconnect and app restart/reconnect.
+- Owner-validated, on the promoted canonical `Dev\current` runtime after the controller-exposure recovery milestone: the app launches through `RunDS4Windows`; a DS4 connects over Bluetooth, is detected, and supplies physical input; **Continue without virtual output** works; the application reports Managed/Virtual as Ready; the transition to Native Physical exposure, and back to Managed/Virtual, both complete; Forza Horizon 6 recognizes the Managed/Virtual Xbox 360 output and responds normally to gameplay input; controller disconnect/reconnect works; and app close/relaunch through `RunDS4Windows` works.
+- Not yet owner-validated: DS4 over USB; DualSense hardware. Rumble, audio, haptics, and other advanced output behavior have not been claimed unless separately exercised.
 
 Never turn build success, protocol tests, a component health check, or test count into a hardware/runtime claim. Record exactly what was exercised.
 
@@ -71,6 +72,7 @@ For a change, run the narrowest relevant test first, then the full x64 suite and
 Use stronger characterization and validation for:
 
 - physical HID, Bluetooth/USB protocol, calibration, report parsing/writing, and hotplug;
+- DS3 and legacy ScpToolkit/ScpTools driver coexistence, ownership, and migration;
 - `ControlService` lifecycle, synchronization, profile switching, and disconnect/reconnect;
 - `Mapping` and `DS4StateFieldMapping` input translation;
 - VIIPER/USB-IP output, feedback, audio, and output-slot ownership;
