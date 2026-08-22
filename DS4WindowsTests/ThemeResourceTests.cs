@@ -52,10 +52,10 @@ namespace DS4WindowsTests
                         null, verifiedUpdateRequired: true,
                         usbipReplacementRequired: true,
                         mandatoryRepairRequired: true);
-                    Assert.AreEqual("USB-IP version must be replaced",
+                    Assert.AreEqual("Game output needs repair",
                         ((TextBlock)repairPrompt.FindName(
                             "headingText")).Text);
-                    Assert.AreEqual("Repair VIIPER + USB-IP",
+                    Assert.AreEqual("Repair game output",
                         ((Button)repairPrompt.FindName(
                             "installButton")).Content);
                     Assert.AreEqual(Visibility.Collapsed,
@@ -67,10 +67,10 @@ namespace DS4WindowsTests
                     var missingPrompt = new ViiperSetupPrompt(
                         "VIIPER and usbip-win2 need setup", null,
                         mandatoryRepairRequired: true);
-                    Assert.AreEqual("VIIPER setup required",
+                    Assert.AreEqual("Set up game output",
                         ((TextBlock)missingPrompt.FindName(
                             "headingText")).Text);
-                    Assert.AreEqual("Continue without virtual output",
+                    Assert.AreEqual("Continue without game output",
                         ((Button)missingPrompt.FindName(
                             "notNowButton")).Content);
                     Assert.IsFalse(missingPrompt.ExitApplicationRequested,

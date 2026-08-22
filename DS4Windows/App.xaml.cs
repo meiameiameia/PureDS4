@@ -320,16 +320,11 @@ namespace DS4WinWPF
                 logger.Info($@"Profiles.xml not read at location ${DS4Windows.Global.appdatapath}\Profiles.xml. Using default app settings");
             }
 
-            // Ask user which devices the mapper should attempt to open when detected.
-            // Currently only support DS4 by default to avoid extra complications from
-            // Steam Input
-            if (firstRun)
-            {
-                DS4Forms.FirstLaunchUtilWindow firstLaunchUtilWin =
-                    new DS4Forms.FirstLaunchUtilWindow(DS4Windows.Global.DeviceOptions);
-                ShowStartupDialog(firstLaunchUtilWin);
-                DS4Windows.Global.Save();
-            }
+            // DS4 is the only enabled input family by default. The inherited
+            // first-launch device picker currently has no visible page, so it
+            // only adds an empty modal between configuration storage and the
+            // actionable game-output decision below. Other device families
+            // remain configurable from Settings.
 
             if (firstRun)
             {

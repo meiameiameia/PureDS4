@@ -10,6 +10,19 @@ namespace DS4WinWPF.DS4Forms
         InstallPortable,
     }
 
+    public sealed class ViiperSetupPromptPresentation
+    {
+        public string Heading { get; init; }
+        public string Summary { get; init; }
+        public string RequirementsHeading { get; init; }
+        public string Requirements { get; init; }
+        public string PrimaryAction { get; init; }
+        public string PortableAction { get; init; }
+        public string ContinueAction { get; init; }
+        public bool ShowPortableAction { get; init; } = true;
+        public bool ShowSuppressPrompt { get; init; } = true;
+    }
+
     public partial class ViiperSetupPrompt : Window
     {
         private readonly bool mandatoryRepairRequired;
@@ -33,70 +46,108 @@ namespace DS4WinWPF.DS4Forms
             InitializeComponent();
             statusText.Text = currentStatus;
 
+            ViiperSetupPromptPresentation presentation = CreatePresentation(
+                citrixUsbMonitorConflict, verifiedUpdateRequired,
+                usbipReplacementRequired, this.mandatoryRepairRequired);
+            headingText.Text = presentation.Heading;
+            summaryText.Text = presentation.Summary;
+            requirementsHeadingText.Text = presentation.RequirementsHeading;
+            requirementsText.Text = presentation.Requirements;
+            installButton.Content = presentation.PrimaryAction;
+            installPortableButton.Content = presentation.PortableAction;
+            notNowButton.Content = presentation.ContinueAction;
+            closeButton.ToolTip = presentation.ContinueAction;
+            installPortableButton.Visibility = presentation.ShowPortableAction
+                ? Visibility.Visible : Visibility.Collapsed;
+            portableWarningPanel.Visibility = presentation.ShowPortableAction
+                ? Visibility.Visible : Visibility.Collapsed;
+            suppressPromptCheck.Visibility = presentation.ShowSuppressPrompt
+                ? Visibility.Visible : Visibility.Collapsed;
+
             if (citrixUsbMonitorConflict)
             {
-                headingText.Text = "VIIPER paused for system safety";
-                summaryText.Text =
-                    "A conflicting Citrix USB monitor is active.";
-                requirementsText.Text =
-                    "• Disable Citrix generic USB redirection only\n" +
-                    "• Restart Windows before VIIPER starts again";
-                installButton.Content = "Disable conflicting USB monitor";
-                installPortableButton.Visibility = Visibility.Collapsed;
-                portableWarningPanel.Visibility = Visibility.Collapsed;
-                suppressPromptCheck.Visibility = Visibility.Collapsed;
-                notNowButton.Content = "Continue without virtual output";
-                closeButton.ToolTip = "Continue without virtual output";
                 return;
             }
 
-            if (!string.IsNullOrWhiteSpace(existingViiperPath))
+            if (!verifiedUpdateRequired &&
+                !string.IsNullOrWhiteSpace(existingViiperPath))
             {
                 existingViiperPathText.Text = existingViiperPath;
                 existingViiperPanel.Visibility = Visibility.Visible;
             }
 
+        }
+
+        public static ViiperSetupPromptPresentation CreatePresentation(
+            bool citrixUsbMonitorConflict, bool verifiedUpdateRequired,
+            bool usbipReplacementRequired, bool mandatoryRepairRequired)
+        {
+            if (citrixUsbMonitorConflict)
+            {
+                return new ViiperSetupPromptPresentation
+                {
+                    Heading = "Game output paused for system safety",
+                    Summary = "A Windows USB component is conflicting with game output.",
+                    RequirementsHeading = "What needs attention",
+                    Requirements = "• Disable Citrix generic USB redirection only\n" +
+                        "• Restart Windows, then try game output again",
+                    PrimaryAction = "Resolve USB conflict",
+                    PortableAction = string.Empty,
+                    ContinueAction = "Continue without game output",
+                    ShowPortableAction = false,
+                    ShowSuppressPrompt = false,
+                };
+            }
+
             if (verifiedUpdateRequired)
             {
-                headingText.Text = usbipReplacementRequired
-                    ? "USB-IP version must be replaced"
-                    : "VIIPER verification failed";
-                summaryText.Text = usbipReplacementRequired
-                    ? currentStatus
-                    : "The installed VIIPER does not match this DS4Windows package.";
-                requirementsHeadingText.Text = "Verified update required";
-                requirementsText.Text = usbipReplacementRequired
-                    ? "• Install and verify bundled VIIPER 0.1.0\n" +
-                      "• Safely remove the unsupported USB-IP package\n" +
-                      "• Restart, then finish installing USB-IP 0.9.7.7"
-                    : "• Install the exact bundled VIIPER build\n" +
-                      "• Choose managed or portable DS4Windows\n" +
-                      "• The unverified backend will not be started";
-                installButton.Content = usbipReplacementRequired
-                    ? "Repair VIIPER + USB-IP"
-                    : "Install standard";
-                installPortableButton.Content =
-                    "Keep DS4Windows portable";
-                existingViiperPanel.Visibility = Visibility.Collapsed;
-                suppressPromptCheck.Visibility = Visibility.Collapsed;
-                notNowButton.Content = "Continue without virtual output";
-                closeButton.ToolTip = "Continue without virtual output";
+                return new ViiperSetupPromptPresentation
+                {
+                    Heading = "Game output needs repair",
+                    Summary = usbipReplacementRequired
+                        ? "A required Windows component must be safely replaced before game output can start."
+                        : "The installed game-output components do not match this DS4Windows package.",
+                    RequirementsHeading = "What setup will do",
+                    Requirements = usbipReplacementRequired
+                        ? "• Safely replace the unsupported Windows component\n" +
+                          "• Restart Windows, then finish verifying game output"
+                        : "• Install the verified game-output components\n" +
+                          "• Keep unverified components from starting",
+                    PrimaryAction = "Repair game output",
+                    PortableAction = "Keep this folder portable",
+                    ContinueAction = "Continue without game output",
+                    ShowSuppressPrompt = false,
+                };
             }
-            else if (this.mandatoryRepairRequired)
+
+            if (mandatoryRepairRequired)
             {
-                headingText.Text = "VIIPER setup required";
-                summaryText.Text = currentStatus;
-                requirementsHeadingText.Text = "Required before DS4Windows can run";
-                requirementsText.Text =
-                    "• Install the bundled VIIPER 0.1.0 build\n" +
-                    "• Install and verify USB-IP 0.9.7.7\n" +
-                    "• Start DS4Windows only after the runtime probe passes";
-                installButton.Content = "Install / Repair";
-                installPortableButton.Content = "Keep DS4Windows portable";
-                suppressPromptCheck.Visibility = Visibility.Collapsed;
-                notNowButton.Content = "Continue without virtual output";
-                closeButton.ToolTip = "Continue without virtual output";
+                return new ViiperSetupPromptPresentation
+                {
+                    Heading = "Set up game output",
+                    Summary = "You can configure controllers now. Set up game output to use them in games.",
+                    RequirementsHeading = "What setup will do",
+                    Requirements = "• Verify the components required for game output\n" +
+                        "• Request Windows permission only when setup needs it\n" +
+                        "• Keep profiles and settings in place",
+                    PrimaryAction = "Set up game output",
+                    PortableAction = "Keep this folder portable",
+                    ContinueAction = "Continue without game output",
+                    ShowSuppressPrompt = false,
+                };
             }
+
+            return new ViiperSetupPromptPresentation
+            {
+                Heading = "Game output setup",
+                Summary = "Game output is ready. You can repair it if an issue returns.",
+                RequirementsHeading = "What setup will do",
+                Requirements = "• Verify the components required for game output\n" +
+                    "• Keep profiles and settings in place",
+                PrimaryAction = "Repair game output",
+                PortableAction = "Keep this folder portable",
+                ContinueAction = "Continue without game output",
+            };
         }
 
         private void TitleBar_MouseLeftButtonDown(object sender,
