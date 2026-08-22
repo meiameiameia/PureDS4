@@ -75,8 +75,15 @@ complete provenance, tests, package validation, and explicit owner approval.
 
 ## Release blockers outside this identity gate
 
-Before public distribution, resolve the component provenance and notice
-blockers recorded in [`component-provenance.md`](component-provenance.md),
-enforce task ownership in installer and portable flows, implement the signed
-release workflow, and validate an authorized in-place upgrade on a disposable
-or owner-approved Windows installation.
+Component hashes, source revisions, notices, signers, and NuGet locks are now
+enforced by the release-input contract described in
+[`component-provenance.md`](component-provenance.md). Public composition still
+fails closed because the inherited FakerInput wrappers have unconfirmed
+license scope. The evidence supports their relationship to the MIT-licensed
+FakerInput family and GPL DS4Windows lineage, but it does not establish their
+precise standalone terms; that decision must be recorded before distribution.
+
+The remaining release program must also enforce task ownership in installer
+and portable flows, implement the signed release workflow, and validate an
+authorized in-place upgrade on a disposable or owner-approved Windows
+installation.

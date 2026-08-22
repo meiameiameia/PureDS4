@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net8.0-windows7.0": {
+      "Microsoft.NET.ILLink.Tasks": {
+        "type": "Direct",
+        "requested": "[8.0.29, )",
+        "resolved": "8.0.29",
+        "contentHash": "HSBTfrkIZijz8z3ybLRKB7E8rHk4QQufFwpHa9fc5CMIgRhRzdn4mBGmlyXZqaueiMPtuJcnjresGvSTfaW8Mg=="
+      },
+      "WixToolset.BootstrapperApplicationApi": {
+        "type": "Direct",
+        "requested": "[5.0.2, )",
+        "resolved": "5.0.2",
+        "contentHash": "frVyP8xhlk2N1aDsTSuFJzra8tdOkeWjgs8UbwbA7dHVkm9ID0w/GUhl9vHPTCg9k4DTzmF2XT3AgX+SsjuXMQ=="
+      }
+    },
+    "net8.0-windows7.0/win-x64": {
+      "WixToolset.BootstrapperApplicationApi": {
+        "type": "Direct",
+        "requested": "[5.0.2, )",
+        "resolved": "5.0.2",
+        "contentHash": "frVyP8xhlk2N1aDsTSuFJzra8tdOkeWjgs8UbwbA7dHVkm9ID0w/GUhl9vHPTCg9k4DTzmF2XT3AgX+SsjuXMQ=="
+      }
+    }
+  }
+}

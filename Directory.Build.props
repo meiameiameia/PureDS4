@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <!-- Release dependencies are content-addressed by committed NuGet locks. -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+</Project>

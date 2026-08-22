@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "releaseReady": false,
+  "releaseBlockers": [
+    "fakerinput-managed-wrapper",
+    "fakerinput-native-wrapper"
+  ],
+  "components": [
+    {
+      "id": "viiper",
+      "version": "0.1.0",
+      "status": "verified",
+      "sourceRepository": "https://github.com/hbashton/VIIPER",
+      "sourceCommit": "fd298a04d7d229293be15b2af664405c9e68114c",
+      "sourceTag": "v0.1.0",
+      "licensePath": "extras/VIIPER-0.1.0-LICENSES.txt",
+      "artifacts": [
+        {
+          "kind": "repository",
+          "path": "extras/VIIPER-0.1.0-x64.exe",
+          "sha256": "AD14F2C9048D61B3447F2F79D7A122EDEA81E5DB52A1AC803D294E5BC9CD2324",
+          "originUrl": "https://github.com/hbashton/VIIPER/releases/download/v0.1.0/viiper-windows-amd64.zip",
+          "originSha256": "07BEB53FDB6856AFA6E0F31EDF210A8618CBC2304AB59AC23FB017B11082ADD7"
+        }
+      ]
+    },
+    {
+      "id": "usbip-win2",
+      "version": "0.9.7.7",
+      "status": "verified",
+      "sourceRepository": "https://github.com/vadimgrn/usbip-win2",
+      "sourceCommit": "7c219953101cc5d0ec9a0bcb3eb87259cf72bedd",
+      "sourceTag": "v.0.9.7.7",
+      "licensePath": "extras/USBip-0.9.7.7-LICENSE.txt",
+      "artifacts": [
+        {
+          "kind": "repository",
+          "path": "extras/USBip-0.9.7.7-x64.exe",
+          "sha256": "51620FA5F9F8BE5932BC9D786DEEE557CE06D5407A99CAB490DCFAC71F185FEA",
+          "originUrl": "https://github.com/vadimgrn/usbip-win2/releases/download/v.0.9.7.7/USBip-0.9.7.7-x64.exe",
+          "originSha256": "51620FA5F9F8BE5932BC9D786DEEE557CE06D5407A99CAB490DCFAC71F185FEA",
+          "signerThumbprint": "9AC56B6C76141395D74FFF6652818376E80B9C95"
+        }
+      ]
+    },
+    {
+      "id": "hidhide",
+      "version": "1.5.230",
+      "status": "verified",
+      "sourceRepository": "https://github.com/nefarius/HidHide",
+      "sourceCommit": "722d997ce75db58f5aa36e40ca920f99022c020a",
+      "sourceTag": "v1.5.230.0",
+      "licensePath": "extras/HidHide-1.5.230-LICENSE.txt",
+      "artifacts": [
+        {
+          "kind": "repository",
+          "path": "extras/HidHide_1.5.230_x64.exe",
+          "sha256": "F4BBBCB82E6258641B887C74BC81C4C5F66E4AA811808DFC304347687B7605F6",
+          "originUrl": "https://github.com/nefarius/HidHide/releases/download/v1.5.230.0/HidHide_1.5.230_x64.exe",
+          "originSha256": "F4BBBCB82E6258641B887C74BC81C4C5F66E4AA811808DFC304347687B7605F6",
+          "signerThumbprint": "1F431092EC96A80B41AB5317F53AC02EA6F9B89B"
+        }
+      ]
+    },
+    {
+      "id": "fakerinput-driver",
+      "version": "0.1.0",
+      "status": "verified",
+      "sourceRepository": "https://github.com/Ryochan7/FakerInput",
+      "sourceCommit": "0bf881f603dc40c4a0a2eef3d8d8da6196c405dc",
+      "sourceTag": "v0.1.0",
+      "licensePath": "extras/FakerInput-0.1.0-LICENSE.txt",
+      "artifacts": [
+        {
+          "kind": "repository",
+          "path": "extras/FakerInput_0.1.0_x64.msi",
+          "sha256": "30CF218B624740A91BE4FCCA3ADFB4550BA8CC8F31AC9625FE39D238E64D13EA",
+          "originUrl": "https://github.com/Ryochan7/FakerInput/releases/download/v0.1.0/FakerInput_0.1.0_x64.msi",
+          "originSha256": "30CF218B624740A91BE4FCCA3ADFB4550BA8CC8F31AC9625FE39D238E64D13EA",
+          "signerThumbprint": "2DDC38159B0A27AD29CAABECFE7E95F9450E5C9A"
+        },
+        {
+          "kind": "repository",
+          "path": "extras/FakerInput_0.1.0_x86.msi",
+          "sha256": "0C0A01EEF8C57C9B3DB917131995A10ADB3599CC643D2F27AD28D9511B96DEC1",
+          "originUrl": "https://github.com/Ryochan7/FakerInput/releases/download/v0.1.0/FakerInput_0.1.0_x86.msi",
+          "originSha256": "0C0A01EEF8C57C9B3DB917131995A10ADB3599CC643D2F27AD28D9511B96DEC1",
+          "signerThumbprint": "2DDC38159B0A27AD29CAABECFE7E95F9450E5C9A"
+        }
+      ]
+    },
+    {
+      "id": "rnnoise-net",
+      "version": "0.1.9",
+      "status": "verified",
+      "sourceRepository": "https://github.com/Yellow-Dog-Man/RNNoise.Net",
+      "sourceCommit": "73189a685823d2db25a6c94edd7b69265309c0db",
+      "sourceTag": "0.1.9",
+      "licensePath": "DS4Windows/ThirdParty/RNNoise.NET-LICENSE.txt",
+      "nugetContentHash": "2lqIr0648oA0qiUlbcTshFe4dm010Lyv+BaP2GGKfN+CI5DOrR7tV3X0kwgYvf/V3DDHllflWiQXhWT7+LTsEg==",
+      "artifacts": [
+        {
+          "kind": "nuget",
+          "packageId": "YellowDogMan.RRNoise.NET",
+          "packageVersion": "0.1.9",
+          "path": "runtimes/win-x64/native/rnnoise.dll",
+          "sha256": "12E19BF7A18D13E092A5FBE5A7C5B2081F5E7B56F6D77AEAB5837335F44CEEDF"
+        }
+      ]
+    },
+    {
+      "id": "sharposc",
+      "version": "0.2.0",
+      "status": "verified",
+      "sourceRepository": "https://github.com/Ryochan7/SharpOSC",
+      "sourceCommit": "6cd3eb265e64d62a92679290a44083ebad1ea579",
+      "licensePath": "DS4Windows/ThirdParty/SharpOSC-LICENSE.txt",
+      "artifacts": [
+        {
+          "kind": "repository",
+          "path": "DS4Windows/libs/x64/SharpOSC/SharpOSC.dll",
+          "sha256": "6419A701CE8EF5BAAD072FF14C232A3557525BF8BB4E3FD6DED09B2D3F22F07E"
+        },
+        {
+          "kind": "repository",
+          "path": "DS4Windows/libs/x86/SharpOSC/SharpOSC.dll",
+          "sha256": "2BA7A8C0D6459F16A05725159903A2725955A3AF6D69018CBC1F15DEFF87F1CE"
+        }
+      ]
+    },
+    {
+      "id": "fakerinput-managed-wrapper",
+      "version": "1.0.3",
+      "status": "blocked",
+      "blocker": "The companion repository does not document whether the FakerInput MIT license covers this wrapper. The binary was inherited through the GPL-licensed DS4Windows lineage, but its precise standalone license scope is not established.",
+      "sourceRepository": "https://github.com/Ryochan7/FakerInputWrapper",
+      "sourceCommit": "a6ba4055d4c53c7b748f182c4d136e433a2400dc",
+      "inheritedDistributionLicensePath": "COPYING",
+      "licenseScope": "unconfirmed",
+      "licensePath": null,
+      "artifacts": [
+        {
+          "kind": "repository",
+          "path": "DS4Windows/libs/x64/FakerInputWrapper/FakerInputWrapper.dll",
+          "sha256": "4792671766A575394D3402A9365AF9908AF94E812EC1969BFE4975C0AB4F5430"
+        },
+        {
+          "kind": "repository",
+          "path": "DS4Windows/libs/x86/FakerInputWrapper/FakerInputWrapper.dll",
+          "sha256": "1A97250E793E22A7A961142C61BFED930F6A5080AAD739D32D79BE021E13B1A8"
+        }
+      ]
+    },
+    {
+      "id": "fakerinput-native-wrapper",
+      "version": "unresolved",
+      "status": "blocked",
+      "blocker": "The companion repository does not document whether the FakerInput MIT license covers this native wrapper, and the inherited binary has no embedded source revision. The binary was inherited through the GPL-licensed DS4Windows lineage, but its precise standalone license scope and exact source revision are not established.",
+      "sourceRepository": "https://github.com/Ryochan7/FakerInputDll",
+      "sourceCommit": null,
+      "inheritedDistributionLicensePath": "COPYING",
+      "licenseScope": "unconfirmed",
+      "licensePath": null,
+      "artifacts": [
+        {
+          "kind": "repository",
+          "path": "DS4Windows/libs/x64/FakerInputWrapper/FakerInputDll.dll",
+          "sha256": "7E3D67A3E6B4EF2ABA039A3B1E079ACDE3AD95E0286A87623949AD74607D1A50"
+        },
+        {
+          "kind": "repository",
+          "path": "DS4Windows/libs/x86/FakerInputWrapper/FakerInputDll.dll",
+          "sha256": "1A73F0D2CA7ECB19F00A390A3FD27BA3BA5E21C3363325EBBCC298EE10D10763"
+        }
+      ]
+    }
+  ]
+}

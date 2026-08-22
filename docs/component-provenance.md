@@ -1,61 +1,83 @@
 # Distributed component provenance
 
-Recorded for the Phase 0 safety gate. SHA-256 values identify the repository
-artifacts at this milestone; a matching version or tag alone is not proof that
-a binary was built from that source revision.
+This inventory is the release authority for third-party binary inputs. The
+machine-readable contract is [`installer/release-inputs.json`](../installer/release-inputs.json);
+`utils/validate-release-inputs.py` verifies its file hashes, package lock,
+license notices, project inventory, and expected Authenticode signers.
 
-## Bundled installers and native components
+A matching version or tag is not sufficient evidence by itself. Release
+inputs are accepted only when their exact local bytes match the recorded
+official asset or source revision. The normal validator allows a known blocked
+component to remain in internal builds; `--require-release-ready` fails closed
+while any blocker exists.
 
-| Component and purpose | Version / candidate source revision | Local artifact and SHA-256 | License / notice | Provenance status |
-| --- | --- | --- | --- | --- |
-| Custom VIIPER virtual-output backend | 0.1.0; `hbashton/VIIPER` tag `v0.1.0`, commit `fd298a04d7d229293be15b2af664405c9e68114c` | `extras/VIIPER-0.1.0-x64.exe` — `AD14F2C9048D61B3447F2F79D7A122EDEA81E5DB52A1AC803D294E5BC9CD2324` | No component-specific notice is packaged; `extras/gplv3.snippet` exists but is not an adequate binary provenance record. | **Unresolved/release blocker:** binary is unsigned and exact binary-to-source mapping and complete notice are not established. Source: <https://github.com/hbashton/VIIPER>. |
-| usbip-win2 installer used by VIIPER | 0.9.7.7; `vadimgrn/usbip-win2` tag `v.0.9.7.7`, commit `7c219953101cc5d0ec9a0bcb3eb87259cf72bedd` | `extras/USBip-0.9.7.7-x64.exe` — `51620FA5F9F8BE5932BC9D786DEEE557CE06D5407A99CAB490DCFAC71F185FEA` | `extras/USBip-0.9.7.7-LICENSE.txt` | Version/source candidate and a valid Cloudyne Systems signature are known; exact release-asset-to-tag reproduction is not yet established. Source: <https://github.com/vadimgrn/usbip-win2>. |
-| HidHide installer | 1.5.230; `nefarius/HidHide` tag `v1.5.230.0`, commit `722d997ce75db58f5aa36e40ca920f99022c020a` | `extras/HidHide_1.5.230_x64.exe` — `F4BBBCB82E6258641B887C74BC81C4C5F66E4AA811808DFC304347687B7605F6` | `extras/HidHide-1.5.230-LICENSE.txt` | Version/source candidate and a valid Nefarius signature are known; reproducible binary-to-source proof is not recorded. Source: <https://github.com/nefarius/HidHide>. |
-| FakerInput driver installers | 0.1.0; `Ryochan7/FakerInput` tag `v0.1.0`, commit `0bf881f603dc40c4a0a2eef3d8d8da6196c405dc` | x64 `extras/FakerInput_0.1.0_x64.msi` — `30CF218B624740A91BE4FCCA3ADFB4550BA8CC8F31AC9625FE39D238E64D13EA`; x86 `extras/FakerInput_0.1.0_x86.msi` — `0C0A01EEF8C57C9B3DB917131995A10ADB3599CC643D2F27AD28D9511B96DEC1` | `extras/FakerInput-0.1.0-LICENSE.txt` | Version/source candidate and valid Travis Nickles signatures are known; reproducible binary-to-source proof is not recorded. Source: <https://github.com/Ryochan7/FakerInput>. |
-| RNNoise native audio suppressor | NuGet package `YellowDogMan.RRNoise.NET` 0.1.9; tag/commit `0.1.9` / `73189a685823d2db25a6c94edd7b69265309c0db` | published `rnnoise.dll` — `12E19BF7A18D13E092A5FBE5A7C5B2081F5E7B56F6D77AEAB5837335F44CEEDF` | Package metadata; no RNNoise-specific notice is copied into the publish. | Package version and native hash are pinned in source, but build provenance and publish notice remain incomplete. Source: <https://github.com/Yellow-Dog-Man/RNNoise.Net>. |
-| FakerInput managed/native wrapper | Inherited binaries; managed wrapper reports 1.0.3 | x64 wrapper `4792671766A575394D3402A9365AF9908AF94E812EC1969BFE4975C0AB4F5430`; x64 native `7E3D67A3E6B4EF2ABA039A3B1E079ACDE3AD95E0286A87623949AD74607D1A50`; x86 wrapper `1A97250E793E22A7A961142C61BFED930F6A5080AAD739D32D79BE021E13B1A8`; x86 native `1A73F0D2CA7ECB19F00A390A3FD27BA3BA5E21C3363325EBBCC298EE10D10763` under `DS4Windows/libs/<arch>/FakerInputWrapper/` | No wrapper-specific license is packaged. | **Unresolved/release blocker:** exact source revisions and licenses for these inherited binaries are not recorded. |
-| SharpOSC managed binary | Inherited binary, assembly version 0.2.0.0 | x64 `DS4Windows/libs/x64/SharpOSC/SharpOSC.dll` — `6419A701CE8EF5BAAD072FF14C232A3557525BF8BB4E3FD6DED09B2D3F22F07E`; x86 equivalent — `2BA7A8C0D6459F16A05725159903A2725955A3AF6D69018CBC1F15DEFF87F1CE` | No SharpOSC-specific license is packaged. | **Unresolved/release blocker:** source revision and license linkage are not recorded. |
-| SbcSharp codec source compiled into the app | Vendored source, revision recorded in `NOTICE.md` | `DS4Windows/ThirdParty/SbcSharp/` | `DS4Windows/ThirdParty/SbcSharp/LICENSE.txt` and `NOTICE.md`, both copied to publish | Source and notice are established; compiled bytes are part of the application assembly. |
+## Verified release inputs
 
-Authenticode signer validation is useful identity evidence but is not a
-substitute for a reproducible source-to-binary chain.
+| Component | Source and binary evidence | License / notice |
+| --- | --- | --- |
+| Custom VIIPER backend 0.1.0 | `hbashton/VIIPER` tag `v0.1.0`, commit `fd298a04d7d229293be15b2af664405c9e68114c`; the official ZIP is SHA-256 `07BEB53FDB6856AFA6E0F31EDF210A8618CBC2304AB59AC23FB017B11082ADD7`, and its `viiper.exe` exactly matches `extras/VIIPER-0.1.0-x64.exe` (`AD14F2C9048D61B3447F2F79D7A122EDEA81E5DB52A1AC803D294E5BC9CD2324`). The executable is upstream-unsigned, so the archive and inner-file hashes are the identity proof. | The official release's complete `licenses.txt` is packaged as `extras/VIIPER-0.1.0-LICENSES.txt`. |
+| usbip-win2 0.9.7.7 | `vadimgrn/usbip-win2` tag `v.0.9.7.7`, commit `7c219953101cc5d0ec9a0bcb3eb87259cf72bedd`; the official release asset exactly matches `extras/USBip-0.9.7.7-x64.exe` (`51620FA5F9F8BE5932BC9D786DEEE557CE06D5407A99CAB490DCFAC71F185FEA`) and has the pinned valid Cloudyne Systems signer. | BSD-2-Clause text in `extras/USBip-0.9.7.7-LICENSE.txt`. |
+| HidHide 1.5.230 | `nefarius/HidHide` tag `v1.5.230.0`, commit `722d997ce75db58f5aa36e40ca920f99022c020a`; the official release asset exactly matches `extras/HidHide_1.5.230_x64.exe` (`F4BBBCB82E6258641B887C74BC81C4C5F66E4AA811808DFC304347687B7605F6`) and has the pinned valid Nefarius signer. | MIT text in `extras/HidHide-1.5.230-LICENSE.txt`. |
+| FakerInput driver 0.1.0 | `Ryochan7/FakerInput` tag `v0.1.0`, commit `0bf881f603dc40c4a0a2eef3d8d8da6196c405dc`; both official MSI assets exactly match the bundled x64 and x86 files and have the pinned valid Travis Nickles signer. | MIT text in `extras/FakerInput-0.1.0-LICENSE.txt`. |
+| RNNoise.NET 0.1.9 | NuGet content hash `2lqIr0648oA0qiUlbcTshFe4dm010Lyv+BaP2GGKfN+CI5DOrR7tV3X0kwgYvf/V3DDHllflWiQXhWT7+LTsEg==`; source tag/commit `0.1.9` / `73189a685823d2db25a6c94edd7b69265309c0db`; published `rnnoise.dll` SHA-256 `12E19BF7A18D13E092A5FBE5A7C5B2081F5E7B56F6D77AEAB5837335F44CEEDF`. | MIT text in `DS4Windows/ThirdParty/RNNoise.NET-LICENSE.txt`, copied to output and publish. |
+| SharpOSC 0.2.0 | Both tracked binaries embed source commit `6cd3eb265e64d62a92679290a44083ebad1ea579`; x64 SHA-256 `6419A701CE8EF5BAAD072FF14C232A3557525BF8BB4E3FD6DED09B2D3F22F07E`, x86 `2BA7A8C0D6459F16A05725159903A2725955A3AF6D69018CBC1F15DEFF87F1CE`. | Upstream MIT text in `DS4Windows/ThirdParty/SharpOSC-LICENSE.txt`, copied to output and publish. |
+| SbcSharp codec | Vendored source revision and modifications are recorded in `DS4Windows/ThirdParty/SbcSharp/NOTICE.md`; compiled bytes are part of the application assembly. | `DS4Windows/ThirdParty/SbcSharp/LICENSE.txt` and `NOTICE.md`, both copied to output and publish. |
 
-## Managed NuGet runtime dependencies
+The exact asset URLs, all individual artifact hashes, and signer certificate
+thumbprints are kept in the machine-readable contract rather than duplicated
+here.
 
-The project directly pins these runtime package versions in
-`DS4Windows/DS4WinWPF.csproj`: `bloomtom.HttpProgress` 2.3.2, `Concentus`
-2.2.2, `DotNetProjects.Extended.Wpf.Toolkit` 5.0.106, `H.NotifyIcon.Wpf`
-2.0.74, `MdXaml` 1.27.0, `NAudio` 2.2.1, `NLog` 5.1.1,
-`Ookii.Dialogs.Wpf` 5.0.1, `System.Management` 7.0.2, `System.Memory` 4.5.5,
-`TaskScheduler` 2.10.1, `WPFLocalizeExtension` 3.9.4, and
-`WpfScreenHelper` 2.1.0. `Microsoft.Windows.CsWin32` 0.3.106 is a private
-build/analyzer dependency. NuGet package metadata is the current source and
-license record.
+## Remaining public-release licensing decision
 
-There is no repository package lock or committed package-artifact hash set, so
-restored transitive binaries are version-resolved rather than reproducibly
-mapped. A release process must capture the resolved dependency graph, package
-hashes/signatures, and notices; Phase 0 does not update packages.
+The inherited FakerInput integration uses two additional binary repositories:
 
-## Repository-only and externally supplied items
+- `FakerInputWrapper.dll` embeds exact source commit
+  `a6ba4055d4c53c7b748f182c4d136e433a2400dc` from
+  `Ryochan7/FakerInputWrapper`.
+- `FakerInputDll.dll` corresponds to `Ryochan7/FakerInputDll`, but the binary
+  embeds no source revision.
 
-- `extras/Virtual Bus Driver.zip` has SHA-256
-  `3DD36E17242F80AB3D9C5DE8F402BE3FF768A30AD83ADE4DB05CB1563AB614E7`.
-  It appears to contain legacy ScpVBus/DIFx artifacts, has no project,
-  installer, or post-build reference, and is not distributed by the current
-  application project. Exact provenance is unresolved; retain it until an
-  explicit repository-cleanup decision.
-- `vJoyInterface.dll` is not bundled. The inherited vJoy integration probes an
-  external installation by library name; its source and license belong to
-  that external installation.
-- NVIDIA Audio Effects libraries are not bundled. They are optional vendor
-  files loaded only from NVIDIA locations below Windows Program Files.
-- `DS4Windows/Resources/ControllerArtwork.NOTICE.txt` records the controller
-  artwork notice and is copied into published output.
+The three repositories are companion projects from the same author and period,
+and the wrappers were inherited through the GPL-licensed DS4Windows lineage.
+That is meaningful redistribution evidence. The wrapper repositories, however,
+do not explicitly say whether the FakerInput driver's MIT license covers them.
+This gate does **not** conclude that they are outside the MIT license or that
+redistribution is prohibited; it records that the license scope is not proven
+well enough for a first public release.
 
-## Release blockers
+The four x64/x86 binary hashes are pinned in the manifest, so byte substitution
+is detected. Public release composition remains intentionally blocked until one
+of these evidence-based resolutions is recorded:
 
-Before a public release, establish the exact source/build chain and complete
-license notices for the custom VIIPER binary, FakerInput wrapper binaries, and
-SharpOSC binaries. Also capture a locked NuGet dependency graph and resolve or
-remove the stale virtual-bus archive through an explicit product decision.
+1. the author confirms that the existing FakerInput MIT license covers both
+   wrapper repositories, preferably by adding their `LICENSE` files;
+2. the author confirms a GPL grant for the wrappers and supplies or identifies
+   the exact corresponding native source revision; or
+3. a later owner-approved engineering decision replaces or removes the
+   integration after real FakerInput validation.
+
+The smallest capability-preserving route is written confirmation or explicit
+license files from the author. No runtime behavior was changed during this
+provenance gate.
+
+## Managed package graph
+
+Every .NET/WiX project commits `packages.lock.json`. CI restores in locked mode,
+and installer composition sets `RestoreLockedMode=true`. NuGet package versions
+and content hashes therefore fail closed if the resolved dependency graph
+changes without a reviewed lock update.
+
+## Repository cleanup and external components
+
+The unreferenced legacy `extras/Virtual Bus Driver.zip` and the Visual Studio
+code snippet `extras/gplv3.snippet` were removed during this gate. Neither was
+used by the project, publish scripts, or installer, and the snippet was not a
+redistributable license notice.
+
+`vJoyInterface.dll` is not bundled; inherited vJoy support probes an external
+installation. NVIDIA Audio Effects libraries are likewise optional files
+loaded only from NVIDIA locations under Windows Program Files. Their binaries
+and licenses are not release inputs for DS4Windows Reworked.
+
+`DS4Windows/Resources/ControllerArtwork.NOTICE.txt` remains the controller
+artwork attribution and is copied into published output.

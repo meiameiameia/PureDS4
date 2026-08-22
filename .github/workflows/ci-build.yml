@@ -26,8 +26,16 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore .\DS4WindowsWPF.sln --locked-mode
+
+      - name: Test release-input gate
+        run: python .\utils\test-release-inputs.py
 
       - name: Run tests (x64)
         # NOTE: Three tests are excluded below. They are exact-string XML round-trip
@@ -61,7 +69,15 @@ jobs:
           python-version: "3.10"
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: |
+          dotnet restore .\DS4WindowsWPF.sln --locked-mode
+          dotnet restore .\installer\DS4Windows.SetupActions\DS4Windows.SetupActions.csproj --locked-mode
+          dotnet restore .\installer\DS4Windows.Bootstrapper\DS4Windows.Bootstrapper.csproj --locked-mode
+          dotnet restore .\installer\DS4Windows.Package\DS4Windows.Package.wixproj --locked-mode
+          dotnet restore .\installer\DS4Windows.Bundle\DS4Windows.Bundle.wixproj --locked-mode
+
+      - name: Validate content-addressed release inputs
+        run: python .\utils\validate-release-inputs.py --verify-signatures
 
       - name: Compute version
         id: ver
@@ -78,7 +94,7 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Build ${{ matrix.platform }}
-        run: dotnet publish .\DS4Windows\DS4WinWPF.csproj -c Release /p:platform=${{ matrix.platform }} -r win-${{ matrix.platform }} --self-contained true -o .\bin\${{ matrix.platform }}\Release\output
+        run: dotnet publish .\DS4Windows\DS4WinWPF.csproj -c Release /p:platform=${{ matrix.platform }} -r win-${{ matrix.platform }} --self-contained true --no-restore -o .\bin\${{ matrix.platform }}\Release\output
 
       - name: Package ${{ matrix.platform }}
         run: python .\utils\post-build.py .\bin\${{ matrix.platform }}\Release\output . ${{ env.VERSION }}

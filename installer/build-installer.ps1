@@ -13,6 +13,15 @@ param(
 $ErrorActionPreference = "Stop"
 $repoRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot ".."))
 $publishPath = [IO.Path]::GetFullPath($PublishRoot)
+$releaseInputValidator = Join-Path $repoRoot "utils\validate-release-inputs.py"
+$releaseInputArguments = @($releaseInputValidator, "--verify-signatures")
+if ($RequireSigning) {
+    $releaseInputArguments += "--require-release-ready"
+}
+& python @releaseInputArguments
+if ($LASTEXITCODE -ne 0) {
+    throw "Release input validation failed."
+}
 if (-not $OutputDirectory) {
     $OutputDirectory = Join-Path $repoRoot "bin\x64\Release\installer"
 }
@@ -132,6 +141,7 @@ if ([string]::IsNullOrWhiteSpace($DisplayVersion) -or
 if (-not $SkipApplicationPublish) {
     & dotnet publish (Join-Path $repoRoot "DS4Windows\DS4WinWPF.csproj") `
         -c Release -p:Platform=x64 -r win-x64 --self-contained true `
+        -p:RestoreLockedMode=true `
         -p:AssemblyVersion=$ProductVersion -p:FileVersion=$ProductVersion `
         -p:Version=$ProductVersion -p:InformationalVersion=$DisplayVersion `
         -o $publishPath
@@ -166,6 +176,7 @@ if ($LASTEXITCODE -ne 0) { throw "Installer manifest generation failed." }
 
 & dotnet publish (Join-Path $repoRoot "installer\DS4Windows.SetupActions\DS4Windows.SetupActions.csproj") `
     -c Release -p:Platform=x64 -p:Version=$ProductVersion `
+    -p:RestoreLockedMode=true `
     -r win-x64 --self-contained true `
     -o (Join-Path $repoRoot "installer\DS4Windows.SetupActions\bin\x64\Release\publish")
 if ($LASTEXITCODE -ne 0) { throw "Setup action host build failed." }
@@ -174,6 +185,7 @@ Invoke-SignAndVerify $setupActions
 
 & dotnet publish (Join-Path $repoRoot "installer\DS4Windows.Bootstrapper\DS4Windows.Bootstrapper.csproj") `
     -c Release -p:Platform=x64 -p:Version=$ProductVersion `
+    -p:RestoreLockedMode=true `
     -r win-x64 --self-contained true `
     -o (Join-Path $repoRoot "installer\DS4Windows.Bootstrapper\bin\x64\Release\publish")
 if ($LASTEXITCODE -ne 0) { throw "Bootstrapper UI build failed." }
@@ -182,6 +194,7 @@ Invoke-SignAndVerify (Join-Path $baRoot "DS4Windows.Bootstrapper.exe")
 
 $packageProject = Join-Path $repoRoot "installer\DS4Windows.Package\DS4Windows.Package.wixproj"
 & dotnet build $packageProject -t:Rebuild -c Release -p:Platform=x64 `
+    -p:RestoreLockedMode=true `
     -p:Version=$ProductVersion -p:ProductVersion=$ProductVersion `
     -p:PublishRoot=$publishPath
 if ($LASTEXITCODE -ne 0) { throw "DS4Windows MSI build failed." }
@@ -195,6 +208,7 @@ if ($setupActionsHash -notmatch '^[0-9A-F]{64}$') {
 $extrasRoot = Join-Path $repoRoot "extras"
 $bundleProject = Join-Path $repoRoot "installer\DS4Windows.Bundle\DS4Windows.Bundle.wixproj"
 & dotnet build $bundleProject -t:Rebuild -c Release -p:Platform=x64 `
+    -p:RestoreLockedMode=true `
     -p:Version=$ProductVersion -p:BundleVersion=$BundleVersion `
     -p:DisplayVersion=$DisplayVersion `
     -p:MsiPath=$msiPath -p:BootstrapperRoot=$baRoot `

@@ -37,9 +37,12 @@ required_offline_files = (
     "hostfxr.dll",
     "extras/install-viiper-backend.ps1",
     "extras/VIIPER-0.1.0-x64.exe",
+    "extras/VIIPER-0.1.0-LICENSES.txt",
     "extras/USBip-0.9.7.7-x64.exe",
     "extras/HidHide_1.5.230_x64.exe",
     "extras/FakerInput_0.1.0_x64.msi",
+    "ThirdParty/RNNoise.NET-LICENSE.txt",
+    "ThirdParty/SharpOSC-LICENSE.txt",
 )
 missing_offline_files = [
     relative_path
