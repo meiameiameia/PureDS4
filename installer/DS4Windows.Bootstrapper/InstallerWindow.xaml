@@ -1,4 +1,4 @@
-<Window x:Class="DS4Windows.Bootstrapper.InstallerWindow"
+﻿<Window x:Class="DS4Windows.Bootstrapper.InstallerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="DS4Windows Reworked Setup" Width="760" Height="640" MinWidth="700" MinHeight="580"
@@ -76,7 +76,7 @@
     </Grid.RowDefinitions>
     <Grid Grid.Row="0" Margin="0,0,0,20">
       <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-      <Border Width="58" Height="58" CornerRadius="2" Background="#142838">
+      <Border Width="58" Height="58" CornerRadius="2" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
         <Image Source="DS4W.ico" Width="42" Height="42" Stretch="Uniform" />
       </Border>
       <StackPanel Grid.Column="1" Margin="16,2,0,0">
@@ -145,7 +145,7 @@
 
       <Grid x:Name="CompletePage" Visibility="Collapsed">
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Stretch">
-          <Border Width="64" Height="64" CornerRadius="32" Background="#2532B67A" HorizontalAlignment="Center"><TextBlock Text="✓" FontSize="34" Foreground="{StaticResource SuccessBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+          <Border Width="64" Height="64" CornerRadius="32" Background="{DynamicResource CardBrush}" BorderBrush="{StaticResource SuccessBrush}" BorderThickness="1" HorizontalAlignment="Center"><TextBlock Text="✓" FontSize="34" Foreground="{StaticResource SuccessBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
           <TextBlock x:Name="CompleteTitle" Text="DS4Windows Reworked is ready" FontSize="25" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,20,0,0" />
           <TextBlock x:Name="CompleteDescription" Text="Installation and verification completed successfully." TextAlignment="Center" Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Center" Margin="0,8,0,22" />
           <CheckBox x:Name="LaunchCheckBox" IsChecked="True" Content="Launch DS4Windows Reworked" HorizontalAlignment="Center" />
@@ -173,7 +173,7 @@
             <Button Style="{StaticResource SecondaryButton}" Content="Copy diagnostics" Margin="0,0,10,0" Click="CopyDiagnostics_Click" />
             <Button Style="{StaticResource PrimaryButton}" Content="Retry" Click="Retry_Click" />
           </StackPanel>
-          <Button Content="Close" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource MutedBrush}" Cursor="Hand" Margin="0,18,0,0" Click="CloseFailure_Click" />
+          <Button Content="Close" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource MutedBrush}" Margin="0,18,0,0" Click="CloseFailure_Click" />
         </StackPanel>
       </Grid>
     </Grid>

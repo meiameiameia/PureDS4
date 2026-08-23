@@ -1,7 +1,8 @@
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using WixToolset.BootstrapperApplicationApi;
 
@@ -58,9 +59,26 @@ namespace DS4Windows.Bootstrapper
                     break;
             }
 
-            Ds4Status.Text = PackageStatus(packages, "DS4WindowsMsi");
-            ViiperStatus.Text = infrastructureHealthy ? "Ready" : "Will install or repair";
-            UsbipStatus.Text = infrastructureHealthy ? "Ready" : "Will verify before changing";
+            SetStatus(Ds4Status, PackageStatus(packages, "DS4WindowsMsi"));
+            SetStatus(ViiperStatus,
+                infrastructureHealthy ? "Ready" : "Will install or repair");
+            SetStatus(UsbipStatus,
+                infrastructureHealthy ? "Ready" : "Will verify before changing");
+        }
+
+        /// <summary>
+        /// Renders a component status the way the application renders state:
+        /// colour and glyph together, so "Ready" and "will be changed" are not
+        /// the same accent blue.
+        /// </summary>
+        private void SetStatus(TextBlock target, string state)
+        {
+            bool ready = state.StartsWith("Ready", StringComparison.OrdinalIgnoreCase)
+                || state.StartsWith("Installed", StringComparison.OrdinalIgnoreCase);
+            target.Text = ready ? "✓ " + state : state;
+            target.Foreground = (Brush)(ready
+                ? FindResource("SuccessBrush")
+                : FindResource("AccentBrush"));
         }
 
         internal void ShowPlanning()
