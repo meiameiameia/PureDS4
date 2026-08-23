@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -608,6 +608,35 @@ namespace DS4Windows.Bootstrapper
             }
         }
 
+        /// <summary>
+        /// Resolves the planned state for a package that only ever executes
+        /// during uninstall.
+        ///
+        /// Burn caches a package's payload only when the package is planned.
+        /// Leaving these at None during install means their payloads are never
+        /// written to the package cache, so the uninstall that finally needs
+        /// them has to re-acquire from the bundle's attached container. That
+        /// resolves against the original setup executable, which is normally
+        /// deleted after installing, and uninstall then fails with
+        /// 0x80070002 (ERROR_FILE_NOT_FOUND) before removing anything.
+        ///
+        /// Requesting Cache on the forward actions puts the payload on disk
+        /// while the source is still available, so uninstall never depends on
+        /// the user having kept the installer.
+        /// </summary>
+        private RequestState PlanUninstallOnlyPackage(bool shouldRun)
+        {
+            if (shouldRun)
+            {
+                return RequestState.Present;
+            }
+
+            return plannedAction == LaunchAction.Install ||
+                   plannedAction == LaunchAction.Repair
+                ? RequestState.Cache
+                : RequestState.None;
+        }
+
         private void OnPlanPackageBegin(object sender, PlanPackageBeginEventArgs e)
         {
             if (string.Equals(e.PackageId, "PostUninstallCleanup",
@@ -616,11 +645,10 @@ namespace DS4Windows.Bootstrapper
                 // Burn unwinds in reverse chain order. The package is first
                 // in the chain so this direct-uninstall cleanup runs after
                 // MSI, and never during an outgoing upgrade bundle.
-                e.State = !infrastructureRecoveryPass &&
+                e.State = PlanUninstallOnlyPackage(
+                    !infrastructureRecoveryPass &&
                     plannedAction == LaunchAction.Uninstall &&
-                    command.Relation != RelationType.Upgrade
-                    ? RequestState.Present
-                    : RequestState.None;
+                    command.Relation != RelationType.Upgrade);
                 return;
             }
 
@@ -646,10 +674,9 @@ namespace DS4Windows.Bootstrapper
                 // is therefore the first executable action during direct or
                 // related-bundle uninstall, before infrastructure or MSI
                 // ownership is removed.
-                e.State = !infrastructureRecoveryPass &&
-                    plannedAction == LaunchAction.Uninstall
-                    ? RequestState.Present
-                    : RequestState.None;
+                e.State = PlanUninstallOnlyPackage(
+                    !infrastructureRecoveryPass &&
+                    plannedAction == LaunchAction.Uninstall);
                 return;
             }
 
@@ -661,11 +688,10 @@ namespace DS4Windows.Bootstrapper
                 // chain so an outgoing related bundle can unregister without
                 // deleting the incoming backend. Only a direct Add/Remove
                 // Programs uninstall explicitly runs this dedicated action.
-                e.State = !infrastructureRecoveryPass &&
+                e.State = PlanUninstallOnlyPackage(
+                    !infrastructureRecoveryPass &&
                     plannedAction == LaunchAction.Uninstall &&
-                    command.Relation != RelationType.Upgrade
-                    ? RequestState.Present
-                    : RequestState.None;
+                    command.Relation != RelationType.Upgrade);
                 return;
             }
 
