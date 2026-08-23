@@ -56,9 +56,8 @@ namespace DS4WinWPF.DS4Forms
             currentOutDevVM = new CurrentOutDeviceViewModel(controlService, outputMan);
             currentOutDevVM.SelectedIndexChanged += CurrentOutDevVM_SelectedIndexChanged;
             currentOutDevLV.DataContext = currentOutDevVM;
-            sideStackPanel.DataContext = currentOutDevVM;
-            plugDevStackPanel.DataContext = currentOutDevVM;
-            outSlotStackPanel.DataContext = null;
+            actionToolbar.DataContext = currentOutDevVM;
+            reservationPanel.DataContext = null;
 
             //permanentDevVM = new PermanentOutDevViewModel(controlService, outputMan);
             //permanentOutDevLV.DataContext = permanentDevVM;
@@ -69,11 +68,11 @@ namespace DS4WinWPF.DS4Forms
             int idx = currentOutDevVM.SelectedIndex;
             if (idx >= 0)
             {
-                outSlotStackPanel.DataContext = currentOutDevVM.SlotDeviceEntries[idx];
+                reservationPanel.DataContext = currentOutDevVM.SlotDeviceEntries[idx];
             }
             else
             {
-                outSlotStackPanel.DataContext = null;
+                reservationPanel.DataContext = null;
             }
         }
 

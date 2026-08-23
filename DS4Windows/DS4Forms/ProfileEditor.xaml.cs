@@ -10,7 +10,6 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -21,7 +20,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using Application = System.Windows.Application;
 using Button = System.Windows.Controls.Button;
-using MessageBox = System.Windows.MessageBox;
+using MessageBox = DS4WinWPF.DS4Forms.AppDialog;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using UserControl = System.Windows.Controls.UserControl;
@@ -78,13 +77,8 @@ namespace DS4WinWPF.DS4Forms
         private Dictionary<Button, Geometry> vectorHoverGeometries = new Dictionary<Button, Geometry>();
         private readonly HashSet<Button> rasterHitGeometryButtons = new HashSet<Button>();
 
-        private bool keepsize;
         private bool controllerReadingsTabActive = false;
-
-        public bool Keepsize
-        {
-            get => keepsize;
-        }
+        private bool sectionNavigationChanging;
 
         public int DeviceNum
         {
@@ -1706,13 +1700,29 @@ namespace DS4WinWPF.DS4Forms
 
         public void SelectWorkspaceSection(int sectionIndex)
         {
+            // The navigation list declares SelectedIndex in XAML, so it raises
+            // SelectionChanged while InitializeComponent is still building the
+            // tree. The workspace tab controls are declared after it and do not
+            // exist yet at that point.
+            if (sectionNavigationList == null || sidebarTabControl == null ||
+                profileSettingsTabCon == null)
+            {
+                return;
+            }
+
             int nextSection = Math.Clamp(sectionIndex, 0, 9);
+            if (sectionNavigationList.SelectedIndex != nextSection)
+            {
+                sectionNavigationChanging = true;
+                sectionNavigationList.SelectedIndex = nextSection;
+                sectionNavigationChanging = false;
+            }
+
             if (nextSection <= 2)
             {
                 profileSettingsTabCon.Visibility = Visibility.Collapsed;
                 sidebarTabControl.Visibility = Visibility.Visible;
                 sidebarTabControl.SelectedIndex = nextSection;
-                AnimateWorkspacePanel(sidebarTabControl);
             }
             else
             {
@@ -1725,21 +1735,20 @@ namespace DS4WinWPF.DS4Forms
                 sidebarTabControl.Visibility = Visibility.Collapsed;
                 profileSettingsTabCon.Visibility = Visibility.Visible;
                 profileSettingsTabCon.SelectedIndex = nextSection - 3;
-                AnimateWorkspacePanel(profileSettingsTabCon);
             }
         }
 
-        private static void AnimateWorkspacePanel(UIElement panel)
+        private void SectionNavigationList_SelectionChanged(object sender,
+            SelectionChangedEventArgs e)
         {
-            panel.Opacity = 1.0;
-            TranslateTransform translate = new TranslateTransform();
-            panel.RenderTransform = translate;
+            if (!IsInitialized || sectionNavigationChanging ||
+                sectionNavigationList == null ||
+                sectionNavigationList.SelectedIndex < 0)
+            {
+                return;
+            }
 
-            CubicEase easing = new CubicEase { EasingMode = EasingMode.EaseOut };
-            panel.BeginAnimation(OpacityProperty, new DoubleAnimation(0.25, 1.0,
-                TimeSpan.FromMilliseconds(170)) { EasingFunction = easing });
-            translate.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(12.0, 0.0,
-                TimeSpan.FromMilliseconds(190)) { EasingFunction = easing });
+            SelectWorkspaceSection(sectionNavigationList.SelectedIndex);
         }
 
         public void CancelEdit()
@@ -1807,12 +1816,14 @@ namespace DS4WinWPF.DS4Forms
                 useControllerUD.Value = device + 1;
                 conReadingsUserCon.UseDevice(device, device);
                 contReadingsTab.IsEnabled = true;
+                controllerReadingsNavigationItem.IsEnabled = true;
             }
             else
             {
                 useControllerUD.Value = 1;
                 conReadingsUserCon.UseDevice(0, Global.TEST_PROFILE_INDEX);
                 contReadingsTab.IsEnabled = true;
+                controllerReadingsNavigationItem.IsEnabled = true;
             }
 
             conReadingsUserCon.EnableControl(false);
@@ -2165,14 +2176,6 @@ namespace DS4WinWPF.DS4Forms
             }
 
             return result;
-        }
-
-        private void KeepSizeBtn_Click(object sender, RoutedEventArgs e)
-        {
-            keepsize = true;
-            ImageSourceConverter c = new ImageSourceConverter();
-            sizeImage.Source =
-                c.ConvertFromString($"{Global.ASSEMBLY_RESOURCE_PREFIX}component/Resources/checked.png") as ImageSource;
         }
 
         public void Close()

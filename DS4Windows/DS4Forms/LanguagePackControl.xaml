@@ -11,8 +11,9 @@
              mc:Ignorable="d" 
              d:DesignHeight="30" d:DesignWidth="340">
     <StackPanel Orientation="Horizontal">
-        <Label x:Name="label1" Content="{lex:Loc LangPackControl.UseLangPack}" ContentStringFormat="{}{0}:" />
-        <ComboBox x:Name="cbCulture" Width="200" Margin="10,0,0,0"
+        <Label x:Name="label1" Content="{lex:Loc LangPackControl.UseLangPack}" ContentStringFormat="{}{0}:"
+               Width="150" Padding="0,0,8,0" VerticalContentAlignment="Center" />
+        <ComboBox x:Name="cbCulture" Width="200"
                   ItemsSource="{Binding LangPackList}" SelectedIndex="{Binding SelectedIndex,FallbackValue=0}" IsEnabled="False">
             <ComboBox.ItemTemplate>
                 <DataTemplate>

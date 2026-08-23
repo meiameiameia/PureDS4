@@ -4,14 +4,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignHeight="760" d:DesignWidth="1040"
-             HorizontalAlignment="Left" VerticalAlignment="Stretch"
-             Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType={x:Type Window}}, Converter={StaticResource ShellViewportWidth}, ConverterParameter=318}">
+             HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
     <UserControl.Resources>
         <Style x:Key="FeatureCard" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource CardBackgroundColor}" />
             <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="7" />
+            <Setter Property="CornerRadius" Value="2" />
             <Setter Property="Padding" Value="0" />
         </Style>
         <Style x:Key="FeatureCardHeader" TargetType="Border">
@@ -142,7 +141,7 @@
                                     <ColumnDefinition Width="50" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <Border Width="42" Height="42" CornerRadius="6"
+                                <Border Width="42" Height="42" CornerRadius="2"
                                         Background="{DynamicResource RaisedBackgroundColor}"
                                         BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
                                     <TextBlock Text="&#xE767;" FontFamily="Segoe MDL2 Assets" FontSize="20"
@@ -160,7 +159,7 @@
                         <StackPanel Grid.Row="1" Margin="20">
                             <Border Background="{DynamicResource RaisedBackgroundColor}"
                                     BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
-                                    CornerRadius="6" Padding="18,15">
+                                    CornerRadius="2" Padding="18,15">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="42" />
@@ -205,13 +204,14 @@
                                 <Button Grid.Column="1" Content="&#xE72C;" FontFamily="Segoe MDL2 Assets"
                                         Width="42" Height="42" Margin="8,0,0,0"
                                         ToolTip="Refresh running audio sessions"
+                                        AutomationProperties.Name="Refresh running audio sessions"
                                         Click="RefreshSources_Click" />
                             </Grid>
 
                             <Border Margin="0,12,0,0" Padding="12,10"
                                     Background="{DynamicResource RaisedBackgroundColor}"
                                     BorderBrush="{DynamicResource BorderColor}"
-                                    BorderThickness="1" CornerRadius="5">
+                                    BorderThickness="1" CornerRadius="2">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
@@ -238,7 +238,7 @@
                                     Margin="0,12,0,0" Padding="12,10"
                                     Background="{DynamicResource RaisedBackgroundColor}"
                                     BorderBrush="{DynamicResource BorderColor}"
-                                    BorderThickness="1" CornerRadius="5"
+                                    BorderThickness="1" CornerRadius="2"
                                     Visibility="Collapsed">
                                 <Grid>
                                     <Grid.RowDefinitions>
@@ -320,7 +320,7 @@
                                     <ColumnDefinition Width="50" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <Border Width="42" Height="42" CornerRadius="6"
+                                <Border Width="42" Height="42" CornerRadius="2"
                                         Background="{DynamicResource RaisedBackgroundColor}"
                                         BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
                                     <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="20"
@@ -343,7 +343,7 @@
                             </Grid.RowDefinitions>
                             <Border Background="{DynamicResource RaisedBackgroundColor}"
                                     BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
-                                    CornerRadius="6" Padding="16">
+                                    CornerRadius="2" Padding="16">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />

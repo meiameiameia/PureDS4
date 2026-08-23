@@ -9,8 +9,9 @@
              lex:ResxLocalizationProvider.DefaultDictionary="Strings"
              xmlns:local="clr-namespace:DS4WinWPF.DS4Forms"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="460">
-    <DockPanel LastChildFill="False">
+             d:DesignHeight="450" d:DesignWidth="460"
+             Background="{DynamicResource SurfaceBaseBrush}">
+    <DockPanel LastChildFill="False" Margin="12">
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
             <StackPanel Orientation="Horizontal" Width="200">
                 <Label x:Name="inputContNum" Content="#" FontWeight="Bold"/>
@@ -19,7 +20,7 @@
                         <SolidColorBrush x:Name="inpuDelayBackBrush" Color="Transparent" />
                     </Label.Background>
                     <Label.Foreground>
-                        <SolidColorBrush x:Name="inpuDelayForeBrush" Color="Black"/>
+                        <SolidColorBrush x:Name="inpuDelayForeBrush" Color="Transparent"/>
                     </Label.Foreground>
                 </Label>
             </StackPanel>
@@ -40,12 +41,12 @@
                     <Rectangle Width="130" Height="130" Stroke="{DynamicResource ForegroundColor}">
                     </Rectangle>
                     <Ellipse x:Name="lsDeadEllipse" Width="{Binding Path=Width, ElementName=lsCanvas}"
-                             Height="{Binding Path=Height, ElementName=lsCanvas}" Fill="#4FCF1F1F">
+                             Height="{Binding Path=Height, ElementName=lsCanvas}" Fill="{DynamicResource StateErrorBrush}" Opacity="0.31">
                     </Ellipse>
                     <Ellipse x:Name="lsDriftEllipse" Width="{Binding Path=Width, ElementName=lsCanvas}"
-                            Height="{Binding Path=Height, ElementName=lsCanvas}" Fill="#FFCF1F1F">
+                            Height="{Binding Path=Height, ElementName=lsCanvas}" Fill="{DynamicResource StateErrorBrush}">
                     </Ellipse>
-                    <Rectangle x:Name="lsMapValRec" Width="6" Height="6" Canvas.Left="62" Canvas.Top="62" Fill="#FFABABAB">
+                    <Rectangle x:Name="lsMapValRec" Width="6" Height="6" Canvas.Left="62" Canvas.Top="62" Fill="{DynamicResource StateNeutralBrush}">
                     </Rectangle>
                     <Rectangle x:Name="lsValRec" Width="6" Height="6" Canvas.Left="62" Canvas.Top="62" Fill="{DynamicResource ForegroundColor}">
                     </Rectangle>
@@ -79,12 +80,12 @@
                                Height="{Binding Path=Height, ElementName=rsCanvas}" Stroke="{DynamicResource ForegroundColor}">
                     </Rectangle>
                     <Ellipse x:Name="rsDeadEllipse" Width="{Binding Path=Width, ElementName=rsCanvas}"
-                             Height="{Binding Path=Height, ElementName=rsCanvas}" Fill="#4FCF1F1F">
+                             Height="{Binding Path=Height, ElementName=rsCanvas}" Fill="{DynamicResource StateErrorBrush}" Opacity="0.31">
                     </Ellipse>
                     <Ellipse x:Name="rsDriftEllipse" Width="{Binding Path=Width, ElementName=rsCanvas}"
-                             Height="{Binding Path=Height, ElementName=rsCanvas}" Fill="#FFCF1F1F">
+                             Height="{Binding Path=Height, ElementName=rsCanvas}" Fill="{DynamicResource StateErrorBrush}">
                     </Ellipse>
-                    <Rectangle x:Name="rsMapValRec" Width="6" Height="6" Canvas.Left="62" Canvas.Top="62" Fill="#FFABABAB">
+                    <Rectangle x:Name="rsMapValRec" Width="6" Height="6" Canvas.Left="62" Canvas.Top="62" Fill="{DynamicResource StateNeutralBrush}">
                     </Rectangle>
                     <Rectangle x:Name="rsValRec" Width="6" Height="6" Canvas.Left="62" Canvas.Top="62" Fill="{DynamicResource ForegroundColor}">
                     </Rectangle>
@@ -117,13 +118,13 @@
                                Height="{Binding Path=Height, ElementName=sixaxisCanvas}" Stroke="{DynamicResource ForegroundColor}">
                     </Rectangle>
                     <Ellipse x:Name="sixAxisDeadEllipse" Width="{Binding Path=Width, ElementName=sixaxisCanvas}"
-                             Height="{Binding Path=Height, ElementName=sixaxisCanvas}" Fill="#FFCF1F1F">
+                             Height="{Binding Path=Height, ElementName=sixaxisCanvas}" Fill="{DynamicResource StateErrorBrush}">
                     </Ellipse>
-                    <Rectangle x:Name="sixAxisMapValRec" Width="6" Height="6" Canvas.Left="62" Canvas.Top="62" Fill="#FFABABAB">
+                    <Rectangle x:Name="sixAxisMapValRec" Width="6" Height="6" Canvas.Left="62" Canvas.Top="62" Fill="{DynamicResource StateNeutralBrush}">
                     </Rectangle>
                     <Rectangle x:Name="sixAxisValRec" Width="6" Height="6" Canvas.Left="62" Canvas.Top="62" Fill="{DynamicResource ForegroundColor}">
                     </Rectangle>
-                    <Ellipse x:Name="gyroCalEllipse" Fill="#FF1FCF1F" Height="32" Canvas.Left="90" Canvas.Top="10" Width="32"/>
+                    <Ellipse x:Name="gyroCalEllipse" Fill="{DynamicResource StateSuccessBrush}" Height="32" Canvas.Left="90" Canvas.Top="10" Width="32"/>
                 </Canvas>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
@@ -162,7 +163,7 @@
                                 </TransformGroup>
                             </Label.RenderTransform>
                             <Label.Foreground>
-                                <SolidColorBrush x:Name="l2ValLbBrush" Color="Black" />
+                                <SolidColorBrush x:Name="l2ValLbBrush" Color="Transparent" />
                             </Label.Foreground>
                         </Label>
                         <Slider x:Name="l2Slider" Orientation="Vertical" Minimum="0" Maximum="255" Value="0" Height="80" Focusable="False" />
@@ -189,7 +190,7 @@
                                 </TransformGroup>
                             </Label.RenderTransform>
                             <Label.Foreground>
-                                <SolidColorBrush x:Name="r2ValLbBrush" Color="Black" />
+                                <SolidColorBrush x:Name="r2ValLbBrush" Color="Transparent" />
                             </Label.Foreground>
                         </Label>
                     </StackPanel>

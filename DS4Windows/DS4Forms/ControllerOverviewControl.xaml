@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:local="clr-namespace:DS4WinWPF.DS4Forms"
              mc:Ignorable="d"
              d:DesignHeight="720" d:DesignWidth="940">
     <UserControl.Resources>
@@ -17,9 +18,9 @@
         <Style x:Key="OverviewCardStyle" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource CardBackgroundColor}" />
             <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="5" />
-            <Setter Property="Padding" Value="18" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="CornerRadius" Value="2" />
+            <Setter Property="Padding" Value="14" />
         </Style>
 
         <Style x:Key="OverviewEyebrowStyle" TargetType="TextBlock">
@@ -49,10 +50,10 @@
         <Style x:Key="OverviewInsetCardStyle" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource RaisedBackgroundColor}" />
             <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="6" />
-            <Setter Property="Padding" Value="15" />
-            <Setter Property="Margin" Value="0,0,0,12" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="CornerRadius" Value="2" />
+            <Setter Property="Padding" Value="12" />
+            <Setter Property="Margin" Value="0,0,0,8" />
         </Style>
 
         <Style x:Key="OverviewSettingsComboBoxStyle" TargetType="ComboBox"
@@ -203,7 +204,7 @@
                 </Border>
                 <TextBlock Text="No controller selected" Margin="0,16,0,5"
                            FontSize="20" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                <TextBlock Text="Connect a controller, then choose it from the device cards in the upper-left corner."
+                <TextBlock Text="Connect a controller, then select it on Home."
                            Foreground="{DynamicResource MutedForegroundColor}" TextAlignment="Center"
                            TextWrapping="Wrap" />
             </StackPanel>
@@ -236,7 +237,7 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <Border Width="152" Height="92" CornerRadius="5" Margin="0,0,20,0"
+                        <Border Width="152" Height="92" CornerRadius="2" Margin="0,0,20,0"
                                 Background="{DynamicResource RaisedBackgroundColor}"
                                 BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
                             <Image Source="{Binding SelectedController.ControllerImageSource}"
@@ -275,9 +276,10 @@
                         <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="18,0,0,0">
                             <TextBlock Text="BATTERY" Style="{StaticResource OverviewEyebrowStyle}"
                                        HorizontalAlignment="Right" />
-                            <TextBlock Text="{Binding SelectedControllerBattery}" Margin="0,5,0,0"
-                                       FontSize="20" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource SuccessColor}" HorizontalAlignment="Right" />
+                            <local:StatusChip Label="{Binding SelectedControllerBattery}"
+                                              State="{Binding SelectedControllerBattery, Converter={StaticResource BatteryTextVisualState}}"
+                                              Margin="0,5,0,0"
+                                              HorizontalAlignment="Right" />
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -324,22 +326,11 @@
                     <Border Style="{StaticResource OverviewCardStyle}" Width="218" MinHeight="112" Margin="6">
                         <StackPanel>
                             <TextBlock Text="CONTROLLER STATUS" Style="{StaticResource OverviewEyebrowStyle}" />
-                            <TextBlock Text="{Binding SelectedControllerStartupTitle}"
-                                       Margin="0,11,0,3">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock" BasedOn="{StaticResource OverviewValueStyle}">
-                                        <Setter Property="Foreground" Value="{DynamicResource AccentColor}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SelectedControllerIsReady}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource SuccessColor}" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding SelectedControllerNeedsAttention}" Value="True">
-                                                <Setter Property="Foreground" Value="#FFFFB020" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
+                            <local:StatusChip Label="{Binding SelectedControllerStartupTitle}"
+                                              Detail="{Binding SelectedControllerStartupDetail}"
+                                              State="{Binding SelectedControllerStartupStage, Converter={StaticResource ControllerStartupStageVisualState}}"
+                                              Margin="0,11,0,3"
+                                              HorizontalAlignment="Left" />
                              <TextBlock Text="{Binding SelectedControllerStartupDetail}"
                                         TextWrapping="Wrap"
                                        Foreground="{DynamicResource MutedForegroundColor}" />
@@ -355,7 +346,7 @@
                         </Grid.RowDefinitions>
 
                         <StackPanel Margin="0,0,0,18">
-                            <TextBlock Text="Quick profile controls" FontSize="18" FontWeight="SemiBold" />
+                            <TextBlock Text="Profile settings" FontSize="18" FontWeight="SemiBold" />
                             <TextBlock Text="Every change is saved to the selected controller's active profile and applied automatically."
                                        Margin="0,3,0,0" TextWrapping="Wrap"
                                        Foreground="{DynamicResource MutedForegroundColor}" />
@@ -483,11 +474,11 @@
                                             </Grid>
                                         </StackPanel>
                                         <Border Grid.Row="4" Margin="0,10,0,0" Padding="9,7"
-                                                CornerRadius="4" Background="#26FFB020"
-                                                BorderBrush="#80FFB020" BorderThickness="1"
+                                                CornerRadius="2" Background="{DynamicResource SurfaceSelectedBrush}"
+                                                BorderBrush="{DynamicResource StateWarningBrush}" BorderThickness="1"
                                                 Visibility="{Binding AudioHapticsSpeakerOverrideActive, Converter={StaticResource BooleanToVisibilityConverter}}">
                                             <TextBlock Text="Audio Haptics is supplying this stream. Turn off Play this app through controller to choose another source."
-                                                       TextWrapping="Wrap" FontSize="11" Foreground="#FFFFC45C" />
+                                                       TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource StateWarningBrush}" />
                                         </Border>
                                     </Grid>
                                 </Border>

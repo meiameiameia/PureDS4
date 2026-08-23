@@ -27,7 +27,7 @@
 
         <Border Grid.Row="0" Background="{DynamicResource CardBackgroundColor}"
                 BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
-                CornerRadius="5" Padding="14,10" Margin="0,0,0,14">
+                CornerRadius="2" Padding="14,10" Margin="0,0,0,14">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -51,17 +51,56 @@
                     <Button x:Name="applyBtn" Content="{lex:Loc Apply}" Margin="8,3,0,3" Click="ApplyBtn_Click" IsEnabled="False" Style="{StaticResource BridgeSecondaryButtonStyle}" />
                     <Button x:Name="cancelBtn" Content="{lex:Loc Cancel}" Margin="8,3,0,3" Click="CancelBtn_Click" Style="{StaticResource BridgeSecondaryButtonStyle}" />
                     <Button x:Name="saveBtn" Content="{lex:Loc SaveProfile}" Margin="8,3,0,3" Click="SaveBtn_Click" Style="{StaticResource BridgePrimaryButtonStyle}" />
-                    <Button x:Name="keepSizeBtn" Margin="8,3,0,3" Click="KeepSizeBtn_Click" ToolTip="Keep this window size after closing">
-                        <StackPanel Orientation="Horizontal" Margin="0">
-                            <Image x:Name="sizeImage" Source="{Binding Source={StaticResource resourcesPaths}, Path=SizePNG}" Width="18" Height="18"/>
-                            <TextBlock x:Name="sizeMsg" Text="Keep size" Margin="4,0,0,0" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
                 </WrapPanel>
             </Grid>
         </Border>
 
-        <TabControl Grid.Row="1" x:Name="sidebarTabControl"
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="190" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Border Background="{DynamicResource SurfaceRaisedBrush}"
+                    BorderBrush="{DynamicResource BorderDefaultBrush}"
+                    BorderThickness="0,0,1,0"
+                    Padding="0,4,8,4">
+                <ListBox x:Name="sectionNavigationList"
+                         SelectedIndex="0"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         ItemContainerStyle="{StaticResource FoundationNavigationListItemStyle}"
+                         KeyboardNavigation.DirectionalNavigation="Cycle"
+                         SelectionChanged="SectionNavigationList_SelectionChanged"
+                         AutomationProperties.Name="Profile editor sections">
+                    <ListBoxItem Content="Button Mapping" Tag="Assign controller buttons, sticks, touch gestures, and shortcuts." />
+                    <ListBoxItem Content="Special Actions" Tag="Create macros, profile shifts, program launches, and multi-action shortcuts." />
+                    <ListBoxItem x:Name="controllerReadingsNavigationItem" IsEnabled="False" Content="Controller Readings" Tag="Inspect live sticks, triggers, motion sensors, and input calibration." />
+                    <ListBoxItem Content="Axis Config" Tag="Tune sticks, triggers, dead zones, curves, and motion axes." />
+                    <ListBoxItem Content="Lightbar" Tag="Set profile colors, battery feedback, flashing, and charging behavior." />
+                    <ListBoxItem Content="Touchpad" Tag="Configure mouse control, gestures, passthrough, and absolute positioning." />
+                    <ListBoxItem Content="Gyro" Tag="Configure motion aiming, steering, mouse control, and directional swipes." />
+                    <ListBoxItem Content="Audio Haptics" Tag="Turn system or app audio into advanced haptic feedback for this profile." />
+                    <ListBoxItem Content="Trigger Lab" Tag="Build persistent L2 and R2 adaptive-trigger effects saved in this profile." />
+                    <ListBoxItem Content="Advanced" Tag="Manage game output, rumble, audio, latency, compatibility, and custom hooks." />
+                </ListBox>
+            </Border>
+            <Grid Grid.Column="1" Margin="12,0,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Border Style="{StaticResource FoundationPropertyGroupStyle}"
+                        Padding="0,0,0,8">
+                    <StackPanel>
+                        <TextBlock Text="{Binding SelectedItem.Content, ElementName=sectionNavigationList}"
+                                   Style="{StaticResource FoundationPageTitleStyle}" />
+                        <TextBlock Text="{Binding SelectedItem.Tag, ElementName=sectionNavigationList}"
+                                   Margin="0,3,0,0"
+                                   Style="{StaticResource FoundationSecondaryTextStyle}" />
+                    </StackPanel>
+                </Border>
+                <Grid Grid.Row="1" Margin="0,8,0,0">
+        <TabControl x:Name="sidebarTabControl"
                     Style="{StaticResource BridgeProfileTabControlStyle}"
                     SelectionChanged="SidebarTabControl_SelectionChanged">
             <TabItem Header="{lex:Loc Controls}">
@@ -73,7 +112,7 @@
 
                     <Border Grid.Column="0" Background="{DynamicResource CardBackgroundColor}"
                             BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
-                            CornerRadius="5" Padding="16" Margin="0,0,14,0">
+                            CornerRadius="2" Padding="16" Margin="0,0,14,0">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -192,6 +231,7 @@
                               StrokeThickness="1.5" Opacity="0.62" IsHitTestVisible="False" />
 
                         <Button x:Name="ds4LightbarColorBtn" Width="138" Height="12" Canvas.Left="150" Canvas.Top="28"
+                                AutomationProperties.Name="Edit controller lightbar color" ToolTip="Edit controller lightbar color"
                                 Background="{x:Null}" BorderBrush="{x:Null}" MouseEnter="Ds4LightbarColorBtn_MouseEnter" MouseLeave="Ds4LightbarColorBtn_MouseLeave" Click="Ds4LightbarColorBtn_Click">
                             <Button.Style>
                                 <Style TargetType="{x:Type Button}">
@@ -295,7 +335,7 @@
                             </Viewbox>
                             <Border Grid.Row="2" Background="{DynamicResource RaisedBackgroundColor}"
                                     BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
-                                    CornerRadius="4" Padding="10,7">
+                                    CornerRadius="2" Padding="10,7">
                                 <TextBlock Text="Tip: right-click supported controls for presets."
                                            FontSize="10" TextAlignment="Center"
                                            Foreground="{DynamicResource MutedForegroundColor}" />
@@ -305,7 +345,7 @@
 
                     <Border Grid.Column="1" Background="{DynamicResource CardBackgroundColor}"
                             BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
-                            CornerRadius="5">
+                            CornerRadius="2">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -326,7 +366,7 @@
                                     </StackPanel>
                                     <Border Grid.Column="1" Background="{DynamicResource RaisedBackgroundColor}"
                                             BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
-                                            CornerRadius="4" Padding="9,5" VerticalAlignment="Center">
+                                            CornerRadius="2" Padding="9,5" VerticalAlignment="Center">
                                         <TextBlock Text="{Binding ElementName=mappingListBox, Path=Items.Count, StringFormat={}{0} controls}"
                                                    FontSize="10" FontWeight="SemiBold"
                                                    Foreground="{DynamicResource MutedForegroundColor}" />
@@ -346,7 +386,7 @@
                                     <Style TargetType="ListBoxItem">
                                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                         <Setter Property="Padding" Value="0" />
-                                        <Setter Property="Margin" Value="0,0,0,6" />
+                                        <Setter Property="Margin" Value="0" />
                                         <Setter Property="Background" Value="Transparent" />
                                         <Setter Property="BorderThickness" Value="0" />
                                         <Setter Property="IsEnabled" Value="{Binding IsAvailableOnPhysicalController}" />
@@ -355,9 +395,9 @@
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="ListBoxItem">
-                                                    <Border x:Name="MappingCard" Background="{DynamicResource RaisedBackgroundColor}"
-                                                            BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
-                                                            CornerRadius="4" Padding="12,9">
+                                                    <Border x:Name="MappingCard" Background="{DynamicResource SurfaceBaseBrush}"
+                                                            BorderBrush="{DynamicResource BorderDefaultBrush}" BorderThickness="2,0,0,1"
+                                                            CornerRadius="0" Padding="12,8">
                                                         <ContentPresenter />
                                                     </Border>
                                                     <ControlTemplate.Triggers>
@@ -367,7 +407,6 @@
                                                         <Trigger Property="IsSelected" Value="True">
                                                             <Setter TargetName="MappingCard" Property="Background" Value="{DynamicResource NavigationSelectionColor}" />
                                                             <Setter TargetName="MappingCard" Property="BorderBrush" Value="{DynamicResource AccentColor}" />
-                                                            <Setter TargetName="MappingCard" Property="BorderThickness" Value="2" />
                                                         </Trigger>
                                                         <Trigger Property="IsEnabled" Value="False">
                                                             <Setter TargetName="MappingCard" Property="Opacity" Value="0.42" />
@@ -425,16 +464,16 @@
                         </UniformGrid>
 
                         <Border x:Name="triggerLabSpecialActionBadge" DockPanel.Dock="Top"
-                                Margin="0,10,0,0" Padding="12,9" CornerRadius="5"
-                                BorderThickness="1" BorderBrush="#80FFB020"
-                                Background="#24FFB020" Visibility="Collapsed">
+                                Margin="0,10,0,0" Padding="12,9" CornerRadius="2"
+                                BorderThickness="1" BorderBrush="{DynamicResource StateWarningBrush}"
+                                Background="{DynamicResource SurfaceSelectedBrush}" Visibility="Collapsed">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="L2/R2" FontWeight="Bold" Foreground="#FFFFB020"
+                                <TextBlock Text="L2/R2" FontWeight="Bold" Foreground="{DynamicResource StateWarningBrush}"
                                            VerticalAlignment="Center" Margin="0,0,12,0" />
                                 <StackPanel Grid.Column="1">
                                     <TextBlock Text="Made with Trigger Lab" FontWeight="SemiBold" />
@@ -443,7 +482,7 @@
                                                TextWrapping="Wrap" Margin="0,2,0,0" />
                                 </StackPanel>
                                 <TextBlock Grid.Column="2" Text="PROTECTED" FontSize="9" FontWeight="Bold"
-                                           Foreground="#FFFFB020" VerticalAlignment="Center" Margin="12,0,0,0" />
+                                           Foreground="{DynamicResource StateWarningBrush}" VerticalAlignment="Center" Margin="12,0,0,0" />
                             </Grid>
                         </Border>
 
@@ -1396,6 +1435,7 @@
 
                                 <StackPanel Orientation="Horizontal" Height="60" Margin="0,10,0,0">
                                     <Button x:Name="rainbowBtn" Height="20" Width="20"
+                                AutomationProperties.Name="Toggle rainbow lightbar"
                                 ToolTip="{lex:Loc Resources:AlwaysRainbow}" Click="RainbowBtn_Click">
                                         <Button.Content>
                                             <Image Source="{Binding Source={StaticResource resourcesPaths}, Path=DS4LightbarPNG}" />
@@ -2361,16 +2401,16 @@
                                                               ToolTip="Mutes the built-in speaker while continuing the same stream through a headset connected to the controller's AUX port." />
                                                 </StackPanel>
                                                 <Label Content="Audio source:" Grid.Row="1" Grid.Column="0"
-                                                       ToolTip="For game audio, select the virtual Wireless Controller endpoint created by a VIIPER PlayStation output. The first stereo pair is mirrored to the physical controller speaker." />
+                                                       ToolTip="For game audio, select the virtual Wireless Controller endpoint created by a PlayStation game output. The first stereo pair is mirrored to the physical controller speaker." />
                                                 <ComboBox ItemsSource="{Binding AudioCaptureEndpointChoices}" DisplayMemberPath="Name" SelectedValuePath="EndpointId"
                                                           SelectedValue="{Binding DualSenseAudioCaptureEndpointId}" Grid.Row="1" Grid.Column="1"
                                                           Margin="{StaticResource spaceMargin}" />
                                                 <Border Grid.Row="2" Grid.ColumnSpan="2" Margin="3,2,3,7" Padding="9,6"
-                                                        Background="#26FFB020" BorderBrush="#80FFB020" BorderThickness="1"
+                                                        Background="{DynamicResource SurfaceSelectedBrush}" BorderBrush="{DynamicResource StateWarningBrush}" BorderThickness="1"
                                                         CornerRadius="3"
                                                         Visibility="{Binding AudioHapticsSpeakerOverrideActive, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                     <TextBlock Text="Audio Haptics is currently supplying the selected app to this controller. Choose another Audio source here to release that override."
-                                                               TextWrapping="Wrap" FontSize="11" Foreground="#FFFFC45C" />
+                                                               TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource StateWarningBrush}" />
                                                 </Border>
                                                 <Grid Grid.Row="3" Grid.ColumnSpan="2" MinHeight="30"
                                                       Visibility="{Binding ShowUsbDualSenseSpeakerSelector, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -2455,7 +2495,7 @@
                                                                 <ColumnDefinition Width="*" />
                                                             </Grid.ColumnDefinitions>
                                                             <TextBlock Grid.ColumnSpan="2" Margin="3,0,3,5"
-                                                                       Text="USB/legacy microphone routing captures the physical Windows controller-mic endpoint and sends it to a virtual audio render device such as VB-CABLE Input. Bluetooth VIIPER microphone routing does not need these endpoints."
+                                                                       Text="USB/legacy microphone routing captures the physical Windows controller-mic endpoint and sends it to a virtual audio render device such as VB-CABLE Input. Bluetooth virtual-microphone routing does not need these endpoints."
                                                                        FontSize="11" TextWrapping="Wrap"
                                                                        Foreground="{DynamicResource MutedForegroundColor}" />
                                                             <Label Content="Controller mic:" Grid.Row="1" Grid.Column="0" />
@@ -2589,11 +2629,11 @@
                                     </PriorityBinding>
                                 </Button.Content>
                             </Button>
-                            <Button x:Name="launchProgIconBtn" Width="20" Height="20" Margin="20,0,0,0" Focusable="False" >
-                                <Button.Background>
+                            <Border x:Name="launchProgIconBtn" Width="20" Height="20" Margin="20,0,0,0">
+                                <Border.Background>
                                     <ImageBrush ImageSource="{Binding LaunchProgramIcon}" />
-                                </Button.Background>
-                            </Button>
+                                </Border.Background>
+                            </Border>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Height="30" Margin="0,6,0,0">
                             <CheckBox Content="{lex:Loc IdleDisconnect}" VerticalAlignment="Center" IsChecked="{Binding IdleDisconnectExists}" />
@@ -2682,5 +2722,8 @@
 
             </TabItem>
         </TabControl>
+                </Grid>
+            </Grid>
+        </Grid>
     </Grid>
 </UserControl>

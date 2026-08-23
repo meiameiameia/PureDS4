@@ -4,14 +4,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignHeight="700" d:DesignWidth="960"
-             HorizontalAlignment="Left" VerticalAlignment="Stretch"
-             Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType={x:Type Window}}, Converter={StaticResource ShellViewportWidth}, ConverterParameter=318}">
+             HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
     <UserControl.Resources>
         <Style x:Key="LabCard" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource CardBackgroundColor}" />
             <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="CornerRadius" Value="2" />
             <Setter Property="Padding" Value="18" />
         </Style>
         <Style x:Key="LabToggle" TargetType="CheckBox">
@@ -48,8 +47,10 @@
             <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
             <Grid Margin="0,0,0,16">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <Border x:Name="overrideBadge" Margin="0,0,14,0" Padding="9,4" CornerRadius="4" Background="#4DFFB020" Visibility="Collapsed">
-                        <TextBlock Text="LAB OVERRIDE" Foreground="#FFFFB020" FontSize="10" FontWeight="Bold" />
+                    <Border x:Name="overrideBadge" Margin="0,0,14,0" Padding="9,4" CornerRadius="2"
+                            Background="{DynamicResource SurfaceSelectedBrush}" BorderBrush="{DynamicResource StateWarningBrush}"
+                            BorderThickness="1" Visibility="Collapsed">
+                        <TextBlock Text="LAB OVERRIDE" Foreground="{DynamicResource StateWarningBrush}" FontSize="10" FontWeight="Bold" />
                     </Border>
                     <TextBlock Text="Effect design" Foreground="{DynamicResource MutedForegroundColor}"
                                FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0" />

@@ -17,13 +17,13 @@
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding" Value="0" />
-            <Setter Property="Margin" Value="0,0,0,8" />
+            <Setter Property="Margin" Value="0" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListViewItem">
-                        <Border x:Name="RuleCard" Background="{DynamicResource CardBackgroundColor}"
-                                BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
-                                CornerRadius="5" Padding="12">
+                        <Border x:Name="RuleCard" Background="{DynamicResource SurfaceBaseBrush}"
+                                BorderBrush="{DynamicResource BorderDefaultBrush}" BorderThickness="2,0,0,1"
+                                CornerRadius="0" Padding="12,8">
                             <ContentPresenter />
                         </Border>
                         <ControlTemplate.Triggers>
@@ -53,10 +53,15 @@
             <Setter Property="Margin" Value="0,1" />
         </Style>
     </UserControl.Resources>
-    <DockPanel Margin="0,2,0,0">
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+            <TextBlock Text="Auto profiles" Style="{StaticResource FoundationPageTitleStyle}" />
+            <TextBlock Text="Switch profiles automatically when a game or application takes focus."
+                       Margin="0,3,0,0" Style="{StaticResource FoundationSecondaryTextStyle}" />
+        </StackPanel>
             <Border DockPanel.Dock="Right" Width="304" Margin="12,0,0,0"
-                    Background="{DynamicResource CardBackgroundColor}" BorderBrush="{DynamicResource BorderColor}"
-                    BorderThickness="1" CornerRadius="5" Padding="12">
+                    Background="{DynamicResource SurfaceRaisedBrush}" BorderBrush="{DynamicResource BorderDefaultBrush}"
+                    BorderThickness="1,0,0,0" CornerRadius="0" Padding="12">
             <ScrollViewer x:Name="sidebarScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <ScrollViewer.Resources>
                     <Thickness x:Key="spaceMargin" Bottom="8" />
@@ -322,25 +327,40 @@
                     HorizontalAlignment="Left" Margin="0,0,0,10"
                     Background="{DynamicResource RaisedBackgroundColor}"
                     BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
-                    CornerRadius="6">
+                    CornerRadius="2">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="34" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="36" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="&#xE721;" FontFamily="Segoe Fluent Icons"
+                    <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets"
                                Foreground="{DynamicResource MutedForegroundColor}"
                                HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Text="Search rules" IsHitTestVisible="False"
+                               Margin="4,0,0,0" VerticalAlignment="Center"
+                               Foreground="{DynamicResource TextSecondaryBrush}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text, ElementName=autoProfilesSearchTextBox}" Value="">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                     <TextBox x:Name="autoProfilesSearchTextBox" Grid.Column="1"
                              BorderThickness="0" Background="Transparent"
                              Padding="2,8" VerticalContentAlignment="Center"
                              TextChanged="AutoProfilesSearchTextBox_TextChanged"
                              ToolTip="Search by profile, window title, executable, or path" />
                     <Button x:Name="clearAutoProfilesSearchBtn" Grid.Column="2" Content="&#xE711;"
-                            FontFamily="Segoe Fluent Icons" FontSize="11"
+                            FontFamily="Segoe MDL2 Assets" FontSize="11"
                             Background="Transparent" BorderThickness="0"
                             Visibility="Collapsed" ToolTip="Clear search"
+                            AutomationProperties.Name="Clear auto-profile search"
                             Click="ClearAutoProfilesSearchBtn_Click" />
                 </Grid>
             </Border>
@@ -361,6 +381,25 @@
                 <Button x:Name="hideUncheckedBtn" Content="{lex:Loc HideUnchecked}" Click="HideUncheckedBtn_Click"
                         Style="{StaticResource BridgeSecondaryButtonStyle}" />
             </WrapPanel>
+            <Grid>
+            <StackPanel x:Name="autoProfilesEmptyState" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        IsHitTestVisible="False" Margin="0,0,0,40">
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=programListLV, Path=HasItems}" Value="False">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+                <TextBlock Text="No auto-profile rules yet" HorizontalAlignment="Center"
+                           Style="{StaticResource FoundationGroupTitleStyle}" />
+                <TextBlock Text="Use Add Programs to pick a game or application, then choose the profile it should load."
+                           Margin="0,6,0,0" MaxWidth="360" TextAlignment="Center" TextWrapping="Wrap"
+                           Style="{StaticResource FoundationSecondaryTextStyle}" />
+            </StackPanel>
             <ListView x:Name="programListLV" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                       ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True"
                       SelectedIndex="{Binding SelectedIndex}" SelectedItem="{Binding SelectedItem}"
@@ -418,6 +457,7 @@
                     </ContextMenu>
                 </ListView.ContextMenu>
             </ListView>
+            </Grid>
         </DockPanel>
     </DockPanel>
 </UserControl>

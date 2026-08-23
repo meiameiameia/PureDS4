@@ -539,10 +539,10 @@
                                         </Style>
                                     </Grid.Resources>
 
-                                    <Button x:Name="prevTrackBtn" Content="9" FontFamily="Webdings" />
-                                    <Button x:Name="stopBtn" Content="&lt;" FontFamily="Webdings" Grid.Column="1" />
-                                    <Button x:Name="playBtn" Content="4" FontFamily="Webdings" Grid.Column="2" />
-                                    <Button x:Name="nextTrackBtn" Content=":" FontFamily="Webdings" Grid.Column="3" />
+                                    <Button x:Name="prevTrackBtn" Content="⏮" FontFamily="Segoe UI Symbol" AutomationProperties.Name="Previous track" />
+                                    <Button x:Name="stopBtn" Content="■" FontFamily="Segoe UI Symbol" Grid.Column="1" AutomationProperties.Name="Stop media" />
+                                    <Button x:Name="playBtn" Content="▶" FontFamily="Segoe UI Symbol" Grid.Column="2" AutomationProperties.Name="Play or pause media" />
+                                    <Button x:Name="nextTrackBtn" Content="⏭" FontFamily="Segoe UI Symbol" Grid.Column="3" AutomationProperties.Name="Next track" />
                                     <Button x:Name="volupBtn" Content="↑ Vol" Grid.Column="4" FontSize="10" />
 
                                     <Button x:Name="numlockBtn" Content="NumLk" Grid.Row="1" Grid.Column="0" />

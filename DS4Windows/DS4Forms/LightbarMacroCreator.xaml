@@ -5,38 +5,76 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:lex="http://wpflocalizeextension.codeplex.com"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:local="clr-namespace:DS4WinWPF.DS4Forms"
         lex:LocalizeDictionary.DesignCulture=""
         lex:ResxLocalizationProvider.DefaultAssembly="DS4Windows"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
         Style="{DynamicResource WindowStyle}"
-        Title="Lightbar macro creator" Height="450" Width="800">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="4*" />
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        Title="Lightbar macro" Height="520" Width="760"
+        MinHeight="420" MinWidth="620" ResizeMode="CanResize"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
-        <ListBox x:Name="MacroListBox" ItemsSource="{Binding LightbarMacro.Macro}" SelectionMode="Single" />
-
-        <StackPanel Grid.Column="1">
-            <Label Content="{lex:Loc ColorAndLength}" />
-            <StackPanel Orientation="Horizontal">
-                <Button Click="SelectColor_Click" Background="{Binding CurrentColorString}" Height="25" Width="25" Margin="3 0" />
-                <xctk:UIntegerUpDown Value="{Binding CurrentInterval}" Width="60" Increment="10" Margin="0 0 3 0" />
-                <Label Content="ms" />
-            </StackPanel>
-            <Label Content="{lex:Loc Trigger}" />
-            <ComboBox x:Name="TriggerCombo" SelectedItem="{Binding LightbarMacro.Trigger}" HorizontalAlignment="Stretch" Margin="3 0" />
-            <StackPanel Orientation="Horizontal">
-                <CheckBox IsChecked="{Binding LightbarMacro.CancelCurrent}" Margin="3 5 0 0" />
-                <Label Content="{lex:Loc CancelCurrentMacro}" ToolTip="{lex:Loc CancelCurrentMacroTooltip}" />
-            </StackPanel>
-            <Button Content="{lex:Loc Add}" Click="AddColor_OnClick" Margin="3" />
-            <Button Content="{lex:Loc Delete}" Click="DeleteColor_OnClick" Margin="3" />
-            <Button Content="{lex:Loc Clear}" Click="Clear_OnClick" Margin="3" />
-            <Button Content="{lex:Loc Save}" Click="Save_OnClick" Margin="3" />
+        <StackPanel Margin="0,0,0,16">
+            <TextBlock Text="Lightbar macro" Style="{StaticResource FoundationPageTitleStyle}" />
+            <TextBlock Text="Build a timed color sequence, then choose how it is triggered."
+                       Style="{StaticResource FoundationSecondaryTextStyle}" Margin="0,4,0,0" />
         </StackPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" MinWidth="230" />
+            </Grid.ColumnDefinitions>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="Macro sequence" Style="{StaticResource FoundationGroupTitleStyle}" Margin="0,0,0,8" />
+                <ListBox Grid.Row="1" x:Name="MacroListBox"
+                         ItemsSource="{Binding LightbarMacro.Macro}"
+                         SelectionMode="Single" />
+            </Grid>
+
+            <Border Grid.Column="2" Style="{StaticResource FoundationPropertyGroupStyle}">
+                <StackPanel>
+                    <TextBlock Text="Selected step" Style="{StaticResource FoundationGroupTitleStyle}" />
+                    <TextBlock Text="Color and duration" Style="{StaticResource FoundationColumnHeaderStyle}" Margin="0,12,0,6" />
+                    <StackPanel Orientation="Horizontal">
+                        <Button Click="SelectColor_Click" Background="{Binding CurrentColorString}"
+                                Height="28" Width="28" Margin="0,0,8,0"
+                                AutomationProperties.Name="Choose lightbar color"
+                                ToolTip="Choose lightbar color" />
+                        <xctk:UIntegerUpDown Value="{Binding CurrentInterval}" Width="80" Increment="10" />
+                        <TextBlock Text="ms" VerticalAlignment="Center" Margin="8,0,0,0" />
+                    </StackPanel>
+
+                    <TextBlock Text="{lex:Loc Trigger}" Style="{StaticResource FoundationColumnHeaderStyle}" Margin="0,16,0,6" />
+                    <ComboBox x:Name="TriggerCombo" SelectedItem="{Binding LightbarMacro.Trigger}"
+                              HorizontalAlignment="Stretch" />
+                    <CheckBox IsChecked="{Binding LightbarMacro.CancelCurrent}"
+                              Content="{lex:Loc CancelCurrentMacro}"
+                              ToolTip="{lex:Loc CancelCurrentMacroTooltip}" Margin="0,12,0,0" />
+
+                    <WrapPanel Margin="0,18,0,0">
+                        <Button Content="{lex:Loc Add}" Click="AddColor_OnClick" Margin="0,0,8,8" />
+                        <Button Content="{lex:Loc Delete}" Click="DeleteColor_OnClick" Margin="0,0,8,8" />
+                        <Button Content="{lex:Loc Clear}" Click="Clear_OnClick" Margin="0,0,0,8" />
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Button Grid.Row="2" Content="{lex:Loc Save}" Click="Save_OnClick"
+                HorizontalAlignment="Right" MinWidth="96" Margin="0,16,0,0"
+                IsDefault="True" Style="{StaticResource FoundationPrimaryButtonStyle}" />
     </Grid>
 </Window>

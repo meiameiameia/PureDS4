@@ -213,6 +213,11 @@ namespace DS4WinWPF.DS4Forms
         public ControllerReadingsControl()
         {
             InitializeComponent();
+            Color textColor = ThemeColor("TextPrimaryBrush",
+                SystemColors.WindowTextColor);
+            inpuDelayForeBrush.Color = textColor;
+            l2ValLbBrush.Color = textColor;
+            r2ValLbBrush.Color = textColor;
             inputContNum.Content = $"#{deviceNum + 1}";
             exposeState = new DS4StateExposed(baseState);
 
@@ -369,30 +374,36 @@ namespace DS4WinWPF.DS4Forms
                     l2ValLbTrans.Y = Math.Min(interState.L2, Math.Max(0, 255)) / 255.0 * -70.0 + TRIG_LB_TRANSFORM_OFFSETY;
                     if (interState.L2 >= 255)
                     {
-                        l2ValLbBrush.Color = Colors.Green;
+                        l2ValLbBrush.Color = ThemeColor("StateSuccessBrush",
+                            Colors.Green);
                     }
                     else if (interState.L2 == 0)
                     {
-                        l2ValLbBrush.Color = Colors.Red;
+                        l2ValLbBrush.Color = ThemeColor("StateErrorBrush",
+                            Colors.Red);
                     }
                     else
                     {
-                        l2ValLbBrush.Color = Colors.Black;
+                        l2ValLbBrush.Color = ThemeColor("TextPrimaryBrush",
+                            SystemColors.WindowTextColor);
                     }
 
                     r2Slider.Value = baseState.R2;
                     r2ValLbTrans.Y = Math.Min(interState.R2, Math.Max(0, 255)) / 255.0 * -70.0 + TRIG_LB_TRANSFORM_OFFSETY;
                     if (interState.R2 >= 255)
                     {
-                        r2ValLbBrush.Color = Colors.Green;
+                        r2ValLbBrush.Color = ThemeColor("StateSuccessBrush",
+                            Colors.Green);
                     }
                     else if (interState.R2 == 0)
                     {
-                        r2ValLbBrush.Color = Colors.Red;
+                        r2ValLbBrush.Color = ThemeColor("StateErrorBrush",
+                            Colors.Red);
                     }
                     else
                     {
-                        r2ValLbBrush.Color = Colors.Black;
+                        r2ValLbBrush.Color = ThemeColor("TextPrimaryBrush",
+                            SystemColors.WindowTextColor);
                     }
 
                     gyroYawSlider.Value = baseState.Motion.gyroYawFull;
@@ -414,20 +425,25 @@ namespace DS4WinWPF.DS4Forms
                     if (latency > warnInterval)
                     {
                         warnMode = LatencyWarnMode.Warn;
-                        inpuDelayBackBrush.Color = Colors.Red;
-                        inpuDelayForeBrush.Color = Colors.White;
+                        inputDelayLb.Content = $"Warning — {inputDelayLb.Content}";
+                        inpuDelayBackBrush.Color = Colors.Transparent;
+                        inpuDelayForeBrush.Color = ThemeColor(
+                            "StateErrorBrush", Colors.Red);
                     }
                     else if (latency > (warnInterval * 0.5))
                     {
                         warnMode = LatencyWarnMode.Caution;
-                        inpuDelayBackBrush.Color = Colors.Yellow;
-                        inpuDelayForeBrush.Color = Colors.Black;
+                        inputDelayLb.Content = $"Caution — {inputDelayLb.Content}";
+                        inpuDelayBackBrush.Color = Colors.Transparent;
+                        inpuDelayForeBrush.Color = ThemeColor(
+                            "StateWarningBrush", Colors.DarkGoldenrod);
                     }
                     else
                     {
                         warnMode = LatencyWarnMode.None;
                         inpuDelayBackBrush.Color = Colors.Transparent;
-                        inpuDelayForeBrush.Color = SystemColors.WindowTextColor;
+                        inpuDelayForeBrush.Color = ThemeColor(
+                            "TextPrimaryBrush", SystemColors.WindowTextColor);
                     }
 
                     prevWarnMode = warnMode;
@@ -442,6 +458,13 @@ namespace DS4WinWPF.DS4Forms
             {
                 readingTimer.Start();
             }
+        }
+
+        private Color ThemeColor(string resourceKey, Color fallback)
+        {
+            return TryFindResource(resourceKey) is SolidColorBrush brush
+                ? brush.Color
+                : fallback;
         }
 
         private void UpdateCoordLabels(DS4State inState, DS4State mapState,

@@ -11,8 +11,9 @@
              lex:ResxLocalizationProvider.DefaultDictionary="Strings"
              xmlns:entity="clr-namespace:DS4WinWPF"
              mc:Ignorable="d" 
-             d:DesignHeight="350" d:DesignWidth="420">
-    <DockPanel>
+             d:DesignHeight="350" d:DesignWidth="420"
+             Background="{DynamicResource SurfaceBaseBrush}">
+    <DockPanel Margin="12">
         <DockPanel DockPanel.Dock="Top" Margin="4,8,4,8">
             <Label Content="Name:" DockPanel.Dock="Left" />
             <TextBox x:Name="actionNameTxt" Text="{Binding ActionName,FallbackValue=Name,ValidatesOnNotifyDataErrors=True}"
@@ -20,7 +21,8 @@
         </DockPanel>
         <DockPanel DockPanel.Dock="Bottom">
             <DockPanel DockPanel.Dock="Left">
-                <ListView x:Name="triggersListView" Tag="{Binding TriggerError, ValidatesOnNotifyDataErrors=True}" Width="200">
+                <ListView x:Name="triggersListView" Tag="{Binding TriggerError, ValidatesOnNotifyDataErrors=True}" Width="200"
+                          ItemContainerStyle="{StaticResource FoundationTableListItemStyle}">
                     <ListView.View>
                         <GridView>
                             <GridView.Columns>
