@@ -1,0 +1,40 @@
+<UserControl x:Class="DS4WinWPF.DS4Forms.BusyOverlay"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="root"
+             Focusable="True"
+             IsTabStop="True"
+             AutomationProperties.LiveSetting="Assertive"
+             AutomationProperties.Name="{Binding Title, ElementName=root}">
+    <UserControl.Style>
+        <Style TargetType="UserControl">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsBusy, ElementName=root}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Style>
+    <Grid>
+        <Border Background="{DynamicResource SurfaceBaseBrush}" Opacity="0.94" />
+        <Border Width="420"
+                MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Padding="16"
+                Background="{DynamicResource SurfaceRaisedBrush}"
+                BorderBrush="{DynamicResource BorderDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource RadiusSmall}">
+            <StackPanel>
+                <TextBlock Text="{Binding Title, ElementName=root}"
+                           Style="{StaticResource FoundationPageTitleStyle}" />
+                <TextBlock Text="{Binding Message, ElementName=root}"
+                           Margin="0,6,0,12"
+                           Style="{StaticResource FoundationSecondaryTextStyle}" />
+                <ProgressBar Height="6" IsIndeterminate="True" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

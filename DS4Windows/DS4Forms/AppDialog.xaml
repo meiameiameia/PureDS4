@@ -1,0 +1,36 @@
+﻿<Window x:Class="DS4WinWPF.DS4Forms.AppDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="DS4Windows Reworked" SizeToContent="Height" Width="520"
+        MinWidth="420" MaxHeight="{x:Static SystemParameters.MaximizedPrimaryScreenHeight}" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        Style="{DynamicResource WindowStyle}">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="36" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="stateGlyph" FontSize="20" FontWeight="SemiBold"
+                       VerticalAlignment="Top" AutomationProperties.Name="Dialog status" />
+            <StackPanel Grid.Column="1">
+                <TextBlock x:Name="headingText" Style="{StaticResource FoundationPageTitleStyle}"
+                           TextWrapping="Wrap" />
+                <ScrollViewer MaxHeight="420" Margin="0,8,0,0"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <TextBlock x:Name="messageText" TextWrapping="Wrap" />
+                </ScrollViewer>
+            </StackPanel>
+        </Grid>
+        <Border Grid.Row="1" Margin="0,18,0,0" BorderBrush="{DynamicResource BorderDefaultBrush}"
+                BorderThickness="0,1,0,0" />
+        <StackPanel Grid.Row="2" x:Name="buttonPanel" Orientation="Horizontal"
+                    HorizontalAlignment="Right" Margin="0,14,0,0" />
+    </Grid>
+</Window>

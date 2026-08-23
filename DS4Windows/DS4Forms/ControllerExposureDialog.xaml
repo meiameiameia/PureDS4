@@ -1,0 +1,63 @@
+﻿<Window x:Class="DS4WinWPF.DS4Forms.ControllerExposureDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Use Native Physical"
+        Width="500"
+        SizeToContent="Height"
+        MaxHeight="{x:Static SystemParameters.MaximizedPrimaryScreenHeight}"
+        MinWidth="420"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        Style="{DynamicResource WindowStyle}">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel>
+            <TextBlock Text="Expose the physical controller?"
+                       Style="{StaticResource FoundationPageTitleStyle}" />
+            <TextBlock Margin="0,8,0,0"
+                       Text="Native Physical temporarily stops game output and lets games access this controller directly."
+                       Style="{StaticResource FoundationBodyTextStyle}"
+                       TextWrapping="Wrap" />
+            <TextBlock Margin="0,6,0,0"
+                       Text="Return to Managed/Virtual to restore protected game output. DS4Windows also restores protection when it exits."
+                       Style="{StaticResource FoundationSecondaryTextStyle}" />
+        </StackPanel>
+        <Border Grid.Row="1"
+                Margin="0,14,0,0"
+                Padding="10,8"
+                Background="{DynamicResource SurfaceInsetBrush}"
+                BorderBrush="{DynamicResource StateWarningBrush}"
+                BorderThickness="3,1,1,1"
+                CornerRadius="{StaticResource RadiusSmall}">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="⚠" Margin="0,0,8,0"
+                           Foreground="{DynamicResource StateWarningBrush}" />
+                <TextBlock Text="Virtual-controller features are unavailable while Native Physical is active."
+                           Foreground="{DynamicResource TextPrimaryBrush}"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+        <StackPanel Grid.Row="2"
+                    Margin="0,16,0,0"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <Button Content="Cancel"
+                    MinWidth="88"
+                    Margin="0,0,8,0"
+                    IsCancel="True"
+                    Style="{StaticResource FoundationButtonStyle}" />
+            <Button Content="Use Native Physical"
+                    MinWidth="150"
+                    IsDefault="True"
+                    Style="{StaticResource FoundationPrimaryButtonStyle}"
+                    Click="ConfirmButton_Click" />
+        </StackPanel>
+    </Grid>
+</Window>
