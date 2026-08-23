@@ -80,7 +80,6 @@
                     <ListBoxItem Content="Touchpad" Tag="Configure mouse control, gestures, passthrough, and absolute positioning." />
                     <ListBoxItem Content="Gyro" Tag="Configure motion aiming, steering, mouse control, and directional swipes." />
                     <ListBoxItem Content="Audio Haptics" Tag="Turn system or app audio into advanced haptic feedback for this profile." />
-                    <ListBoxItem Content="Trigger Lab" Tag="Build persistent L2 and R2 adaptive-trigger effects saved in this profile." />
                     <ListBoxItem Content="Advanced" Tag="Manage game output, rumble, audio, latency, compatibility, and custom hooks." />
                 </ListBox>
             </Border>
@@ -462,29 +461,6 @@
                             <Button x:Name="removeActionBtn" Content="{lex:Loc RemoveAction}" IsEnabled="{Binding ItemSelected}" Margin="5,0,0,0" Click="RemoveActionBtn_Click" />
                             <Button Content="{lex:Loc ExportSpecialActions}" Margin="5 0 0 0" Click="ExportSpecialActions_OnClick"/>
                         </UniformGrid>
-
-                        <Border x:Name="triggerLabSpecialActionBadge" DockPanel.Dock="Top"
-                                Margin="0,10,0,0" Padding="12,9" CornerRadius="2"
-                                BorderThickness="1" BorderBrush="{DynamicResource StateWarningBrush}"
-                                Background="{DynamicResource SurfaceSelectedBrush}" Visibility="Collapsed">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="L2/R2" FontWeight="Bold" Foreground="{DynamicResource StateWarningBrush}"
-                                           VerticalAlignment="Center" Margin="0,0,12,0" />
-                                <StackPanel Grid.Column="1">
-                                    <TextBlock Text="Made with Trigger Lab" FontWeight="SemiBold" />
-                                    <TextBlock Text="This protected profile effect overrides incoming game adaptive-trigger output. Edit it in Trigger Lab."
-                                               Foreground="{DynamicResource MutedForegroundColor}"
-                                               TextWrapping="Wrap" Margin="0,2,0,0" />
-                                </StackPanel>
-                                <TextBlock Grid.Column="2" Text="PROTECTED" FontSize="9" FontWeight="Bold"
-                                           Foreground="{DynamicResource StateWarningBrush}" VerticalAlignment="Center" Margin="12,0,0,0" />
-                            </Grid>
-                        </Border>
 
                         <ListView x:Name="specialActionsLV" ItemsSource="{Binding ActionCol}" SelectedIndex="{Binding SpecialActionIndex}" SelectedItem="{Binding CurrentSpecialActionItem,Mode=OneWayToSource}" DockPanel.Dock="Bottom" Margin="0,10,0,0">
                             <ListView.View>
@@ -2234,11 +2210,6 @@
             <TabItem Header="Audio Haptics" Tag="Turn system or app audio into advanced controller haptics">
                 <local:AudioHapticsControl x:Name="profileAudioHapticsControl"
                                            SettingsChanged="ProfileAudioHapticsControl_SettingsChanged" />
-            </TabItem>
-
-            <TabItem Header="Trigger Lab" Tag="Build persistent adaptive-trigger effects for this profile">
-                <local:TriggerLabControl x:Name="profileTriggerLabControl"
-                                         SettingsChanged="ProfileTriggerLabControl_SettingsChanged" />
             </TabItem>
 
             <TabItem Header="Advanced" Tag="Output device, rumble, audio, latency, compatibility, and custom hooks">

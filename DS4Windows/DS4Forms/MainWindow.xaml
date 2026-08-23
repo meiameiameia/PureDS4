@@ -312,10 +312,6 @@
                 <local:AudioHapticsControl x:Name="audioHapticsControl" SettingsChanged="ProfileFeatureControl_SettingsChanged" />
             </TabItem>
 
-            <TabItem x:Name="triggerLabTab" Header="Trigger Lab" Tag="TriggerPair" Visibility="Collapsed" Style="{StaticResource BridgeHiddenToolTabItemStyle}" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
-                <local:TriggerLabControl x:Name="triggerLabControl" SettingsChanged="ProfileFeatureControl_SettingsChanged" />
-            </TabItem>
-
             <TabItem x:Name="profilesTab" Header="{lex:Loc Profiles}" Tag="&#xE8A5;">
                 <Grid x:Name="profDockPanel">
                     <Grid x:Name="profilesBrowserPanel">
@@ -1024,13 +1020,6 @@
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                     <StackPanel><TextBlock Text="Audio Haptics" Style="{StaticResource FoundationGroupTitleStyle}" /><TextBlock Text="Route an audio session into supported controller haptics." Style="{StaticResource FoundationSecondaryTextStyle}" /></StackPanel>
                                     <Button Grid.Column="1" Content="Open" Tag="audio" Margin="12,0,0,0" Click="ToolsMenuItem_Click" Style="{StaticResource FoundationButtonStyle}" />
-                                </Grid>
-                            </Border>
-                            <Border Style="{StaticResource FoundationPropertyGroupStyle}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <StackPanel><TextBlock Text="Trigger Lab" Style="{StaticResource FoundationGroupTitleStyle}" /><TextBlock Text="Preview and tune adaptive-trigger effects on compatible hardware." Style="{StaticResource FoundationSecondaryTextStyle}" /></StackPanel>
-                                    <Button Grid.Column="1" Content="Open" Tag="trigger" Margin="12,0,0,0" Click="ToolsMenuItem_Click" Style="{StaticResource FoundationButtonStyle}" />
                                 </Grid>
                             </Border>
                             <Border Style="{StaticResource FoundationPropertyGroupStyle}">

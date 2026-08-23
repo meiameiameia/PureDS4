@@ -145,8 +145,6 @@ namespace DS4WinWPF.DS4Forms
             inputTimer = new NonFormTimer(100);
             inputTimer.Elapsed += InputDS4;
             profileAudioHapticsControl.SetDevice(deviceNum);
-            profileTriggerLabControl.SetDevice(deviceNum, triggerPreviewDeviceIndex);
-            UpdateTriggerLabSpecialActionBadge();
             SetupEvents();
         }
 
@@ -1802,8 +1800,6 @@ namespace DS4WinWPF.DS4Forms
             }
 
             profileAudioHapticsControl.SetDevice(deviceNum);
-            profileTriggerLabControl.SetDevice(deviceNum, triggerPreviewDeviceIndex);
-            UpdateTriggerLabSpecialActionBadge();
 
             ColorByBatteryPerCheck();
 
@@ -1934,7 +1930,6 @@ namespace DS4WinWPF.DS4Forms
             ClearRumblePreview();
 
             Global.outDevTypeTemp[deviceNum] = OutContType.ViiperX360;
-            profileTriggerLabControl.RestorePhysicalProfileEffects();
             Mapping.RequestRegularProfileReload(deviceNum, false, App.rootHub);
 
             Closed?.Invoke(this, EventArgs.Empty);
@@ -2030,27 +2025,10 @@ namespace DS4WinWPF.DS4Forms
             HideControllerHover();
         }
 
-        private void ProfileTriggerLabControl_SettingsChanged(object sender,
-            ProfileFeatureSettingsChangedEventArgs e)
-        {
-            UpdateTriggerLabSpecialActionBadge();
-        }
-
         private void ProfileAudioHapticsControl_SettingsChanged(object sender,
             ProfileFeatureSettingsChangedEventArgs e)
         {
             profileSettingsVM.RaiseAudioHapticsSpeakerOverrideStateChanged();
-        }
-
-        private void UpdateTriggerLabSpecialActionBadge()
-        {
-            TriggerLabProfileSettings settings = deviceNum >= 0 &&
-                deviceNum < Global.TEST_PROFILE_ITEM_COUNT
-                    ? Global.store.triggerLabSettings[deviceNum]
-                    : null;
-            triggerLabSpecialActionBadge.Visibility = settings?.HasActiveOverride == true
-                ? Visibility.Visible
-                : Visibility.Collapsed;
         }
 
         private void HideControllerHover()
@@ -2110,7 +2088,6 @@ namespace DS4WinWPF.DS4Forms
             bool saved = ApplyProfileStep(false);
             if (saved)
             {
-                profileTriggerLabControl.RestorePhysicalProfileEffects();
                 Closed?.Invoke(this, EventArgs.Empty);
             }
         }
@@ -2178,7 +2155,6 @@ namespace DS4WinWPF.DS4Forms
         {
             ClearRumblePreview();
 
-            profileTriggerLabControl.RestorePhysicalProfileEffects();
             Closed?.Invoke(this, EventArgs.Empty);
         }
 

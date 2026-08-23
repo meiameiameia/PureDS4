@@ -164,7 +164,6 @@ namespace DS4WinWPF.DS4Forms
             controllerLV.ItemsSource = conLvViewModel.ControllerCol;
             mainWinVM.SelectedController = conLvViewModel.ControllerCol.FirstOrDefault();
             audioHapticsControl.SetDevice(mainWinVM.SelectedController?.DevIndex ?? -1);
-            triggerLabControl.SetDevice(mainWinVM.SelectedController?.DevIndex ?? -1);
             ChangeControllerPanel();
 
             // Sort device by input slot number
@@ -1195,7 +1194,6 @@ Suspend support not enabled.", true);
             TabItem target = destination switch
             {
                 "audio" => audioHapticsTab,
-                "trigger" => triggerLabTab,
                 "auto" => autoProfilesTab,
                 "slots" => outputSlotsTab,
                 "log" => logTab,
@@ -1601,7 +1599,6 @@ Suspend support not enabled.", true);
             }
 
             audioHapticsControl.SetDevice(mainWinVM.SelectedController?.DevIndex ?? -1);
-            triggerLabControl.SetDevice(mainWinVM.SelectedController?.DevIndex ?? -1);
         }
 
         private void ProfileFeatureControl_SettingsChanged(object sender,

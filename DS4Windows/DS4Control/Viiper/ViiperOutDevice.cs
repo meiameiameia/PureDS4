@@ -279,13 +279,6 @@ namespace DS4Windows
         private byte legacyDualSenseLightFast;
         private byte legacyDualSenseHeavySlow;
         private bool legacyDualSenseRumbleKnown;
-        private byte lastTriggerLabLeftRumble;
-        private byte lastTriggerLabRightRumble;
-        private int lastTriggerLabRumbleSignature;
-        private bool triggerLabRumbleStateKnown;
-        private bool lastTriggerLabLeftRumbleEnabled;
-        private bool lastTriggerLabRightRumbleEnabled;
-        private readonly object triggerLabRumbleLock = new object();
         private int dualShock4DecodedPcmFifoCount;
         private int dualShock4LastDecodedPcmCount;
         private ushort dualShock4LastMicrophoneSequence;
@@ -628,11 +621,6 @@ namespace DS4Windows
 
         internal void BindPhysicalController(int deviceIndex)
         {
-            int previousDeviceIndex = Volatile.Read(ref lastInputDeviceIndex);
-            if (previousDeviceIndex != deviceIndex)
-            {
-                ReleaseTriggerLabRumbleOverrides(previousDeviceIndex);
-            }
             Volatile.Write(ref lastInputDeviceIndex, deviceIndex);
             if (connected)
             {
@@ -665,7 +653,6 @@ namespace DS4Windows
             Interlocked.Exchange(ref submittedPacketCount, 0);
             Interlocked.Exchange(ref writtenPacketCount, 0);
             ResetMicrophoneLiveness();
-            ResetTriggerLabRumbleState();
             Interlocked.Exchange(ref lastMicrophoneArmTimestamp, 0);
             Interlocked.Exchange(ref microphoneArmAttempts, 0);
             Interlocked.Exchange(ref microphoneArmFailures, 0);
@@ -911,9 +898,6 @@ namespace DS4Windows
             // old monitor from reattaching after this synchronous detach.
             DetachBluetoothMicrophoneSource();
             ResetLegacyDualSenseRumbleDeduplication();
-            ReleaseTriggerLabRumbleOverrides(
-                Volatile.Read(ref lastInputDeviceIndex));
-            ResetTriggerLabRumbleState();
             StopMicrophoneInterfaceMonitor();
             lock (pendingPacketLock)
             {
@@ -3010,8 +2994,6 @@ namespace DS4Windows
                     if (feedbackLength >= 2)
                     {
                         Program.rootHub.SetDevRumble(device, feedback[0], feedback[1], deviceIndex);
-                        ApplyGameRumbleTriggerVibration(device, deviceIndex,
-                            feedback[1], feedback[0]);
                     }
                     break;
 
@@ -3019,8 +3001,6 @@ namespace DS4Windows
                     if (feedbackLength >= 7)
                     {
                         Program.rootHub.SetDevRumble(device, feedback[1], feedback[0], deviceIndex);
-                        ApplyGameRumbleTriggerVibration(device, deviceIndex,
-                            feedback[0], feedback[1]);
                         if (ShouldApplyGameLightbar(deviceIndex))
                         {
                             ApplyLightbar(device, feedback[2], feedback[3],
@@ -3081,8 +3061,6 @@ namespace DS4Windows
                                 feedback[4], 0, 0);
                         }
                         ApplyDualSenseTriggerFeedback(device, deviceIndex, feedback, feedbackLength);
-                        ApplyGameRumbleTriggerVibration(device, deviceIndex,
-                            lightFast, heavySlow);
                     }
                     break;
 
@@ -3092,8 +3070,6 @@ namespace DS4Windows
                         byte left = MaxByte(feedback, 0, 16);
                         byte right = MaxByte(feedback, 16, 16);
                         Program.rootHub.SetDevRumble(device, left, right, deviceIndex);
-                        ApplyGameRumbleTriggerVibration(device, deviceIndex,
-                            right, left);
                     }
                     break;
             }
@@ -3304,150 +3280,6 @@ namespace DS4Windows
             {
                 Interlocked.Increment(ref microphoneArmFailures);
             }
-        }
-
-        private void ResetTriggerLabRumbleState()
-        {
-            lock (triggerLabRumbleLock)
-            {
-                triggerLabRumbleStateKnown = false;
-                lastTriggerLabLeftRumble = 0;
-                lastTriggerLabRightRumble = 0;
-                lastTriggerLabRumbleSignature = 0;
-                lastTriggerLabLeftRumbleEnabled = false;
-                lastTriggerLabRightRumbleEnabled = false;
-            }
-        }
-
-        private void ReleaseTriggerLabRumbleOverrides(int deviceIndex)
-        {
-            lock (triggerLabRumbleLock)
-            {
-                if (!triggerLabRumbleStateKnown ||
-                    (!lastTriggerLabLeftRumbleEnabled &&
-                        !lastTriggerLabRightRumbleEnabled) ||
-                    deviceIndex < 0 || Program.rootHub == null ||
-                    deviceIndex >= Program.rootHub.DS4Controllers.Length ||
-                    Program.rootHub.DS4Controllers[deviceIndex] is not
-                        DualSenseDevice dualSenseDevice ||
-                    !IsCurrentPhysicalSonyDualSense(dualSenseDevice))
-                {
-                    return;
-                }
-
-                TriggerLabProfileSettings settings =
-                    TriggerLabForDevice(deviceIndex);
-                if (lastTriggerLabLeftRumbleEnabled)
-                {
-                    TriggerLabEffectEncoder.ApplyToDevice(dualSenseDevice,
-                        TriggerId.LeftTrigger, settings?.Left,
-                        settings?.Enabled == true &&
-                            settings.LeftActive);
-                }
-                if (lastTriggerLabRightRumbleEnabled)
-                {
-                    TriggerLabEffectEncoder.ApplyToDevice(dualSenseDevice,
-                        TriggerId.RightTrigger, settings?.Right,
-                        settings?.Enabled == true &&
-                            settings.RightActive);
-                }
-            }
-        }
-
-        private void ApplyGameRumbleTriggerVibration(DS4Device device,
-            int deviceIndex, byte lightFast, byte heavySlow)
-        {
-            if (device is not DualSenseDevice dualSenseDevice ||
-                !IsCurrentPhysicalSonyDualSense(dualSenseDevice))
-            {
-                return;
-            }
-
-            lock (triggerLabRumbleLock)
-            {
-                TriggerLabProfileSettings settings =
-                    TriggerLabForDevice(deviceIndex);
-                bool leftEnabled = settings?.Enabled == true &&
-                    settings.LeftGameRumbleVibration;
-                bool rightEnabled = settings?.Enabled == true &&
-                    settings.RightGameRumbleVibration;
-                int signature = TriggerLabRumbleSignature(settings);
-                if (triggerLabRumbleStateKnown &&
-                    lastTriggerLabLeftRumble == heavySlow &&
-                    lastTriggerLabRightRumble == lightFast &&
-                    lastTriggerLabRumbleSignature == signature &&
-                    lastTriggerLabLeftRumbleEnabled == leftEnabled &&
-                    lastTriggerLabRightRumbleEnabled == rightEnabled)
-                {
-                    return;
-                }
-
-                bool restoreLeft = lastTriggerLabLeftRumbleEnabled &&
-                    !leftEnabled;
-                bool restoreRight = lastTriggerLabRightRumbleEnabled &&
-                    !rightEnabled;
-                triggerLabRumbleStateKnown = true;
-                lastTriggerLabLeftRumble = heavySlow;
-                lastTriggerLabRightRumble = lightFast;
-                lastTriggerLabRumbleSignature = signature;
-                lastTriggerLabLeftRumbleEnabled = leftEnabled;
-                lastTriggerLabRightRumbleEnabled = rightEnabled;
-
-                if (leftEnabled)
-                {
-                    TriggerLabEffectEncoder.ApplyGameRumbleToDevice(
-                        dualSenseDevice, TriggerId.LeftTrigger, settings.Left,
-                        settings.LeftActive, heavySlow);
-                }
-                else if (restoreLeft)
-                {
-                    TriggerLabEffectEncoder.ApplyToDevice(dualSenseDevice,
-                        TriggerId.LeftTrigger, settings?.Left,
-                        settings?.Enabled == true && settings.LeftActive);
-                }
-
-                if (rightEnabled)
-                {
-                    TriggerLabEffectEncoder.ApplyGameRumbleToDevice(
-                        dualSenseDevice, TriggerId.RightTrigger,
-                        settings.Right, settings.RightActive, lightFast);
-                }
-                else if (restoreRight)
-                {
-                    TriggerLabEffectEncoder.ApplyToDevice(dualSenseDevice,
-                        TriggerId.RightTrigger, settings?.Right,
-                        settings?.Enabled == true &&
-                            settings.RightActive);
-                }
-            }
-        }
-
-        private static int TriggerLabRumbleSignature(
-            TriggerLabProfileSettings settings)
-        {
-            if (settings == null)
-            {
-                return 0;
-            }
-
-            HashCode hash = new HashCode();
-            hash.Add(settings.Enabled);
-            hash.Add(settings.LeftActive);
-            hash.Add(settings.RightActive);
-            hash.Add(settings.LeftGameRumbleVibration);
-            hash.Add(settings.RightGameRumbleVibration);
-            AddTriggerLabEffectSignature(ref hash, settings.Left);
-            AddTriggerLabEffectSignature(ref hash, settings.Right);
-            return hash.ToHashCode();
-        }
-
-        private static void AddTriggerLabEffectSignature(ref HashCode hash,
-            TriggerLabEffectSettings effect)
-        {
-            hash.Add(effect?.Mode ?? TriggerLabMode.Feedback);
-            hash.Add(effect?.StartPercent ?? 0);
-            hash.Add(effect?.WallPercent ?? 0);
-            hash.Add(effect?.ForcePercent ?? 0);
         }
 
         private bool ShouldApplyLegacyDualSenseRumble(DS4Device device,
@@ -3887,28 +3719,19 @@ namespace DS4Windows
 
             int r2Offset = DualSenseTriggerFeedbackOffset;
             int l2Offset = DualSenseTriggerFeedbackOffset + DualSenseTriggerEffectLength;
-            TriggerLabProfileSettings triggerLab = TriggerLabForDevice(deviceIndex);
             bool r2Changed = !TriggerFeedbackEquals(feedback, r2Offset, lastR2TriggerFeedback);
             bool l2Changed = !TriggerFeedbackEquals(feedback, l2Offset, lastL2TriggerFeedback);
 
             if (r2Changed)
             {
                 CopyTriggerFeedback(feedback, r2Offset, lastR2TriggerFeedback);
-                if (triggerLab?.HasActiveOverride == true && triggerLab.RightActive)
-                    TriggerLabEffectEncoder.ApplyToDevice(dualSenseDevice,
-                        TriggerId.RightTrigger, triggerLab.Right, true);
-                else
-                    ApplyRawTriggerEffect(dualSenseDevice, TriggerId.RightTrigger, feedback, r2Offset);
+                ApplyRawTriggerEffect(dualSenseDevice, TriggerId.RightTrigger, feedback, r2Offset);
             }
 
             if (l2Changed)
             {
                 CopyTriggerFeedback(feedback, l2Offset, lastL2TriggerFeedback);
-                if (triggerLab?.HasActiveOverride == true && triggerLab.LeftActive)
-                    TriggerLabEffectEncoder.ApplyToDevice(dualSenseDevice,
-                        TriggerId.LeftTrigger, triggerLab.Left, true);
-                else
-                    ApplyRawTriggerEffect(dualSenseDevice, TriggerId.LeftTrigger, feedback, l2Offset);
+                ApplyRawTriggerEffect(dualSenseDevice, TriggerId.LeftTrigger, feedback, l2Offset);
             }
         }
 
@@ -3948,9 +3771,6 @@ namespace DS4Windows
         {
             byte[] report = new byte[DualSenseNativeOutputReportLength];
             Array.Copy(feedback, DualSenseNativeOutputReportOffset, report, 0, report.Length);
-
-            ApplyTriggerLabNativeOverrides(report, 1, 11, 22,
-                TriggerLabForDevice(deviceIndex), feedback[1], feedback[0]);
 
             return report;
         }
@@ -4011,15 +3831,6 @@ namespace DS4Windows
 
             Program.rootHub?.ApplyAudioHapticsToGameReport(deviceIndex,
                 report, reportOffset + 78, 64);
-            if (!audioOnlySidecar && !hasNativeGameState)
-            {
-                int stateOffset = reportOffset + 13;
-                ApplyTriggerLabNativeOverrides(report, stateOffset,
-                    stateOffset + 10, stateOffset + 21,
-                    TriggerLabForDevice(deviceIndex), feedback[1],
-                    feedback[0]);
-            }
-
             return dualSenseDevice.WriteBluetoothCombinedHapticsAudioOutputReport(report,
                 DualSenseCombinedBluetoothReportOffset,
                 DualSenseCombinedBluetoothReportLength,
@@ -4318,60 +4129,6 @@ namespace DS4Windows
         [DllImport("user32.dll")]
         private static extern uint GetWindowThreadProcessId(IntPtr window,
             out uint processId);
-
-        private static void ApplyTriggerLabNativeOverrides(byte[] report,
-            int flagsOffset, int rightTriggerOffset, int leftTriggerOffset,
-            TriggerLabProfileSettings triggerLab, byte lightFast,
-            byte heavySlow)
-        {
-            if (triggerLab?.Enabled != true)
-            {
-                return;
-            }
-
-            bool rightPersistent = triggerLab.RightActive;
-            bool rightRumble = triggerLab.RightGameRumbleVibration;
-            if (rightPersistent || rightRumble)
-            {
-                report[flagsOffset] |= 0x04;
-                if (rightRumble)
-                {
-                    TriggerLabEffectEncoder.WriteGameRumbleNativeBlock(
-                        report, rightTriggerOffset, triggerLab.Right,
-                        rightPersistent, lightFast);
-                }
-                else
-                {
-                    TriggerLabEffectEncoder.WriteNativeBlock(report,
-                        rightTriggerOffset, triggerLab.Right, true);
-                }
-            }
-
-            bool leftPersistent = triggerLab.LeftActive;
-            bool leftRumble = triggerLab.LeftGameRumbleVibration;
-            if (leftPersistent || leftRumble)
-            {
-                report[flagsOffset] |= 0x08;
-                if (leftRumble)
-                {
-                    TriggerLabEffectEncoder.WriteGameRumbleNativeBlock(
-                        report, leftTriggerOffset, triggerLab.Left,
-                        leftPersistent, heavySlow);
-                }
-                else
-                {
-                    TriggerLabEffectEncoder.WriteNativeBlock(report,
-                        leftTriggerOffset, triggerLab.Left, true);
-                }
-            }
-        }
-
-        private static TriggerLabProfileSettings TriggerLabForDevice(int deviceIndex)
-        {
-            if (deviceIndex < 0 || deviceIndex >= Global.TEST_PROFILE_ITEM_COUNT)
-                return null;
-            return Global.store.triggerLabSettings[deviceIndex];
-        }
 
         private bool IsNativeDualSenseFeedbackCompatible(DS4Device device)
         {
