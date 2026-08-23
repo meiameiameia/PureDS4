@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"
+     fill="none" role="img" aria-label="DS4Windows Reworked">
+  <!-- Hand-tuned 16px grid. Deck spans and chamfer are dropped; the gaps and
+       the solid-vs-hollow contrast are kept, because those carry the meaning.
+       Hollow stroke thins to 1 so its hole stays 3x4 and reads as a hole. -->
+  <g fill="currentColor">
+    <rect x="1" y="5" width="5" height="6"/>
+  </g>
+  <rect x="10.5" y="5.5" width="4" height="5" stroke="currentColor" stroke-width="1"/>
+  <rect x="7" y="2" width="2" height="12" fill="var(--bridge-pillar, currentColor)"/>
+</svg>

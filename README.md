@@ -1,5 +1,7 @@
 # DS4Windows Reworked
 
+![DS4Windows Reworked Mapped Pad icon](branding/mapped-pad/mapped-pad-512.png)
+
 This repository is a maintainable DS4Windows derivative focused on dependable
 controller input, profile mapping, and Windows virtual-controller output.
 
@@ -50,6 +52,8 @@ provenance, signing, installer, and release-validation gates are complete.
 
 See [`docs/RELEASE_CONTRACT.md`](docs/RELEASE_CONTRACT.md) for the version,
 upgrade, compatibility, artifact, and release-authority contract.
+See [`docs/visual-contract.md`](docs/visual-contract.md) for the interface,
+identity, status, accessibility, and validation rules.
 
 ## Provenance and license
 

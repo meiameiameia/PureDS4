@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540">
+  <title>Reworked R responsive icon concept sheet</title>
+  <defs>
+    <symbol id="app-icon" viewBox="0 0 64 64">
+      <path fill="#142838" d="M16 4h32c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12H16C9.373 60 4 54.627 4 48V16C4 9.373 9.373 4 16 4Z"/>
+      <path fill="#F4F7FB" fill-rule="evenodd" d="M17 14h17c9.331 0 15 4.854 15 13 0 6.278-3.41 10.405-9 12H28v11H17V14Zm11 9v8h6c2.818 0 4-1.411 4-4s-1.182-4-4-4h-6Z"/>
+      <path fill="#D28A28" d="M31 35h11l10 15H40L27 37l4-2Z"/>
+    </symbol>
+    <symbol id="mono-mark" viewBox="0 0 64 64">
+      <path fill="currentColor" fill-rule="evenodd" d="M13 9h22c11.819 0 19 6.149 19 16.468 0 7.951-4.319 13.179-11.4 15.194L56 55H40L26.8 42H26v13H13V9Zm13 11v11h8c4.227 0 6-1.94 6-5.5S38.227 20 34 20h-8Z"/>
+    </symbol>
+  </defs>
+
+  <rect width="960" height="540" fill="#F3F4F5"/>
+  <text x="48" y="52" fill="#20272C" font-family="Segoe UI, sans-serif" font-size="24" font-weight="600">Reworked R — identity and responsive family</text>
+  <text x="48" y="82" fill="#5E6B74" font-family="Segoe UI, sans-serif" font-size="15">The product mark carries identity. Runtime state remains a separate, readable badge.</text>
+
+  <text x="48" y="133" fill="#20272C" font-family="Segoe UI, sans-serif" font-size="14" font-weight="600">APPLICATION</text>
+  <use href="#app-icon" x="48" y="154" width="224" height="224"/>
+  <use href="#app-icon" x="304" y="154" width="96" height="96"/>
+  <use href="#app-icon" x="424" y="154" width="48" height="48"/>
+  <use href="#app-icon" x="496" y="154" width="32" height="32"/>
+  <use href="#app-icon" x="552" y="154" width="20" height="20"/>
+  <use href="#app-icon" x="596" y="154" width="16" height="16"/>
+  <text x="304" y="272" fill="#5E6B74" font-family="Segoe UI, sans-serif" font-size="13">96</text>
+  <text x="424" y="222" fill="#5E6B74" font-family="Segoe UI, sans-serif" font-size="13">48</text>
+  <text x="496" y="206" fill="#5E6B74" font-family="Segoe UI, sans-serif" font-size="13">32</text>
+  <text x="552" y="198" fill="#5E6B74" font-family="Segoe UI, sans-serif" font-size="13">20</text>
+  <text x="596" y="194" fill="#5E6B74" font-family="Segoe UI, sans-serif" font-size="13">16</text>
+
+  <text x="48" y="432" fill="#20272C" font-family="Segoe UI, sans-serif" font-size="14" font-weight="600">SYSTEM TRAY — RESPONSIVE MONO MARK</text>
+  <rect x="48" y="452" width="400" height="56" rx="4" fill="#202124"/>
+  <g color="#F4F7FB">
+    <use href="#mono-mark" x="72" y="464" width="32" height="32"/>
+    <use href="#mono-mark" x="128" y="468" width="24" height="24"/>
+    <use href="#mono-mark" x="176" y="470" width="20" height="20"/>
+    <use href="#mono-mark" x="220" y="472" width="16" height="16"/>
+  </g>
+  <rect x="480" y="452" width="400" height="56" rx="4" fill="#FFFFFF" stroke="#B8C2C9"/>
+  <g color="#20272C">
+    <use href="#mono-mark" x="504" y="464" width="32" height="32"/>
+    <use href="#mono-mark" x="560" y="468" width="24" height="24"/>
+    <use href="#mono-mark" x="608" y="470" width="20" height="20"/>
+    <use href="#mono-mark" x="652" y="472" width="16" height="16"/>
+  </g>
+
+  <text x="680" y="166" fill="#20272C" font-family="Segoe UI, sans-serif" font-size="14" font-weight="600">WHY THIS DIRECTION</text>
+  <text x="680" y="196" fill="#5E6B74" font-family="Segoe UI, sans-serif" font-size="14">
+    <tspan x="680" dy="0">• Strong silhouette before metaphor</tspan>
+    <tspan x="680" dy="26">• Ownable “Reworked” identity</tspan>
+    <tspan x="680" dy="26">• No platform trade dress</tspan>
+    <tspan x="680" dy="26">• Clean monochrome tray form</tspan>
+    <tspan x="680" dy="26">• Status can change independently</tspan>
+  </text>
+</svg>

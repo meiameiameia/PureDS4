@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
+     fill="none" stroke="none" role="img" aria-label="DS4Windows Reworked">
+  <!--
+    "The Bridge" - master geometry, 24-unit grid.
+
+    Left  : solid anchor, chamfered top-left  = the physical device (real)
+    Centre: pillar, tall, crossing the deck   = the application (the intervention)
+    Right : hollow anchor, 2-unit stroke      = the virtual device (emulated)
+
+    The 1-unit gap on each side of the pillar is load-bearing: it says the
+    crossing is an assembled piece, so removing it leaves both sides intact.
+    Everything is axis-aligned and centred on (12, 12).
+  -->
+  <g fill="currentColor">
+    <path d="M3 9 H7 V15 H1 V11 Z"/>
+    <rect x="8" y="11" width="3" height="2"/>
+    <rect x="13" y="11" width="3" height="2"/>
+  </g>
+  <rect x="18" y="10" width="4" height="4" stroke="currentColor" stroke-width="2"/>
+  <rect x="11" y="6" width="2" height="12" fill="var(--bridge-pillar, currentColor)"/>
+</svg>

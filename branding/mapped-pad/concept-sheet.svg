@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560">
+  <title>Mapped Pad responsive icon concept sheet</title>
+  <defs>
+    <clipPath id="left-half"><rect width="32" height="64"/></clipPath>
+    <clipPath id="right-half"><rect x="32" width="32" height="64"/></clipPath>
+    <symbol id="app-icon" viewBox="0 0 64 64">
+      <path fill="#142838" d="M16 4h32c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12H16C9.373 60 4 54.627 4 48V16C4 9.373 9.373 4 16 4Z"/>
+      <g transform="translate(0 -5)">
+        <path clip-path="url(#left-half)" fill="#F4F7FB" d="M19 20c-6 0-9.9 4.4-11 12.6L6.6 44.2C5.8 50.5 9 54 13.1 54c2.2 0 4.1-1 5.7-3l5.5-7h15.4l5.5 7c1.6 2 3.5 3 5.7 3 4.1 0 7.3-3.5 6.5-9.8L56 32.6C54.9 24.4 51 20 45 20c-4.3 0-7.6 1.8-10 5H29c-2.4-3.2-5.7-5-10-5Z"/>
+        <path clip-path="url(#right-half)" fill="#8AB4D6" d="M19 20c-6 0-9.9 4.4-11 12.6L6.6 44.2C5.8 50.5 9 54 13.1 54c2.2 0 4.1-1 5.7-3l5.5-7h15.4l5.5 7c1.6 2 3.5 3 5.7 3 4.1 0 7.3-3.5 6.5-9.8L56 32.6C54.9 24.4 51 20 45 20c-4.3 0-7.6 1.8-10 5H29c-2.4-3.2-5.7-5-10-5Z"/>
+        <path fill="#142838" d="M15 29h6v5h5v6h-5v5h-6v-5h-5v-6h5Z"/>
+        <circle cx="44" cy="32" r="2.5" fill="#142838"/>
+        <circle cx="49" cy="38" r="2.5" fill="#142838"/>
+        <rect x="30" y="27" width="4" height="16" rx="2" fill="#D28A28"/>
+      </g>
+    </symbol>
+    <symbol id="tray-mark" viewBox="0 0 64 64">
+      <g transform="translate(0 -5)">
+        <path fill="currentColor" d="M19 16C10 16 5 22 4 33L3 45c-1 9 4 14 10 14 4 0 7-2 10-6l4-6h10l4 6c3 4 6 6 10 6 6 0 11-5 10-14l-1-12c-1-11-6-17-15-17-5 0-9 2-12 6h-2c-3-4-7-6-12-6Z"/>
+        <path fill="#000" fill-opacity=".001" d="M18 27h5v5h5v5h-5v5h-5v-5h-5v-5h5v-5Z"/>
+      </g>
+    </symbol>
+  </defs>
+
+  <rect width="960" height="560" fill="#F3F4F5"/>
+  <text x="48" y="52" fill="#20272C" font-family="Segoe UI, sans-serif" font-size="24" font-weight="600">Mapped Pad — controller first, routing second</text>
+  <text x="48" y="82" fill="#5E6B74" font-family="Segoe UI, sans-serif" font-size="15">An original generic controller silhouette split into physical and virtual halves.</text>
+
+  <text x="48" y="132" fill="#20272C" font-family="Segoe UI, sans-serif" font-size="14" font-weight="600">APPLICATION ICON</text>
+  <use href="#app-icon" x="48" y="152" width="224" height="224"/>
+  <use href="#app-icon" x="304" y="152" width="96" height="96"/>
+  <use href="#app-icon" x="424" y="152" width="48" height="48"/>
+  <use href="#app-icon" x="496" y="152" width="32" height="32"/>
+  <use href="#app-icon" x="552" y="152" width="20" height="20"/>
+  <use href="#app-icon" x="596" y="152" width="16" height="16"/>
+  <text x="304" y="270" fill="#5E6B74" font-family="Segoe UI, sans-serif" font-size="13">96</text>
+  <text x="424" y="220" fill="#5E6B74" font-family="Segoe UI, sans-serif" font-size="13">48</text>
+  <text x="496" y="204" fill="#5E6B74" font-family="Segoe UI, sans-serif" font-size="13">32</text>
+  <text x="552" y="196" fill="#5E6B74" font-family="Segoe UI, sans-serif" font-size="13">20</text>
+  <text x="596" y="192" fill="#5E6B74" font-family="Segoe UI, sans-serif" font-size="13">16</text>
+
+  <text x="680" y="164" fill="#20272C" font-family="Segoe UI, sans-serif" font-size="14" font-weight="600">VISUAL CONTRACT</text>
+  <text x="680" y="196" fill="#5E6B74" font-family="Segoe UI, sans-serif" font-size="14">
+    <tspan x="680" dy="0">• Immediately reads as gaming</tspan>
+    <tspan x="680" dy="26">• No DualShock/Xbox silhouette</tspan>
+    <tspan x="680" dy="26">• Light half = physical device</tspan>
+    <tspan x="680" dy="26">• Blue half = virtual output</tspan>
+    <tspan x="680" dy="26">• Amber seam = controlled mapping</tspan>
+    <tspan x="680" dy="26">• State remains a separate badge</tspan>
+  </text>
+
+  <text x="48" y="424" fill="#20272C" font-family="Segoe UI, sans-serif" font-size="14" font-weight="600">SYSTEM TRAY — SIMPLIFIED SILHOUETTE</text>
+  <rect x="48" y="444" width="400" height="72" rx="4" fill="#202124"/>
+  <g color="#F4F7FB">
+    <use href="#tray-mark" x="72" y="460" width="40" height="40"/>
+    <use href="#tray-mark" x="136" y="464" width="32" height="32"/>
+    <use href="#tray-mark" x="192" y="468" width="24" height="24"/>
+    <use href="#tray-mark" x="240" y="470" width="20" height="20"/>
+    <use href="#tray-mark" x="284" y="472" width="16" height="16"/>
+  </g>
+  <rect x="480" y="444" width="400" height="72" rx="4" fill="#FFFFFF" stroke="#B8C2C9"/>
+  <g color="#20272C">
+    <use href="#tray-mark" x="504" y="460" width="40" height="40"/>
+    <use href="#tray-mark" x="568" y="464" width="32" height="32"/>
+    <use href="#tray-mark" x="624" y="468" width="24" height="24"/>
+    <use href="#tray-mark" x="672" y="470" width="20" height="20"/>
+    <use href="#tray-mark" x="716" y="472" width="16" height="16"/>
+  </g>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>DS4Windows Reworked icon concept</title>
+  <path fill="#142838" d="M16 4h32c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12H16C9.373 60 4 54.627 4 48V16C4 9.373 9.373 4 16 4Z"/>
+  <path fill="#F4F7FB" fill-rule="evenodd" d="M17 14h17c9.331 0 15 4.854 15 13 0 6.278-3.41 10.405-9 12H28v11H17V14Zm11 9v8h6c2.818 0 4-1.411 4-4s-1.182-4-4-4h-6Z"/>
+  <path fill="#D28A28" d="M31 35h11l10 15H40L27 37l4-2Z"/>
+</svg>

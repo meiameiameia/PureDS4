@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>DS4Windows Reworked Mapped Pad icon concept</title>
+  <defs>
+    <clipPath id="left-half"><rect width="32" height="64"/></clipPath>
+    <clipPath id="right-half"><rect x="32" width="32" height="64"/></clipPath>
+  </defs>
+  <path fill="#142838" d="M16 4h32c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12H16C9.373 60 4 54.627 4 48V16C4 9.373 9.373 4 16 4Z"/>
+  <g transform="translate(0 -5)">
+    <path clip-path="url(#left-half)" fill="#F4F7FB" d="M19 20c-6 0-9.9 4.4-11 12.6L6.6 44.2C5.8 50.5 9 54 13.1 54c2.2 0 4.1-1 5.7-3l5.5-7h15.4l5.5 7c1.6 2 3.5 3 5.7 3 4.1 0 7.3-3.5 6.5-9.8L56 32.6C54.9 24.4 51 20 45 20c-4.3 0-7.6 1.8-10 5H29c-2.4-3.2-5.7-5-10-5Z"/>
+    <path clip-path="url(#right-half)" fill="#8AB4D6" d="M19 20c-6 0-9.9 4.4-11 12.6L6.6 44.2C5.8 50.5 9 54 13.1 54c2.2 0 4.1-1 5.7-3l5.5-7h15.4l5.5 7c1.6 2 3.5 3 5.7 3 4.1 0 7.3-3.5 6.5-9.8L56 32.6C54.9 24.4 51 20 45 20c-4.3 0-7.6 1.8-10 5H29c-2.4-3.2-5.7-5-10-5Z"/>
+    <path fill="#142838" d="M15 29h6v5h5v6h-5v5h-6v-5h-5v-6h5Z"/>
+    <circle cx="44" cy="32" r="2.5" fill="#142838"/>
+    <circle cx="49" cy="38" r="2.5" fill="#142838"/>
+    <rect x="30" y="27" width="4" height="16" rx="2" fill="#D28A28"/>
+  </g>
+</svg>
