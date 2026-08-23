@@ -1,4 +1,4 @@
-using DS4Windows.InputDevices;
+﻿using DS4Windows.InputDevices;
 using DS4WinWPF;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -71,7 +71,7 @@ namespace DS4WindowsTests
 
             Assert.IsTrue(rule.IsDeviceMatch(InputDeviceType.DualSense));
             Assert.IsFalse(rule.IsDeviceMatch(InputDeviceType.DS4));
-            Assert.IsFalse(rule.IsDeviceMatch(InputDeviceType.SwitchPro));
+            Assert.IsFalse(rule.IsDeviceMatch(InputDeviceType.DS3));
         }
     }
 }

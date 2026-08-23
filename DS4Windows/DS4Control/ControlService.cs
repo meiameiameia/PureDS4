@@ -668,40 +668,6 @@ namespace DS4Windows
 
         public void PostDS4DeviceInit(DS4Device device)
         {
-            if (device.DeviceType == InputDevices.InputDeviceType.JoyConL ||
-                device.DeviceType == InputDevices.InputDeviceType.JoyConR)
-            {
-                if (deviceOptions.JoyConDeviceOpts.LinkedMode == JoyConDeviceOptions.LinkMode.Joined)
-                {
-                    InputDevices.JoyConDevice tempJoyDev = device as InputDevices.JoyConDevice;
-                    tempJoyDev.PerformStateMerge = true;
-
-                    if (device.DeviceType == InputDevices.InputDeviceType.JoyConL)
-                    {
-                        tempJoyDev.PrimaryDevice = true;
-                        if (deviceOptions.JoyConDeviceOpts.JoinGyroProv == JoyConDeviceOptions.JoinedGyroProvider.JoyConL)
-                        {
-                            tempJoyDev.OutputMapGyro = true;
-                        }
-                        else
-                        {
-                            tempJoyDev.OutputMapGyro = false;
-                        }
-                    }
-                    else
-                    {
-                        tempJoyDev.PrimaryDevice = false;
-                        if (deviceOptions.JoyConDeviceOpts.JoinGyroProv == JoyConDeviceOptions.JoinedGyroProvider.JoyConR)
-                        {
-                            tempJoyDev.OutputMapGyro = true;
-                        }
-                        else
-                        {
-                            tempJoyDev.OutputMapGyro = false;
-                        }
-                    }
-                }
-            }
         }
 
         private void PrepareDS4DeviceSettingHooks(DS4Device device)
@@ -712,10 +678,6 @@ namespace DS4Windows
 
                 DualSenseControllerOptions dSOpts = tempDSDev.NativeOptionsStore;
                 dSOpts.LedModeChanged += (sender, e) => { tempDSDev.CheckControllerNumDeviceSettings(activeControllers); };
-            }
-            else if (device.DeviceType == InputDevices.InputDeviceType.JoyConL ||
-                device.DeviceType == InputDevices.InputDeviceType.JoyConR)
-            {
             }
         }
 
@@ -729,14 +691,6 @@ namespace DS4Windows
                     break;
                 case InputDevices.InputDeviceType.DualSense:
                     result = deviceOptions.DualSenseOpts.Enabled;
-                    break;
-                case InputDevices.InputDeviceType.SwitchPro:
-                    result = deviceOptions.SwitchProDeviceOpts.Enabled;
-                    break;
-                case InputDevices.InputDeviceType.JoyConL:
-                case InputDevices.InputDeviceType.JoyConR:
-                case InputDevices.InputDeviceType.JoyConGrip:
-                    result = deviceOptions.JoyConDeviceOpts.Enabled;
                     break;
                 case InputDevices.InputDeviceType.DS3:
                     result = deviceOptions.DS3DeviceOpts.Enabled;
@@ -980,7 +934,7 @@ namespace DS4Windows
         /// <summary>
         /// Obtain extra mappable controls not on a DS4 that should be added
         /// to the checked inputs list. Keeps Mapping class from having to check
-        /// extra Switch Pro and JoyCon buttons for DS4 controllers
+        /// extra non-DS4 buttons for DS4 controllers
         /// </summary>
         /// <param name="dev">Instance of input device</param>
         /// <returns>List of extra controls to check in Mapping class</returns>
@@ -1001,13 +955,6 @@ namespace DS4Windows
                         }
                     }
 
-                    break;
-                case InputDevices.InputDeviceType.JoyConL:
-                case InputDevices.InputDeviceType.JoyConR:
-                    result.AddRange(new DS4Controls[] { DS4Controls.Capture, DS4Controls.SideL, DS4Controls.SideR, DS4Controls.FnL, DS4Controls.FnR });
-                    break;
-                case InputDevices.InputDeviceType.SwitchPro:
-                    result.AddRange(new DS4Controls[] { DS4Controls.Capture });
                     break;
                 default:
                     break;
@@ -2113,7 +2060,6 @@ namespace DS4Windows
                     activeControllers = numControllers;
                     DS4LightBar.defaultLight = false;
                     int i = 0;
-                    InputDevices.JoyConDevice tempPrimaryJoyDev = null;
                     for (var devEnum = devices.GetEnumerator();
                         devEnum.MoveNext() && loopControllers; i++)
                     {
@@ -2123,38 +2069,6 @@ namespace DS4Windows
                         StartupDiag($"BeginPrepareConnectedInputController begin index={i}");
                         BeginPrepareConnectedInputController(device, showlog: true);
                         StartupDiag($"BeginPrepareConnectedInputController end index={i}");
-
-                        if (deviceOptions.JoyConDeviceOpts.LinkedMode == JoyConDeviceOptions.LinkMode.Joined)
-                        {
-                            if ((device.DeviceType == InputDevices.InputDeviceType.JoyConL ||
-                                device.DeviceType == InputDevices.InputDeviceType.JoyConR) && device.PerformStateMerge)
-                            {
-                                if (tempPrimaryJoyDev == null)
-                                {
-                                    tempPrimaryJoyDev = device as InputDevices.JoyConDevice;
-                                }
-                                else
-                                {
-                                    InputDevices.JoyConDevice currentJoyDev = device as InputDevices.JoyConDevice;
-                                    tempPrimaryJoyDev.JointDevice = currentJoyDev;
-                                    currentJoyDev.JointDevice = tempPrimaryJoyDev;
-
-                                    tempPrimaryJoyDev.JointState = currentJoyDev.JointState;
-
-                                    InputDevices.JoyConDevice parentJoy = tempPrimaryJoyDev;
-                                    tempPrimaryJoyDev.Removal += (sender, args) =>
-                                    {
-                                        currentJoyDev.JointDevice = null;
-                                    };
-                                    currentJoyDev.Removal += (sender, args) =>
-                                    {
-                                        parentJoy.JointDevice = null;
-                                    };
-
-                                    tempPrimaryJoyDev = null;
-                                }
-                            }
-                        }
 
                         DS4Controllers[i] = device;
                         device.DeviceSlotNumber = i;
@@ -2470,20 +2384,6 @@ namespace DS4Windows
                 IEnumerable<DS4Device> devices = DS4Devices.getDS4Controllers();
                 int numControllers = devices.Count();
                 activeControllers = numControllers;
-                InputDevices.JoyConDevice tempPrimaryJoyDev = null;
-                InputDevices.JoyConDevice tempSecondaryJoyDev = null;
-
-                if (deviceOptions.JoyConDeviceOpts.LinkedMode == JoyConDeviceOptions.LinkMode.Joined)
-                {
-                    tempPrimaryJoyDev = devices.Where(d =>
-                        (d.DeviceType == InputDevices.InputDeviceType.JoyConL || d.DeviceType == InputDevices.InputDeviceType.JoyConR)
-                         && d.PrimaryDevice && d.JointDeviceSlotNumber == -1).FirstOrDefault() as InputDevices.JoyConDevice;
-
-                    tempSecondaryJoyDev = devices.Where(d =>
-                        (d.DeviceType == InputDevices.InputDeviceType.JoyConL || d.DeviceType == InputDevices.InputDeviceType.JoyConR)
-                        && !d.PrimaryDevice && d.JointDeviceSlotNumber == -1).FirstOrDefault() as InputDevices.JoyConDevice;
-                }
-
                 for (var devEnum = devices.GetEnumerator(); devEnum.MoveNext() && loopControllers;)
                 {
                     DS4Device device = devEnum.Current;
@@ -2526,57 +2426,6 @@ namespace DS4Windows
                         if (DS4Controllers[Index] == null)
                         {
                             BeginPrepareConnectedInputController(device);
-
-                            if (deviceOptions.JoyConDeviceOpts.LinkedMode == JoyConDeviceOptions.LinkMode.Joined)
-                            {
-                                if ((device.DeviceType == InputDevices.InputDeviceType.JoyConL ||
-                                    device.DeviceType == InputDevices.InputDeviceType.JoyConR) && device.PerformStateMerge)
-                                {
-                                    if (device.PrimaryDevice &&
-                                        tempSecondaryJoyDev != null)
-                                    {
-                                        InputDevices.JoyConDevice currentJoyDev = device as InputDevices.JoyConDevice;
-                                        tempSecondaryJoyDev.JointDevice = currentJoyDev;
-                                        currentJoyDev.JointDevice = tempSecondaryJoyDev;
-
-                                        tempSecondaryJoyDev.JointState = currentJoyDev.JointState;
-
-                                        InputDevices.JoyConDevice secondaryJoy = tempSecondaryJoyDev;
-                                        secondaryJoy.Removal += (sender, args) =>
-                                        {
-                                            currentJoyDev.JointDevice = null;
-                                        };
-                                        currentJoyDev.Removal += (sender, args) =>
-                                        {
-                                            secondaryJoy.JointDevice = null;
-                                        };
-
-                                        tempSecondaryJoyDev = null;
-                                        tempPrimaryJoyDev = null;
-                                    }
-                                    else if (!device.PrimaryDevice &&
-                                        tempPrimaryJoyDev != null)
-                                    {
-                                        InputDevices.JoyConDevice currentJoyDev = device as InputDevices.JoyConDevice;
-                                        tempPrimaryJoyDev.JointDevice = currentJoyDev;
-                                        currentJoyDev.JointDevice = tempPrimaryJoyDev;
-
-                                        tempPrimaryJoyDev.JointState = currentJoyDev.JointState;
-
-                                        InputDevices.JoyConDevice parentJoy = tempPrimaryJoyDev;
-                                        tempPrimaryJoyDev.Removal += (sender, args) =>
-                                        {
-                                            currentJoyDev.JointDevice = null;
-                                        };
-                                        currentJoyDev.Removal += (sender, args) =>
-                                        {
-                                            parentJoy.JointDevice = null;
-                                        };
-
-                                        tempPrimaryJoyDev = null;
-                                    }
-                                }
-                            }
 
                             DS4Controllers[Index] = device;
                             device.DeviceSlotNumber = Index;

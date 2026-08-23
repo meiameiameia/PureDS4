@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Linq;
 using DS4Windows;
 using DS4Windows.InputDevices;
@@ -20,10 +20,6 @@ namespace DS4WindowsTests
         [DataTestMethod]
         [DataRow(InputDeviceType.DS4)]
         [DataRow(InputDeviceType.DualSense)]
-        [DataRow(InputDeviceType.SwitchPro)]
-        [DataRow(InputDeviceType.JoyConL)]
-        [DataRow(InputDeviceType.JoyConR)]
-        [DataRow(InputDeviceType.JoyConGrip)]
         public void EverySupportedPhysicalFamilyCanFeedEveryViiperOutput(
             InputDeviceType physicalType)
         {

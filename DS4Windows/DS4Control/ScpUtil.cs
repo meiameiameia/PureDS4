@@ -8779,53 +8779,6 @@ namespace DS4Windows
                             catch { }
                         }
 
-                        XmlNode xmlSwitchProSupport = xmlDeviceOptions.SelectSingleNode("SwitchProSupportSettings");
-                        if (xmlSwitchProSupport != null)
-                        {
-                            try
-                            {
-                                XmlNode item = xmlSwitchProSupport.SelectSingleNode("Enabled");
-                                if (bool.TryParse(item?.InnerText ?? "", out bool temp))
-                                {
-                                    deviceOptions.SwitchProDeviceOpts.Enabled = temp;
-                                }
-                            }
-                            catch { }
-                        }
-
-                        XmlNode xmlJoyConSupport = xmlDeviceOptions.SelectSingleNode("JoyConSupportSettings");
-                        if (xmlJoyConSupport != null)
-                        {
-                            try
-                            {
-                                XmlNode item = xmlJoyConSupport.SelectSingleNode("Enabled");
-                                if (bool.TryParse(item?.InnerText ?? "", out bool temp))
-                                {
-                                    deviceOptions.JoyConDeviceOpts.Enabled = temp;
-                                }
-                            }
-                            catch { }
-
-                            try
-                            {
-                                XmlNode item = xmlJoyConSupport.SelectSingleNode("LinkMode");
-                                if (Enum.TryParse(item?.InnerText ?? "", out JoyConDeviceOptions.LinkMode temp))
-                                {
-                                    deviceOptions.JoyConDeviceOpts.LinkedMode = temp;
-                                }
-                            }
-                            catch { }
-
-                            try
-                            {
-                                XmlNode item = xmlJoyConSupport.SelectSingleNode("JoinedGyroProvider");
-                                if (Enum.TryParse(item?.InnerText ?? "", out JoyConDeviceOptions.JoinedGyroProvider temp))
-                                {
-                                    deviceOptions.JoyConDeviceOpts.JoinGyroProv = temp;
-                                }
-                            }
-                            catch { }
-                        }
                     }
 
                     for (int i = 0; i < Global.MAX_DS4_CONTROLLER_COUNT; i++)
@@ -9028,26 +8981,6 @@ namespace DS4Windows
             xmlDualSenseSupport.AppendChild(xmlDualSenseEnabled);
 
             xmlDeviceOptions.AppendChild(xmlDualSenseSupport);
-
-            XmlElement xmlSwitchProSupport = m_Xdoc.CreateElement("SwitchProSupportSettings", null);
-            XmlElement xmlSwitchProEnabled = m_Xdoc.CreateElement("Enabled", null);
-            xmlSwitchProEnabled.InnerText = deviceOptions.SwitchProDeviceOpts.Enabled.ToString();
-            xmlSwitchProSupport.AppendChild(xmlSwitchProEnabled);
-
-            xmlDeviceOptions.AppendChild(xmlSwitchProSupport);
-
-            XmlElement xmlJoyConSupport = m_Xdoc.CreateElement("JoyConSupportSettings", null);
-            XmlElement xmlJoyconEnabled = m_Xdoc.CreateElement("Enabled", null);
-            xmlJoyconEnabled.InnerText = deviceOptions.JoyConDeviceOpts.Enabled.ToString();
-            xmlJoyConSupport.AppendChild(xmlJoyconEnabled);
-            XmlElement xmlJoyconLinkMode = m_Xdoc.CreateElement("LinkMode", null);
-            xmlJoyconLinkMode.InnerText = deviceOptions.JoyConDeviceOpts.LinkedMode.ToString();
-            xmlJoyConSupport.AppendChild(xmlJoyconLinkMode);
-            XmlElement xmlJoyconUnionGyro = m_Xdoc.CreateElement("JoinedGyroProvider", null);
-            xmlJoyconUnionGyro.InnerText = deviceOptions.JoyConDeviceOpts.JoinGyroProv.ToString();
-            xmlJoyConSupport.AppendChild(xmlJoyconUnionGyro);
-
-            xmlDeviceOptions.AppendChild(xmlJoyConSupport);
 
             rootElement.AppendChild(xmlDeviceOptions);
 

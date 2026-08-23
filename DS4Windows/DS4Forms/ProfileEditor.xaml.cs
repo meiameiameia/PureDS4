@@ -117,10 +117,6 @@ namespace DS4WinWPF.DS4Forms
                 : physicalController?.DeviceType switch
                 {
                     InputDeviceType.DualSense => ControllerDiagramKind.DualSense,
-                    InputDeviceType.SwitchPro or
-                    InputDeviceType.JoyConL or
-                    InputDeviceType.JoyConR or
-                    InputDeviceType.JoyConGrip => ControllerDiagramKind.Switch2Pro,
                     _ => ControllerDiagramKind.DualShock4,
                 };
             ConfigureControllerDiagram(defaultDiagram, true);

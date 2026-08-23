@@ -215,11 +215,6 @@ namespace DS4Windows
         internal const int RAZER_VID = 0x1532;
         internal const int NACON_VID = 0x146B;
         internal const int HORI_VID = 0x0F0D;
-        internal const int NINTENDO_VENDOR_ID = 0x57e;
-        internal const int SWITCH_PRO_PRODUCT_ID = 0x2009;
-        internal const int JOYCON_L_PRODUCT_ID = 0x2006;
-        internal const int JOYCON_R_PRODUCT_ID = 0x2007;
-        internal const int JOYCON_CHARGING_GRIP_PRODUCT_ID = 0x200E;
 
         // https://support.steampowered.com/kb_article.php?ref=5199-TOKV-4426&l=english web site has a list of other PS4 compatible device VID/PID values and brand names. 
         // However, not all those are guaranteed to work with DS4Windows app so support is added case by case when users of DS4Windows app tests non-official DS4 gamepads.
@@ -258,10 +253,6 @@ namespace DS4Windows
             new VidPidInfo(HORI_VID, 0x0101, "Hori Mini Hatsune Miku FT", InputDeviceType.DS4, VidPidFeatureSet.NoGyroCalib), // Hori Mini Hatsune Miku FT (wired only. No light bar, gyro or rumble)
             new VidPidInfo(HORI_VID, 0x00C9, "Hori Taiko Controller",  InputDeviceType.DS4, VidPidFeatureSet.NoGyroCalib), // Hori Taiko Controller (wired only. No light bar, touchpad, gyro, rumble, sticks or triggers)
             new VidPidInfo(0x0C12, 0x1E1C, "SnakeByte Game:Pad 4S", InputDeviceType.DS4, VidPidFeatureSet.NoGyroCalib | VidPidFeatureSet.NoBatteryReading), // SnakeByte Gamepad for PS4 (wired only. No gyro. No light bar). If it doesn't work then try the latest gamepad firmware from https://mysnakebyte.com/
-            new VidPidInfo(NINTENDO_VENDOR_ID, SWITCH_PRO_PRODUCT_ID, "Switch Pro", InputDeviceType.SwitchPro, VidPidFeatureSet.DefaultDS4, checkConnection: SwitchProDevice.DetermineConnectionType),
-            new VidPidInfo(NINTENDO_VENDOR_ID, JOYCON_L_PRODUCT_ID, "JoyCon (L)", InputDeviceType.JoyConL, VidPidFeatureSet.DefaultDS4, checkConnection: JoyConDevice.DetermineConnectionType),
-            new VidPidInfo(NINTENDO_VENDOR_ID, JOYCON_R_PRODUCT_ID, "JoyCon (R)", InputDeviceType.JoyConR, VidPidFeatureSet.DefaultDS4, checkConnection: JoyConDevice.DetermineConnectionType),
-            new VidPidInfo(NINTENDO_VENDOR_ID, JOYCON_CHARGING_GRIP_PRODUCT_ID, "JoyCon (Grip)", InputDeviceType.JoyConGrip, VidPidFeatureSet.DefaultDS4, checkConnection: JoyConDevice.DetermineConnectionType),
             new VidPidInfo(0x7545, 0x1122, "Gioteck VX4", InputDeviceType.DS4), // Gioteck VX4 (no real lightbar, only some RGB leds)
             new VidPidInfo(0x7331, 0x0001, "DualShock 3 (DS4 Emulation)", InputDeviceType.DS4, VidPidFeatureSet.NoGyroCalib | VidPidFeatureSet.VendorDefinedDevice), // Sony DualShock 3 using DsHidMini driver. DsHidMini uses vendor-defined HID device type when it's emulating DS3 using DS4 button layout
             new VidPidInfo(0x20D6, 0x792A, "PowerA FUSION Wired Fightpad for PS4", InputDeviceType.DS4, VidPidFeatureSet.NoGyroCalib), // No lightbar, gyro, or sticks
@@ -608,11 +599,6 @@ namespace DS4Windows
                             metainfo.inputDevType == InputDeviceType.DS3)
                         {
                             serial = hDevice.GenerateFakeHwSerial();
-                        }
-                        else if (metainfo.inputDevType == InputDeviceType.JoyConGrip)
-                        {
-                            // Blank serial will mean that a JoyCon is not docked to a side
-                            serial = JoyConDevice.ReadUSBSerial(hDevice);
                         }
                         else
                         {

@@ -1,4 +1,4 @@
-using DS4Windows;
+﻿using DS4Windows;
 using DS4Windows.InputDevices;
 using DS4WinWPF.DS4Forms.ViewModels;
 
@@ -52,17 +52,6 @@ namespace DS4WindowsTests
             Assert.IsTrue(capabilities.ShowDualSenseHardwareControls);
             Assert.IsTrue(capabilities.SupportsAdaptiveTriggers);
             Assert.IsTrue(capabilities.SupportsMuteButton);
-        }
-
-        [TestMethod]
-        public void NonPlayStationControllerHidesPlayStationSpecificPanels()
-        {
-            ControllerUiCapabilities capabilities =
-                ControllerUiCapabilities.For(InputDeviceType.SwitchPro);
-
-            Assert.IsFalse(capabilities.ShowPlayStationControllerSettings);
-            Assert.IsFalse(capabilities.ShowControllerAudioSettings);
-            Assert.IsFalse(capabilities.ShowDualSenseHardwareControls);
         }
 
         [TestMethod]

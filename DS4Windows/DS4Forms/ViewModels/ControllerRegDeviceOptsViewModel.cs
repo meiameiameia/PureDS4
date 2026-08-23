@@ -25,8 +25,6 @@ using DS4Windows;
 using DS4WinWPF.DS4Forms.ViewModels.Util;
 using LEDBarMode = DS4Windows.DualSenseControllerOptions.LEDBarMode;
 using MuteLEDMode = DS4Windows.DualSenseControllerOptions.MuteLEDMode;
-using LinkMode = DS4Windows.JoyConDeviceOptions.LinkMode;
-using JoinedGyroProvider = DS4Windows.JoyConDeviceOptions.JoinedGyroProvider;
 
 namespace DS4WinWPF.DS4Forms.ViewModels
 {
@@ -38,17 +36,13 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
         public bool EnableDualSense { get => serviceDeviceOpts.DualSenseOpts.Enabled; }
 
-        public bool EnableSwitchPro { get => serviceDeviceOpts.SwitchProDeviceOpts.Enabled; }
 
-        public bool EnableJoyCon { get => serviceDeviceOpts.JoyConDeviceOpts.Enabled; }
 
         public bool EnableDS3 { get => serviceDeviceOpts.DS3DeviceOpts.Enabled; }
 
         public DS4DeviceOptions DS4DeviceOpts { get => serviceDeviceOpts.DS4DeviceOpts; }
         public DS3DeviceOptions DS3DeviceOpts { get => serviceDeviceOpts.DS3DeviceOpts; }
         public DualSenseDeviceOptions DSDeviceOpts { get => serviceDeviceOpts.DualSenseOpts; }
-        public SwitchProDeviceOptions SwitchProDeviceOpts { get => serviceDeviceOpts.SwitchProDeviceOpts; }
-        public JoyConDeviceOptions JoyConDeviceOpts { get => serviceDeviceOpts.JoyConDeviceOpts; }
 
         public bool UseMoonlightChanged
         {
@@ -108,15 +102,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             get => controllerOptionsStores[controllerSelectedIndex] as DualSenseControllerOptions;
         }
 
-        public SwitchProControllerOptions CurrentSwitchProOptions
-        {
-            get => controllerOptionsStores[controllerSelectedIndex] as SwitchProControllerOptions;
-        }
 
-        public JoyConControllerOptions CurrentJoyConOptions
-        {
-            get => controllerOptionsStores[controllerSelectedIndex] as JoyConControllerOptions;
-        }
 
         private int currentTabSelectedIndex = 0;
         public int CurrentTabSelectedIndex
@@ -169,17 +155,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 case DS4Windows.InputDevices.InputDeviceType.DualSense:
                     result = 2;
                     break;
-                case DS4Windows.InputDevices.InputDeviceType.SwitchPro:
-                    result = 3;
-                    break;
-                case DS4Windows.InputDevices.InputDeviceType.JoyConL:
-                case DS4Windows.InputDevices.InputDeviceType.JoyConR:
-                    result = 4;
-                    break;
-                default:
-                    // Default to empty control
-                    result = 0;
-                    break;
             }
 
             return result;
@@ -200,15 +175,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     break;
                 case DS4Windows.InputDevices.InputDeviceType.DualSense:
                     dataContextObject = new DualSenseControllerOptionsWrapper(CurrentDSOptions, serviceDeviceOpts.DualSenseOpts);
-                    break;
-                case DS4Windows.InputDevices.InputDeviceType.SwitchPro:
-                    dataContextObject = new SwitchProControllerOptionsWrapper(CurrentSwitchProOptions, serviceDeviceOpts.SwitchProDeviceOpts);
-                    break;
-                case DS4Windows.InputDevices.InputDeviceType.JoyConL:
-                case DS4Windows.InputDevices.InputDeviceType.JoyConR:
-                    dataContextObject = new JoyConControllerOptionsWrapper(CurrentJoyConOptions, serviceDeviceOpts.JoyConDeviceOpts);
-                    break;
-                default:
                     break;
             }
         }
@@ -287,58 +253,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
         public DualSenseControllerOptionsWrapper(DualSenseControllerOptions options,
             DualSenseDeviceOptions parentOpts)
-        {
-            this.options = options;
-            this.parentOptions = parentOpts;
-            parentOptions.EnabledChanged += (sender, e) => { VisibleChanged?.Invoke(this, EventArgs.Empty); };
-        }
-    }
-
-    public class SwitchProControllerOptionsWrapper
-    {
-        private SwitchProControllerOptions options;
-        public SwitchProControllerOptions Options { get => options; }
-
-        private SwitchProDeviceOptions parentOptions;
-        public bool Visible { get => parentOptions.Enabled; }
-        public event EventHandler VisibleChanged;
-
-        public SwitchProControllerOptionsWrapper(SwitchProControllerOptions options,
-            SwitchProDeviceOptions parentOpts)
-        {
-            this.options = options;
-            this.parentOptions = parentOpts;
-            parentOptions.EnabledChanged += (sender, e) => { VisibleChanged?.Invoke(this, EventArgs.Empty); };
-        }
-    }
-
-    public class JoyConControllerOptionsWrapper
-    {
-        private JoyConControllerOptions options;
-        public JoyConControllerOptions Options { get => options; }
-
-        private JoyConDeviceOptions parentOptions;
-        public JoyConDeviceOptions ParentOptions { get => parentOptions; }
-
-        public bool Visible { get => parentOptions.Enabled; }
-        public event EventHandler VisibleChanged;
-
-        private List<EnumChoiceSelection<LinkMode>> linkModes = new List<EnumChoiceSelection<LinkMode>>()
-        {
-            new EnumChoiceSelection<LinkMode>("Split", LinkMode.Split),
-            new EnumChoiceSelection<LinkMode>("Joined", LinkMode.Joined),
-        };
-        public List<EnumChoiceSelection<LinkMode>> LinkModes { get => linkModes; }
-
-        private List<EnumChoiceSelection<JoinedGyroProvider>> joinGyroOptions = new List<EnumChoiceSelection<JoinedGyroProvider>>()
-        {
-            new EnumChoiceSelection<JoinedGyroProvider>("Left", JoinedGyroProvider.JoyConL),
-            new EnumChoiceSelection<JoinedGyroProvider>("Right", JoinedGyroProvider.JoyConR),
-        };
-        public List<EnumChoiceSelection<JoinedGyroProvider>> JoinGyroOptions { get => joinGyroOptions; }
-
-        public JoyConControllerOptionsWrapper(JoyConControllerOptions options,
-            JoyConDeviceOptions parentOpts)
         {
             this.options = options;
             this.parentOptions = parentOpts;

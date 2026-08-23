@@ -1,4 +1,4 @@
-using DS4Windows;
+﻿using DS4Windows;
 using DS4Windows.InputDevices;
 
 namespace DS4WinWPF.DS4Forms.ViewModels
@@ -302,34 +302,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     microphoneToggleLabel: "Enable controller microphone input",
                     microphoneDescription:
                         "Uses the DualSense built-in microphone or a headset connected to the controller."),
-                InputDeviceType.SwitchPro => new ControllerUiCapabilities(
-                    deviceType,
-                    productId == 0x2069 ? "Switch 2 Pro" : "Switch Pro",
-                    "Switch 2 Pro Controller.png",
-                    isPlayStationController: false,
-                    showControllerAudioSettings: false,
-                    showDualSenseHardwareControls: false,
-                    feedbackLabel: "Rumble strength",
-                    audioHeader: "Controller audio",
-                    audioDescription: "Controller audio is not available on this device.",
-                    microphoneToggleLabel: "Enable controller microphone input",
-                    microphoneDescription: "Controller microphone input is not available on this device."),
-                InputDeviceType.JoyConL or
-                InputDeviceType.JoyConR or
-                InputDeviceType.JoyConGrip => new ControllerUiCapabilities(
-                    deviceType,
-                    deviceType == InputDeviceType.JoyConL ? "Joy-Con (L)" :
-                        deviceType == InputDeviceType.JoyConR ? "Joy-Con (R)" :
-                        "Joy-Con Grip",
-                    "Switch 2 Pro Controller.png",
-                    isPlayStationController: false,
-                    showControllerAudioSettings: false,
-                    showDualSenseHardwareControls: false,
-                    feedbackLabel: "Rumble strength",
-                    audioHeader: "Controller audio",
-                    audioDescription: "Controller audio is not available on this device.",
-                    microphoneToggleLabel: "Enable controller microphone input",
-                    microphoneDescription: "Controller microphone input is not available on this device."),
                 InputDeviceType.DS3 => new ControllerUiCapabilities(
                     deviceType,
                     "DualShock 3",

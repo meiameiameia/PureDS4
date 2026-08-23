@@ -27,10 +27,6 @@ namespace DS4Windows.InputDevices
     public enum InputDeviceType : uint
     {
         DS4,
-        SwitchPro,
-        JoyConL,
-        JoyConR,
-        JoyConGrip,
         DualSense,
         DS3
     }
@@ -46,14 +42,6 @@ namespace DS4Windows.InputDevices
             {
                 case InputDeviceType.DS4:
                     temp = new DS4Device(hidDevice, disName, featureSet);
-                    break;
-                case InputDeviceType.SwitchPro:
-                    temp = new SwitchProDevice(hidDevice, disName, featureSet);
-                    break;
-                case InputDeviceType.JoyConL:
-                case InputDeviceType.JoyConR:
-                case InputDeviceType.JoyConGrip:
-                    temp = new JoyConDevice(hidDevice, disName, featureSet);
                     break;
                 case InputDeviceType.DualSense:
                     temp = new DualSenseDevice(hidDevice, disName, featureSet);

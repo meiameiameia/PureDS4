@@ -943,16 +943,6 @@ namespace DS4WinWPF.DS4Control.DTOXml
                 {
                     Enabled = source.deviceOptions.DualSenseOpts.Enabled,
                 },
-                SwitchProSupportSettings = new SwitchProSupportSettings()
-                {
-                    Enabled = source.deviceOptions.SwitchProDeviceOpts.Enabled,
-                },
-                JoyConSupportSettings = new JoyConSupportSettings()
-                {
-                    Enabled = source.deviceOptions.JoyConDeviceOpts.Enabled,
-                    LinkMode = source.deviceOptions.JoyConDeviceOpts.LinkedMode,
-                    JoinedGyroProvider = source.deviceOptions.JoyConDeviceOpts.JoinGyroProv,
-                },
                 DS3SupportSettings = new DS3SupportSettings()
                 {
                     Enabled = source.deviceOptions.DS3DeviceOpts.Enabled,
@@ -1051,10 +1041,6 @@ namespace DS4WinWPF.DS4Control.DTOXml
 
             destination.deviceOptions.DS4DeviceOpts.Enabled = DeviceOptions.DS4SupportSettings.Enabled;
             destination.deviceOptions.DualSenseOpts.Enabled = DeviceOptions.DualSenseSupportSettings.Enabled;
-            destination.deviceOptions.SwitchProDeviceOpts.Enabled = DeviceOptions.SwitchProSupportSettings.Enabled;
-            destination.deviceOptions.JoyConDeviceOpts.Enabled = DeviceOptions.JoyConSupportSettings.Enabled;
-            destination.deviceOptions.JoyConDeviceOpts.LinkedMode = DeviceOptions.JoyConSupportSettings.LinkMode;
-            destination.deviceOptions.JoyConDeviceOpts.JoinGyroProv = DeviceOptions.JoyConSupportSettings.JoinedGyroProvider;
             destination.deviceOptions.DS3DeviceOpts.Enabled = DeviceOptions.DS3SupportSettings.Enabled;
 
             LightbarDS4WinInfo[] tempLightArray = new LightbarDS4WinInfo[]
@@ -1115,15 +1101,7 @@ namespace DS4WinWPF.DS4Control.DTOXml
             get; set;
         } = new DualSenseSupportSettings();
 
-        public SwitchProSupportSettings SwitchProSupportSettings
-        {
-            get; set;
-        } = new SwitchProSupportSettings();
 
-        public JoyConSupportSettings JoyConSupportSettings
-        {
-            get; set;
-        } = new JoyConSupportSettings();
 
         public DS3SupportSettings DS3SupportSettings
         {
@@ -1177,29 +1155,4 @@ namespace DS4WinWPF.DS4Control.DTOXml
         }
     }
 
-    public class SwitchProSupportSettings : BaseInputDeviceSettingsGroup
-    {
-        public SwitchProSupportSettings() : base()
-        {
-            Enabled = SwitchProDeviceOptions.DEFAULT_ENABLE;
-        }
-    }
-
-    public class JoyConSupportSettings : BaseInputDeviceSettingsGroup
-    {
-        public JoyConDeviceOptions.LinkMode LinkMode
-        {
-            get; set;
-        } = JoyConDeviceOptions.LINK_MODE_DEFAULT;
-
-        public JoyConDeviceOptions.JoinedGyroProvider JoinedGyroProvider
-        {
-            get; set;
-        }
-
-        public JoyConSupportSettings() : base()
-        {
-            Enabled = JoyConDeviceOptions.DEFAULT_ENABLE;
-        }
-    }
 }

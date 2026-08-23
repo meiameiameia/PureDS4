@@ -41,18 +41,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             set => serviceDeviceOpts.DualSenseOpts.Enabled = value;
         }
 
-        public bool EnableSwitchPro
-        {
-            get => serviceDeviceOpts.SwitchProDeviceOpts.Enabled;
-            set => serviceDeviceOpts.SwitchProDeviceOpts.Enabled = value;
-        }
-
-        public bool EnableJoyCon
-        {
-            get => serviceDeviceOpts.JoyConDeviceOpts.Enabled;
-            set => serviceDeviceOpts.JoyConDeviceOpts.Enabled = value;
-        }
-
         public bool EnableDS3
         {
             get => serviceDeviceOpts.DS3DeviceOpts.Enabled;

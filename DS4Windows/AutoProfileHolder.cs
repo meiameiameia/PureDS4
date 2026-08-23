@@ -37,8 +37,6 @@ namespace DS4WinWPF
         DualSense,
         DS4,
         DS3,
-        SwitchPro,
-        JoyCons,
     }
 
     public class AutoProfileHolder
@@ -280,12 +278,6 @@ namespace DS4WinWPF
                     return deviceType == DS4Windows.InputDevices.InputDeviceType.DS4;
                 case AutoProfileDeviceOption.DS3:
                     return deviceType == DS4Windows.InputDevices.InputDeviceType.DS3;
-                case AutoProfileDeviceOption.SwitchPro:
-                    return deviceType == DS4Windows.InputDevices.InputDeviceType.SwitchPro;
-                case AutoProfileDeviceOption.JoyCons:
-                    return deviceType == DS4Windows.InputDevices.InputDeviceType.JoyConL ||
-                        deviceType == DS4Windows.InputDevices.InputDeviceType.JoyConR ||
-                        deviceType == DS4Windows.InputDevices.InputDeviceType.JoyConGrip;
                 default:
                     return false;
             }
