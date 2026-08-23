@@ -28,7 +28,6 @@ namespace DS4Windows
         private readonly int fixedProcessId;
         private readonly string fixedProcessedRouteEndpointId = string.Empty;
         private readonly int automaticSlot = -1;
-        private readonly AudioHapticsProfileSettings automaticSettings;
         private readonly AutomaticGameAudioDetector automaticDetector;
         private readonly object sessionLock = new();
         private readonly ManualResetEvent stopped = new(false);
@@ -77,8 +76,7 @@ namespace DS4Windows
             WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(48000, 2);
         }
 
-        private ProcessLoopbackWaveCapture(int automaticSlot,
-            AudioHapticsProfileSettings settings)
+        private ProcessLoopbackWaveCapture(int automaticSlot)
         {
             if (automaticSlot < 0 ||
                 automaticSlot >= Global.TEST_PROFILE_ITEM_COUNT)
@@ -86,8 +84,6 @@ namespace DS4Windows
                 throw new ArgumentOutOfRangeException(nameof(automaticSlot));
             }
             this.automaticSlot = automaticSlot;
-            automaticSettings = (settings ??
-                new AudioHapticsProfileSettings()).Clone();
             automaticDetector = new AutomaticGameAudioDetector();
             WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(48000, 2);
         }
@@ -115,7 +111,7 @@ namespace DS4Windows
             SourceChanged;
 
         public static ProcessLoopbackWaveCapture CreateAutomatic(int slot) =>
-            new(slot, Global.store.audioHapticsSettings[slot]);
+            new(slot);
 
         public void StartRecording()
         {
@@ -246,58 +242,6 @@ namespace DS4Windows
                     out processId) && processId > 0;
         }
 
-        public static int ResolveProcessId(
-            AudioHapticsProfileSettings settings)
-        {
-            if (settings == null)
-            {
-                return 0;
-            }
-
-            if (settings.ProcessId > 0)
-            {
-                try
-                {
-                    using Process process = Process.GetProcessById(
-                        settings.ProcessId);
-                    if (!process.HasExited)
-                    {
-                        return process.Id;
-                    }
-                }
-                catch { }
-            }
-
-            foreach (Process process in Process.GetProcesses())
-            {
-                using (process)
-                {
-                    try
-                    {
-                        string path = process.MainModule?.FileName ??
-                            string.Empty;
-                        if (!string.IsNullOrWhiteSpace(settings.ProcessPath) &&
-                            string.Equals(path, settings.ProcessPath,
-                                StringComparison.OrdinalIgnoreCase))
-                        {
-                            return process.Id;
-                        }
-                        if (!string.IsNullOrWhiteSpace(
-                                settings.ExecutableName) &&
-                            string.Equals(process.ProcessName,
-                                settings.ExecutableName,
-                                StringComparison.OrdinalIgnoreCase))
-                        {
-                            return process.Id;
-                        }
-                    }
-                    catch { }
-                }
-            }
-
-            return 0;
-        }
-
         private void AutomaticMonitorLoop()
         {
             int proposedProcessId = 0;
@@ -311,21 +255,6 @@ namespace DS4Windows
                     GameAudioCandidate candidate = null;
                     bool detected = automaticDetector.TryDetect(current,
                         out candidate);
-                    if (!detected && current == 0)
-                    {
-                        int fallback = ResolveProcessId(automaticSettings);
-                        if (fallback > 0)
-                        {
-                            candidate = new GameAudioCandidate
-                            {
-                                ProcessId = fallback,
-                                DisplayName = DescribeProcess(fallback),
-                                Evidence = GameDetectionEvidence.None,
-                            };
-                            detected = true;
-                        }
-                    }
-
                     if (detected && candidate.ProcessId == current)
                     {
                         proposedProcessId = 0;

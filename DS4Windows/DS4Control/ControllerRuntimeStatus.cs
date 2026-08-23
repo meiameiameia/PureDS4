@@ -27,7 +27,6 @@ namespace DS4Windows
         ArmingAdvancedHaptics,
         StartingSpeaker,
         StartingMicrophone,
-        StartingAudioHaptics,
         Ready,
         Attention,
     }
@@ -40,7 +39,6 @@ namespace DS4Windows
             ControllerRuntimeLaneState advancedHaptics,
             ControllerRuntimeLaneState speaker,
             ControllerRuntimeLaneState microphone,
-            ControllerRuntimeLaneState audioHaptics,
             string virtualControllerName,
             ControllerExposureMode exposureMode =
                 ControllerExposureMode.ManagedVirtual,
@@ -59,7 +57,6 @@ namespace DS4Windows
             AdvancedHaptics = advancedHaptics;
             Speaker = speaker;
             Microphone = microphone;
-            AudioHaptics = audioHaptics;
             VirtualControllerName = virtualControllerName ?? "virtual controller";
             ExposureMode = exposureMode;
             ExposureStage = exposureStage;
@@ -77,7 +74,6 @@ namespace DS4Windows
         public ControllerRuntimeLaneState AdvancedHaptics { get; }
         public ControllerRuntimeLaneState Speaker { get; }
         public ControllerRuntimeLaneState Microphone { get; }
-        public ControllerRuntimeLaneState AudioHaptics { get; }
         public string VirtualControllerName { get; }
         public ControllerExposureMode ExposureMode { get; }
         public ControllerExposureStage ExposureStage { get; }
@@ -182,14 +178,6 @@ namespace DS4Windows
             laneStatus = EvaluateLane(signals.Microphone,
                 ControllerStartupStage.StartingMicrophone,
                 "Starting microphone", "controller microphone");
-            if (laneStatus.Stage != ControllerStartupStage.Ready)
-            {
-                return laneStatus;
-            }
-
-            laneStatus = EvaluateLane(signals.AudioHaptics,
-                ControllerStartupStage.StartingAudioHaptics,
-                "Starting Audio Haptics", "Audio Haptics capture");
             if (laneStatus.Stage != ControllerStartupStage.Ready)
             {
                 return laneStatus;

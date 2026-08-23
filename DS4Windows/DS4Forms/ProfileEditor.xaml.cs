@@ -144,7 +144,6 @@ namespace DS4WinWPF.DS4Forms
 
             inputTimer = new NonFormTimer(100);
             inputTimer.Elapsed += InputDS4;
-            profileAudioHapticsControl.SetDevice(deviceNum);
             SetupEvents();
         }
 
@@ -1799,7 +1798,6 @@ namespace DS4WinWPF.DS4Forms
                 }
             }
 
-            profileAudioHapticsControl.SetDevice(deviceNum);
 
             ColorByBatteryPerCheck();
 
@@ -2023,12 +2021,6 @@ namespace DS4WinWPF.DS4Forms
         private void ContBtn_MouseLeave(object sender, MouseEventArgs e)
         {
             HideControllerHover();
-        }
-
-        private void ProfileAudioHapticsControl_SettingsChanged(object sender,
-            ProfileFeatureSettingsChangedEventArgs e)
-        {
-            profileSettingsVM.RaiseAudioHapticsSpeakerOverrideStateChanged();
         }
 
         private void HideControllerHover()

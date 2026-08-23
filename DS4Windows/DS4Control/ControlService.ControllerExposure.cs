@@ -623,7 +623,6 @@ namespace DS4Windows
             dualSenseAudioPassthrough.Stop(index);
             dualShock4AudioPassthrough.Stop(index);
             dualSenseMicrophonePassthrough.Stop();
-            audioHapticsService.Stop(index);
             DisconnectPlayStationFeatureOutput(index);
 
             OutputDevice primaryOutput = outputDevices[index];

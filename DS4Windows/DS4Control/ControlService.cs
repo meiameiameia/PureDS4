@@ -41,7 +41,6 @@ namespace DS4Windows
         private readonly DualSenseAudioPassthrough dualSenseAudioPassthrough = new DualSenseAudioPassthrough();
         private readonly DualShock4AudioPassthrough dualShock4AudioPassthrough = new DualShock4AudioPassthrough();
         private readonly DualSenseMicrophonePassthrough dualSenseMicrophonePassthrough = new DualSenseMicrophonePassthrough();
-        private readonly AudioHapticsService audioHapticsService = new AudioHapticsService();
         private readonly ViiperOutDevice[] playStationFeatureOutputDevices =
             new ViiperOutDevice[MAX_DS4_CONTROLLER_COUNT];
         private readonly object playStationFeatureOutputLock = new object();
@@ -2297,9 +2296,6 @@ namespace DS4Windows
                 StartupDiag("ControlService.Stop DualSenseMicrophone stop begin");
                 dualSenseMicrophonePassthrough.Stop();
                 StartupDiag("ControlService.Stop DualSenseMicrophone stop end");
-                StartupDiag("ControlService.Stop AudioHaptics reset begin");
-                audioHapticsService.ResetForServiceStop();
-                StartupDiag("ControlService.Stop AudioHaptics reset end");
                 StartupDiag("ControlService.Stop PlayStation feature outputs begin");
                 StopAllPlayStationFeatureOutputs();
                 StartupDiag("ControlService.Stop PlayStation feature outputs end");
@@ -2840,12 +2836,10 @@ namespace DS4Windows
                 }
                 dualsense.HapticPowerLevel = DualSenseHapticPowerLevel[ind];
                 bool speakerEnabled = IsControllerSpeakerEnabled(ind);
-                bool audioHapticsEnabled =
-                    Global.store.audioHapticsSettings[ind]?.Enabled == true;
                 bool silentHapticsCarrier =
                     RequiresDualSenseBluetoothMediaCarrier(
                         dualsense.ConnectionType, speakerEnabled,
-                        audioHapticsEnabled, playStationFeatureOutputType);
+                        playStationFeatureOutputType);
                 bool mediaCarrierEnabled = speakerEnabled ||
                     silentHapticsCarrier;
                 string speakerCaptureEndpointId =
@@ -2974,52 +2968,24 @@ namespace DS4Windows
                 dualSenseMicrophonePassthrough.Stop();
             }
 
-            audioHapticsService.Start(ind, device,
-                Global.store.audioHapticsSettings[ind],
-                playStationFeatureOutputType,
-                DualSenseAudioSpeakerEndpointId[ind],
-                playStationFeatureOutput?.DirectSpeakerUsbipPort ?? -1);
-
             if (!startUp)
             {
                 CheckLauchProfileOption(ind, device);
             }
         }
 
-        internal bool ApplyAudioHapticsToGameReport(int deviceIndex,
-            byte[] report, int sampleOffset, int sampleLength)
-        {
-            return audioHapticsService.ApplyToGameHaptics(deviceIndex,
-                report, sampleOffset, sampleLength);
-        }
+        private static string GetControllerSpeakerCaptureEndpointId(int index) =>
+            Global.DualSenseAudioCaptureEndpointId[index];
 
-        public AudioHapticsRuntimeStatus GetAudioHapticsStatus(
-            int deviceIndex)
-        {
-            return audioHapticsService.GetStatus(deviceIndex);
-        }
-
-        internal static bool IsAudioHapticsSpeakerOverrideActive(int index)
-        {
-            if (index < 0 || index >= Global.store.audioHapticsSettings.Length)
-            {
-                return false;
-            }
-
-            AudioHapticsProfileSettings settings =
-                Global.store.audioHapticsSettings[index];
-            return settings?.Enabled == true &&
-                settings.Source == AudioHapticsSourceKind.AppSession &&
-                settings.StreamAppAudioToController;
-        }
+        private static bool IsControllerHeadsetOnlyAudio(int index) =>
+            Global.DualSenseHeadsetOnlyAudio[index];
 
         private static bool IsControllerSpeakerEnabled(int index) =>
-            Global.DualSenseEnableSpeakerOutput[index] ||
-            IsAudioHapticsSpeakerOverrideActive(index);
+            Global.DualSenseEnableSpeakerOutput[index];
 
         internal static bool RequiresDualSenseBluetoothMediaCarrier(
             ConnectionType connectionType, bool speakerEnabled,
-            bool audioHapticsEnabled, OutContType outputType)
+            OutContType outputType)
         {
             if (connectionType != ConnectionType.BT || speakerEnabled)
             {
@@ -3027,48 +2993,8 @@ namespace DS4Windows
             }
 
             outputType = outputType.Normalize();
-            return audioHapticsEnabled ||
-                outputType == OutContType.ViiperDualSense ||
+            return outputType == OutContType.ViiperDualSense ||
                 outputType == OutContType.ViiperDualSenseEdge;
-        }
-
-        private static bool IsControllerHeadsetOnlyAudio(int index)
-        {
-            if (IsAudioHapticsSpeakerOverrideActive(index))
-            {
-                return Global.store.audioHapticsSettings[index]
-                    .StreamAppAudioToHeadsetOnly;
-            }
-
-            return Global.DualSenseHeadsetOnlyAudio[index];
-        }
-
-        private static string GetControllerSpeakerCaptureEndpointId(int index)
-        {
-            if (!IsAudioHapticsSpeakerOverrideActive(index))
-            {
-                return Global.DualSenseAudioCaptureEndpointId[index];
-            }
-
-            AudioHapticsProfileSettings settings =
-                Global.store.audioHapticsSettings[index];
-            if (settings?.AutomaticGameDetection == true)
-            {
-                return ProcessLoopbackWaveCapture
-                    .BuildAutomaticEndpointId(index);
-            }
-            int processId = ProcessLoopbackWaveCapture.ResolveProcessId(settings);
-            if (processId <= 0)
-            {
-                // Keep this as an explicit app endpoint instead of silently
-                // falling back to system audio. The worker will remain in its
-                // starting/error state until the selected app is available.
-                processId = settings?.ProcessId ?? 0;
-            }
-
-            return processId > 0
-                ? ProcessLoopbackWaveCapture.BuildEndpointId(processId)
-                : ProcessLoopbackWaveCapture.EndpointPrefix + "unavailable";
         }
 
         private void CheckLauchProfileOption(int ind, DS4Device device)
@@ -3403,7 +3329,6 @@ namespace DS4Windows
                         dualSenseAudioPassthrough.Stop(ind);
                         dualShock4AudioPassthrough.Stop(ind);
                         dualSenseMicrophonePassthrough.Stop();
-                        audioHapticsService.Stop(ind);
                         DisconnectPlayStationFeatureOutput(ind);
                     }
                     /*Stopwatch sw = new Stopwatch();
@@ -3479,7 +3404,6 @@ namespace DS4Windows
             {
                 return new ControllerRuntimeSignals(false, false, false,
                     false, false, false,
-                    ControllerRuntimeLaneState.NotRequired,
                     ControllerRuntimeLaneState.NotRequired,
                     ControllerRuntimeLaneState.NotRequired,
                     ControllerRuntimeLaneState.NotRequired,
@@ -3569,26 +3493,10 @@ namespace DS4Windows
                 }
             }
 
-            bool audioHapticsRequired = physicalPresent &&
-                Global.store.audioHapticsSettings[index]?.Enabled == true;
-            ControllerRuntimeLaneState audioHaptics =
-                ControllerRuntimeLaneState.NotRequired;
-            if (audioHapticsRequired)
-            {
-                AudioHapticsRuntimeStatus status =
-                    audioHapticsService.GetStatus(index);
-                audioHaptics = status.Active
-                    ? ControllerRuntimeLaneState.Ready
-                    : status.Message.IndexOf("starting",
-                        StringComparison.OrdinalIgnoreCase) >= 0
-                        ? ControllerRuntimeLaneState.Starting
-                        : ControllerRuntimeLaneState.Unavailable;
-            }
-
             return new ControllerRuntimeSignals(physicalPresent,
                 physicalSynced, physicalAlive, virtualRequired,
                 virtualConnected, virtualTypeMatches, advancedHaptics,
-                speaker, microphone, audioHaptics,
+                speaker, microphone,
                 desiredType.ToDisplayName(), exposureStatus.Mode,
                 exposureStatus.Stage, virtualOutputBlockReason,
                 activeVirtualControllerName);

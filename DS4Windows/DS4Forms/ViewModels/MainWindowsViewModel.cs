@@ -44,16 +44,13 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             bool requiresProfileReload,
             OutContType requestedOutputController = OutContType.None,
             bool? requestedSpeakerOutputEnabled = null,
-            string requestedAudioSourceId = null,
-            bool releaseAudioHapticsSpeakerOverride = false)
+            string requestedAudioSourceId = null)
         {
             DeviceIndex = deviceIndex;
             RequiresProfileReload = requiresProfileReload;
             RequestedOutputController = requestedOutputController.Normalize();
             RequestedSpeakerOutputEnabled = requestedSpeakerOutputEnabled;
             RequestedAudioSourceId = requestedAudioSourceId;
-            ReleaseAudioHapticsSpeakerOverride =
-                releaseAudioHapticsSpeakerOverride;
         }
 
         public int DeviceIndex { get; }
@@ -61,7 +58,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         public OutContType RequestedOutputController { get; }
         public bool? RequestedSpeakerOutputEnabled { get; }
         public string RequestedAudioSourceId { get; }
-        public bool ReleaseAudioHapticsSpeakerOverride { get; }
     }
 
     public class MainWindowsViewModel
@@ -122,7 +118,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     false, false, ControllerRuntimeLaneState.NotRequired,
                     ControllerRuntimeLaneState.NotRequired,
                     ControllerRuntimeLaneState.NotRequired,
-                    ControllerRuntimeLaneState.NotRequired,
                     "virtual controller"));
 
         public CompositeDeviceModel SelectedController
@@ -166,7 +161,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         public event EventHandler HeadsetOnlyAudioChanged;
         public event EventHandler ControllerAudioSourceChoicesChanged;
         public event EventHandler ControllerAudioSourceIdChanged;
-        public event EventHandler AudioHapticsSpeakerOverrideActiveChanged;
         public event EventHandler MicrophoneInputEnabledChanged;
         public event EventHandler SpeakerVolumePercentChanged;
         public event EventHandler HeadphoneVolumePercentChanged;
@@ -474,30 +468,18 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     normalized = string.Empty;
                 }
 
-                AudioHapticsProfileSettings audioHaptics =
-                    Global.store.audioHapticsSettings[deviceIndex];
-                bool releasedOverride =
-                    audioHaptics?.StreamAppAudioToController == true;
                 bool sourceChanged = !string.Equals(
                     Global.DualSenseAudioCaptureEndpointId[deviceIndex],
                     normalized, StringComparison.Ordinal);
-                if (!sourceChanged && !releasedOverride) return;
+                if (!sourceChanged) return;
 
                 Global.DualSenseAudioCaptureEndpointId[deviceIndex] =
                     normalized;
-                if (releasedOverride)
-                {
-                    audioHaptics.StreamAppAudioToController = false;
-                    audioHaptics.StreamAppAudioToHeadsetOnly = false;
-                    AudioHapticsSpeakerOverrideActiveChanged?.Invoke(this,
-                        EventArgs.Empty);
-                }
 
                 ControllerAudioSourceIdChanged?.Invoke(this,
                     EventArgs.Empty);
                 RaiseQuickProfileSettingChanged(deviceIndex,
-                    requestedAudioSourceId: normalized,
-                    releaseAudioHapticsSpeakerOverride: releasedOverride);
+                    requestedAudioSourceId: normalized);
             }
         }
 
@@ -514,11 +496,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             return ProcessLoopbackWaveCapture.BuildEndpointId(
                 rootProcessId > 0 ? rootProcessId : processId);
         }
-
-        public bool AudioHapticsSpeakerOverrideActive =>
-            HasValidSelectedDevice &&
-            ControlService.IsAudioHapticsSpeakerOverrideActive(
-                selectedController.DevIndex);
 
         public int HeadphoneVolumePercent
         {
@@ -630,8 +607,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     EventArgs.Empty);
             }
             ControllerAudioSourceIdChanged?.Invoke(this, EventArgs.Empty);
-            AudioHapticsSpeakerOverrideActiveChanged?.Invoke(this,
-                EventArgs.Empty);
             MicrophoneInputEnabledChanged?.Invoke(this, EventArgs.Empty);
             SpeakerVolumePercentChanged?.Invoke(this, EventArgs.Empty);
             HeadphoneVolumePercentChanged?.Invoke(this, EventArgs.Empty);
@@ -744,12 +719,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 ControllerAudioSourceIdChanged?.Invoke(this,
                     EventArgs.Empty);
             }
-            if (previous.AudioHapticsSpeakerOverrideActive !=
-                snapshot.AudioHapticsSpeakerOverrideActive)
-            {
-                AudioHapticsSpeakerOverrideActiveChanged?.Invoke(this,
-                    EventArgs.Empty);
-            }
             if (previous.HeadphoneVolume != snapshot.HeadphoneVolume)
             {
                 HeadphoneVolumePercentChanged?.Invoke(this, EventArgs.Empty);
@@ -859,7 +828,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                         ControllerRuntimeLaneState.NotRequired,
                         ControllerRuntimeLaneState.NotRequired,
                         ControllerRuntimeLaneState.NotRequired,
-                        ControllerRuntimeLaneState.NotRequired,
                         "virtual controller");
             ControllerStartupStatus startupStatus =
                 ControllerRuntimeStatusPolicy.Evaluate(signals);
@@ -874,7 +842,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 SelectedControllerBattery, SelectedOutputController,
                 HapticStrengthPercent, SpeakerOutputEnabled,
                 HeadsetOnlyAudio, ControllerAudioSourceId,
-                AudioHapticsSpeakerOverrideActive, MicrophoneInputEnabled,
+                MicrophoneInputEnabled,
                 SpeakerVolumePercent,
                 HeadphoneVolumePercent, SpeakerCompressionIndex,
                 SpeakerBassBoostDb, MicrophoneVolumePercent,
@@ -889,7 +857,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 OutContType outputController, int hapticStrength,
                 bool speakerEnabled, bool headsetOnlyAudio,
                 string controllerAudioSourceId,
-                bool audioHapticsSpeakerOverrideActive,
                 bool microphoneEnabled,
                 int speakerVolume, int headphoneVolume,
                 int speakerCompression, int speakerBassBoost,
@@ -907,8 +874,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 HeadsetOnlyAudio = headsetOnlyAudio;
                 ControllerAudioSourceId = controllerAudioSourceId ??
                     string.Empty;
-                AudioHapticsSpeakerOverrideActive =
-                    audioHapticsSpeakerOverrideActive;
                 MicrophoneEnabled = microphoneEnabled;
                 SpeakerVolume = speakerVolume;
                 HeadphoneVolume = headphoneVolume;
@@ -929,7 +894,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             public bool SpeakerEnabled { get; }
             public bool HeadsetOnlyAudio { get; }
             public string ControllerAudioSourceId { get; }
-            public bool AudioHapticsSpeakerOverrideActive { get; }
             public bool MicrophoneEnabled { get; }
             public int SpeakerVolume { get; }
             public int HeadphoneVolume { get; }
@@ -986,14 +950,12 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             bool requiresProfileReload = false,
             OutContType requestedOutputController = OutContType.None,
             bool? requestedSpeakerOutputEnabled = null,
-            string requestedAudioSourceId = null,
-            bool releaseAudioHapticsSpeakerOverride = false)
+            string requestedAudioSourceId = null)
         {
             QuickProfileSettingChanged?.Invoke(this,
                 new QuickProfileSettingChangedEventArgs(deviceIndex,
                     requiresProfileReload, requestedOutputController,
-                    requestedSpeakerOutputEnabled, requestedAudioSourceId,
-                    releaseAudioHapticsSpeakerOverride));
+                    requestedSpeakerOutputEnabled, requestedAudioSourceId));
         }
 
         private static int ByteToPercent(byte value) =>

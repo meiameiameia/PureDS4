@@ -79,7 +79,6 @@
                     <ListBoxItem Content="Lightbar" Tag="Set profile colors, battery feedback, flashing, and charging behavior." />
                     <ListBoxItem Content="Touchpad" Tag="Configure mouse control, gestures, passthrough, and absolute positioning." />
                     <ListBoxItem Content="Gyro" Tag="Configure motion aiming, steering, mouse control, and directional swipes." />
-                    <ListBoxItem Content="Audio Haptics" Tag="Turn system or app audio into advanced haptic feedback for this profile." />
                     <ListBoxItem Content="Advanced" Tag="Manage game output, rumble, audio, latency, compatibility, and custom hooks." />
                 </ListBox>
             </Border>
@@ -2207,11 +2206,6 @@
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="Audio Haptics" Tag="Turn system or app audio into advanced controller haptics">
-                <local:AudioHapticsControl x:Name="profileAudioHapticsControl"
-                                           SettingsChanged="ProfileAudioHapticsControl_SettingsChanged" />
-            </TabItem>
-
             <TabItem Header="Advanced" Tag="Output device, rumble, audio, latency, compatibility, and custom hooks">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
@@ -2376,13 +2370,6 @@
                                                 <ComboBox ItemsSource="{Binding AudioCaptureEndpointChoices}" DisplayMemberPath="Name" SelectedValuePath="EndpointId"
                                                           SelectedValue="{Binding DualSenseAudioCaptureEndpointId}" Grid.Row="1" Grid.Column="1"
                                                           Margin="{StaticResource spaceMargin}" />
-                                                <Border Grid.Row="2" Grid.ColumnSpan="2" Margin="3,2,3,7" Padding="9,6"
-                                                        Background="{DynamicResource SurfaceSelectedBrush}" BorderBrush="{DynamicResource StateWarningBrush}" BorderThickness="1"
-                                                        CornerRadius="3"
-                                                        Visibility="{Binding AudioHapticsSpeakerOverrideActive, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                    <TextBlock Text="Audio Haptics is currently supplying the selected app to this controller. Choose another Audio source here to release that override."
-                                                               TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource StateWarningBrush}" />
-                                                </Border>
                                                 <Grid Grid.Row="3" Grid.ColumnSpan="2" MinHeight="30"
                                                       Visibility="{Binding ShowUsbDualSenseSpeakerSelector, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                     <Grid.ColumnDefinitions>

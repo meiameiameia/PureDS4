@@ -3235,29 +3235,8 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 }
 
                 Global.DualSenseAudioCaptureEndpointId[device] = normalized;
-                AudioHapticsProfileSettings audioHaptics =
-                    Global.store.audioHapticsSettings[device];
-                if (audioHaptics?.StreamAppAudioToController == true)
-                {
-                    audioHaptics.StreamAppAudioToController = false;
-                    audioHaptics.StreamAppAudioToHeadsetOnly = false;
-                    RaiseAudioHapticsSpeakerOverrideStateChanged();
-                }
             }
         }
-
-        public bool AudioHapticsSpeakerOverrideActive =>
-            Global.store.audioHapticsSettings[device]?.Enabled == true &&
-            Global.store.audioHapticsSettings[device]?.Source ==
-                AudioHapticsSourceKind.AppSession &&
-            Global.store.audioHapticsSettings[device]
-                .StreamAppAudioToController;
-
-        public event EventHandler AudioHapticsSpeakerOverrideActiveChanged;
-
-        public void RaiseAudioHapticsSpeakerOverrideStateChanged() =>
-            AudioHapticsSpeakerOverrideActiveChanged?.Invoke(this,
-                EventArgs.Empty);
 
         public List<AudioEndpointChoice> AudioSpeakerEndpointChoices
         {

@@ -93,8 +93,6 @@ namespace DS4WinWPF.DS4Forms
             overviewRequestedSpeakerOutputStates = new();
         private readonly Dictionary<int, string>
             overviewRequestedAudioSourceIds = new();
-        private readonly HashSet<int>
-            overviewAudioHapticsOverrideReleaseRequests = new();
         private DispatcherTimer overviewProfileSaveTimer;
         private DispatcherTimer overviewStatusRefreshTimer;
         private bool contextclose;
@@ -163,7 +161,6 @@ namespace DS4WinWPF.DS4Forms
             controllerLV.DataContext = conLvViewModel;
             controllerLV.ItemsSource = conLvViewModel.ControllerCol;
             mainWinVM.SelectedController = conLvViewModel.ControllerCol.FirstOrDefault();
-            audioHapticsControl.SetDevice(mainWinVM.SelectedController?.DevIndex ?? -1);
             ChangeControllerPanel();
 
             // Sort device by input slot number
@@ -1193,7 +1190,6 @@ Suspend support not enabled.", true);
 
             TabItem target = destination switch
             {
-                "audio" => audioHapticsTab,
                 "auto" => autoProfilesTab,
                 "slots" => outputSlotsTab,
                 "log" => logTab,
@@ -1565,11 +1561,6 @@ Suspend support not enabled.", true);
                 overviewRequestedAudioSourceIds[e.DeviceIndex] =
                     e.RequestedAudioSourceId;
             }
-            if (e.ReleaseAudioHapticsSpeakerOverride)
-            {
-                overviewAudioHapticsOverrideReleaseRequests.Add(
-                    e.DeviceIndex);
-            }
             overviewProfileSaveTimer.Stop();
             // Save after the current binding pass, before the next status
             // refresh can reconcile controls against the active profile.
@@ -1598,16 +1589,6 @@ Suspend support not enabled.", true);
                 return;
             }
 
-            audioHapticsControl.SetDevice(mainWinVM.SelectedController?.DevIndex ?? -1);
-        }
-
-        private void ProfileFeatureControl_SettingsChanged(object sender,
-            ProfileFeatureSettingsChangedEventArgs e)
-        {
-            overviewDirtyControllerIndices.Add(e.DeviceIndex);
-            mainWinVM.RefreshRuntimeState(App.rootHub);
-            overviewProfileSaveTimer.Stop();
-            overviewProfileSaveTimer.Start();
         }
 
         private void OverviewProfileSaveTimer_Tick(object sender, EventArgs e)
@@ -1637,9 +1618,6 @@ Suspend support not enabled.", true);
                 bool hasRequestedAudioSource =
                     overviewRequestedAudioSourceIds.TryGetValue(deviceIndex,
                         out string requestedAudioSourceId);
-                bool releaseAudioHapticsOverride =
-                    overviewAudioHapticsOverrideReleaseRequests.Contains(
-                        deviceIndex);
                 if (!overviewDirtyControllerIndices.Remove(deviceIndex) ||
                     deviceIndex < 0 || deviceIndex >= ControlService.CURRENT_DS4_CONTROLLER_LIMIT)
                 {
@@ -1675,17 +1653,6 @@ Suspend support not enabled.", true);
                         Global.DualSenseAudioCaptureEndpointId[deviceIndex] =
                             requestedAudioSourceId ?? string.Empty;
                     }
-                    if (releaseAudioHapticsOverride)
-                    {
-                        AudioHapticsProfileSettings audioHaptics =
-                            Global.store.audioHapticsSettings[deviceIndex];
-                        if (audioHaptics != null)
-                        {
-                            audioHaptics.StreamAppAudioToController = false;
-                            audioHaptics.StreamAppAudioToHeadsetOnly = false;
-                        }
-                    }
-
                     ProfileEntity profile = profileListHolder.ProfileListCol
                         .SingleOrDefault(item => item.Name == profileName);
                     if (profile != null)
@@ -1701,8 +1668,6 @@ Suspend support not enabled.", true);
                 overviewRequestedOutputControllers.Remove(deviceIndex);
                 overviewRequestedSpeakerOutputStates.Remove(deviceIndex);
                 overviewRequestedAudioSourceIds.Remove(deviceIndex);
-                overviewAudioHapticsOverrideReleaseRequests.Remove(
-                    deviceIndex);
 
                 ProfileEntity savedProfile = profileListHolder.ProfileListCol
                     .SingleOrDefault(item => item.Name == profileName);

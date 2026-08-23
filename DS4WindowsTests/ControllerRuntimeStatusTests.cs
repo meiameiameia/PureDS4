@@ -11,11 +11,10 @@ namespace DS4WindowsTests
             bool virtualTypeMatches = true,
             ControllerRuntimeLaneState haptics = ControllerRuntimeLaneState.NotRequired,
             ControllerRuntimeLaneState speaker = ControllerRuntimeLaneState.NotRequired,
-            ControllerRuntimeLaneState microphone = ControllerRuntimeLaneState.NotRequired,
-            ControllerRuntimeLaneState audioHaptics = ControllerRuntimeLaneState.NotRequired) =>
+            ControllerRuntimeLaneState microphone = ControllerRuntimeLaneState.NotRequired) =>
             new ControllerRuntimeSignals(present, synced, alive,
                 virtualRequired, virtualConnected, virtualTypeMatches,
-                haptics, speaker, microphone, audioHaptics, "DualSense");
+                haptics, speaker, microphone, "DualSense");
 
         [TestMethod]
         public void ReportsPhysicalConnectionStagesBeforeVirtualReadiness()
@@ -65,8 +64,7 @@ namespace DS4WindowsTests
                 ControllerRuntimeStatusPolicy.Evaluate(Signals(
                     haptics: ControllerRuntimeLaneState.Ready,
                     speaker: ControllerRuntimeLaneState.Ready,
-                    microphone: ControllerRuntimeLaneState.Ready,
-                    audioHaptics: ControllerRuntimeLaneState.Ready));
+                    microphone: ControllerRuntimeLaneState.Ready));
             Assert.IsTrue(status.IsReady);
             Assert.AreEqual("Ready", status.Title);
         }
@@ -104,7 +102,6 @@ namespace DS4WindowsTests
         {
             ControllerRuntimeSignals signals = new(true, true, true, true,
                 false, false, ControllerRuntimeLaneState.NotRequired,
-                ControllerRuntimeLaneState.NotRequired,
                 ControllerRuntimeLaneState.NotRequired,
                 ControllerRuntimeLaneState.NotRequired, "Xbox 360",
                 virtualOutputBlockReason: reason);

@@ -4367,9 +4367,6 @@ namespace DS4Windows
           DEFAULT_OUT_CONT_TYPE, DEFAULT_OUT_CONT_TYPE, DEFAULT_OUT_CONT_TYPE,
           DEFAULT_OUT_CONT_TYPE, DEFAULT_OUT_CONT_TYPE, DEFAULT_OUT_CONT_TYPE};
 
-        public AudioHapticsProfileSettings[] audioHapticsSettings = Enumerable.Range(0, Global.TEST_PROFILE_ITEM_COUNT)
-            .Select(_ => new AudioHapticsProfileSettings()).ToArray();
-
         public const bool DEFAULT_OUTPUT_VIRTUAL_TRIG_BUTTONS = true;
         public bool[] outputVirtualTriggerButtons = new bool[Global.TEST_PROFILE_ITEM_COUNT]
         {
@@ -10255,7 +10252,6 @@ namespace DS4Windows
             touchMStickInfo[device].Reset();
             touchpadButtonMode[device] = TouchButtonActivationMode.Click;
             outputDevType[device] = DEFAULT_OUT_CONT_TYPE;
-            audioHapticsSettings[device] = new AudioHapticsProfileSettings();
             ds4Mapping = false;
         }
 
