@@ -518,6 +518,8 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
             if (runAtStartup && runStartProg)
             {
+                StartupMethods.MigrateLegacyStartProgEntry();
+
                 bool locChange = StartupMethods.CheckStartupExeLocation();
                 if (locChange)
                 {
@@ -637,7 +639,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
         private void CheckStartupOptions()
         {
-            bool lnkExists = File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\DS4Windows.lnk");
+            bool lnkExists = StartupMethods.HasStartProgEntry();
             if (lnkExists)
             {
                 runAtStartup = true;

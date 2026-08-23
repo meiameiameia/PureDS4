@@ -469,10 +469,8 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                         temp = Translations.Strings.ExclusiveAccess;
                         break;
                     case DS4Device.ExclusiveStatus.HidHideAffected:
-                        temp = Translations.Strings.HidHideAccess;
-                        break;
                     case DS4Device.ExclusiveStatus.HidGuardAffected:
-                        temp = Translations.Strings.HidGuardianAccess;
+                        temp = "Protected";
                         break;
                     default:
                         break;

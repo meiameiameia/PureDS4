@@ -165,7 +165,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 return new ControllerMicrophoneUiState(
                     ControllerMicrophoneUiStatus.RequiresPlayStationOutput,
                     canEnable: false,
-                    "A VIIPER PlayStation audio interface is required to expose the controller microphone.");
+                    "A virtual PlayStation audio interface is required to expose the controller microphone.");
             }
 
             if (requireActiveStream && !activeStreamSupportsMicrophone)
@@ -173,7 +173,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 return new ControllerMicrophoneUiState(
                     ControllerMicrophoneUiStatus.OutputStarting,
                     canEnable: false,
-                    "The VIIPER microphone interface is starting. This control will become available automatically.");
+                    "The virtual microphone interface is starting. This control will become available automatically.");
             }
 
             return new ControllerMicrophoneUiState(

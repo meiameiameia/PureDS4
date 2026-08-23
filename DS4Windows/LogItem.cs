@@ -33,6 +33,7 @@ namespace DS4WinWPF
         public DateTime Datetime { get => datetime; set => datetime = value; }
         public string Message { get => message; set => message = value; }
         public bool Warning { get => warning; set => warning = value; }
+        public string Severity => warning ? "Warning" : "Information";
         public string Color
         {
             get

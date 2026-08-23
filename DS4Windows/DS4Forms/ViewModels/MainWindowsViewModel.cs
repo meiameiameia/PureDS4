@@ -148,6 +148,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         public event EventHandler SelectedControllerBatteryChanged;
         public event EventHandler SelectedControllerStartupTitleChanged;
         public event EventHandler SelectedControllerStartupDetailChanged;
+        public event EventHandler SelectedControllerStartupStageChanged;
         public event EventHandler SelectedControllerIsReadyChanged;
         public event EventHandler SelectedControllerNeedsAttentionChanged;
         public event EventHandler SelectedControllerSupportsAudioChanged;
@@ -785,6 +786,8 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 EventArgs.Empty);
             SelectedControllerStartupDetailChanged?.Invoke(this,
                 EventArgs.Empty);
+            SelectedControllerStartupStageChanged?.Invoke(this,
+                EventArgs.Empty);
             SelectedControllerIsReadyChanged?.Invoke(this,
                 EventArgs.Empty);
             SelectedControllerNeedsAttentionChanged?.Invoke(this,
@@ -1096,49 +1099,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 ? "No physical controller selected"
                 : controller.ConnectionText;
         }
-
-        private int profileEditorNavigationIndex = 1;
-
-        public int ProfileEditorNavigationIndex
-        {
-            get => profileEditorNavigationIndex;
-            set
-            {
-                if (profileEditorNavigationIndex == value) return;
-                profileEditorNavigationIndex = value;
-                ProfileEditorNavigationIndexChanged?.Invoke(this, EventArgs.Empty);
-            }
-        }
-        public event EventHandler ProfileEditorNavigationIndexChanged;
-
-        private string profileEditorSectionTitle = "Button Mapping";
-
-        public string ProfileEditorSectionTitle
-        {
-            get => profileEditorSectionTitle;
-            set
-            {
-                if (profileEditorSectionTitle == value) return;
-                profileEditorSectionTitle = value;
-                ProfileEditorSectionTitleChanged?.Invoke(this, EventArgs.Empty);
-            }
-        }
-        public event EventHandler ProfileEditorSectionTitleChanged;
-
-        private string profileEditorSectionDescription =
-            "Assign controller buttons, sticks, touch gestures, and shortcuts.";
-
-        public string ProfileEditorSectionDescription
-        {
-            get => profileEditorSectionDescription;
-            set
-            {
-                if (profileEditorSectionDescription == value) return;
-                profileEditorSectionDescription = value;
-                ProfileEditorSectionDescriptionChanged?.Invoke(this, EventArgs.Empty);
-            }
-        }
-        public event EventHandler ProfileEditorSectionDescriptionChanged;
 
         public bool CheckDrivers()
         {

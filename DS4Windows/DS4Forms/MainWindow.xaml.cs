@@ -52,9 +52,6 @@ namespace DS4WinWPF.DS4Forms
     [System.Security.SuppressUnmanagedCodeSecurity]
     public partial class MainWindow : Window
     {
-        private const int DEFAULT_PROFILE_EDITOR_WIDTH = 1280;
-        private const int DEFAULT_PROFILE_EDITOR_HEIGHT = 780;
-
         private const int POWER_RESUME = 7;
         private const int POWER_SUSPEND = 4;
 
@@ -62,6 +59,7 @@ namespace DS4WinWPF.DS4Forms
         private StatusLogMsg lastLogMsg = new StatusLogMsg();
         private ProfileList profileListHolder = new ProfileList();
         private ListCollectionView profilesCollectionView;
+        private ListCollectionView logCollectionView;
         private LogViewModel logvm;
         private ControllerListViewModel conLvViewModel;
         private TrayIconViewModel trayIconVM;
@@ -86,7 +84,6 @@ namespace DS4WinWPF.DS4Forms
         private int shutdownRequested;
         private bool profileEditorLoading;
         private int profileEditorReturnTabIndex = -1;
-        private bool profileEditorNavigationChanging;
         private readonly HashSet<int> overviewDirtyControllerIndices = new();
         private readonly HashSet<int> overviewProfileReloadControllerIndices =
             new();
@@ -100,10 +97,9 @@ namespace DS4WinWPF.DS4Forms
             overviewAudioHapticsOverrideReleaseRequests = new();
         private DispatcherTimer overviewProfileSaveTimer;
         private DispatcherTimer overviewStatusRefreshTimer;
-        private bool preserveSize = true;
-        private Size oldSize;
         private bool contextclose;
         private bool startMinimized;
+        private string exposureRecoveryInstanceId = string.Empty;
 
         public ProfileList ProfileListHolder { get => profileListHolder; }
 
@@ -122,7 +118,6 @@ namespace DS4WinWPF.DS4Forms
 
             mainWinVM = new MainWindowsViewModel();
             DataContext = mainWinVM;
-            mainWinVM.ProfileEditorNavigationIndexChanged += MainWinVM_ProfileEditorNavigationIndexChanged;
             mainWinVM.QuickProfileSettingChanged += MainWinVM_QuickProfileSettingChanged;
             mainWinVM.SelectedControllerChanged += MainWinVM_SelectedControllerChanged;
 
@@ -145,8 +140,12 @@ namespace DS4WinWPF.DS4Forms
             settingsTab.DataContext = settingsWrapVM;
             RefreshViiperStatusText();
             logvm = new LogViewModel(App.rootHub);
-            //logListView.ItemsSource = logvm.LogItems;
             logListView.DataContext = logvm;
+            logCollectionView = new ListCollectionView(logvm.LogItems)
+            {
+                Filter = LogItemMatchesFilter,
+            };
+            logListView.ItemsSource = logCollectionView;
             ProcessPriorityComboBox.ItemsSource = ProcessPriorityClasses;
 
             profileListHolder.Refresh();
@@ -436,7 +435,7 @@ Suspend support not enabled.", true);
 
         private void SettingsWrapVM_IconChoiceIndexChanged(object sender, EventArgs e)
         {
-            trayIconVM.IconSource = Global.iconChoiceResources[Global.UseIconChoice];
+            trayIconVM.RefreshConfiguredIcon();
         }
 
         private void MainWinVM_FullTabsEnabledChanged(object sender, EventArgs e)
@@ -457,9 +456,9 @@ Suspend support not enabled.", true);
                 Dispatcher.BeginInvoke((Action)(() =>
                 {
                     int count = logListView.Items.Count;
-                    if (count > 0)
+                    if (count > 0 && logAutoScrollCheckBox.IsChecked == true)
                     {
-                        logListView.ScrollIntoView(logvm.LogItems[count - 1]);
+                        logListView.ScrollIntoView(logListView.Items[count - 1]);
                     }
                 }));
             }
@@ -1191,11 +1190,10 @@ Suspend support not enabled.", true);
 
         private void ToolsMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is not MenuItem { Tag: string destination }) return;
+            if (sender is not FrameworkElement { Tag: string destination }) return;
 
             TabItem target = destination switch
             {
-                "overview" => overviewTab,
                 "audio" => audioHapticsTab,
                 "trigger" => triggerLabTab,
                 "auto" => autoProfilesTab,
@@ -1211,18 +1209,31 @@ Suspend support not enabled.", true);
             }
         }
 
-        private void ToolsButton_Click(object sender, RoutedEventArgs e)
+        private void HomeControllerDetailsBtn_Click(object sender,
+            RoutedEventArgs e)
         {
-            if (sender is Button { ContextMenu: { } menu } button)
+            if (sender is FrameworkElement
+                {
+                    DataContext: CompositeDeviceModel controller
+                })
             {
-                menu.PlacementTarget = button;
-                menu.IsOpen = true;
+                mainWinVM.SelectedController = controller;
+                controllerLV.SelectedItem = controller;
             }
+
+            overviewTab.Visibility = Visibility.Visible;
+            mainTabCon.SelectedItem = overviewTab;
         }
 
         private void HomeDisconnectBtn_Click(object sender, RoutedEventArgs e)
         {
-            mainWinVM.SelectedController?.RequestDisconnect();
+            if (sender is FrameworkElement
+                {
+                    DataContext: CompositeDeviceModel controller
+                })
+            {
+                controller.RequestDisconnect();
+            }
         }
 
         private async void HomeUseNativeBtn_Click(object sender,
@@ -1236,20 +1247,14 @@ Suspend support not enabled.", true);
             button.IsEnabled = false;
             try
             {
-                MessageBoxResult consent = MessageBox.Show(this,
-                    "Native Physical temporarily stops virtual output and " +
-                    "exposes this controller directly to games. If an " +
-                    "external HidHide rule contains this controller, only " +
-                    "that exact rule will be suspended for this session and " +
-                    "restored when you return to Managed / Virtual or exit " +
-                    "DS4Windows.\n\nContinue?",
-                    "Use Native Physical", MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning, MessageBoxResult.No);
-                if (consent != MessageBoxResult.Yes)
+                var consent = new ControllerExposureDialog { Owner = this };
+                if (consent.ShowDialog() != true)
                 {
                     return;
                 }
 
+                BeginExposureOperation("Switching to Native Physical",
+                    "Stopping game output and safely exposing the physical controller.");
                 ControllerExposureTransitionResult result =
                     await App.rootHub.SetControllerExposureModeAsync(
                         controllerIndex,
@@ -1257,20 +1262,25 @@ Suspend support not enabled.", true);
                         allowExternalContainmentSuspension: true);
                 if (!result.Succeeded)
                 {
-                    MessageBox.Show(this, result.Status.Detail,
-                        "Controller exposure",
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    ShowExposureFailure("Native Physical was not enabled",
+                        result.Status.Detail, result.Status.NeedsRecovery);
+                }
+                else
+                {
+                    ClearExposureMessage();
                 }
             }
             catch (Exception ex)
             {
                 App.rootHub.LogDebug(
                     $"Controller exposure failed: {ex.Message}", true);
-                MessageBox.Show(this, ex.Message, "Controller exposure",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowExposureFailure("Controller exposure failed", ex.Message,
+                    FindRecoveryInstanceId() != null,
+                    StatusVisualState.Error);
             }
             finally
             {
+                EndExposureOperation();
                 button.IsEnabled = true;
             }
         }
@@ -1287,25 +1297,32 @@ Suspend support not enabled.", true);
             button.IsEnabled = false;
             try
             {
+                BeginExposureOperation("Returning to Managed/Virtual",
+                    "Restoring controller protection and game output.");
                 ControllerExposureTransitionResult result =
                     await App.rootHub.SetControllerExposureModeAsync(instanceId,
                         ControllerExposureMode.ManagedVirtual);
                 if (!result.Succeeded)
                 {
-                    MessageBox.Show(this, result.Status.Detail,
-                        "Controller exposure",
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    ShowExposureFailure("Managed/Virtual was not restored",
+                        result.Status.Detail, result.Status.NeedsRecovery);
+                }
+                else
+                {
+                    ClearExposureMessage();
                 }
             }
             catch (Exception ex)
             {
                 App.rootHub.LogDebug(
                     $"Controller exposure failed: {ex.Message}", true);
-                MessageBox.Show(this, ex.Message, "Controller exposure",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowExposureFailure("Controller exposure failed", ex.Message,
+                    FindRecoveryInstanceId() != null,
+                    StatusVisualState.Error);
             }
             finally
             {
+                EndExposureOperation();
                 button.IsEnabled = true;
             }
         }
@@ -1322,29 +1339,126 @@ Suspend support not enabled.", true);
             button.IsEnabled = false;
             try
             {
+                BeginExposureOperation("Recovering controller handling",
+                    "Resetting the controller service and restoring Managed/Virtual.");
                 ControllerExposureRecoveryResult result =
                     await App.rootHub.RecoverControllerExposureAsync(
                         instanceId);
                 if (!result.Succeeded)
                 {
-                    MessageBox.Show(this, result.Detail,
-                        "Controller recovery",
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    ShowExposureFailure("Controller recovery did not complete",
+                        result.Detail, canRecover: true,
+                        StatusVisualState.Recovery, instanceId);
+                }
+                else
+                {
+                    ClearExposureMessage();
                 }
             }
             catch (Exception ex)
             {
                 App.rootHub.LogDebug(
                     $"Controller recovery failed: {ex.Message}", true);
-                MessageBox.Show(this,
-                    "Controller handling could not be recovered. " +
-                    "It has been left stopped where possible. " + ex.Message,
-                    "Controller recovery", MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                ShowExposureFailure("Controller recovery failed",
+                    "Controller handling was left stopped where possible. " +
+                    ex.Message, canRecover: true, StatusVisualState.Error,
+                    instanceId);
             }
             finally
             {
+                EndExposureOperation();
                 button.IsEnabled = true;
+            }
+        }
+
+        private void BeginExposureOperation(string title, string message)
+        {
+            exposureBusyOverlay.Title = title;
+            exposureBusyOverlay.Message = message;
+            exposureBusyOverlay.IsBusy = true;
+            exposureBusyOverlay.Focus();
+        }
+
+        private void EndExposureOperation()
+        {
+            exposureBusyOverlay.IsBusy = false;
+        }
+
+        private void ShowExposureFailure(string title, string detail,
+            bool canRecover, StatusVisualState state = StatusVisualState.Warning,
+            string recoveryInstanceId = null)
+        {
+            exposureRecoveryInstanceId = recoveryInstanceId ??
+                FindRecoveryInstanceId() ?? string.Empty;
+            exposureStatusBanner.Title = title;
+            exposureStatusBanner.Message = string.IsNullOrWhiteSpace(detail)
+                ? "The requested controller exposure change did not complete."
+                : detail;
+            exposureStatusBanner.State = canRecover
+                ? StatusVisualState.Recovery
+                : state;
+            exposureStatusBanner.ShowAction = canRecover &&
+                !string.IsNullOrWhiteSpace(exposureRecoveryInstanceId);
+            exposureStatusBanner.IsOpen = true;
+        }
+
+        private string FindRecoveryInstanceId() =>
+            App.rootHub.GetControllerExposureSessions()
+                .FirstOrDefault(session => session.CanRecover)?.InstanceId;
+
+        private void ClearExposureMessage()
+        {
+            exposureRecoveryInstanceId = string.Empty;
+            exposureStatusBanner.IsOpen = false;
+            exposureStatusBanner.ShowAction = false;
+        }
+
+        private void GameOutputStatusBanner_ActionRequested(object sender,
+            EventArgs e)
+        {
+            mainTabCon.SelectedItem = settingsTab;
+            settingsCategoryTabs.SelectedIndex = 2;
+        }
+
+        private async void ExposureStatusBanner_ActionRequested(object sender,
+            EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(exposureRecoveryInstanceId))
+            {
+                return;
+            }
+
+            string instanceId = exposureRecoveryInstanceId;
+            exposureStatusBanner.ShowAction = false;
+            try
+            {
+                BeginExposureOperation("Recovering controller handling",
+                    "Resetting the controller service and restoring Managed/Virtual.");
+                ControllerExposureRecoveryResult result =
+                    await App.rootHub.RecoverControllerExposureAsync(instanceId);
+                if (result.Succeeded)
+                {
+                    ClearExposureMessage();
+                }
+                else
+                {
+                    ShowExposureFailure("Controller recovery did not complete",
+                        result.Detail, canRecover: true,
+                        StatusVisualState.Recovery, instanceId);
+                }
+            }
+            catch (Exception ex)
+            {
+                App.rootHub.LogDebug(
+                    $"Controller recovery failed: {ex.Message}", true);
+                ShowExposureFailure("Controller recovery failed",
+                    "Controller handling was left stopped where possible. " +
+                    ex.Message, canRecover: true, StatusVisualState.Error,
+                    instanceId);
+            }
+            finally
+            {
+                EndExposureOperation();
             }
         }
 
@@ -1380,10 +1494,8 @@ Suspend support not enabled.", true);
 
         private void LogListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            int idx = logListView.SelectedIndex;
-            if (idx > -1)
+            if (logListView.SelectedItem is LogItem temp)
             {
-                LogItem temp = logvm.LogItems[idx];
                 LogMessageDisplay msgBox = new LogMessageDisplay(temp.Message);
                 msgBox.Owner = this;
                 msgBox.ShowDialog();
@@ -1394,6 +1506,31 @@ Suspend support not enabled.", true);
         private void ClearLogBtn_Click(object sender, RoutedEventArgs e)
         {
             logvm.LogItems.Clear();
+        }
+
+        private bool LogItemMatchesFilter(object value)
+        {
+            if (value is not LogItem item) return false;
+
+            if (logSeverityFilter?.SelectedIndex == 1 && !item.Warning)
+                return false;
+
+            string search = logSearchTextBox?.Text?.Trim();
+            return string.IsNullOrEmpty(search) ||
+                item.Message?.Contains(search, StringComparison.OrdinalIgnoreCase) == true ||
+                item.Severity.Contains(search, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void LogFilter_Changed(object sender, RoutedEventArgs e)
+        {
+            logCollectionView?.Refresh();
+        }
+
+        private void CopySelectedLogBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (logListView.SelectedItem is not LogItem item) return;
+
+            Clipboard.SetText($"{item.Datetime:G}\t{item.Severity}\t{item.Message}");
         }
 
         private void MainTabCon_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1645,96 +1782,6 @@ Suspend support not enabled.", true);
         private void ControllerOverview_DisconnectRequested(object sender, EventArgs e)
         {
             mainWinVM.SelectedController?.RequestDisconnect();
-        }
-
-        private void MainWinVM_ProfileEditorNavigationIndexChanged(object sender, EventArgs e)
-        {
-            if (profileEditorNavigationChanging || !mainWinVM.ProfileEditorMode || editor == null)
-            {
-                return;
-            }
-
-            NavigateProfileEditor(mainWinVM.ProfileEditorNavigationIndex);
-        }
-
-        private void NavigateProfileEditor(int navigationIndex)
-        {
-            if (editor == null)
-            {
-                return;
-            }
-
-            if (navigationIndex == 0)
-            {
-                editor.CancelEdit();
-                return;
-            }
-
-            string title;
-            string description;
-            switch (navigationIndex)
-            {
-                case 1:
-                    title = "Button Mapping";
-                    description = "Assign controller buttons, sticks, touch gestures, and shortcuts.";
-                    break;
-                case 2:
-                    title = "Special Actions";
-                    description = "Create macros, profile shifts, program launches, and multi-action shortcuts.";
-                    break;
-                case 3:
-                    title = "Controller Readings";
-                    description = "Inspect live sticks, triggers, motion sensors, and input calibration.";
-                    break;
-                case 4:
-                    title = "Axis Config";
-                    description = "Tune sticks, triggers, dead zones, curves, and motion axes.";
-                    break;
-                case 5:
-                    title = "Lightbar";
-                    description = "Set profile colors, battery feedback, flashing, and charging behavior.";
-                    break;
-                case 6:
-                    title = "Touchpad";
-                    description = "Configure mouse control, gestures, passthrough, and absolute positioning.";
-                    break;
-                case 7:
-                    title = "Gyro";
-                    description = "Configure motion aiming, steering, mouse control, and directional swipes.";
-                    break;
-                case 8:
-                    title = "Audio Haptics";
-                    description = "Turn system audio or one app session into advanced haptic feedback for this profile.";
-                    break;
-                case 9:
-                    title = "Trigger Lab";
-                    description = "Build persistent L2 and R2 adaptive-trigger effects saved directly in this profile.";
-                    break;
-                case 10:
-                    title = "Advanced";
-                    description = "Manage output devices, rumble, audio, latency, compatibility, and custom hooks.";
-                    break;
-                case 11:
-                    title = "Log";
-                    description = "View live service events without leaving the profile editing workspace.";
-                    break;
-                default:
-                    return;
-            }
-
-            mainWinVM.ProfileEditorSectionTitle = title;
-            mainWinVM.ProfileEditorSectionDescription = description;
-
-            if (navigationIndex == 11)
-            {
-                editor.DeactivateLiveReadings();
-                mainTabCon.SelectedItem = logTab;
-            }
-            else
-            {
-                mainTabCon.SelectedItem = profilesTab;
-                editor.SelectWorkspaceSection(navigationIndex - 1);
-            }
         }
 
         private void ProfilesListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -2531,6 +2578,20 @@ Suspend support not enabled.", true);
             }
 
             ViiperPrerequisiteStatus status = ViiperSetupManager.GetStatus(tryStartServer: false);
+            viiperStatusChip.Label = status.Ready
+                ? "Game output ready"
+                : "Game output needs attention";
+            viiperStatusChip.Detail = status.UserFacingDisplayText;
+            viiperStatusChip.State = status.Ready
+                ? StatusVisualState.Success
+                : StatusVisualState.Warning;
+            viiperSummaryText.Text = status.Ready
+                ? "Virtual controllers can be created for active game output profiles."
+                : "Profiles can still be edited, but virtual game output is unavailable until setup is repaired.";
+
+            gameOutputStatusBanner.Title = "Game output is unavailable";
+            gameOutputStatusBanner.Message = status.UserFacingDisplayText;
+            gameOutputStatusBanner.IsOpen = !status.Ready;
             viiperStatusText.Text = $"{status.DisplayText}. " +
                 $"VIIPER helper: {(status.ViiperInstalled ? "installed" : "missing")}; " +
                 $"usbip-win2: {(status.UsbipInstalled ? "installed" : "missing")}; " +
@@ -2658,7 +2719,7 @@ Suspend support not enabled.", true);
 
         private void MainDS4Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (WindowState != WindowState.Minimized && preserveSize && !IsInitialShow)
+            if (WindowState != WindowState.Minimized && !IsInitialShow)
             {
                 var result = WindowPlacementHelper.GetPlacement(this);
                 Global.FormWidth = result.Right - result.Left;
@@ -2699,17 +2760,6 @@ Suspend support not enabled.", true);
             profilesBrowserPanel.Visibility = Visibility.Visible;
             profOptsToolbar.Visibility = Visibility.Visible;
             profilesListBox.Visibility = Visibility.Visible;
-            preserveSize = true;
-            if (closingEditor != null && !closingEditor.Keepsize)
-            {
-                this.Width = oldSize.Width;
-                this.Height = oldSize.Height;
-            }
-            else
-            {
-                oldSize = new Size(Width, Height);
-            }
-
             editor = null;
             mainWinVM.ProfileEditorMode = false;
             mainWinVM.EditingProfileName = "Profile";
@@ -2758,26 +2808,10 @@ Suspend support not enabled.", true);
             profileEditorLoadingPanel.Visibility = Visibility.Visible;
             mainWinVM.FullTabsEnabled = false;
 
-            preserveSize = false;
-            oldSize.Width = Width;
-            oldSize.Height = Height;
-            if (this.Width < DEFAULT_PROFILE_EDITOR_WIDTH)
-            {
-                this.Width = DEFAULT_PROFILE_EDITOR_WIDTH;
-            }
-
-            if (this.Height < DEFAULT_PROFILE_EDITOR_HEIGHT)
-            {
-                this.Height = DEFAULT_PROFILE_EDITOR_HEIGHT;
-            }
-
             mainWinVM.EditingProfileName = entity?.Name ?? "New profile";
             mainWinVM.SetEditingControllerContext(editingController);
             mainWinVM.ProfileEditorMode = true;
             mainTabCon.SelectedItem = profilesTab;
-            profileEditorNavigationChanging = true;
-            mainWinVM.ProfileEditorNavigationIndex = 1;
-            profileEditorNavigationChanging = false;
             LogOpenPhase("workspace prepared");
 
             try
@@ -2812,14 +2846,17 @@ Suspend support not enabled.", true);
                 profileEditorLoadingPanel.Visibility = Visibility.Collapsed;
                 profDockPanel.Children.Add(editor);
                 mainWinVM.EditingProfileName = editor.ProfileName;
-                NavigateProfileEditor(1);
+                editor.SelectWorkspaceSection(0);
                 await Dispatcher.Yield(DispatcherPriority.Render);
                 LogOpenPhase("first frame rendered");
             }
             catch (Exception ex)
             {
+                // Log the full exception, not just the message: this path fails
+                // silently from the user's point of view, so the stack trace is
+                // the only way to find the cause afterwards.
                 AppLogger.LogToGui($"Failed to open profile editor after " +
-                    $"{openTimer.ElapsedMilliseconds}ms: {ex.Message}", true);
+                    $"{openTimer.ElapsedMilliseconds}ms: {ex}", true);
                 profileEditorLoadingPanel.Visibility = Visibility.Collapsed;
                 profilesBrowserPanel.Visibility = Visibility.Visible;
                 profOptsToolbar.Visibility = Visibility.Visible;
@@ -2829,12 +2866,6 @@ Suspend support not enabled.", true);
                 mainWinVM.SetEditingControllerContext(null);
                 mainWinVM.FullTabsEnabled = true;
                 mainTabCon.SelectedIndex = profileEditorReturnTabIndex;
-
-                if (!preserveSize)
-                {
-                    Width = oldSize.Width;
-                    Height = oldSize.Height;
-                }
 
                 editor = null;
             }

@@ -29,10 +29,10 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 {
     public sealed class TrayIconViewModel : IDisposable
     {
-        private string tooltipText = "DS4Windows";
+        private string tooltipText = ProductIdentity.Name;
         private string iconSource;
-        public const string ballonTitle = "DS4Windows";
-        public const string trayTitle = "DS4Windows";
+        public const string ballonTitle = ProductIdentity.Name;
+        public const string trayTitle = ProductIdentity.Name;
         private ContextMenu contextMenu;
         private MenuItem changeServiceItem;
         private MenuItem openItem;
@@ -94,8 +94,10 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             this.profileListHolder = profileListHolder;
             this.controlService = service;
             contextMenu = new ContextMenu();
-            iconSource = Global.iconChoiceResources[Global.UseIconChoice];
+            iconSource = ResolveConfiguredIconSource();
             Global.BatteryChanged += UpdateTrayBattery;
+            Microsoft.Win32.SystemEvents.UserPreferenceChanged +=
+                SystemEvents_UserPreferenceChanged;
             changeServiceItem = new MenuItem() { Header = "Start" };
             changeServiceItem.Click += ChangeControlServiceItem_Click;
             changeServiceItem.IsEnabled = false;
@@ -503,7 +505,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
             if (PrimaryDs4HasNonNumericBatteryPresentation())
             {
-                IconSource = $"{Global.RESOURCES_PREFIX}/DS4W.ico";
+                IconSource = $"{Global.RESOURCES_PREFIX}/50.ico";
                 return;
             }
 
@@ -522,6 +524,33 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 100 => $"{Global.RESOURCES_PREFIX}/100.ico",
                 _ => $"{Global.RESOURCES_PREFIX}/DS4W.ico"
             };
+        }
+
+        public void RefreshConfiguredIcon()
+        {
+            IconSource = ResolveConfiguredIconSource();
+        }
+
+        private void SystemEvents_UserPreferenceChanged(object sender,
+            Microsoft.Win32.UserPreferenceChangedEventArgs e)
+        {
+            if (disposed || Global.UseIconChoice != TrayIconChoice.Default)
+            {
+                return;
+            }
+
+            Application.Current?.Dispatcher.BeginInvoke(
+                (Action)RefreshConfiguredIcon);
+        }
+
+        private static string ResolveConfiguredIconSource()
+        {
+            if (Global.UseIconChoice != TrayIconChoice.Default)
+                return Global.iconChoiceResources[Global.UseIconChoice];
+
+            return DS4Windows.Util.SystemAppsUsingDarkTheme()
+                ? $"{Global.RESOURCES_PREFIX}/DS4W - White.ico"
+                : $"{Global.RESOURCES_PREFIX}/DS4W - Black.ico";
         }
 
         private bool PrimaryDs4HasNonNumericBatteryPresentation()
@@ -557,6 +586,8 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
             disposed = true;
             Global.BatteryChanged -= UpdateTrayBattery;
+            Microsoft.Win32.SystemEvents.UserPreferenceChanged -=
+                SystemEvents_UserPreferenceChanged;
             profileListHolder.ProfileListCol.CollectionChanged -= ProfileListCol_CollectionChanged;
             controlService.ServiceStarted -= BuildControllerList;
             controlService.ServiceStarted -= HookEvents;

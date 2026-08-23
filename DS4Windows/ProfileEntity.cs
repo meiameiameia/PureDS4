@@ -22,6 +22,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using DS4WinWPF.DS4Control;
+using DS4WinWPF.DS4Control.DTOXml;
 
 namespace DS4WinWPF
 {
@@ -40,8 +43,58 @@ namespace DS4WinWPF
         }
 
         public event EventHandler NameChanged;
+        public event EventHandler GameOutputDisplayChanged;
+        public event EventHandler ModifiedDisplayChanged;
         public event EventHandler ProfileSaved;
         public event EventHandler ProfileDeleted;
+
+        private string ProfilePath => Path.Combine(DS4Windows.Global.appdatapath,
+            "Profiles", $"{name}.xml");
+
+        public string GameOutputDisplay => ReadGameOutputDisplay(ProfilePath);
+
+        public string ModifiedDisplay
+        {
+            get
+            {
+                try
+                {
+                    return File.Exists(ProfilePath)
+                        ? File.GetLastWriteTime(ProfilePath).ToString("g")
+                        : "Not saved";
+                }
+                catch
+                {
+                    return "Unavailable";
+                }
+            }
+        }
+
+        internal static string ReadGameOutputDisplay(string profilePath)
+        {
+            try
+            {
+                if (!File.Exists(profilePath)) return "Not saved";
+
+                string value = XDocument.Load(profilePath)
+                    .Descendants()
+                    .FirstOrDefault(element =>
+                        element.Name.LocalName == "OutputContDevice")?.Value;
+                return DS4Windows.OutContTypeCompatibility.ToDisplayName(
+                    OutputSlotPersistDTO.ParseOutputDeviceType(value,
+                        DS4Windows.BackingStore.DEFAULT_OUT_CONT_TYPE));
+            }
+            catch
+            {
+                return "Unavailable";
+            }
+        }
+
+        private void NotifyPresentationChanged()
+        {
+            GameOutputDisplayChanged?.Invoke(this, EventArgs.Empty);
+            ModifiedDisplayChanged?.Invoke(this, EventArgs.Empty);
+        }
 
         public void DeleteFile()
         {
@@ -62,11 +115,13 @@ namespace DS4WinWPF
             {
                 DS4Windows.Global.SaveProfile(deviceNum, name);
                 DS4Windows.Global.CacheExtraProfileInfo(deviceNum);
+                NotifyPresentationChanged();
             }
         }
 
         public void FireSaved()
         {
+            NotifyPresentationChanged();
             ProfileSaved?.Invoke(this, EventArgs.Empty);
         }
 
@@ -83,6 +138,7 @@ namespace DS4WinWPF
                 File.Move(oldFilePath, newFilePath);
                 // Send NameChanged event so controls get updated with new name
                 Name = newProfileName;
+                NotifyPresentationChanged();
             }
         }
     }
