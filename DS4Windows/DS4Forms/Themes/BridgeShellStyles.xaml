@@ -205,23 +205,23 @@
                 <ControlTemplate TargetType="ListViewItem">
                     <Grid>
                         <Border x:Name="Card"
-                                Background="{DynamicResource SurfaceBackgroundColor}"
-                                BorderBrush="{DynamicResource BorderColor}"
+                                Background="{DynamicResource SurfaceRaisedBrush}"
+                                BorderBrush="{DynamicResource BorderDefaultBrush}"
                                 BorderThickness="0,0,0,1"
                                 Padding="8,7">
                             <ContentPresenter />
                         </Border>
-                        <Border x:Name="SelectionIndicator" Width="3" Background="{DynamicResource AccentColor}"
+                        <Border x:Name="SelectionIndicator" Width="3" Background="{DynamicResource AccentBrush}"
                                 HorizontalAlignment="Left" Visibility="Collapsed" />
-                        <Border x:Name="FocusRing" BorderBrush="{DynamicResource AccentColor}" BorderThickness="1"
+                        <Border x:Name="FocusRing" BorderBrush="{DynamicResource FocusBrush}" BorderThickness="1"
                                 Visibility="Collapsed" IsHitTestVisible="False" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Card" Property="Background" Value="{DynamicResource RaisedBackgroundColor}" />
+                            <Setter TargetName="Card" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="Card" Property="Background" Value="{DynamicResource RaisedBackgroundColor}" />
+                            <Setter TargetName="Card" Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
                             <Setter TargetName="SelectionIndicator" Property="Visibility" Value="Visible" />
                         </Trigger>
                         <Trigger Property="IsKeyboardFocusWithin" Value="True">

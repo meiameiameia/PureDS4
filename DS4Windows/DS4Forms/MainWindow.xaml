@@ -119,7 +119,7 @@
                                             <Grid Margin="8,0,8,4" IsHitTestVisible="False">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="2*" MinWidth="180" />
-                                                    <ColumnDefinition Width="76" />
+                                                    <ColumnDefinition Width="112" />
                                                     <ColumnDefinition Width="1.25*" MinWidth="110" />
                                                     <ColumnDefinition Width="1.25*" MinWidth="115" />
                                                     <ColumnDefinition Width="96" />
@@ -146,7 +146,7 @@
                                     <Grid Grid.Row="0" MinHeight="56">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="2*" MinWidth="180" />
-                                            <ColumnDefinition Width="76" />
+                                            <ColumnDefinition Width="112" />
                                             <ColumnDefinition Width="1.25*" MinWidth="110" />
                                             <ColumnDefinition Width="1.25*" MinWidth="115" />
                                             <ColumnDefinition Width="96" />
@@ -181,6 +181,7 @@
                                         </Grid>
                                         <local:StatusChip Grid.Column="1"
                                                           Label="{Binding BatteryState, Mode=OneWay}"
+                                                          Detail="{Binding BatteryState, Mode=OneWay}"
                                                           State="{Binding BatteryState, Converter={StaticResource BatteryTextVisualState}}"
                                                           VerticalAlignment="Center" />
                                         <ComboBox Grid.Column="2" x:Name="selectProfCombo" Style="{StaticResource BridgeProfileComboBoxStyle}"
@@ -479,7 +480,9 @@
                                         </ListBox.Resources>
                                         <ListBox.Template>
                                             <ControlTemplate TargetType="ListBox">
-                                                <Border Background="{DynamicResource SurfaceBaseBrush}"
+                                                <!-- Rows paint SurfaceRaised, so the empty area below them
+                                                     must match or the table changes tone halfway down. -->
+                                                <Border Background="{DynamicResource SurfaceRaisedBrush}"
                                                         BorderBrush="{DynamicResource BorderDefaultBrush}"
                                                         BorderThickness="1,0,1,1">
                                                     <Grid>
