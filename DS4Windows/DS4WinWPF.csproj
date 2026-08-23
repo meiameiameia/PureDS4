@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
@@ -6,6 +6,18 @@
 		<UseWPF>true</UseWPF>
 		<Platforms>x64;x86</Platforms>
 		<RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
+		<!-- Publish as a single file. The install root previously held the
+		     executable next to 29 loose dependency assemblies and 24 single-file
+		     satellite language folders, which made it impossible to tell product
+		     content from framework payload. Bundling the managed assemblies and
+		     satellites leaves only the executable, its configuration, real native
+		     libraries, and genuine content directories. Native libraries are
+		     deliberately not extracted: they stay beside the executable where the
+		     native-dependency trust check expects to verify them. -->
+		<PublishSingleFile>true</PublishSingleFile>
+		<SelfContained>false</SelfContained>
+		<IncludeNativeLibrariesForSelfExtract>false</IncludeNativeLibrariesForSelfExtract>
+		<EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
 		<RootNamespace>DS4WinWPF</RootNamespace>
 		<AssemblyName>DS4Windows</AssemblyName>
 		<ApplicationIcon>DS4W.ico</ApplicationIcon>
