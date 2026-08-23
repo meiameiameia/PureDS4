@@ -122,6 +122,21 @@ namespace DS4Windows.Tests
         }
 
         [TestMethod]
+        public void UserFacingStatusHidesBackendTopology()
+        {
+            ViiperPrerequisiteStatus status = new ViiperPrerequisiteStatus
+            {
+                ViiperInstalled = false,
+                UsbipInstalled = false,
+            };
+
+            StringAssert.Contains(status.UserFacingDisplayText,
+                "game-output");
+            Assert.IsFalse(status.UserFacingDisplayText.Contains("VIIPER"));
+            Assert.IsFalse(status.UserFacingDisplayText.Contains("usbip"));
+        }
+
+        [TestMethod]
         public void VerifiedPortableRuntimeIsSelectedByExactPath()
         {
             string directory = Path.Combine(Path.GetTempPath(),

@@ -91,5 +91,12 @@ namespace DS4Windows.Tests
             Assert.IsNull(typeof(ViiperSetupManager).GetMethod(
                 "RefreshSelectedStartupTaskOnLaunch", callable));
         }
+
+        [TestMethod]
+        public void StartupShortcutUsesProductDisplayName()
+        {
+            Assert.AreEqual("DS4Windows Reworked.lnk",
+                Path.GetFileName(StartupMethods.lnkpath));
+        }
     }
 }

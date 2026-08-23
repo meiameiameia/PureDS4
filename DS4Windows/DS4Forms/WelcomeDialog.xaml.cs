@@ -48,7 +48,7 @@ namespace DS4WinWPF.DS4Forms
                 DS4Windows.ViiperSetupManager.GetStatus(tryStartServer: true);
             if (status.Ready)
             {
-                viiperInstallBtn.Content = "VIIPER is ready";
+                viiperInstallBtn.Content = "Game output is ready";
             }
         }
 
@@ -58,7 +58,7 @@ namespace DS4WinWPF.DS4Forms
                 DS4Windows.ViiperSetupManager.GetStatus(tryStartServer: true);
             if (status.Ready)
             {
-                viiperInstallBtn.Content = "VIIPER is ready";
+                viiperInstallBtn.Content = "Game output is ready";
                 return;
             }
 
@@ -66,12 +66,13 @@ namespace DS4WinWPF.DS4Forms
                 EnsureReadyWithPrompt(this, forcePrompt: true);
             viiperInstallBtn.Content = launched
                 ? "Setup opened — finish it, then click here to verify"
-                : "VIIPER setup needs attention";
+                : "Game output setup needs attention";
         }
 
         private async void HidHideInstall_Click(object sender, RoutedEventArgs e)
         {
             await RunBundledInstallerAsync(hidHideInstallBtn, "HidHide",
+                "Controller protection",
                 HidHideInstallerFileName,
                 HidHideInstallerSha256);
         }
@@ -84,11 +85,12 @@ namespace DS4WinWPF.DS4Forms
             string sha256 = useX64 ? FakerInputX64Sha256 :
                 FakerInputX86Sha256;
             await RunBundledInstallerAsync(fakerInputInstallBtn,
-                "FakerInput", fileName, sha256);
+                "FakerInput", "Keyboard and mouse support", fileName, sha256);
         }
 
         private async Task RunBundledInstallerAsync(
             System.Windows.Controls.Button button, string componentName,
+            string displayName,
             string bundledFileName, string expectedSha256)
         {
             string target = Path.Combine(AppContext.BaseDirectory, "extras",
@@ -104,7 +106,7 @@ namespace DS4WinWPF.DS4Forms
                         $"{bundledFileName} is missing.", target);
                 }
 
-                button.Content = $"Verifying bundled {componentName}…";
+                button.Content = $"Verifying {displayName.ToLowerInvariant()}…";
                 if (!await InstallerMatchesSha256Async(target,
                     expectedSha256))
                 {
@@ -113,7 +115,7 @@ namespace DS4WinWPF.DS4Forms
                         "SHA-256 integrity check.");
                 }
 
-                button.Content = $"Installing {componentName}…";
+                button.Content = $"Installing {displayName.ToLowerInvariant()}…";
                 using Process process = Process.Start(new ProcessStartInfo
                 {
                     FileName = target,
@@ -141,22 +143,22 @@ namespace DS4WinWPF.DS4Forms
                     DS4Windows.Global.RefreshFakerInputInfo();
                 }
                 button.Content = restartRequired ?
-                    $"{componentName} setup complete — restart required" :
-                    $"{componentName} setup complete";
+                    $"{displayName} setup complete — restart required" :
+                    $"{displayName} setup complete";
                 if (restartRequired)
                 {
                     MessageBox.Show(this,
-                        $"{componentName} was installed successfully. Restart Windows to finish setup.",
-                        $"{componentName} setup", MessageBoxButton.OK,
+                        $"{displayName} was installed successfully. Restart Windows to finish setup.",
+                        $"{displayName} setup", MessageBoxButton.OK,
                         MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
-                button.Content = $"{componentName} setup failed";
+                button.Content = $"{displayName} setup failed";
                 MessageBox.Show(this,
-                    $"Could not install {componentName}: {ex.Message}",
-                    $"{componentName} setup", MessageBoxButton.OK,
+                    $"Could not install {displayName.ToLowerInvariant()}: {ex.Message}",
+                    $"{displayName} setup", MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
             finally

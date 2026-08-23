@@ -29,6 +29,7 @@ using TaskDefinition = Microsoft.Win32.TaskScheduler.TaskDefinition;
 using TaskLogonType = Microsoft.Win32.TaskScheduler.TaskLogonType;
 using TaskRunLevel = Microsoft.Win32.TaskScheduler.TaskRunLevel;
 using TaskService = Microsoft.Win32.TaskScheduler.TaskService;
+using MessageBox = DS4WinWPF.DS4Forms.AppDialog;
 
 namespace DS4Windows
 {
@@ -138,6 +139,48 @@ namespace DS4Windows
                 }
 
                 return ServerRunning ? "VIIPER status unknown" : "VIIPER server not running";
+            }
+        }
+
+        public string UserFacingDisplayText
+        {
+            get
+            {
+                if (Ready)
+                {
+                    return ViiperStartupTaskReady
+                        ? "Ready"
+                        : "Ready; background startup needs attention";
+                }
+
+                if (CitrixUsbMonitorConflict)
+                {
+                    return "A conflicting Windows USB component is blocking game output";
+                }
+
+                if (ViiperProcessConflict)
+                {
+                    return "Another game-output helper is already running";
+                }
+
+                if (!UsbipInstalled || !UsbipExecutableSafe ||
+                    !UsbipDriverFilesSafe || !UsbipRuntimeReady ||
+                    UsbipRebootOrRepairRequired)
+                {
+                    return "A required game-output driver needs repair";
+                }
+
+                if (!ViiperInstalled || !ViiperPackageCurrent)
+                {
+                    return "The game-output helper needs setup";
+                }
+
+                if (!ViiperStartupTaskReady)
+                {
+                    return "Background startup needs repair";
+                }
+
+                return "The game-output service is not running";
             }
         }
     }
@@ -465,16 +508,16 @@ namespace DS4Windows
             {
                 string message =
                     "This DS4Windows package is incomplete: the bundled " +
-                    "VIIPER setup script is missing.\n\nDownload or extract " +
+                    "game-output setup script is missing.\n\nDownload or extract " +
                     "the complete DS4Windows package, then try again. " +
                     "Setup does not download missing components.";
                 if (owner != null)
                 {
-                    MessageBox.Show(owner, message, "VIIPER setup", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(owner, message, "Game output setup", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
                 else
                 {
-                    MessageBox.Show(message, "VIIPER setup", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(message, "Game output setup", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
                 return false;
             }
@@ -482,8 +525,8 @@ namespace DS4Windows
             if (Interlocked.CompareExchange(ref installerRunning, 1, 0) != 0)
             {
                 ShowInstallerMessage(owner,
-                    "VIIPER setup is already running. Finish the open setup window, then use Refresh to verify it.",
-                    "VIIPER setup", MessageBoxImage.Information);
+                    "Game output setup is already running. Finish the open setup window, then use Refresh to verify it.",
+                    "Game output setup", MessageBoxImage.Information);
                 return true;
             }
 
@@ -572,15 +615,15 @@ namespace DS4Windows
             {
                 Interlocked.Exchange(ref installerRunning, 0);
                 ShowInstallerMessage(owner,
-                    "VIIPER setup was canceled at the Windows administrator prompt. No changes were made.",
-                    "VIIPER setup canceled", MessageBoxImage.Information);
+                    "Game output setup was canceled at the Windows administrator prompt. No changes were made.",
+                    "Game output setup canceled", MessageBoxImage.Information);
                 return false;
             }
             catch (Exception ex)
             {
                 Interlocked.Exchange(ref installerRunning, 0);
-                string message = $"Could not launch VIIPER setup: {ex.Message}";
-                ShowInstallerMessage(owner, message, "VIIPER setup",
+                string message = $"Could not launch game output setup: {ex.Message}";
+                ShowInstallerMessage(owner, message, "Game output setup",
                     MessageBoxImage.Error);
 
                 return false;
@@ -627,22 +670,22 @@ namespace DS4Windows
                 if (exitCode == 3010)
                 {
                     ShowInstallerMessage(owner,
-                        "VIIPER setup reached a required kernel-driver " +
+                        "Game output setup reached a required driver " +
                         "safety boundary. Restart Windows, then run Install " +
                         "/ Repair again to finish setup. No replacement " +
                         "driver was overlaid in the current Windows session.",
-                        "VIIPER setup requires a restart",
+                        "Game output setup requires a restart",
                         MessageBoxImage.Warning);
                     return;
                 }
 
                 string logPath = GetInfrastructureActionsLogPath();
                 string message = exitCode == 0
-                    ? "VIIPER was installed, but Windows is not reporting every component as ready yet. Restart Windows once, then click Refresh."
+                    ? "Game output was installed, but Windows is not reporting every component as ready yet. Restart Windows once, then click Refresh."
                     : exitCode == 1223
-                    ? "VIIPER setup was canceled. No USBIP driver or foreign executable was changed."
+                    ? "Game output setup was canceled. No driver or foreign executable was changed."
                     : BuildInstallerFailureMessage(exitCode, logPath);
-                ShowInstallerMessage(owner, message, "VIIPER setup",
+                ShowInstallerMessage(owner, message, "Game output setup",
                     exitCode == 1223 ? MessageBoxImage.Information :
                     exitCode == 0 ? MessageBoxImage.Warning :
                         MessageBoxImage.Error);
@@ -667,7 +710,7 @@ namespace DS4Windows
                 if (!principal.IsInRole(WindowsBuiltInRole.Administrator))
                 {
                     throw new InvalidOperationException(
-                        "The embedded VIIPER installer host is not elevated.");
+                        "The embedded game-output installer is not elevated.");
                 }
 
                 string targetLocalAppData = GetRequiredInstallerArgument(args,
@@ -746,7 +789,7 @@ namespace DS4Windows
                     if (resource == null)
                     {
                         throw new InvalidOperationException(
-                            "The embedded VIIPER installer resource is missing.");
+                            "The embedded game-output installer resource is missing.");
                     }
                     using (FileStream file = new FileStream(scriptPath,
                                FileMode.CreateNew, FileAccess.Write,
@@ -767,7 +810,7 @@ namespace DS4Windows
                     string stagedExtras = Path.Combine(stagedPackageRoot,
                         "extras");
                     progress.SetPhase(
-                        "Starting the verified VIIPER installer...");
+                        "Starting the verified game-output installer...");
 
                     string powershellPath = Path.Combine(
                         Environment.SystemDirectory, "WindowsPowerShell",
@@ -823,17 +866,17 @@ namespace DS4Windows
                     if (process == null)
                     {
                         throw new InvalidOperationException(
-                            "Windows did not start the embedded VIIPER setup.");
+                            "Windows did not start the embedded game-output setup.");
                     }
                     progress.SetPhase(
-                        "Installing VIIPER and verifying USB-IP...");
+                        "Installing and verifying game output...");
                     exitCode = progress.WaitForProcess(process);
                     FinishProgress(exitCode == 0);
 
                     if (exitCode == 3010)
                     {
                         MessageBox.Show(
-                            "VIIPER setup reached a required kernel-driver " +
+                            "Game output setup reached a required driver " +
                             "safety boundary. Restart Windows, then run " +
                             "Install / Repair again to finish setup. No " +
                             "replacement driver was overlaid in this session.",
@@ -850,7 +893,7 @@ namespace DS4Windows
                         MessageBox.Show(
                             BuildInstallerFailureMessage(exitCode,
                                 scriptLogPath),
-                            "VIIPER setup failed", MessageBoxButton.OK,
+                            "Game output setup failed", MessageBoxButton.OK,
                             MessageBoxImage.Error);
                     }
                 }
@@ -877,9 +920,9 @@ namespace DS4Windows
                 try
                 {
                     MessageBox.Show(
-                        $"VIIPER setup host failed: {ex.Message}\n\n" +
+                        $"Game output setup failed: {ex.Message}\n\n" +
                         $"Diagnostics were saved to:\n{hostLogPath}",
-                        "VIIPER setup", MessageBoxButton.OK,
+                        "Game output setup", MessageBoxButton.OK,
                         MessageBoxImage.Error);
                 }
                 catch { }
@@ -1041,7 +1084,7 @@ namespace DS4Windows
                     SupportedViiperSha256))
             {
                 throw new InvalidOperationException(
-                    "The staged VIIPER payload does not match this " +
+                    "The staged game-output payload does not match this " +
                     "DS4Windows build.");
             }
 
@@ -1188,10 +1231,10 @@ namespace DS4Windows
         internal static string BuildInstallerFailureMessage(int exitCode,
             string logPath)
         {
-            return $"VIIPER setup could not finish (exit code {exitCode}).\n\n" +
-                "No incompatible VIIPER installation was accepted. Click " +
+            return $"Game output setup could not finish (exit code {exitCode}).\n\n" +
+                "No incompatible component was accepted. Click " +
                 "Repair to retry the verified bundled package. If Windows " +
-                "requires a restart to replace USB-IP, restart once and run " +
+                "requires a restart to replace its driver, restart once and run " +
                 "Repair again.\n\nThe exact failing phase is recorded here:\n" +
                 logPath;
         }

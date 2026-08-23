@@ -1,4 +1,4 @@
-﻿<Window x:Class="DS4WinWPF.DS4Forms.WelcomeDialog"
+<Window x:Class="DS4WinWPF.DS4Forms.WelcomeDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -9,64 +9,82 @@
         lex:ResxLocalizationProvider.DefaultAssembly="DS4Windows"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="{lex:Loc Welcome.WinTitle}" Height="440" Width="418" MinWidth="500" MinHeight="500"
+        Title="Set up DS4Windows Reworked" Height="650" Width="720"
+        MinWidth="620" MinHeight="500" ResizeMode="CanResize"
+        WindowStartupLocation="CenterOwner"
         Style="{DynamicResource WindowStyle}">
     <Window.Resources>
-        <Style TargetType="{x:Type Button}" x:Key="CommonMargin" BasedOn="{StaticResource {x:Type Button}}">
-            <Setter Property="Margin" Value="0,10,0,0" />
-        </Style>
-        <Style TargetType="{x:Type TextBlock}" x:Key="CommonMarginTxt" BasedOn="{StaticResource {x:Type TextBlock}}">
-            <Setter Property="Margin" Value="0,10,0,0" />
-        </Style>
-
         <local:WelcomeDialogResourcePaths x:Key="resourcePaths" />
     </Window.Resources>
-    <ScrollViewer>
-        <DockPanel Margin="10,10,10,10" LastChildFill="False">
-            <Button x:Name="viiperInstallBtn" Content="Install / Repair VIIPER" Style="{StaticResource CommonMargin}" DockPanel.Dock="Top" Click="ViiperInstallBtn_Click" />
-            <TextBlock TextAlignment="Center" DockPanel.Dock="Top" TextWrapping="Wrap"
-                       Text="Required virtual-controller backend. DS4Windows Reworked requests administrator access and installs VIIPER plus usbip-win2 for you." />
-            <Button x:Name="step2Btn" IsEnabled="False" Content="{lex:Loc Welcome.Step2Text}" Style="{StaticResource CommonMargin}" DockPanel.Dock="Top"
-                Click="Step2Btn_Click" />
-            <TextBlock TextAlignment="Center" DockPanel.Dock="Top">
-                <TextBlock.Text>
-                    <lex:Loc Key="Welcome.Step2HelpText" />
-                </TextBlock.Text>
-            </TextBlock>
-            <TextBlock TextWrapping="Wrap" TextAlignment="Center" Style="{StaticResource CommonMarginTxt}" DockPanel.Dock="Top"
-                       Text="{lex:Loc Welcome.Step3HelpText}">
-            
-            </TextBlock>
-            <DockPanel Margin="0,10" DockPanel.Dock="Top">
-                <TextBlock TextAlignment="Center" TextWrapping="Wrap" Style="{StaticResource CommonMarginTxt}" DockPanel.Dock="Bottom">
-                    <Run Text="{lex:Loc Welcome.Step3BluetoothHelpText}" />
-                    <LineBreak />
-                    <Hyperlink x:Name="bluetoothSetLink" Click="BluetoothSetLink_Click" Foreground="{DynamicResource AccentColor}">
-                        <Run Text="{lex:Loc Welcome.BluetoothSettings}" />
-                    </Hyperlink>
-                </TextBlock>
-                <Image Source="{Binding Source={StaticResource resourcePaths}, Path=PairmodePNG}" Height="80" DockPanel.Dock="Top" />
-            </DockPanel>
-
-            <StackPanel x:Name="step4HidHidePanel" DockPanel.Dock="Top" Margin="0,8,0,0">
-                <Button x:Name="hidHideInstallBtn" Content="{lex:Loc Welcome.Step4Text}" Click="HidHideInstall_Click" />
-                <TextBlock TextWrapping="Wrap" TextAlignment="Center" Margin="0, 10, 0, 0">
-                    <TextBlock.Text>
-                        <lex:Loc Key="Welcome.Step4HelpText" />
-                    </TextBlock.Text>
-                </TextBlock>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,16">
+            <TextBlock Text="Get ready to play" Style="{StaticResource FoundationPageTitleStyle}" />
+            <TextBlock Text="Complete the required game-output setup first, then connect a controller. Optional tools can be added at any time from Settings."
+                       Margin="0,4,0,0" Style="{StaticResource FoundationSecondaryTextStyle}" />
+        </StackPanel>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+                <GroupBox Header="1. Set up game output">
+                    <StackPanel>
+                        <TextBlock Text="Required for games to receive a virtual controller. Administrator permission is requested only for installation or repair."
+                                   Style="{StaticResource FoundationSecondaryTextStyle}" />
+                        <Button x:Name="viiperInstallBtn" Content="Install or repair game output"
+                                HorizontalAlignment="Left" Margin="0,10,0,0"
+                                Style="{StaticResource FoundationPrimaryButtonStyle}"
+                                Click="ViiperInstallBtn_Click" />
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="2. Connect a controller">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="130" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <Button x:Name="step2Btn" IsEnabled="False" Content="{lex:Loc Welcome.Step2Text}"
+                                    HorizontalAlignment="Left" Click="Step2Btn_Click" />
+                            <TextBlock Text="{lex:Loc Welcome.Step2HelpText}" Margin="0,8,0,0"
+                                       Style="{StaticResource FoundationSecondaryTextStyle}" />
+                            <TextBlock Text="{lex:Loc Welcome.Step3HelpText}" Margin="0,8,0,0"
+                                       Style="{StaticResource FoundationSecondaryTextStyle}" />
+                            <TextBlock Margin="0,8,0,0">
+                                <Run Text="{lex:Loc Welcome.Step3BluetoothHelpText}" />
+                                <Hyperlink x:Name="bluetoothSetLink" Click="BluetoothSetLink_Click"
+                                           Foreground="{DynamicResource AccentBrush}">
+                                    <Run Text="{lex:Loc Welcome.BluetoothSettings}" />
+                                </Hyperlink>
+                            </TextBlock>
+                        </StackPanel>
+                        <Image Grid.Column="1" Source="{Binding Source={StaticResource resourcePaths}, Path=PairmodePNG}"
+                               Height="90" Stretch="Uniform" />
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Optional compatibility tools">
+                    <StackPanel>
+                        <StackPanel x:Name="step4HidHidePanel">
+                            <Button x:Name="hidHideInstallBtn" Content="Install controller protection"
+                                    HorizontalAlignment="Left" Click="HidHideInstall_Click" />
+                            <TextBlock Text="Prevents double input in games that must see only one controller." Margin="0,6,0,12"
+                                       Style="{StaticResource FoundationSecondaryTextStyle}" />
+                        </StackPanel>
+                        <StackPanel x:Name="step5FakerInputPanel">
+                            <Button x:Name="fakerInputInstallBtn" Content="Install keyboard and mouse support"
+                                    HorizontalAlignment="Left" Click="FakerInputInstallBtn_Click" />
+                            <TextBlock Text="Adds system-wide virtual keyboard and mouse input for games that block standard input simulation." Margin="0,6,0,0"
+                                       Style="{StaticResource FoundationSecondaryTextStyle}" />
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
             </StackPanel>
-
-            <StackPanel x:Name="step5FakerInputPanel" DockPanel.Dock="Top" Margin="0,8,0,0">
-                <Button x:Name="fakerInputInstallBtn" Content="{lex:Loc Welcome.Step5Text}" Click="FakerInputInstallBtn_Click" />
-                <TextBlock TextWrapping="Wrap" TextAlignment="Center" Margin="0, 10, 0, 0">
-                    <TextBlock.Text>
-                        <lex:Loc Key="Welcome.Step5HelpText" />
-                    </TextBlock.Text>
-                </TextBlock>
-            </StackPanel>
-
-            <Button x:Name="finishedBtn" Content="Finished" HorizontalAlignment="Center" Padding="10,1" Style="{StaticResource CommonMargin}" Click="FinishedBtn_Click" DockPanel.Dock="Bottom" />
-        </DockPanel>
-    </ScrollViewer>
+        </ScrollViewer>
+        <Button Grid.Row="2" x:Name="finishedBtn" Content="Finish setup" HorizontalAlignment="Right"
+                MinWidth="110" Margin="0,16,0,0" IsDefault="True"
+                Style="{StaticResource FoundationPrimaryButtonStyle}"
+                Click="FinishedBtn_Click" />
+    </Grid>
 </Window>

@@ -29,13 +29,21 @@ namespace DS4WinWPF
     [System.Security.SuppressUnmanagedCodeSecurity]
     public static class StartupMethods
     {
-        public static string lnkpath = Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\DS4Windows.lnk";
+        private const string StartupShortcutName = "DS4Windows Reworked.lnk";
+        private const string LegacyStartupShortcutName = "DS4Windows.lnk";
+
+        public static string lnkpath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.Startup),
+            StartupShortcutName);
+
+        private static readonly string legacyLnkPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.Startup),
+            LegacyStartupShortcutName);
 
         public static bool HasStartProgEntry()
         {
             // Exception handling should not be needed here. Method handles most cases
-            bool exists = File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\DS4Windows.lnk");
-            return exists;
+            return File.Exists(lnkpath) || File.Exists(legacyLnkPath);
         }
 
         public static bool HasTaskEntry()
@@ -84,6 +92,8 @@ namespace DS4WinWPF
                     //lnk.Arguments = "-m";
                     lnk.IconLocation = app.Replace('\\', '/');
                     lnk.Save();
+
+                    DeleteShortcutIfWritable(legacyLnkPath);
                 }
                 finally
                 {
@@ -98,27 +108,45 @@ namespace DS4WinWPF
 
         public static void DeleteStartProgEntry()
         {
-            if (File.Exists(lnkpath) && !new FileInfo(lnkpath).IsReadOnly)
-            {
-                File.Delete(lnkpath);
-            }
+            DeleteShortcutIfWritable(lnkpath);
+            DeleteShortcutIfWritable(legacyLnkPath);
         }
 
         public static bool CanWriteStartEntry()
         {
-            bool result = false;
-            if (!new FileInfo(lnkpath).IsReadOnly)
-            {
-                result = true;
-            }
-
-            return result;
+            return !IsExistingShortcutReadOnly(lnkpath) &&
+                !IsExistingShortcutReadOnly(legacyLnkPath);
         }
 
         public static bool CheckStartupExeLocation()
         {
-            string lnkprogpath = ResolveShortcut(lnkpath);
+            string shortcutPath = File.Exists(lnkpath) ? lnkpath : legacyLnkPath;
+            string lnkprogpath = ResolveShortcut(shortcutPath);
             return lnkprogpath != DS4Windows.Global.exelocation;
+        }
+
+        public static void MigrateLegacyStartProgEntry()
+        {
+            if (File.Exists(lnkpath) || !File.Exists(legacyLnkPath) ||
+                IsExistingShortcutReadOnly(legacyLnkPath))
+            {
+                return;
+            }
+
+            WriteStartProgEntry();
+        }
+
+        private static bool IsExistingShortcutReadOnly(string path)
+        {
+            return File.Exists(path) && new FileInfo(path).IsReadOnly;
+        }
+
+        private static void DeleteShortcutIfWritable(string path)
+        {
+            if (File.Exists(path) && !new FileInfo(path).IsReadOnly)
+            {
+                File.Delete(path);
+            }
         }
 
         public static void LaunchOldTask()

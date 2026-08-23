@@ -87,8 +87,8 @@ namespace DS4WinWPF.DS4Forms
             setupProgress.Value = success ? 100 : 0;
             statusGlyph.Text = success ? "\u2713" : "!";
             headingText.Text = success
-                ? "VIIPER is ready"
-                : "VIIPER setup needs attention";
+                ? "Game output is ready"
+                : "Game output setup needs attention";
             phaseText.Text = success
                 ? "Setup completed successfully."
                 : "Setup stopped safely before verification completed.";
