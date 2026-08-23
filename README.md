@@ -39,10 +39,9 @@ DualSense hardware is unvalidated, as is the upgrade path from the previous
 multi-file layout. Rumble, audio, haptics, and other advanced output behavior
 are not claimed unless separately exercised.
 
-DualShock 4 is the reference hardware. USB support is intended, but only the
-Bluetooth path has been owner-validated from the baseline. DualSense and
-DualSense Edge compatibility is preserved, but no DualSense hardware has been
-validated.
+DualShock 4 is the reference hardware, and both the Bluetooth and USB paths
+have now been owner-validated. DualSense and DualSense Edge compatibility is
+preserved, but no DualSense hardware has been validated.
 
 DualShock 3 compatibility is a future candidate. Potential access to genuine
 DS3 hardware is available for later owner-assisted validation, but existing
