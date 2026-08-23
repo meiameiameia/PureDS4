@@ -1,7 +1,14 @@
 # Product identity and release contract
 
-DS4Windows Reworked is an independently maintained derivative published by
-`meiameiameia`. Its public source and support authority is
+> **No release is planned.** `hbashton/DS4Windows` is the maintained public
+> DS4Windows. This repository is a personal derivative whose work reaches
+> users through upstream pull requests, not through its own distribution.
+> This document defines the identity and compatibility rules the tree follows
+> so that versioning, upgrade paths, and installer behaviour stay coherent for
+> the owner's own installs — it does not describe a publication plan.
+
+DS4Windows Reworked is an independently maintained derivative by
+`meiameiameia`. Its source is
 <https://github.com/meiameiameia/ds4windows-reworked>.
 
 ## Identity and compatibility

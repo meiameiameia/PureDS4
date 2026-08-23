@@ -42,16 +42,20 @@ dotnet build DS4WindowsWPF.sln -c Debug -p:Platform=x64
 dotnet test DS4WindowsWPF.sln -c Debug -p:Platform=x64
 ```
 
-## Product and release identity
+## Relationship to DS4Windows
 
-The public product is **DS4Windows Reworked**, maintained under the
-`meiameiameia` alias. The executable and established DS4Windows configuration
-paths remain unchanged for compatibility. The first public candidate is
-`5.1.0-beta.1`; it is not authorized for publication until the remaining
-provenance, signing, installer, and release-validation gates are complete.
+[`hbashton/DS4Windows`](https://github.com/hbashton/DS4Windows) is the
+maintained DS4Windows and keeps that identity. This repository is a personal
+derivative: it exists so its owner can run the controller setup he wants, and
+as a place to develop work that is offered back upstream by pull request.
+
+There is no planned release. The version identifiers in the tree
+(`5.1.0-beta.1` and friends) record identity only, and the executable and
+established DS4Windows configuration paths are unchanged for compatibility.
+If you are looking for DS4Windows to install and use, go upstream.
 
 See [`docs/RELEASE_CONTRACT.md`](docs/RELEASE_CONTRACT.md) for the version,
-upgrade, compatibility, artifact, and release-authority contract.
+upgrade, compatibility, and artifact contract those identifiers follow.
 See [`docs/visual-contract.md`](docs/visual-contract.md) for the interface,
 identity, status, accessibility, and validation rules.
 
