@@ -296,12 +296,15 @@ namespace DS4Windows.SetupActions
                 "DS4Windows");
             Directory.CreateDirectory(programsDirectory);
             CreateShellShortcut(Path.Combine(programsDirectory,
-                    "DS4Windows.lnk"), ds4Path, workingDirectory);
+                    "DS4Windows Reworked.lnk"), ds4Path, workingDirectory);
+            var legacyStartShortcut = Path.Combine(programsDirectory,
+                "DS4Windows.lnk");
+            if (File.Exists(legacyStartShortcut)) File.Delete(legacyStartShortcut);
 
             var desktopPath = Path.Combine(
                 Environment.GetFolderPath(
                     Environment.SpecialFolder.CommonDesktopDirectory),
-                "DS4Windows.lnk");
+                "DS4Windows Reworked.lnk");
             if (desktopShortcut)
             {
                 CreateShellShortcut(desktopPath, ds4Path, workingDirectory);
@@ -310,6 +313,11 @@ namespace DS4Windows.SetupActions
             {
                 File.Delete(desktopPath);
             }
+            var legacyDesktopPath = Path.Combine(
+                Environment.GetFolderPath(
+                    Environment.SpecialFolder.CommonDesktopDirectory),
+                "DS4Windows.lnk");
+            if (File.Exists(legacyDesktopPath)) File.Delete(legacyDesktopPath);
         }
 
         private static void CreateShellShortcut(string shortcutPath,
@@ -345,12 +353,19 @@ namespace DS4Windows.SetupActions
                     Environment.SpecialFolder.CommonPrograms),
                 "DS4Windows");
             var startMenuShortcut = Path.Combine(startMenuDirectory,
+                "DS4Windows Reworked.lnk");
+            var legacyStartMenuShortcut = Path.Combine(startMenuDirectory,
                 "DS4Windows.lnk");
-            var desktopShortcut = Path.Combine(
+            var desktopDirectory =
                 Environment.GetFolderPath(
-                    Environment.SpecialFolder.CommonDesktopDirectory),
+                    Environment.SpecialFolder.CommonDesktopDirectory);
+            var desktopShortcut = Path.Combine(desktopDirectory,
+                "DS4Windows Reworked.lnk");
+            var legacyDesktopShortcut = Path.Combine(desktopDirectory,
                 "DS4Windows.lnk");
-            foreach (var path in new[] { startMenuShortcut, desktopShortcut })
+            foreach (var path in new[] { startMenuShortcut,
+                legacyStartMenuShortcut, desktopShortcut,
+                legacyDesktopShortcut })
             {
                 if (File.Exists(path)) File.Delete(path);
             }

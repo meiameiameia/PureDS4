@@ -2,13 +2,13 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="DS4Windows Reworked Setup" Width="760" Height="640" MinWidth="700" MinHeight="580"
-        WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen" ResizeMode="CanResize"
         Icon="DS4W.ico" Background="{DynamicResource WindowBrush}" Foreground="{DynamicResource TextBrush}">
   <Window.Resources>
-    <SolidColorBrush x:Key="AccentBrush" Color="#2F80ED" />
-    <SolidColorBrush x:Key="AccentHoverBrush" Color="#4A94F5" />
-    <SolidColorBrush x:Key="SuccessBrush" Color="#32B67A" />
-    <SolidColorBrush x:Key="WarningBrush" Color="#E7A83E" />
+    <SolidColorBrush x:Key="AccentBrush" Color="#2E647F" />
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="#25526B" />
+    <SolidColorBrush x:Key="SuccessBrush" Color="#1F6B3A" />
+    <SolidColorBrush x:Key="WarningBrush" Color="#7A5200" />
     <Style TargetType="TextBlock">
       <Setter Property="FontFamily" Value="Segoe UI" />
     </Style>
@@ -23,7 +23,7 @@
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="Button">
-            <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+            <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="2" Padding="{TemplateBinding Padding}">
               <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
             <ControlTemplate.Triggers>
@@ -42,7 +42,7 @@
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="Button">
-            <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+            <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="2" Padding="{TemplateBinding Padding}">
               <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
             <ControlTemplate.Triggers>
@@ -56,7 +56,7 @@
       <Setter Property="Background" Value="{DynamicResource CardBrush}" />
       <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
       <Setter Property="BorderThickness" Value="1" />
-      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="CornerRadius" Value="2" />
       <Setter Property="Padding" Value="18" />
       <Setter Property="Margin" Value="0,0,0,12" />
     </Style>
@@ -76,7 +76,7 @@
     </Grid.RowDefinitions>
     <Grid Grid.Row="0" Margin="0,0,0,20">
       <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-      <Border Width="58" Height="58" CornerRadius="15" Background="#183E73">
+      <Border Width="58" Height="58" CornerRadius="2" Background="#142838">
         <Image Source="DS4W.ico" Width="42" Height="42" Stretch="Uniform" />
       </Border>
       <StackPanel Grid.Column="1" Margin="16,2,0,0">
