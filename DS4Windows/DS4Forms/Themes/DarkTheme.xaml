@@ -6,34 +6,56 @@
                     xmlns:themes1="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero">
 
     <!-- Brushes -->
-    <SolidColorBrush x:Key="BackgroundColor" Color="#FF070D15" />
-    <SolidColorBrush x:Key="BorderColor" Color="#FF223041" />
-    <SolidColorBrush x:Key="ForegroundColor" Color="#FFF4F7FB" />
-    <SolidColorBrush x:Key="SecondaryColor" Color="#FF153B6E" />
-    <SolidColorBrush x:Key="AccentColor" Color="#FF2C7DF7" />
-    <SolidColorBrush x:Key="SurfaceBackgroundColor" Color="#FF070D15" />
-    <SolidColorBrush x:Key="SidebarBackgroundColor" Color="#FF08111B" />
-    <SolidColorBrush x:Key="CardBackgroundColor" Color="#FF0A121D" />
-    <SolidColorBrush x:Key="RaisedBackgroundColor" Color="#FF0E1926" />
-    <SolidColorBrush x:Key="NavigationSelectionColor" Color="#FF153B6E" />
-    <SolidColorBrush x:Key="MutedForegroundColor" Color="#FF9CB0CA" />
-    <SolidColorBrush x:Key="SuccessColor" Color="#FF41D56A" />
-    <SolidColorBrush x:Key="DangerColor" Color="#FFE2555F" />
+    <SolidColorBrush x:Key="BackgroundColor" Color="#FF12181E" />
+    <SolidColorBrush x:Key="BorderColor" Color="#FF71808C" />
+    <SolidColorBrush x:Key="ForegroundColor" Color="#FFF1F4F6" />
+    <SolidColorBrush x:Key="SecondaryColor" Color="#FF3C5668" />
+    <SolidColorBrush x:Key="AccentColor" Color="#FF8AB4D6" />
+    <SolidColorBrush x:Key="SurfaceBackgroundColor" Color="#FF12181E" />
+    <SolidColorBrush x:Key="SidebarBackgroundColor" Color="#FF222C35" />
+    <SolidColorBrush x:Key="CardBackgroundColor" Color="#FF222C35" />
+    <SolidColorBrush x:Key="RaisedBackgroundColor" Color="#FF0D141A" />
+    <SolidColorBrush x:Key="NavigationSelectionColor" Color="#FF3C5668" />
+    <SolidColorBrush x:Key="MutedForegroundColor" Color="#FFC3CDD3" />
+    <SolidColorBrush x:Key="SuccessColor" Color="#FF78C892" />
+    <SolidColorBrush x:Key="DangerColor" Color="#FFF08A90" />
+
+    <!-- Gate 7 semantic palette. Component styles consume these roles so light
+         and dark modes share geometry, hierarchy, and interaction states. -->
+    <SolidColorBrush x:Key="SurfaceBaseBrush" Color="#FF12181E" />
+    <SolidColorBrush x:Key="SurfaceRaisedBrush" Color="#FF222C35" />
+    <SolidColorBrush x:Key="SurfaceInsetBrush" Color="#FF0D141A" />
+    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#FF354754" />
+    <SolidColorBrush x:Key="SurfaceSelectedBrush" Color="#FF3C5668" />
+    <SolidColorBrush x:Key="BorderDefaultBrush" Color="#FF71808C" />
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFF1F4F6" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FFC3CDD3" />
+    <SolidColorBrush x:Key="TextDisabledBrush" Color="#FF8E9AA3" />
+    <SolidColorBrush x:Key="AccentBrush" Color="#FF8AB4D6" />
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="#FFA2C5E0" />
+    <SolidColorBrush x:Key="AccentPressedBrush" Color="#FF74A2C5" />
+    <SolidColorBrush x:Key="AccentForegroundBrush" Color="#FF12181E" />
+    <SolidColorBrush x:Key="FocusBrush" Color="#FF86B9E0" />
+    <SolidColorBrush x:Key="StateNeutralBrush" Color="#FFC3CDD3" />
+    <SolidColorBrush x:Key="StateSuccessBrush" Color="#FF78C892" />
+    <SolidColorBrush x:Key="StateWarningBrush" Color="#FFE2B65F" />
+    <SolidColorBrush x:Key="StateErrorBrush" Color="#FFF08A90" />
+    <SolidColorBrush x:Key="StateRecoveryBrush" Color="#FF86B9E0" />
 
     <!-- Opt-in classic-derived foundation. These semantic tokens intentionally do
          not replace legacy control colors until each surface is migrated. -->
-    <SolidColorBrush x:Key="ClassicWorkspaceBrush" Color="#FF1A2026" />
-    <SolidColorBrush x:Key="ClassicSurfaceBrush" Color="#FF222A31" />
-    <SolidColorBrush x:Key="ClassicSelectedSurfaceBrush" Color="#FF2D3A45" />
-    <SolidColorBrush x:Key="ClassicDividerBrush" Color="#FF3D4852" />
-    <SolidColorBrush x:Key="ClassicPrimaryTextBrush" Color="#FFE7ECEF" />
-    <SolidColorBrush x:Key="ClassicSecondaryTextBrush" Color="#FFAAB5BD" />
-    <SolidColorBrush x:Key="ClassicDisabledTextBrush" Color="#FF6E7982" />
-    <SolidColorBrush x:Key="ClassicAccentBrush" Color="#FF6A9DC4" />
-    <SolidColorBrush x:Key="ClassicFocusBrush" Color="#FF8AB4D6" />
-    <SolidColorBrush x:Key="ClassicReadyBrush" Color="#FF66B783" />
-    <SolidColorBrush x:Key="ClassicWarningBrush" Color="#FFD9A65A" />
-    <SolidColorBrush x:Key="ClassicErrorBrush" Color="#FFD77A7A" />
+    <SolidColorBrush x:Key="ClassicWorkspaceBrush" Color="#FF12181E" />
+    <SolidColorBrush x:Key="ClassicSurfaceBrush" Color="#FF222C35" />
+    <SolidColorBrush x:Key="ClassicSelectedSurfaceBrush" Color="#FF3C5668" />
+    <SolidColorBrush x:Key="ClassicDividerBrush" Color="#FF71808C" />
+    <SolidColorBrush x:Key="ClassicPrimaryTextBrush" Color="#FFF1F4F6" />
+    <SolidColorBrush x:Key="ClassicSecondaryTextBrush" Color="#FFC3CDD3" />
+    <SolidColorBrush x:Key="ClassicDisabledTextBrush" Color="#FF8E9AA3" />
+    <SolidColorBrush x:Key="ClassicAccentBrush" Color="#FF8AB4D6" />
+    <SolidColorBrush x:Key="ClassicFocusBrush" Color="#FF86B9E0" />
+    <SolidColorBrush x:Key="ClassicReadyBrush" Color="#FF78C892" />
+    <SolidColorBrush x:Key="ClassicWarningBrush" Color="#FFE2B65F" />
+    <SolidColorBrush x:Key="ClassicErrorBrush" Color="#FFF08A90" />
 
     <system:String x:Key="KeyImageImg">key-solid_white.png</system:String>
     <system:String x:Key="CancelImg">cancel_white.png</system:String>
@@ -115,7 +137,7 @@
 
     <!-- Button Style -->
     <Style x:Key="ButtonStyle" TargetType="{x:Type Button}">
-        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="FocusVisualStyle" Value="{DynamicResource FoundationFocusVisualStyle}"/>
         <Setter Property="Background" Value="{StaticResource BackgroundColor}"/>
         <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
@@ -150,7 +172,7 @@
 
     <!-- Repeat Button Style -->
     <Style x:Key="RepeatButtonStyle" TargetType="{x:Type RepeatButton}">
-        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="FocusVisualStyle" Value="{DynamicResource FoundationFocusVisualStyle}"/>
         <Setter Property="Background" Value="{StaticResource BackgroundColor}"/>
         <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
@@ -1396,7 +1418,7 @@
         <Setter Property="CornerRadius" Value="0"/>
         <Setter Property="IsTabStop" Value="False"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="FocusVisualStyle" Value="{DynamicResource FoundationFocusVisualStyle}"/>
         <Setter Property="Background" Value="{StaticResource BackgroundColor}"/>
         <Setter Property="BorderBrush" Value="{StaticResource ForegroundColor}"/>
         <Setter Property="BorderThickness" Value="1"/>
@@ -1853,11 +1875,11 @@
                 <ControlTemplate TargetType="{x:Type ToolBar}">
                     <Grid x:Name="Grid" Margin="3,1,1,1" SnapsToDevicePixels="true">
                         <Grid x:Name="OverflowGrid" HorizontalAlignment="Right">
-                            <ToggleButton x:Name="OverflowButton" ClickMode="Press" FocusVisualStyle="{x:Null}" IsEnabled="{TemplateBinding HasOverflowItems}" IsChecked="{Binding IsOverflowOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" Style="{StaticResource ToolBarHorizontalOverflowButtonStyle}"/>
+                            <ToggleButton x:Name="OverflowButton" ClickMode="Press" FocusVisualStyle="{DynamicResource FoundationFocusVisualStyle}" IsEnabled="{TemplateBinding HasOverflowItems}" IsChecked="{Binding IsOverflowOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" Style="{StaticResource ToolBarHorizontalOverflowButtonStyle}"/>
                             <Popup x:Name="OverflowPopup" AllowsTransparency="true" Focusable="false" IsOpen="{Binding IsOverflowOpen, RelativeSource={RelativeSource TemplatedParent}}" Placement="Bottom" PopupAnimation="{DynamicResource {x:Static SystemParameters.ComboBoxPopupAnimationKey}}" StaysOpen="false">
                                 <themes1:SystemDropShadowChrome x:Name="Shdw" Color="Transparent">
                                     <Border x:Name="ToolBarSubMenuBorder" Background="{StaticResource BackgroundColor}" BorderThickness="1" BorderBrush="{StaticResource BorderColor}" RenderOptions.ClearTypeHint="Enabled">
-                                        <ToolBarOverflowPanel x:Name="PART_ToolBarOverflowPanel" KeyboardNavigation.DirectionalNavigation="Cycle" Focusable="true" FocusVisualStyle="{x:Null}" Margin="2" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" KeyboardNavigation.TabNavigation="Cycle" WrapWidth="200"/>
+                                        <ToolBarOverflowPanel x:Name="PART_ToolBarOverflowPanel" KeyboardNavigation.DirectionalNavigation="Cycle" Focusable="true" FocusVisualStyle="{DynamicResource FoundationFocusVisualStyle}" Margin="2" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" KeyboardNavigation.TabNavigation="Cycle" WrapWidth="200"/>
                                     </Border>
                                 </themes1:SystemDropShadowChrome>
                             </Popup>

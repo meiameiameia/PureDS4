@@ -1,0 +1,643 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib"
+                    xmlns:converters="clr-namespace:DS4WinWPF.DS4Forms.Converters">
+
+    <converters:ControllerStartupStageVisualStateConverter x:Key="ControllerStartupStageVisualState" />
+    <converters:BatteryTextVisualStateConverter x:Key="BatteryTextVisualState" />
+    <converters:CountLabelConverter x:Key="CountLabel" />
+
+    <!-- Shared metrics. Theme dictionaries own color only; component geometry
+         and interaction stay identical in light and dark modes. -->
+    <system:Double x:Key="Space1">4</system:Double>
+    <system:Double x:Key="Space2">8</system:Double>
+    <system:Double x:Key="Space3">12</system:Double>
+    <system:Double x:Key="Space4">16</system:Double>
+    <system:Double x:Key="Space5">24</system:Double>
+    <system:Double x:Key="Space6">32</system:Double>
+
+    <Thickness x:Key="Space1Thickness">4</Thickness>
+    <Thickness x:Key="Space2Thickness">8</Thickness>
+    <Thickness x:Key="Space3Thickness">12</Thickness>
+    <Thickness x:Key="Space4Thickness">16</Thickness>
+    <Thickness x:Key="ControlPaddingDense">8,2</Thickness>
+    <Thickness x:Key="ControlPaddingDefault">10,4</Thickness>
+    <Thickness x:Key="ControlPaddingProminent">14,6</Thickness>
+    <Thickness x:Key="PropertyGroupPadding">12,8</Thickness>
+
+    <system:Double x:Key="ControlHeightDense">24</system:Double>
+    <system:Double x:Key="ControlHeightDefault">28</system:Double>
+    <system:Double x:Key="ControlHeightProminent">32</system:Double>
+    <system:Double x:Key="TypePageTitleSize">16</system:Double>
+    <system:Double x:Key="TypeGroupTitleSize">13</system:Double>
+    <system:Double x:Key="TypeBodySize">12</system:Double>
+    <system:Double x:Key="TypeSecondarySize">12</system:Double>
+    <system:Double x:Key="TypeColumnHeaderSize">11</system:Double>
+
+    <CornerRadius x:Key="RadiusSmall">2</CornerRadius>
+    <FontFamily x:Key="TypeUiFontFamily">Segoe UI Variable Text, Segoe UI</FontFamily>
+    <FontFamily x:Key="TypeMonoFontFamily">Cascadia Mono, Consolas</FontFamily>
+
+    <Style x:Key="FoundationFocusVisualStyle" TargetType="Control">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Border Margin="1"
+                            BorderBrush="{DynamicResource FocusBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource RadiusSmall}"
+                            SnapsToDevicePixels="True" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="FoundationButtonStyle" TargetType="Button">
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeightDefault}" />
+        <Setter Property="Padding" Value="{StaticResource ControlPaddingDefault}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="FontFamily" Value="{StaticResource TypeUiFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource TypeBodySize}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FoundationFocusVisualStyle}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="Chrome"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{StaticResource RadiusSmall}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <Border x:Name="KeyboardFocusRing"
+                                Margin="1"
+                                BorderBrush="{DynamicResource FocusBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource RadiusSmall}"
+                                IsHitTestVisible="False"
+                                Visibility="Collapsed" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsDefaulted" Value="True">
+                            <Setter TargetName="KeyboardFocusRing" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="KeyboardFocusRing" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource BorderDefaultBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="FoundationPrimaryButtonStyle"
+           TargetType="Button"
+           BasedOn="{StaticResource FoundationButtonStyle}">
+        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="Chrome"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{StaticResource RadiusSmall}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <Border x:Name="KeyboardFocusRing"
+                                Margin="1"
+                                BorderBrush="{DynamicResource AccentForegroundBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource RadiusSmall}"
+                                IsHitTestVisible="False"
+                                Visibility="Collapsed" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AccentHoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AccentPressedBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsDefaulted" Value="True">
+                            <Setter TargetName="KeyboardFocusRing" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="KeyboardFocusRing" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource BorderDefaultBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="FoundationCheckBoxStyle" TargetType="CheckBox">
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeightDense}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="FontFamily" Value="{StaticResource TypeUiFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource TypeBodySize}" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FoundationFocusVisualStyle}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <Grid Background="Transparent">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border x:Name="Box"
+                                Width="16" Height="16"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource SurfaceInsetBrush}"
+                                BorderBrush="{DynamicResource BorderDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource RadiusSmall}">
+                            <Path x:Name="CheckMark"
+                                  Width="9" Height="7"
+                                  Data="M 0 3 L 3 6 L 9 0"
+                                  Stretch="Fill"
+                                  Stroke="{DynamicResource TextPrimaryBrush}"
+                                  StrokeThickness="2"
+                                  StrokeStartLineCap="Square"
+                                  StrokeEndLineCap="Square"
+                                  Visibility="Collapsed" />
+                        </Border>
+                        <ContentPresenter Grid.Column="1"
+                                          Margin="8,0,0,0"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True" />
+                        <Border x:Name="KeyboardFocusRing"
+                                Grid.ColumnSpan="2"
+                                Margin="1"
+                                BorderBrush="{DynamicResource FocusBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource RadiusSmall}"
+                                IsHitTestVisible="False"
+                                Visibility="Collapsed" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Box" Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+                            <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="{x:Null}">
+                            <Setter TargetName="Box" Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+                            <Setter TargetName="CheckMark" Property="Data" Value="M 0 3 L 9 3" />
+                            <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource FocusBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="KeyboardFocusRing" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+                            <Setter TargetName="CheckMark" Property="Stroke" Value="{DynamicResource TextDisabledBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="FoundationComboBoxItemStyle" TargetType="ComboBoxItem">
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeightDefault}" />
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FoundationFocusVisualStyle}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBoxItem">
+                    <Border x:Name="ItemChrome"
+                            Background="Transparent"
+                            Padding="{TemplateBinding Padding}"
+                            CornerRadius="{StaticResource RadiusSmall}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="ItemChrome" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="ItemChrome" Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="FoundationComboBoxStyle" TargetType="ComboBox">
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeightDefault}" />
+        <Setter Property="MinWidth" Value="110" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceInsetBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="FontFamily" Value="{StaticResource TypeUiFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource TypeBodySize}" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="ItemContainerStyle" Value="{StaticResource FoundationComboBoxItemStyle}" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FoundationFocusVisualStyle}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid>
+                        <Border x:Name="Chrome"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{StaticResource RadiusSmall}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="26" />
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter Margin="8,0,6,0"
+                                                  VerticalAlignment="Center"
+                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  Content="{TemplateBinding SelectionBoxItem}"
+                                                  ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                  ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                                  IsHitTestVisible="False" />
+                                <Border Grid.Column="1"
+                                        BorderBrush="{DynamicResource BorderDefaultBrush}"
+                                        BorderThickness="1,0,0,0">
+                                    <Path x:Name="Arrow"
+                                          Width="8" Height="5"
+                                          Data="M 0 0 L 4 4 L 8 0"
+                                          Stretch="Fill"
+                                          Stroke="{DynamicResource TextSecondaryBrush}"
+                                          StrokeThickness="1.5"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <ToggleButton Background="Transparent"
+                                      BorderThickness="0"
+                                      ClickMode="Press"
+                                      Focusable="False"
+                                      IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border Background="Transparent" />
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                        </ToggleButton>
+                        <Border x:Name="KeyboardFocusRing"
+                                Margin="1"
+                                BorderBrush="{DynamicResource FocusBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource RadiusSmall}"
+                                IsHitTestVisible="False"
+                                Visibility="Collapsed" />
+                        <Popup x:Name="PART_Popup"
+                               AllowsTransparency="True"
+                               Focusable="False"
+                               IsOpen="{TemplateBinding IsDropDownOpen}"
+                               Placement="Bottom"
+                               PopupAnimation="Fade">
+                            <Border Margin="0,2,0,0"
+                                    MinWidth="{TemplateBinding ActualWidth}"
+                                    MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                    Background="{DynamicResource SurfaceRaisedBrush}"
+                                    BorderBrush="{DynamicResource BorderDefaultBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource RadiusSmall}"
+                                    Padding="2">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                              HorizontalScrollBarVisibility="Disabled"
+                                              CanContentScroll="True">
+                                    <StackPanel IsItemsHost="True"
+                                                KeyboardNavigation.DirectionalNavigation="Contained" />
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter TargetName="KeyboardFocusRing" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsDropDownOpen" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+                            <Setter TargetName="Arrow" Property="Stroke" Value="{DynamicResource FocusBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+                            <Setter TargetName="Arrow" Property="Stroke" Value="{DynamicResource TextDisabledBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="FoundationTextBoxStyle" TargetType="TextBox">
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeightDefault}" />
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceInsetBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="FontFamily" Value="{StaticResource TypeUiFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource TypeBodySize}" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FoundationFocusVisualStyle}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Grid>
+                        <Border x:Name="Chrome"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{StaticResource RadiusSmall}">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" />
+                        </Border>
+                        <Border x:Name="KeyboardFocusRing"
+                                Margin="1"
+                                BorderBrush="{DynamicResource FocusBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource RadiusSmall}"
+                                IsHitTestVisible="False"
+                                Visibility="Collapsed" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="KeyboardFocusRing" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="FoundationPageTitleStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource TypeUiFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource TypePageTitleSize}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style x:Key="FoundationGroupTitleStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource TypeUiFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource TypeGroupTitleSize}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style x:Key="FoundationBodyTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource TypeUiFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource TypeBodySize}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style x:Key="FoundationSecondaryTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource TypeUiFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource TypeSecondarySize}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="FoundationColumnHeaderStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource TypeUiFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource TypeColumnHeaderSize}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    </Style>
+
+    <Style x:Key="FoundationPropertyGroupStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="Padding" Value="{StaticResource PropertyGroupPadding}" />
+    </Style>
+
+    <Style x:Key="FoundationGroupBoxStyle" TargetType="GroupBox">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="FontFamily" Value="{StaticResource TypeUiFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource TypeBodySize}" />
+        <Setter Property="Margin" Value="0,0,0,12" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="GroupBox">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Border Background="{DynamicResource SurfaceRaisedBrush}"
+                                BorderBrush="{DynamicResource BorderDefaultBrush}"
+                                BorderThickness="0,0,0,1"
+                                Padding="12,7">
+                            <ContentPresenter ContentSource="Header"
+                                              TextElement.FontSize="{StaticResource TypeGroupTitleSize}"
+                                              TextElement.FontWeight="SemiBold" />
+                        </Border>
+                        <Border Grid.Row="1"
+                                Background="{DynamicResource SurfaceBaseBrush}"
+                                Padding="12,10">
+                            <ContentPresenter />
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="FoundationToolbarBarStyle" TargetType="Border">
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeightDefault}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="Padding" Value="4,2" />
+    </Style>
+
+    <Style x:Key="FoundationToolbarButtonStyle"
+           TargetType="Button"
+           BasedOn="{StaticResource FoundationButtonStyle}">
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeightDense}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Padding" Value="{StaticResource ControlPaddingDense}" />
+    </Style>
+
+    <Style x:Key="FoundationNavigationListItemStyle" TargetType="ListBoxItem">
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeightDefault}" />
+        <Setter Property="Padding" Value="10,5" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FoundationFocusVisualStyle}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Grid>
+                        <Border x:Name="Chrome"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                BorderThickness="2,0,0,0"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <Border x:Name="KeyboardFocusRing"
+                                Margin="1"
+                                BorderBrush="{DynamicResource FocusBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource RadiusSmall}"
+                                IsHitTestVisible="False"
+                                Visibility="Collapsed" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="KeyboardFocusRing" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Tables that draw their own header row must not use the GridView scroll
+         viewer: it reserves a band at the top for GridView column headers, which
+         renders as an empty strip under the real header. -->
+    <Style x:Key="FoundationTableListViewStyle" TargetType="ListView">
+        <Setter Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+        <Setter Property="ScrollViewer.CanContentScroll" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListView">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <ScrollViewer Padding="{TemplateBinding Padding}" Focusable="False">
+                            <ItemsPresenter SnapsToDevicePixels="True" />
+                        </ScrollViewer>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="FoundationTableListItemStyle" TargetType="ListViewItem">
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeightDefault}" />
+        <Setter Property="Padding" Value="10,5" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FoundationFocusVisualStyle}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListViewItem">
+                    <Grid>
+                        <Border x:Name="Chrome" Background="{DynamicResource SurfaceRaisedBrush}"
+                                BorderBrush="{DynamicResource BorderDefaultBrush}"
+                                BorderThickness="2,0,0,1" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <Border x:Name="KeyboardFocusRing" Margin="1"
+                                BorderBrush="{DynamicResource FocusBrush}" BorderThickness="1"
+                                IsHitTestVisible="False" Visibility="Collapsed" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="KeyboardFocusRing" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Controls without a local style receive the same geometry, focus,
+         and interaction behavior in both themes. -->
+    <Style TargetType="Button" BasedOn="{StaticResource FoundationButtonStyle}">
+        <Setter Property="MinHeight" Value="0" />
+    </Style>
+    <Style TargetType="CheckBox" BasedOn="{StaticResource FoundationCheckBoxStyle}">
+        <Setter Property="MinHeight" Value="0" />
+    </Style>
+    <Style TargetType="ComboBox" BasedOn="{StaticResource FoundationComboBoxStyle}">
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="MinWidth" Value="0" />
+    </Style>
+    <Style TargetType="TextBox" BasedOn="{StaticResource FoundationTextBoxStyle}">
+        <Setter Property="MinHeight" Value="0" />
+    </Style>
+    <Style TargetType="GroupBox" BasedOn="{StaticResource FoundationGroupBoxStyle}" />
+</ResourceDictionary>

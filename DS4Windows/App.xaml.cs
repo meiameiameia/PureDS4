@@ -1007,6 +1007,10 @@ namespace DS4WinWPF
                 Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary() { Source = new Uri(loc, uriKind: UriKind.Relative) });
                 Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary()
                 {
+                    Source = new Uri("DS4Forms/Themes/Foundation.xaml", UriKind.Relative)
+                });
+                Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary()
+                {
                     Source = new Uri("DS4Forms/Themes/BridgeShellStyles.xaml", UriKind.Relative)
                 });
 
@@ -1019,6 +1023,10 @@ namespace DS4WinWPF
             {
                 Application.Current.Resources.MergedDictionaries.Clear();
                 Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary() { Source = new Uri(loc, uriKind: UriKind.Relative) });
+                Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary()
+                {
+                    Source = new Uri("DS4Forms/Themes/Foundation.xaml", UriKind.Relative)
+                });
                 Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary()
                 {
                     Source = new Uri("DS4Forms/Themes/BridgeShellStyles.xaml", UriKind.Relative)
