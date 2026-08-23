@@ -3773,8 +3773,11 @@ namespace DS4Windows
         public const int DEFAULT_STICK_OUTPUT_CURVE_ID = 0;
         public const string DEFAULT_SA_OUTPUT_CURVE = "linear";
         public const int DEFAULT_SA_OUTPUT_CURVE_ID = 0;
-
-        public String m_Profile = Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName + "\\Profiles.xml";
+        // Assembly.Location is an empty string when the application is published
+        // as a single file, which made this throw during static initialization
+        // before any handler could report it. AppContext.BaseDirectory is correct
+        // in both layouts and has no initialization-order dependency.
+        public String m_Profile = Path.Combine(AppContext.BaseDirectory, "Profiles.xml");
         public String m_Actions = Global.appdatapath + "\\Actions.xml";
         public string m_linkedProfiles = Global.appdatapath + "\\LinkedProfiles.xml";
         public string m_controllerConfigs = Global.appdatapath + "\\ControllerConfigs.xml";

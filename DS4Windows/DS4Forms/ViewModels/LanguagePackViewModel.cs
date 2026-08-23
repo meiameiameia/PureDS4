@@ -97,7 +97,10 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         private void CreateLanguageAssembliesBindingSource()
         {
             // Find the location where application installed.
-            string exeLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            // Assembly.Location is empty under a single-file publish; the
+            // application directory is what this actually wants.
+            string exeLocation = AppContext.BaseDirectory.TrimEnd(
+                Path.DirectorySeparatorChar);
             List<string> lookupPaths = Global.PROBING_PATH.Split(';')
                 .Select(path => Path.Combine(exeLocation, path))
                 .Where(path => path != exeLocation)
