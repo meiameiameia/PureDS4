@@ -1,4 +1,4 @@
-# DS4Windows Reworked
+﻿# DS4Windows Reworked
 
 ![DS4Windows Reworked Mapped Pad icon](branding/mapped-pad/mapped-pad-512.png)
 
@@ -20,9 +20,24 @@ the controller-exposure recovery milestone:
   normally to gameplay input.
 - Controller disconnect/reconnect and app close/relaunch both work.
 
-Not yet validated: DS4 over USB and DualSense hardware. Rumble, audio, haptics,
-and other advanced output behavior are not claimed unless separately
-exercised.
+Additionally validated on the single-file build installed by the reworked
+installer, starting from a machine with no prior DS4Windows, VIIPER, usbip-win2
+or HidHide present:
+
+- The installer provisions VIIPER, usbip-win2 and HidHide and completes without
+  error.
+- The install root contains only the intended six files and four content
+  directories.
+- A DualShock 4 over **USB** is detected, supplies physical input, reports
+  Managed/Virtual as Ready, and completes the transition to Native Physical
+  exposure.
+
+Not yet validated: **uninstall**. The fix that caches the uninstall-only
+installer packages is committed but has not been exercised end to end, so no
+claim is made that an install produced by this installer can be removed by it.
+DualSense hardware is unvalidated, as is the upgrade path from the previous
+multi-file layout. Rumble, audio, haptics, and other advanced output behavior
+are not claimed unless separately exercised.
 
 DualShock 4 is the reference hardware. USB support is intended, but only the
 Bluetooth path has been owner-validated from the baseline. DualSense and

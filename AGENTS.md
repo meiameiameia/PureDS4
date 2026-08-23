@@ -1,4 +1,4 @@
-# DS4Windows Reworked
+﻿# DS4Windows Reworked
 
 ## Working agreement
 
@@ -28,7 +28,8 @@ Controller correctness and reliability come first, followed by latency consisten
 - Joy-Con, Switch Pro, third-party controllers, and other inherited families are not initial priorities. Preserve them until their value, coupling, maintenance cost, and validation feasibility support an explicit product decision.
 - The first dependable product journey is a normal Windows user reaching working in-game controller output without learning VIIPER, USB-IP, HidHide internals, hashes, or installation modes. Do not weaken integrity or identity checks to simplify setup.
 - Owner-validated, on the promoted canonical `Dev\current` runtime after the controller-exposure recovery milestone: the app launches through `RunDS4Windows`; a DS4 connects over Bluetooth, is detected, and supplies physical input; **Continue without virtual output** works; the application reports Managed/Virtual as Ready; the transition to Native Physical exposure, and back to Managed/Virtual, both complete; Forza Horizon 6 recognizes the Managed/Virtual Xbox 360 output and responds normally to gameplay input; controller disconnect/reconnect works; and app close/relaunch through `RunDS4Windows` works.
-- Not yet owner-validated: DS4 over USB; DualSense hardware. Rumble, audio, haptics, and other advanced output behavior have not been claimed unless separately exercised.
+- Owner-validated on the single-file build installed by the reworked installer, from a fully clean machine with no prior DS4Windows, VIIPER, usbip-win2 or HidHide present: the installer provisions VIIPER, usbip-win2 and HidHide and completes without error; the install root contains only the intended six files and four content directories; a DS4 connects over **USB**, is detected, supplies physical input, reports Managed/Virtual as Ready, and the transition to Native Physical exposure works. A DS4 over Bluetooth also reaches Ready on this build.
+- Not yet owner-validated: **uninstall**. The fix that caches the uninstall-only Burn packages is committed but has not been exercised end to end, so no claim is made that an install produced by this installer can be removed by it. DualSense hardware remains unvalidated, as does the upgrade path from the previous multi-file layout, which may leave orphaned assemblies and language folders behind. Rumble, audio, haptics, and other advanced output behavior have not been claimed unless separately exercised.
 
 Never turn build success, protocol tests, a component health check, or test count into a hardware/runtime claim. Record exactly what was exercised.
 
