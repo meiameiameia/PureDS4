@@ -86,6 +86,8 @@ inferred from this repository. The version identifiers in the tree
 configuration paths are still the inherited DS4Windows ones. If you want
 DS4Windows to install and use today, go upstream.
 
+See [`docs/HARDWARE_VALIDATION.md`](docs/HARDWARE_VALIDATION.md) for the
+manual pass that checks the controller paths against real hardware.
 See [`docs/RELEASE_CONTRACT.md`](docs/RELEASE_CONTRACT.md) for the version,
 upgrade, compatibility, and artifact contract those identifiers follow.
 See [`docs/visual-contract.md`](docs/visual-contract.md) for the interface,
