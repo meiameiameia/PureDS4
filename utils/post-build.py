@@ -31,10 +31,17 @@ if not target_dir.is_dir() or is_reparse_point(target_dir):
 # A published DS4Windows build is an offline installer. Fail package
 # composition if any required runtime or installer payload is absent instead
 # of producing an archive that later needs a network recovery path.
+#
+# The self-contained single-file publish bundles the runtime, including
+# coreclr and hostfxr, inside DS4Windows.exe. Only the native libraries that
+# cannot be bundled stay beside it, so those are what this check can see.
 required_offline_files = (
     "DS4Windows.exe",
-    "coreclr.dll",
-    "hostfxr.dll",
+    "D3DCompiler_47_cor3.dll",
+    "PenImc_cor3.dll",
+    "PresentationNative_cor3.dll",
+    "vcruntime140_cor3.dll",
+    "wpfgfx_cor3.dll",
     "extras/install-viiper-backend.ps1",
     "extras/VIIPER-0.1.0-x64.exe",
     "extras/VIIPER-0.1.0-LICENSES.txt",
@@ -71,34 +78,61 @@ viiper_hash_path.write_text(
     encoding="ascii",
 )
 
-# move l18n assemblies to a separate directory
-lang_dir = target_dir / "Lang"
-if not lang_dir.exists():
-    Path.mkdir(lang_dir)
+# A single-file publish bundles the managed assemblies, the satellite
+# resource assemblies, and the dependency manifest inside DS4Windows.exe, so
+# neither the language layout nor the dependency-path rewrite below has
+# anything on disk to act on. Detect the layout from the loose application
+# assembly rather than guessing, so a multi-file publish still gets both
+# steps and still fails loudly when a payload is genuinely missing.
+is_single_file_publish = not (target_dir / "DS4Windows.dll").is_file()
 
 langs = ["ar", "cs", "de", "el", "es", "fi", "fr", "he", "hu-HU", "idn", "it", "ja", "ms",
          "nl", "pl", "pt", "pt-BR", "ru", "se", "tr", "uk-UA", "vi", "zh-Hans", "zh-Hant", "zh-CN"]
-for lang in langs:
-    current_lang_dir = target_dir / lang
-    target_lang_dir = lang_dir / lang
-    if not target_lang_dir.exists():
-        target_lang_dir.mkdir()
 
-    if current_lang_dir.exists():
-        for file in current_lang_dir.iterdir():
-            if file.is_file():
-                shutil.move(file, target_lang_dir / file.name)
-        current_lang_dir.rmdir()
+if not is_single_file_publish:
+    # move l18n assemblies to a separate directory
+    lang_dir = target_dir / "Lang"
+    if not lang_dir.exists():
+        Path.mkdir(lang_dir)
+
+    for lang in langs:
+        current_lang_dir = target_dir / lang
+        target_lang_dir = lang_dir / lang
+        if not target_lang_dir.exists():
+            target_lang_dir.mkdir()
+
+        if current_lang_dir.exists():
+            for file in current_lang_dir.iterdir():
+                if file.is_file():
+                    shutil.move(file, target_lang_dir / file.name)
+            current_lang_dir.rmdir()
+else:
+    # Guard the assumption: a bundled publish must not leave loose satellite
+    # assemblies behind, or the shipped package would silently lose them.
+    stray_satellites = [
+        (target_dir / lang) for lang in langs if (target_dir / lang).is_dir()
+    ]
+    if stray_satellites:
+        stray = ", ".join(entry.name for entry in stray_satellites)
+        raise SystemExit(
+            "Single-file publish still produced loose satellite assemblies: "
+            + stray
+        )
 
 
 # Resolve companion tooling from this script, not from the caller's checkout
 # layout. CI passes the repository root as project_dir; the historical parent
 # lookup escaped that checkout and failed only on a clean runner.
-lang_script = Path(__file__).resolve().with_name("inject_deps_path.py")
-if not lang_script.is_file():
-    raise FileNotFoundError(f"Dependency-path helper is missing: {lang_script}")
-deps_json_path = target_dir / "DS4Windows.deps.json"
-subprocess.run([sys.executable, str(lang_script), str(deps_json_path)], check=True)
+if not is_single_file_publish:
+    lang_script = Path(__file__).resolve().with_name("inject_deps_path.py")
+    if not lang_script.is_file():
+        raise FileNotFoundError(f"Dependency-path helper is missing: {lang_script}")
+    deps_json_path = target_dir / "DS4Windows.deps.json"
+    if not deps_json_path.is_file():
+        raise FileNotFoundError(
+            f"Multi-file publish is missing its dependency manifest: {deps_json_path}"
+        )
+    subprocess.run([sys.executable, str(lang_script), str(deps_json_path)], check=True)
 
 # Preserve the exact GitHub release channel in both portable and managed
 # packages. The numeric Windows file version cannot distinguish an RC from a
