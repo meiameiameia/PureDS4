@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Fragment>
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Component Id="cmp_217d3502ee252c90622584d6" Guid="CC328237-8706-598F-8562-D46DA119AEE1">
+        <File Id="fil_217d3502ee252c90622584d6" Source="$(var.PublishRoot)\.pureds4-managed-files.txt" KeyPath="yes" />
+      </Component>
+      <Component Id="cmp_6969e309304b4bfd8b11e765" Guid="3E387FD0-FB94-5BA6-A62F-CBA357D17885">
+        <File Id="fil_6969e309304b4bfd8b11e765" Source="$(var.PublishRoot)\D3DCompiler_47_cor3.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="cmp_52e4e070aae7b184b3ee1919" Guid="52515A66-7A43-55A9-BE1A-F745165906D7">
+        <File Id="fil_52e4e070aae7b184b3ee1919" Source="$(var.PublishRoot)\FakerInputDll.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="cmp_728d7b5c9f85933d02e831f6" Guid="24ABEFD3-A5DA-5E11-97E8-C2F7C5A27717">
+        <File Id="fil_728d7b5c9f85933d02e831f6" Source="$(var.PublishRoot)\NLog.config" KeyPath="yes" />
+      </Component>
+      <Component Id="cmp_0efbcdb7f09f39f78078af41" Guid="A648497B-6BA8-5C10-B3C8-31D195E7049E">
+        <File Id="fil_0efbcdb7f09f39f78078af41" Source="$(var.PublishRoot)\package-manifest.json" KeyPath="yes" />
+      </Component>
+      <Component Id="cmp_3823248ab7afe42b7ac5fd40" Guid="9D8ACA98-7099-505D-9ABD-5DF7340C77CB">
+        <File Id="fil_3823248ab7afe42b7ac5fd40" Source="$(var.PublishRoot)\PenImc_cor3.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="cmp_f26425027cbd2b381b56fde2" Guid="DE1A3BC1-DFB8-5DC2-99B3-F7F952202110">
+        <File Id="fil_f26425027cbd2b381b56fde2" Source="$(var.PublishRoot)\PresentationNative_cor3.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="cmp_f87ef34b2abdfbc39c634a3d" Guid="58075299-3FE6-5D39-A634-2199AC56C259">
+        <File Id="fil_PureDS4_exe" Source="$(var.PublishRoot)\PureDS4.exe" KeyPath="yes" />
+      </Component>
+      <Component Id="cmp_e4732d24ff40d47bab253966" Guid="31EFAEF9-951C-523D-9AEA-0A15B75210A6">
+        <File Id="fil_e4732d24ff40d47bab253966" Source="$(var.PublishRoot)\PureDS4.release" KeyPath="yes" />
+      </Component>
+      <Component Id="cmp_a1b5aa110d9ba29b3625d1ef" Guid="31878974-8B2D-5100-ADCF-4D53B7299D71">
+        <File Id="fil_a1b5aa110d9ba29b3625d1ef" Source="$(var.PublishRoot)\rnnoise.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="cmp_704e70145f90900f61e56aad" Guid="5458E8E8-2ED5-5EF3-BAF8-5F9C5D9FF78C">
+        <File Id="fil_704e70145f90900f61e56aad" Source="$(var.PublishRoot)\vcruntime140_cor3.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="cmp_b5acbf26eae8c27b770ef196" Guid="F00E5857-3A8E-5919-BC72-253152669144">
+        <File Id="fil_b5acbf26eae8c27b770ef196" Source="$(var.PublishRoot)\wpfgfx_cor3.dll" KeyPath="yes" />
+      </Component>
+      <Directory Id="dir_aa45a43ef6ef16fcb4f31de8" Name="BezierCurveEditor">
+        <Component Id="cmp_695c620566f6cd62ed355e1b" Guid="DE332A0D-8479-5967-A22F-863365F5459A">
+          <File Id="fil_695c620566f6cd62ed355e1b" Source="$(var.PublishRoot)\BezierCurveEditor\build.js" KeyPath="yes" />
+        </Component>
+        <Component Id="cmp_95670ba062c6c6b4ff3dfb7e" Guid="D3806638-36D6-5F5C-B420-309BD1BE79CB">
+          <File Id="fil_95670ba062c6c6b4ff3dfb7e" Source="$(var.PublishRoot)\BezierCurveEditor\index.html" KeyPath="yes" />
+        </Component>
+      </Directory>
+      <Directory Id="dir_8048b69bd5b33a4e38a834d2" Name="extras">
+        <Component Id="cmp_32194fc4048a7233edbf2e38" Guid="3171F3CB-E306-5322-8700-EC70C3495F75">
+          <File Id="fil_32194fc4048a7233edbf2e38" Source="$(var.PublishRoot)\extras\FakerInput-0.1.0-LICENSE.txt" KeyPath="yes" />
+        </Component>
+        <Component Id="cmp_315f718406cc0272127aecac" Guid="C543BB55-DA3C-59DA-88F2-43FF97ED63D3">
+          <File Id="fil_315f718406cc0272127aecac" Source="$(var.PublishRoot)\extras\FakerInput_0.1.0_x64.msi" KeyPath="yes" />
+        </Component>
+        <Component Id="cmp_9a77585de89c4550734abe94" Guid="E8AC53FD-399E-54AB-A44C-45342A40E071">
+          <File Id="fil_9a77585de89c4550734abe94" Source="$(var.PublishRoot)\extras\FakerInput_0.1.0_x86.msi" KeyPath="yes" />
+        </Component>
+        <Component Id="cmp_fccc181f4971c1cd3f3f924d" Guid="2C76B5CF-AB86-5B6D-9F36-FD6E16D49886">
+          <File Id="fil_fccc181f4971c1cd3f3f924d" Source="$(var.PublishRoot)\extras\HidHide-1.5.230-LICENSE.txt" KeyPath="yes" />
+        </Component>
+        <Component Id="cmp_0d49ea116bcd76f7787ebb07" Guid="F6DC716B-5EE9-526E-91B5-B17C578FB69B">
+          <File Id="fil_0d49ea116bcd76f7787ebb07" Source="$(var.PublishRoot)\extras\HidHide_1.5.230_x64.exe" KeyPath="yes" />
+        </Component>
+        <Component Id="cmp_dd8d72b6d2de84b6218f16fe" Guid="73D24D12-E76C-5B6E-8995-07EF0DABD59C">
+          <File Id="fil_dd8d72b6d2de84b6218f16fe" Source="$(var.PublishRoot)\extras\install-viiper-backend.ps1" KeyPath="yes" />
+        </Component>
+        <Component Id="cmp_2410fca94ce9664b4df90c9a" Guid="E290AE22-B83A-5394-A9A8-0105F6DFD75E">
+          <File Id="fil_2410fca94ce9664b4df90c9a" Source="$(var.PublishRoot)\extras\USBip-0.9.7.7-LICENSE.txt" KeyPath="yes" />
+        </Component>
+        <Component Id="cmp_5de46db45d70b6b94cf6c974" Guid="54766352-C23A-54C8-99D3-293CCCB268C4">
+          <File Id="fil_5de46db45d70b6b94cf6c974" Source="$(var.PublishRoot)\extras\USBip-0.9.7.7-x64.exe" KeyPath="yes" />
+        </Component>
+        <Component Id="cmp_f720c9f8e9f4831fee01b852" Guid="5A9F574A-2BA0-51B7-9885-0768F68EAAB1">
+          <File Id="fil_f720c9f8e9f4831fee01b852" Source="$(var.PublishRoot)\extras\VIIPER-0.1.0-LICENSES.txt" KeyPath="yes" />
+        </Component>
+        <Component Id="cmp_8c448c0a6792e45bbdbdab54" Guid="7074F8BC-8565-5503-A684-4FCA8C79650C">
+          <File Id="fil_8c448c0a6792e45bbdbdab54" Source="$(var.PublishRoot)\extras\VIIPER-0.1.0-x64.exe" KeyPath="yes" />
+        </Component>
+        <Component Id="cmp_e543c032d245ac2a2c996990" Guid="30F0E1E7-7D4B-5F56-BE0D-9E1F25674454">
+          <File Id="fil_e543c032d245ac2a2c996990" Source="$(var.PublishRoot)\extras\VIIPER-0.1.0-x64.exe.sha256" KeyPath="yes" />
+        </Component>
+      </Directory>
+      <Directory Id="dir_e89b30aa1dc30a6ad8c34610" Name="Resources">
+        <Component Id="cmp_4f4c0ad5e329f71965d85631" Guid="B4E4F060-DEF1-5266-B468-23AC9FC596BE">
+          <File Id="fil_4f4c0ad5e329f71965d85631" Source="$(var.PublishRoot)\Resources\ControllerArtwork.NOTICE.txt" KeyPath="yes" />
+        </Component>
+      </Directory>
+      <Directory Id="dir_ecafdc74a57381442f9dd763" Name="ThirdParty">
+        <Component Id="cmp_f5838352b43f2800a076b940" Guid="ED03926A-2A6A-56CA-9969-362B3ECC7D78">
+          <File Id="fil_f5838352b43f2800a076b940" Source="$(var.PublishRoot)\ThirdParty\RNNoise.NET-LICENSE.txt" KeyPath="yes" />
+        </Component>
+        <Component Id="cmp_44726c0b6cb42e9298c6af38" Guid="34392636-7AC2-5476-A859-867D6A66FAED">
+          <File Id="fil_44726c0b6cb42e9298c6af38" Source="$(var.PublishRoot)\ThirdParty\SharpOSC-LICENSE.txt" KeyPath="yes" />
+        </Component>
+        <Directory Id="dir_378ae05690ab0b6f7761b91d" Name="SbcSharp">
+          <Component Id="cmp_0271bf3b2642ab575b71aef6" Guid="B723B7E3-E8B4-5504-A4F1-AEF148C07A01">
+            <File Id="fil_0271bf3b2642ab575b71aef6" Source="$(var.PublishRoot)\ThirdParty\SbcSharp\LICENSE.txt" KeyPath="yes" />
+          </Component>
+          <Component Id="cmp_de98bbab3d377537ce8b91d3" Guid="36A5EAC2-941F-598C-A4A3-9E9126F7694C">
+            <File Id="fil_de98bbab3d377537ce8b91d3" Source="$(var.PublishRoot)\ThirdParty\SbcSharp\NOTICE.md" KeyPath="yes" />
+          </Component>
+        </Directory>
+      </Directory>
+    </DirectoryRef>
+  </Fragment>
+  <Fragment>
+    <ComponentGroup Id="PublishedFiles">
+      <ComponentRef Id="cmp_217d3502ee252c90622584d6" />
+      <ComponentRef Id="cmp_6969e309304b4bfd8b11e765" />
+      <ComponentRef Id="cmp_52e4e070aae7b184b3ee1919" />
+      <ComponentRef Id="cmp_728d7b5c9f85933d02e831f6" />
+      <ComponentRef Id="cmp_0efbcdb7f09f39f78078af41" />
+      <ComponentRef Id="cmp_3823248ab7afe42b7ac5fd40" />
+      <ComponentRef Id="cmp_f26425027cbd2b381b56fde2" />
+      <ComponentRef Id="cmp_f87ef34b2abdfbc39c634a3d" />
+      <ComponentRef Id="cmp_e4732d24ff40d47bab253966" />
+      <ComponentRef Id="cmp_a1b5aa110d9ba29b3625d1ef" />
+      <ComponentRef Id="cmp_704e70145f90900f61e56aad" />
+      <ComponentRef Id="cmp_b5acbf26eae8c27b770ef196" />
+      <ComponentRef Id="cmp_695c620566f6cd62ed355e1b" />
+      <ComponentRef Id="cmp_95670ba062c6c6b4ff3dfb7e" />
+      <ComponentRef Id="cmp_32194fc4048a7233edbf2e38" />
+      <ComponentRef Id="cmp_315f718406cc0272127aecac" />
+      <ComponentRef Id="cmp_9a77585de89c4550734abe94" />
+      <ComponentRef Id="cmp_fccc181f4971c1cd3f3f924d" />
+      <ComponentRef Id="cmp_0d49ea116bcd76f7787ebb07" />
+      <ComponentRef Id="cmp_dd8d72b6d2de84b6218f16fe" />
+      <ComponentRef Id="cmp_2410fca94ce9664b4df90c9a" />
+      <ComponentRef Id="cmp_5de46db45d70b6b94cf6c974" />
+      <ComponentRef Id="cmp_f720c9f8e9f4831fee01b852" />
+      <ComponentRef Id="cmp_8c448c0a6792e45bbdbdab54" />
+      <ComponentRef Id="cmp_e543c032d245ac2a2c996990" />
+      <ComponentRef Id="cmp_4f4c0ad5e329f71965d85631" />
+      <ComponentRef Id="cmp_f5838352b43f2800a076b940" />
+      <ComponentRef Id="cmp_44726c0b6cb42e9298c6af38" />
+      <ComponentRef Id="cmp_0271bf3b2642ab575b71aef6" />
+      <ComponentRef Id="cmp_de98bbab3d377537ce8b91d3" />
+    </ComponentGroup>
+  </Fragment>
+</Wix>

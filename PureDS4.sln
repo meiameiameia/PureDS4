@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34322.80
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DS4WinWPF", "DS4Windows\DS4WinWPF.csproj", "{0135A24D-5DBB-483C-9FC5-9A869E23DA9A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DS4WinWPF", "PureDS4\PureDS4.csproj", "{0135A24D-5DBB-483C-9FC5-9A869E23DA9A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DS4WindowsTests", "DS4WindowsTests\DS4WindowsTests.csproj", "{6BEB9062-56E7-4A0D-9243-BE43F09A711D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PureDS4.Tests", "PureDS4.Tests\PureDS4.Tests.csproj", "{6BEB9062-56E7-4A0D-9243-BE43F09A711D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

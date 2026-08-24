@@ -16,7 +16,7 @@
          SourceFile as the Icon stream, so using the single-file
          PureDS4.exe here put a second 182 MB copy of the application
          inside the MSI purely to supply an Add/Remove Programs icon. -->
-    <Icon Id="PureDS4Icon" SourceFile="$(var.RepoRoot)DS4Windows\DS4W.ico" />
+    <Icon Id="PureDS4Icon" SourceFile="$(var.RepoRoot)PureDS4\DS4W.ico" />
     <Property Id="ARPPRODUCTICON" Value="PureDS4Icon" />
     <Property Id="ARPHELPLINK" Value="https://github.com/meiameiameia/pureds4/issues" />
     <Property Id="ARPURLINFOABOUT" Value="https://github.com/meiameiameia/pureds4" />

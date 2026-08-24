@@ -41,7 +41,7 @@ jobs:
           python-version: "3.10"
 
       - name: Restore dependencies
-        run: dotnet restore .\DS4WindowsWPF.sln --locked-mode
+        run: dotnet restore .\PureDS4.sln --locked-mode
 
       - name: Test release-input gate
         run: python .\utils\test-release-inputs.py
@@ -51,7 +51,7 @@ jobs:
         # were excluded here (CheckSettingsSave, CheckWriteProfile,
         # CheckJaysProfileRead) now pass against the regenerated fixtures, so
         # the filter that hid them is gone.
-        run: dotnet test .\DS4WindowsTests\DS4WindowsTests.csproj -c Release -p:Platform=x64 --verbosity normal
+        run: dotnet test .\PureDS4.Tests\PureDS4.Tests.csproj -c Release -p:Platform=x64 --verbosity normal
 
   build:
     runs-on: windows-2022
@@ -84,11 +84,11 @@ jobs:
 
       - name: Restore dependencies
         run: |
-          dotnet restore .\DS4WindowsWPF.sln --locked-mode
-          dotnet restore .\installer\DS4Windows.SetupActions\DS4Windows.SetupActions.csproj --locked-mode
-          dotnet restore .\installer\DS4Windows.Bootstrapper\DS4Windows.Bootstrapper.csproj --locked-mode
-          dotnet restore .\installer\DS4Windows.Package\DS4Windows.Package.wixproj --locked-mode
-          dotnet restore .\installer\DS4Windows.Bundle\DS4Windows.Bundle.wixproj --locked-mode
+          dotnet restore .\PureDS4.sln --locked-mode
+          dotnet restore .\installer\PureDS4.SetupActions\PureDS4.SetupActions.csproj --locked-mode
+          dotnet restore .\installer\PureDS4.Bootstrapper\PureDS4.Bootstrapper.csproj --locked-mode
+          dotnet restore .\installer\PureDS4.Package\PureDS4.Package.wixproj --locked-mode
+          dotnet restore .\installer\PureDS4.Bundle\PureDS4.Bundle.wixproj --locked-mode
 
       - name: Validate content-addressed release inputs
         run: python .\utils\validate-release-inputs.py --verify-signatures
@@ -98,7 +98,7 @@ jobs:
         shell: bash
         run: |
           VERSION="$(date +%Y.%m.%d)-ci-${GITHUB_SHA::7}"
-          ASSEMBLY_VERSION="$(python -c "import xml.etree.ElementTree as ET; print(ET.parse('DS4Windows/DS4WinWPF.csproj').find('.//AssemblyVersion').text)")"
+          ASSEMBLY_VERSION="$(python -c "import xml.etree.ElementTree as ET; print(ET.parse('PureDS4/PureDS4.csproj').find('.//AssemblyVersion').text)")"
           PRODUCT_VERSION="$(echo "$ASSEMBLY_VERSION" | awk -F. '{print $1"."$2"."$3}')"
           BUNDLE_BASE="$PRODUCT_VERSION"
           BUNDLE_VERSION="${BUNDLE_BASE}-ci.${GITHUB_RUN_NUMBER}"
@@ -108,7 +108,7 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Build ${{ matrix.platform }}
-        run: dotnet publish .\DS4Windows\DS4WinWPF.csproj -c Release /p:platform=${{ matrix.platform }} -r win-${{ matrix.platform }} --self-contained true --no-restore -o .\bin\${{ matrix.platform }}\Release\output
+        run: dotnet publish .\PureDS4\PureDS4.csproj -c Release /p:platform=${{ matrix.platform }} -r win-${{ matrix.platform }} --self-contained true --no-restore -o .\bin\${{ matrix.platform }}\Release\output
 
       - name: Package ${{ matrix.platform }}
         run: python .\utils\post-build.py .\bin\${{ matrix.platform }}\Release\output . ${{ env.VERSION }}
@@ -142,7 +142,7 @@ jobs:
       - name: Exercise MSI install, repair, and uninstall lifecycle
         shell: pwsh
         run: |
-          $msi = (Resolve-Path ".\installer\DS4Windows.Package\bin\x64\Release\PureDS4_${{ env.PRODUCT_VERSION }}_x64.msi").Path
+          $msi = (Resolve-Path ".\installer\PureDS4.Package\bin\x64\Release\PureDS4_${{ env.PRODUCT_VERSION }}_x64.msi").Path
           $msiexec = Join-Path $env:SystemRoot "System32\msiexec.exe"
           $logRoot = Join-Path $env:RUNNER_TEMP "pureds4-msi-lifecycle"
           New-Item -ItemType Directory -Path $logRoot -Force | Out-Null

@@ -90,7 +90,7 @@ def normalize_project_path(repo_root: Path, project_dir: Path, value: str) -> st
 
 
 def discover_project_inputs(repo_root: Path) -> set[str]:
-    project = repo_root / "DS4Windows" / "DS4WinWPF.csproj"
+    project = repo_root / "PureDS4" / "PureDS4.csproj"
     if not project.is_file():
         fail(f"Application project is missing: {project}")
     root = ET.parse(project).getroot()
@@ -147,7 +147,7 @@ def verify_nuget_lock(repo_root: Path, component: dict[str, object]) -> None:
         return
     package_id = str(component["artifacts"][0]["packageId"])
     version = str(component["artifacts"][0]["packageVersion"])
-    lock_path = repo_root / "DS4Windows" / "packages.lock.json"
+    lock_path = repo_root / "PureDS4" / "packages.lock.json"
     if not lock_path.is_file():
         fail(f"NuGet lock file is missing for {component['id']}: {lock_path}")
     lock = json.loads(lock_path.read_text(encoding="utf-8"))

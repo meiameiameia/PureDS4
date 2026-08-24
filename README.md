@@ -69,9 +69,9 @@ before changing behavior or claiming support.
 ## Build and test
 
 ```powershell
-dotnet restore DS4WindowsWPF.sln
-dotnet build DS4WindowsWPF.sln -c Debug -p:Platform=x64
-dotnet test DS4WindowsWPF.sln -c Debug -p:Platform=x64
+dotnet restore PureDS4.sln
+dotnet build PureDS4.sln -c Debug -p:Platform=x64
+dotnet test PureDS4.sln -c Debug -p:Platform=x64
 ```
 
 ## Relationship to DS4Windows

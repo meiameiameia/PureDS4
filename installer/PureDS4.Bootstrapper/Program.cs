@@ -1,6 +1,6 @@
 using WixToolset.BootstrapperApplicationApi;
 
-namespace DS4Windows.Bootstrapper
+namespace PureDS4.Bootstrapper
 {
     internal static class Program
     {

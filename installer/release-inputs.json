@@ -96,7 +96,7 @@
       "sourceRepository": "https://github.com/Yellow-Dog-Man/RNNoise.Net",
       "sourceCommit": "73189a685823d2db25a6c94edd7b69265309c0db",
       "sourceTag": "0.1.9",
-      "licensePath": "DS4Windows/ThirdParty/RNNoise.NET-LICENSE.txt",
+      "licensePath": "PureDS4/ThirdParty/RNNoise.NET-LICENSE.txt",
       "nugetContentHash": "2lqIr0648oA0qiUlbcTshFe4dm010Lyv+BaP2GGKfN+CI5DOrR7tV3X0kwgYvf/V3DDHllflWiQXhWT7+LTsEg==",
       "artifacts": [
         {
@@ -114,16 +114,16 @@
       "status": "verified",
       "sourceRepository": "https://github.com/Ryochan7/SharpOSC",
       "sourceCommit": "6cd3eb265e64d62a92679290a44083ebad1ea579",
-      "licensePath": "DS4Windows/ThirdParty/SharpOSC-LICENSE.txt",
+      "licensePath": "PureDS4/ThirdParty/SharpOSC-LICENSE.txt",
       "artifacts": [
         {
           "kind": "repository",
-          "path": "DS4Windows/libs/x64/SharpOSC/SharpOSC.dll",
+          "path": "PureDS4/libs/x64/SharpOSC/SharpOSC.dll",
           "sha256": "6419A701CE8EF5BAAD072FF14C232A3557525BF8BB4E3FD6DED09B2D3F22F07E"
         },
         {
           "kind": "repository",
-          "path": "DS4Windows/libs/x86/SharpOSC/SharpOSC.dll",
+          "path": "PureDS4/libs/x86/SharpOSC/SharpOSC.dll",
           "sha256": "2BA7A8C0D6459F16A05725159903A2725955A3AF6D69018CBC1F15DEFF87F1CE"
         }
       ]
@@ -141,12 +141,12 @@
       "artifacts": [
         {
           "kind": "repository",
-          "path": "DS4Windows/libs/x64/FakerInputWrapper/FakerInputWrapper.dll",
+          "path": "PureDS4/libs/x64/FakerInputWrapper/FakerInputWrapper.dll",
           "sha256": "4792671766A575394D3402A9365AF9908AF94E812EC1969BFE4975C0AB4F5430"
         },
         {
           "kind": "repository",
-          "path": "DS4Windows/libs/x86/FakerInputWrapper/FakerInputWrapper.dll",
+          "path": "PureDS4/libs/x86/FakerInputWrapper/FakerInputWrapper.dll",
           "sha256": "1A97250E793E22A7A961142C61BFED930F6A5080AAD739D32D79BE021E13B1A8"
         }
       ]
@@ -164,12 +164,12 @@
       "artifacts": [
         {
           "kind": "repository",
-          "path": "DS4Windows/libs/x64/FakerInputWrapper/FakerInputDll.dll",
+          "path": "PureDS4/libs/x64/FakerInputWrapper/FakerInputDll.dll",
           "sha256": "7E3D67A3E6B4EF2ABA039A3B1E079ACDE3AD95E0286A87623949AD74607D1A50"
         },
         {
           "kind": "repository",
-          "path": "DS4Windows/libs/x86/FakerInputWrapper/FakerInputDll.dll",
+          "path": "PureDS4/libs/x86/FakerInputWrapper/FakerInputDll.dll",
           "sha256": "1A73F0D2CA7ECB19F00A390A3FD27BA3BA5E21C3363325EBBCC298EE10D10763"
         }
       ]

@@ -104,11 +104,11 @@ def require(text: str, *contracts: str) -> None:
 
 
 def main() -> None:
-    bootstrapper = (ROOT / "installer/DS4Windows.Bootstrapper/InstallerApplication.cs").read_text(encoding="utf-8")
-    bundle = (ROOT / "installer/DS4Windows.Bundle/Bundle.wxs").read_text(encoding="utf-8")
-    setup_actions = (ROOT / "installer/DS4Windows.SetupActions/Program.cs").read_text(encoding="utf-8")
+    bootstrapper = (ROOT / "installer/PureDS4.Bootstrapper/InstallerApplication.cs").read_text(encoding="utf-8")
+    bundle = (ROOT / "installer/PureDS4.Bundle/Bundle.wxs").read_text(encoding="utf-8")
+    setup_actions = (ROOT / "installer/PureDS4.SetupActions/Program.cs").read_text(encoding="utf-8")
     backend = (ROOT / "extras/install-viiper-backend.ps1").read_text(encoding="utf-8")
-    runtime = (ROOT / "DS4Windows/DS4Control/Viiper/ViiperSetupManager.cs").read_text(encoding="utf-8")
+    runtime = (ROOT / "PureDS4/DS4Control/Viiper/ViiperSetupManager.cs").read_text(encoding="utf-8")
 
     require(
         bootstrapper,
@@ -136,7 +136,7 @@ def main() -> None:
         'Tag="PureDS4ManagedV1"',
         'Id="PostUninstallCleanup"',
         'Id="ViiperUsbipUninstall"',
-        'Name="DS4Windows.SetupActions.InfrastructureUninstall.exe"',
+        'Name="PureDS4.SetupActions.InfrastructureUninstall.exe"',
         'Permanent="yes"',
     )
     require(

@@ -1,4 +1,4 @@
-﻿<Window x:Class="DS4Windows.Bootstrapper.InstallerWindow"
+﻿<Window x:Class="PureDS4.Bootstrapper.InstallerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="PureDS4 Setup" Width="760" Height="640" MinWidth="700" MinHeight="580"

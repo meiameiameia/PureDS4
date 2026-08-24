@@ -11,11 +11,11 @@ using System.Windows.Interop;
 using System.Windows.Threading;
 using WixToolset.BootstrapperApplicationApi;
 
-namespace DS4Windows.Bootstrapper
+namespace PureDS4.Bootstrapper
 {
     internal sealed class InstallerApplication : BootstrapperApplication
     {
-        private const string ManagedBundleTag = "DS4WindowsManagedV2";
+        private const string ManagedBundleTag = "PureDS4ManagedV1";
         private readonly Dictionary<string, PackageState> packageStates = new Dictionary<string, PackageState>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, int> installerBusyRetries = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<string> managedRelatedBundles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -170,7 +170,7 @@ namespace DS4Windows.Bootstrapper
             try
             {
                 bundleMutex = new Mutex(false,
-                    @"Global\DS4Windows-Installer-Transaction");
+                    @"Global\PureDS4-Installer-Transaction");
                 try
                 {
                     bundleMutexOwned = bundleMutex.WaitOne(waitMilliseconds);
@@ -200,7 +200,7 @@ namespace DS4Windows.Bootstrapper
         {
             if (TryAcquireBundleMutex(waitMilliseconds)) return true;
             ShowFailure(1618,
-                "Another DS4Windows installation or repair is already running. Close it, then choose Retry.");
+                "Another PureDS4 installation or repair is already running. Close it, then choose Retry.");
             return false;
         }
 
@@ -275,7 +275,7 @@ namespace DS4Windows.Bootstrapper
             // The installed application must still launch successfully.
             var path = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-                "DS4Windows", "DS4Windows.exe");
+                "PureDS4", "PureDS4.exe");
             if (File.Exists(path))
             {
                 try
@@ -286,14 +286,14 @@ namespace DS4Windows.Bootstrapper
                 catch (Exception ex)
                 {
                     engine.Log(LogLevel.Error,
-                        "Could not launch DS4Windows: " + ex.Message);
+                        "Could not launch PureDS4: " + ex.Message);
                 }
             }
         }
 
         private static Process FirstDs4WindowsProcess()
         {
-            var processes = Process.GetProcessesByName("DS4Windows");
+            var processes = Process.GetProcessesByName("PureDS4");
             if (processes.Length == 0) return null;
             for (var index = 1; index < processes.Length; index++)
             {
@@ -329,7 +329,7 @@ namespace DS4Windows.Bootstrapper
             try { log = engine.GetVariableString("WixBundleLog"); } catch { }
             var actionLog = InstallerActionLogPath;
             var helperLog = SetupActionsLogPath;
-            return "DS4Windows Setup\r\n" +
+            return "PureDS4 Setup\r\n" +
                    "Action: " + plannedAction + "\r\n" +
                    "Registered: " + registrationType + "\r\n" +
                    "Infrastructure healthy: " + infrastructureHealthy + "\r\n" +
@@ -455,7 +455,7 @@ namespace DS4Windows.Bootstrapper
             if (IsInstallerBusyStatus(e.Status))
             {
                 // Related bundles are non-vital cleanup owned by Burn, not
-                // packages in this bundle's chain. Legacy DS4Windows bundles
+                // packages in this bundle's chain. Legacy PureDS4 bundles
                 // can return ERROR_INSTALL_ALREADY_RUNNING while their child
                 // elevated engine is still winding down. Retrying the same
                 // stale bundle only repeats the collision and presents a
@@ -496,7 +496,7 @@ namespace DS4Windows.Bootstrapper
 
                 lastError = "Another Windows installation is still active. " +
                     "Let it finish, close any stale installer windows, then " +
-                    "choose Retry. DS4Windows did not wait indefinitely or " +
+                    "choose Retry. PureDS4 did not wait indefinitely or " +
                     "change the existing installation.";
             }
             else if (e.Status >= 0)
@@ -541,7 +541,7 @@ namespace DS4Windows.Bootstrapper
                 !string.IsNullOrWhiteSpace(newerRelatedBundleVersion))
             {
                 ShowFailure(1638,
-                    "A newer DS4Windows installer (" +
+                    "A newer PureDS4 installer (" +
                     newerRelatedBundleVersion +
                     ") is already installed. This older package will not " +
                     "remove or replace it.");
@@ -551,7 +551,7 @@ namespace DS4Windows.Bootstrapper
             infrastructureHealthy = InfrastructureProbe.IsHealthy();
 
             // Burn removes related bundles after it executes this bundle's
-            // package chain. Older DS4Windows bundles own older infrastructure
+            // package chain. Older PureDS4 bundles own older infrastructure
             // helpers, so installing VIIPER before those bundles are removed
             // lets their uninstall overwrite or delete the new helper. Finish
             // the app upgrade first, then run one isolated infrastructure
@@ -568,7 +568,7 @@ namespace DS4Windows.Bootstrapper
             {
                 mode = InstallerMode.Uninstall;
             }
-            else if (registrationType == RegistrationType.None && packageStates.TryGetValue("DS4WindowsMsi", out var msiState) && msiState == PackageState.Present)
+            else if (registrationType == RegistrationType.None && packageStates.TryGetValue("PureDS4Msi", out var msiState) && msiState == PackageState.Present)
             {
                 mode = InstallerMode.Update;
             }
@@ -796,7 +796,7 @@ namespace DS4Windows.Bootstrapper
                 if (infrastructureRecoveryPass)
                 {
                     ShowFailure(1,
-                        "DS4Windows installed, but VIIPER/USB-IP did not pass " +
+                        "PureDS4 installed, but VIIPER/USB-IP did not pass " +
                         "the final post-upgrade health check.");
                     return;
                 }
@@ -868,11 +868,11 @@ namespace DS4Windows.Bootstrapper
 
         private static string InstallerActionLogPath => Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-            "DS4Windows", "Installer", "infrastructure-actions.log");
+            "PureDS4", "Installer", "infrastructure-actions.log");
 
         private static string SetupActionsLogPath => Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-            "DS4Windows", "Installer", "setup-actions.log");
+            "PureDS4", "Installer", "setup-actions.log");
 
         private static string InfrastructureFailureSummary()
         {
@@ -882,7 +882,7 @@ namespace DS4Windows.Bootstrapper
                 tail = ReadLogTail(InstallerActionLogPath, 10000);
             }
             if (string.IsNullOrWhiteSpace(tail)) return null;
-            var invocationMarker = "=== DS4Windows setup invocation ";
+            var invocationMarker = "=== PureDS4 setup invocation ";
             var invocationStart = tail.LastIndexOf(invocationMarker,
                 StringComparison.Ordinal);
             if (invocationStart >= 0)

@@ -7,9 +7,9 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <UseWPF>true</UseWPF>
     <EnableDynamicLoading>true</EnableDynamicLoading>
-    <AssemblyName>DS4Windows.Bootstrapper</AssemblyName>
-    <RootNamespace>DS4Windows.Bootstrapper</RootNamespace>
-    <ApplicationIcon>..\..\DS4Windows\DS4W.ico</ApplicationIcon>
+    <AssemblyName>PureDS4.Bootstrapper</AssemblyName>
+    <RootNamespace>PureDS4.Bootstrapper</RootNamespace>
+    <ApplicationIcon>..\..\PureDS4\DS4W.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
@@ -19,10 +19,10 @@
     <PackageReference Include="WixToolset.BootstrapperApplicationApi" Version="5.0.2" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="..\..\DS4Windows\DS4W.ico" Link="DS4W.ico" />
+    <Resource Include="..\..\PureDS4\DS4W.ico" Link="DS4W.ico" />
     <!-- The .ico stores every frame as PNG, which the WPF ICO decoder
          renders poorly at display sizes. Ship the real PNG for on-screen
          use and keep the .ico for the window and shell icon. -->
-    <Resource Include="..\..\DS4Windows\Resources\AppIcon.png" Link="AppIcon.png" />
+    <Resource Include="..\..\PureDS4\Resources\AppIcon.png" Link="AppIcon.png" />
   </ItemGroup>
 </Project>

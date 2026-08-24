@@ -7,8 +7,8 @@ param(
     [string]$TargetDs4WindowsPath,
     [string]$PackageExtrasRoot,
     [int]$InstallerHostPid = 0,
-    # Backward-compatible name used by older DS4Windows packages. This now
-    # means "keep DS4Windows portable" only. The elevated VIIPER service is
+    # Backward-compatible name used by older PureDS4 packages. This now
+    # means "keep PureDS4 portable" only. The elevated VIIPER service is
     # always installed beneath Program Files.
     [switch]$PortableInstallation,
     [switch]$KeepDs4WindowsPortable,
@@ -18,7 +18,7 @@ param(
     [string]$CorrelationId
 )
 
-# DS4Windows normally streams this script from an embedded resource into the
+# PureDS4 normally streams this script from an embedded resource into the
 # absolute system PowerShell executable. Environment values carry the original
 # signed-in user and package paths without executing a mutable .ps1 file after
 # the UAC boundary. Direct/manual script execution keeps the normal parameters.
@@ -125,10 +125,10 @@ if (-not [IO.Path]::IsPathRooted($TargetLocalAppData) -or
 $script:TargetUserSid = $TargetUserSid
 $script:TargetUserName = $TargetUserName
 $script:TargetRunKeyPath = "Registry::HKEY_USERS\$TargetUserSid\Software\Microsoft\Windows\CurrentVersion\Run"
-$script:ManagedRoot = Join-Path $programFilesRoot "DS4Windows"
+$script:ManagedRoot = Join-Path $programFilesRoot "PureDS4"
 $script:InstallDir = Join-Path $script:ManagedRoot "VIIPER"
 $script:Ds4WindowsInstallDir = $script:ManagedRoot
-$script:InstallerLogRoot = Join-Path $env:ProgramData "DS4Windows\Installer"
+$script:InstallerLogRoot = Join-Path $env:ProgramData "PureDS4\Installer"
 # Keep diagnostics outside the transaction target so failures that occur
 # before Program Files/LocalAppData creation still leave a readable record.
 $script:LogPath = Join-Path $script:InstallerLogRoot `
@@ -137,14 +137,14 @@ $script:UsbipReplacementStatePath = Join-Path $script:InstallDir `
     "usbip-replacement-pending.json"
 $script:UsbipUninstallKeyName = `
     "{199505b0-b93d-4521-a8c7-897818e0205a}_is1"
-$script:InfrastructureRegistryPath = "HKLM:\SOFTWARE\DS4Windows"
+$script:InfrastructureRegistryPath = "HKLM:\SOFTWARE\PureDS4"
 $script:InfrastructureVersion = "VIIPER-0.1.0+USBIP-0.9.7.7"
 $script:System32 = [Environment]::SystemDirectory
 $script:PnPUtilPath = Join-Path $script:System32 "pnputil.exe"
 $script:TaskKillPath = Join-Path $script:System32 "taskkill.exe"
 $script:IcaclsPath = Join-Path $script:System32 "icacls.exe"
 $script:TempDir = Join-Path ([IO.Path]::GetTempPath()) (
-    "DS4Windows-VIIPER-Setup-" + [Guid]::NewGuid().ToString("N"))
+    "PureDS4-VIIPER-Setup-" + [Guid]::NewGuid().ToString("N"))
 
 function Write-SetupLog([string]$message, [ConsoleColor]$color =
         [ConsoleColor]::Gray) {
@@ -186,7 +186,7 @@ function Clear-InfrastructureReadiness {
         [Microsoft.Win32.RegistryView]::Registry64)
     try {
         $key = $baseKey.CreateSubKey(
-            "SOFTWARE\DS4Windows", $true)
+            "SOFTWARE\PureDS4", $true)
         try {
             $key.DeleteValue("InfrastructureVersion", $false)
             $key.SetValue("InfrastructureState", "Installing",
@@ -211,7 +211,7 @@ function Commit-InfrastructureReadiness {
         [Microsoft.Win32.RegistryView]::Registry64)
     try {
         $key = $baseKey.CreateSubKey(
-            "SOFTWARE\DS4Windows", $true)
+            "SOFTWARE\PureDS4", $true)
         try {
             # Publish Ready last. Readers can never observe Ready paired with
             # an old or missing version from this transaction.
@@ -257,7 +257,7 @@ function Set-InfrastructureState([string]$state) {
         [Microsoft.Win32.RegistryView]::Registry64)
     try {
         $key = $baseKey.CreateSubKey(
-            "SOFTWARE\DS4Windows", $true)
+            "SOFTWARE\PureDS4", $true)
         try {
             $key.SetValue("InfrastructureState", $state,
                 [Microsoft.Win32.RegistryValueKind]::String)
@@ -761,7 +761,7 @@ function Disconnect-UsbipImports([string]$usbipPath) {
     })
     if ($foreign.Count -gt 0) {
         $ports = ($foreign | ForEach-Object { $_.Port }) -join ", "
-        throw "USBIP port(s) $ports are not exact DS4Windows-owned local " +
+        throw "USBIP port(s) $ports are not exact PureDS4-owned local " +
             "VIIPER imports. Close the owning application or detach those " +
             "imports manually, then run Repair again. No imports were changed."
     }
@@ -769,7 +769,7 @@ function Disconnect-UsbipImports([string]$usbipPath) {
     foreach ($block in $owned) {
         $port = $block.Port
         Write-SetupLog (
-            "Detaching exact DS4Windows-owned local VIIPER import on port " +
+            "Detaching exact PureDS4-owned local VIIPER import on port " +
             "$port."
         ) Yellow
         $previousErrorActionPreference = $ErrorActionPreference
@@ -784,7 +784,7 @@ function Disconnect-UsbipImports([string]$usbipPath) {
         if ($detachExitCode -ne 0) {
             $detail = ($detachOutput | ForEach-Object { [string]$_ }) -join `
                 [Environment]::NewLine
-            throw "Could not detach DS4Windows-owned USBIP port $port " +
+            throw "Could not detach PureDS4-owned USBIP port $port " +
                 "(exit=$detachExitCode): $detail. No driver transition was started."
         }
     }
@@ -805,7 +805,7 @@ function Disconnect-UsbipImports([string]$usbipPath) {
         if ($remainingOwned.Count -eq 0) {
             if ($owned.Count -gt 0) {
                 Write-SetupLog (
-                    "Confirmed all exact DS4Windows-owned USBIP imports " +
+                    "Confirmed all exact PureDS4-owned USBIP imports " +
                     "are detached."
                 ) Green
             }
@@ -816,7 +816,7 @@ function Disconnect-UsbipImports([string]$usbipPath) {
     }
 
     $ports = ($remainingOwned | ForEach-Object { $_.Port }) -join ", "
-    throw "DS4Windows-owned USBIP port(s) $ports did not detach within " +
+    throw "PureDS4-owned USBIP port(s) $ports did not detach within " +
         "the convergence window. No driver transition was started."
 }
 
@@ -991,7 +991,7 @@ function Assert-ViiperFileSha256([string]$path, [string]$expectedHash) {
 function Read-PackagedSha256([string]$manifestPath,
         [string]$expectedFileName) {
     if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) {
-        throw "The offline DS4Windows package is incomplete: missing " +
+        throw "The offline PureDS4 package is incomplete: missing " +
             "$(Split-Path -Leaf $manifestPath)."
     }
 
@@ -1086,14 +1086,14 @@ function Test-UsbipRuntime([string]$usbipPath) {
 function Stop-Ds4WindowsProcesses([string]$operation) {
     $processes = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
         Where-Object {
-            $_.Name -ieq "DS4Windows.exe" -and
+            $_.Name -ieq "PureDS4.exe" -and
             $_.ProcessId -ne $script:InstallerHostPid
         })
     if ($processes.Count -eq 0) { return $true }
 
     $unverified = @($processes | Where-Object {
         -not (Test-RecognizedProductExecutable `
-            ([string]$_.ExecutablePath) "DS4Windows")
+            ([string]$_.ExecutablePath) "PureDS4")
     })
     if ($unverified.Count -gt 0) {
         $details = ($unverified | ForEach-Object {
@@ -1101,7 +1101,7 @@ function Stop-Ds4WindowsProcesses([string]$operation) {
         }) -join "; "
         Write-SetupLog (
             "Refusing to terminate an unverified process named " +
-            "DS4Windows.exe: $details. Close it manually before setup."
+            "PureDS4.exe: $details. Close it manually before setup."
         ) Red
         return $false
     }
@@ -1115,14 +1115,14 @@ function Stop-Ds4WindowsProcesses([string]$operation) {
     }
     if (-not $restartPath) {
         $bundledPath = Join-Path `
-            (Split-Path -Parent $script:PackageExtrasRoot) "DS4Windows.exe"
+            (Split-Path -Parent $script:PackageExtrasRoot) "PureDS4.exe"
         if (Test-Path -LiteralPath $bundledPath) {
             $restartPath = $bundledPath
         }
     }
     $script:Ds4WindowsRestartPath = $restartPath
 
-    Write-SetupLog "Stopping DS4Windows output owners for $operation..." Yellow
+    Write-SetupLog "Stopping PureDS4 output owners for $operation..." Yellow
     foreach ($entry in $processes) {
         try {
             $process = Get-Process -Id $entry.ProcessId -ErrorAction Stop
@@ -1139,14 +1139,14 @@ function Stop-Ds4WindowsProcesses([string]$operation) {
     }
     Start-Sleep -Milliseconds 750
 
-    $remaining = @(Get-Process -Name "DS4Windows" `
+    $remaining = @(Get-Process -Name "PureDS4" `
         -ErrorAction SilentlyContinue | Where-Object {
             $_.Id -ne $script:InstallerHostPid
         })
     if ($remaining.Count -eq 0) { return $true }
 
     Write-SetupLog (
-        "DS4Windows could not be stopped safely for $operation. " +
+        "PureDS4 could not be stopped safely for $operation. " +
         "Close it manually and run Install / Repair again."
     ) Red
     return $false
@@ -1185,7 +1185,7 @@ function Install-ViiperAtomically([string]$candidatePath,
     Copy-Item -LiteralPath $candidatePath -Destination $newPath -Force
 
     # An explicit repair/update may replace a running backend. Stop only the
-    # VIIPER process and leave DS4Windows and every physical Bluetooth device
+    # VIIPER process and leave PureDS4 and every physical Bluetooth device
     # alone.
     $stopped = Stop-ViiperProcesses "backend replacement"
     if (-not $stopped) {
@@ -1241,11 +1241,11 @@ function Test-RecognizedProductExecutable([string]$path,
     try {
         $version = [Diagnostics.FileVersionInfo]::GetVersionInfo(
             [IO.Path]::GetFullPath($path))
-        if ([string]::Equals($expectedProduct, "DS4Windows",
+        if ([string]::Equals($expectedProduct, "PureDS4",
                 [StringComparison]::OrdinalIgnoreCase)) {
-            return [string]::Equals($version.ProductName, "DS4Windows",
+            return [string]::Equals($version.ProductName, "PureDS4",
                        [StringComparison]::OrdinalIgnoreCase) -or
-                [string]::Equals($version.FileDescription, "DS4Windows",
+                [string]::Equals($version.FileDescription, "PureDS4",
                     [StringComparison]::OrdinalIgnoreCase)
         }
         return [string]::Equals($version.ProductName, "VIIPER",
@@ -1294,14 +1294,14 @@ function Test-KnownPortableViiperPath([string]$path) {
 
 function Remove-ForeignViiperInstallations {
     # There is one elevated backend owner: Program Files. An older
-    # LocalAppData copy is foreign too, even when DS4Windows itself remains
+    # LocalAppData copy is foreign too, even when PureDS4 itself remains
     # portable.
     $foreign = @(Get-ForeignViiperProcesses)
     if ($foreign.Count -eq 0) { return }
 
     Write-SetupLog (
         "Detected running VIIPER process(es) outside the managed install " +
-        "path '$script:InstallDir'. DS4Windows will never use them."
+        "path '$script:InstallDir'. PureDS4 will never use them."
     ) Yellow
     foreach ($process in $foreign) {
         $displayPath = if ($process.ExecutablePath) {
@@ -1485,7 +1485,7 @@ function Stop-InstallerHostForStandardMigration {
         [IO.Path]::GetFullPath([string]$hostProcess.ExecutablePath)
     }
     else { $null }
-    if ($hostProcess.Name -ine "DS4Windows.exe" -or
+    if ($hostProcess.Name -ine "PureDS4.exe" -or
             -not $actualPath -or
             -not [string]::Equals($actualPath, $expectedPath,
                 [StringComparison]::OrdinalIgnoreCase)) {
@@ -1493,7 +1493,7 @@ function Stop-InstallerHostForStandardMigration {
     }
 
     Write-SetupLog (
-        "Closing the old portable DS4Windows installer host before cleanup: " +
+        "Closing the old portable PureDS4 installer host before cleanup: " +
         "PID $script:InstallerHostPid"
     ) Yellow
     Stop-Process -Id $script:InstallerHostPid -Force -ErrorAction Stop
@@ -1504,7 +1504,7 @@ function Stop-InstallerHostForStandardMigration {
         }
         Start-Sleep -Milliseconds 100
     }
-    throw "The old portable DS4Windows installer host did not exit."
+    throw "The old portable PureDS4 installer host did not exit."
 }
 
 function Remove-PortableDs4WindowsPackageForStandardMode {
@@ -1520,11 +1520,11 @@ function Remove-PortableDs4WindowsPackageForStandardMode {
     }
 
     $portableDirectory = Assert-SafeManagedDirectory $portableDirectory `
-        "portable DS4Windows package" -RequireExisting
+        "portable PureDS4 package" -RequireExisting
     $manifestPath = Join-Path $portableDirectory `
         ".pureds4-managed-files.txt"
     if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) {
-        throw "The old portable DS4Windows package has no managed-file " +
+        throw "The old portable PureDS4 package has no managed-file " +
             "manifest, so setup will not guess which files are safe to remove."
     }
 
@@ -1537,12 +1537,12 @@ function Remove-PortableDs4WindowsPackageForStandardMode {
         $relative = ([string]$entry).Trim().Replace('/', '\')
         if (-not (Test-SafePackageRelativePath $relative) -or
                 -not $managedFiles.Add($relative)) {
-            throw "The old portable DS4Windows manifest contains an unsafe " +
+            throw "The old portable PureDS4 manifest contains an unsafe " +
                 "or duplicate path: '$entry'."
         }
     }
-    if (-not $managedFiles.Contains("DS4Windows.exe")) {
-        throw "The old portable package manifest does not own DS4Windows.exe."
+    if (-not $managedFiles.Contains("PureDS4.exe")) {
+        throw "The old portable package manifest does not own PureDS4.exe."
     }
 
     foreach ($relative in $managedFiles) {
@@ -1551,7 +1551,7 @@ function Remove-PortableDs4WindowsPackageForStandardMode {
         if (-not $path.StartsWith($portablePrefix,
                 [StringComparison]::OrdinalIgnoreCase)) {
             throw "Refusing to remove a managed file outside the portable " +
-                "DS4Windows folder: $relative"
+                "PureDS4 folder: $relative"
         }
 
         $parentDirectory = [IO.Path]::GetFullPath(
@@ -1561,7 +1561,7 @@ function Remove-PortableDs4WindowsPackageForStandardMode {
             if (-not ($parentDirectory + '\').StartsWith($portablePrefix,
                     [StringComparison]::OrdinalIgnoreCase)) {
                 throw "Refusing to clean a package directory outside the " +
-                    "portable DS4Windows folder: $parentDirectory"
+                    "portable PureDS4 folder: $parentDirectory"
             }
             [void]$managedDirectories.Add($parentDirectory)
             $parentDirectory = [IO.Path]::GetFullPath(
@@ -1579,8 +1579,8 @@ function Remove-PortableDs4WindowsPackageForStandardMode {
     }
     Remove-Item -LiteralPath $manifestPath -Force -ErrorAction Stop
 
-    if (Test-Path -LiteralPath (Join-Path $portableDirectory "DS4Windows.exe")) {
-        throw "The old portable DS4Windows executable could not be removed."
+    if (Test-Path -LiteralPath (Join-Path $portableDirectory "PureDS4.exe")) {
+        throw "The old portable PureDS4 executable could not be removed."
     }
 
     $directories = @($managedDirectories | Sort-Object Length -Descending)
@@ -1596,12 +1596,12 @@ function Remove-PortableDs4WindowsPackageForStandardMode {
                 -ErrorAction Stop).Count -eq 0) {
         Remove-Item -LiteralPath $portableDirectory -Force -ErrorAction Stop
         Write-SetupLog (
-            "Removed the old portable DS4Windows folder: $portableDirectory"
+            "Removed the old portable PureDS4 folder: $portableDirectory"
         ) Green
     }
     else {
         Write-SetupLog (
-            "Removed the old portable DS4Windows executable and package " +
+            "Removed the old portable PureDS4 executable and package " +
             "files. Preserved non-package user files in: $portableDirectory"
         ) Yellow
     }
@@ -2022,9 +2022,9 @@ function Assert-SafeManagedDirectory([string]$directory, [string]$label,
 function Install-Ds4WindowsPackage([string]$sourceDirectory,
         [string]$destinationDirectory) {
     $source = Assert-SafeManagedDirectory $sourceDirectory `
-        "DS4Windows source package" -RequireExisting
+        "PureDS4 source package" -RequireExisting
     $destination = Assert-SafeManagedDirectory $destinationDirectory `
-        "managed DS4Windows installation"
+        "managed PureDS4 installation"
     $sourcePrefix = $source.TrimEnd('\') + '\'
     $destinationPrefix = $destination.TrimEnd('\') + '\'
     if (-not [string]::Equals($source, $destination,
@@ -2033,13 +2033,13 @@ function Install-Ds4WindowsPackage([string]$sourceDirectory,
                 [StringComparison]::OrdinalIgnoreCase) -or
             $destinationPrefix.StartsWith($sourcePrefix,
                 [StringComparison]::OrdinalIgnoreCase))) {
-        throw "The DS4Windows source and managed destination may not contain one another."
+        throw "The PureDS4 source and managed destination may not contain one another."
     }
 
     $manifestName = ".pureds4-managed-files.txt"
     $sourceManifest = Join-Path $source $manifestName
     if (-not (Test-Path -LiteralPath $sourceManifest -PathType Leaf)) {
-        throw "The DS4Windows package manifest is missing. Extract and run the complete release ZIP instead of a raw build folder."
+        throw "The PureDS4 package manifest is missing. Extract and run the complete release ZIP instead of a raw build folder."
     }
 
     $managedFiles = [Collections.Generic.HashSet[string]]::new(
@@ -2048,10 +2048,10 @@ function Install-Ds4WindowsPackage([string]$sourceDirectory,
     foreach ($entry in Get-Content -LiteralPath $sourceManifest) {
         $relative = ([string]$entry).Trim().Replace('/', '\')
         if (-not (Test-SafePackageRelativePath $relative)) {
-            throw "The DS4Windows package manifest contains an unsafe path: '$entry'."
+            throw "The PureDS4 package manifest contains an unsafe path: '$entry'."
         }
         if (-not $managedFiles.Add($relative)) {
-            throw "The DS4Windows package manifest contains a duplicate path: '$relative'."
+            throw "The PureDS4 package manifest contains a duplicate path: '$relative'."
         }
 
         $sourcePath = [IO.Path]::GetFullPath((Join-Path $source $relative))
@@ -2062,7 +2062,7 @@ function Install-Ds4WindowsPackage([string]$sourceDirectory,
                 -not $destinationPath.StartsWith($destinationPrefix,
                 [StringComparison]::OrdinalIgnoreCase) -or
                 -not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) {
-            throw "The DS4Windows package manifest does not resolve to a packaged file: '$relative'."
+            throw "The PureDS4 package manifest does not resolve to a packaged file: '$relative'."
         }
         $copyPlan.Add([pscustomobject]@{
             Relative = $relative
@@ -2071,7 +2071,7 @@ function Install-Ds4WindowsPackage([string]$sourceDirectory,
         })
     }
     if ($copyPlan.Count -eq 0) {
-        throw "The DS4Windows package manifest is empty."
+        throw "The PureDS4 package manifest is empty."
     }
 
     if (-not [string]::Equals($source, $destination,
@@ -2101,12 +2101,12 @@ function Install-Ds4WindowsPackage([string]$sourceDirectory,
         foreach ($file in $copyPlan) {
             $parent = Split-Path -Parent $file.Destination
             New-Item -ItemType Directory -Path $parent -Force | Out-Null
-            # An in-app repair is hosted by the installed DS4Windows process.
+            # An in-app repair is hosted by the installed PureDS4 process.
             # Its executable and managed DLLs are therefore legitimately open
             # while this verified snapshot is promoted. Never overwrite a
             # byte-identical destination: doing so is unnecessary and fails
             # on Windows for loaded assemblies. Changed package files are
-            # still replaced normally after all other DS4Windows processes
+            # still replaced normally after all other PureDS4 processes
             # have been quiesced.
             if (Test-Path -LiteralPath $file.Destination -PathType Leaf) {
                 $sourceInfo = Get-Item -LiteralPath $file.Source -Force
@@ -2144,11 +2144,11 @@ function Install-Ds4WindowsPackage([string]$sourceDirectory,
         }
     }
 
-    $installedExecutable = Join-Path $destination "DS4Windows.exe"
+    $installedExecutable = Join-Path $destination "PureDS4.exe"
     if (-not (Test-Path -LiteralPath $installedExecutable -PathType Leaf)) {
-        throw "The managed DS4Windows installation is missing DS4Windows.exe."
+        throw "The managed PureDS4 installation is missing PureDS4.exe."
     }
-    Write-SetupLog "DS4Windows installed to $destination" Green
+    Write-SetupLog "PureDS4 installed to $destination" Green
     return $installedExecutable
 }
 
@@ -2221,7 +2221,7 @@ try {
     $script:InstallerLogRoot = Assert-SafeManagedDirectory `
         $script:InstallerLogRoot "installer log directory" -RequireExisting
     if (-not (Test-Administrator)) {
-        throw "Administrator permission is required. Launch setup from DS4Windows so Windows can request it automatically."
+        throw "Administrator permission is required. Launch setup from PureDS4 so Windows can request it automatically."
     }
     $elevatedIdentity = [Security.Principal.WindowsIdentity]::GetCurrent()
     if (-not [string]::Equals($elevatedIdentity.User.Value,
@@ -2232,16 +2232,16 @@ try {
             "Setup was elevated with alternate administrator credentials. " +
             "Installation will continue safely, but startup tasks for " +
             "$script:TargetUserName will be deferred until that user launches " +
-            "DS4Windows and grants elevation."
+            "PureDS4 and grants elevation."
         ) Yellow
     }
 
     if (-not $SetupMutexAlreadyHeld) {
         try {
             $script:SetupMutex = [Threading.Mutex]::new(
-                $false, "Global\DS4Windows-VIIPER-Setup")
+                $false, "Global\PureDS4-VIIPER-Setup")
             if (-not $script:SetupMutex.WaitOne(0)) {
-                throw "Another DS4Windows VIIPER setup is already running."
+                throw "Another PureDS4 VIIPER setup is already running."
             }
             $script:SetupMutexOwned = $true
         }
@@ -2258,13 +2258,13 @@ try {
     }
 
     Write-Host ""
-    Write-Host "DS4Windows VIIPER virtual controller setup" `
+    Write-Host "PureDS4 VIIPER virtual controller setup" `
         -ForegroundColor Green
     $installationMode = if ($script:KeepDs4WindowsPortable) {
-        "Portable app: keep DS4Windows in place; install VIIPER safely in Program Files."
+        "Portable app: keep PureDS4 in place; install VIIPER safely in Program Files."
     }
     else {
-        "Standard: install DS4Windows and VIIPER in Program Files."
+        "Standard: install PureDS4 and VIIPER in Program Files."
     }
     Write-Host $installationMode -ForegroundColor Cyan
     Write-Host "Planned order:" -ForegroundColor Cyan
@@ -2301,11 +2301,11 @@ try {
         "VIIPER installation"
     if (-not $script:KeepDs4WindowsPortable) {
         $script:Ds4WindowsInstallDir = Assert-SafeManagedDirectory `
-            $script:Ds4WindowsInstallDir "managed DS4Windows installation"
+            $script:Ds4WindowsInstallDir "managed PureDS4 installation"
         New-Item -ItemType Directory -Path $script:Ds4WindowsInstallDir `
             -Force | Out-Null
         Protect-ElevatedTaskTargetDirectory $script:Ds4WindowsInstallDir `
-            "DS4Windows"
+            "PureDS4"
     }
     New-Item -ItemType Directory -Path $script:InstallDir -Force | Out-Null
     Protect-ElevatedTaskTargetDirectory $script:InstallDir "VIIPER"
@@ -2331,7 +2331,7 @@ try {
     $candidatePath = Join-Path $script:TempDir "viiper.exe"
     if (-not (Test-Path -LiteralPath $script:BundledViiperPath `
             -PathType Leaf)) {
-        throw "The offline DS4Windows package is incomplete: missing " +
+        throw "The offline PureDS4 package is incomplete: missing " +
             "$(Split-Path -Leaf $script:BundledViiperPath)."
     }
     $bundledViiperSha256 = Read-PackagedSha256 `
@@ -2343,7 +2343,7 @@ try {
         -Destination $candidatePath -Force
     Assert-ViiperFileSha256 $candidatePath $bundledViiperSha256
     if (-not (Stop-Ds4WindowsProcesses "VIIPER backend replacement")) {
-        throw "Unable to quiesce DS4Windows before replacing VIIPER."
+        throw "Unable to quiesce PureDS4 before replacing VIIPER."
     }
     if (-not (Stop-ViiperProcesses "VIIPER backend replacement")) {
         throw "Unable to stop the existing VIIPER backend before replacement."
@@ -2355,7 +2355,7 @@ try {
 
     if (-not $script:Ds4WindowsRestartPath) {
         $bundledDs4Windows = Join-Path `
-            (Split-Path -Parent $script:PackageExtrasRoot) "DS4Windows.exe"
+            (Split-Path -Parent $script:PackageExtrasRoot) "PureDS4.exe"
         if (Test-Path -LiteralPath $bundledDs4Windows -PathType Leaf) {
             $script:Ds4WindowsRestartPath = $bundledDs4Windows
         }
@@ -2363,14 +2363,14 @@ try {
     if (-not $script:Ds4WindowsRestartPath -or
             -not (Test-Path -LiteralPath $script:Ds4WindowsRestartPath `
                 -PathType Leaf)) {
-        throw "DS4Windows.exe could not be located for the elevated startup task."
+        throw "PureDS4.exe could not be located for the elevated startup task."
     }
     # A Burn/MSI install has already atomically placed and verified the managed
     # application payload. The legacy in-app installer still promotes its
     # protected package snapshot itself, so retain that verification there.
     if ($script:InstallerMode) {
         $expectedManagedPath = Join-Path $script:Ds4WindowsInstallDir `
-            "DS4Windows.exe"
+            "PureDS4.exe"
         $resolvedRestartPath = [IO.Path]::GetFullPath(
             $script:Ds4WindowsRestartPath)
         $resolvedManagedPath = [IO.Path]::GetFullPath($expectedManagedPath)
@@ -2379,12 +2379,12 @@ try {
                 [StringComparison]::OrdinalIgnoreCase) -or
                 -not (Test-Path -LiteralPath $resolvedManagedPath `
                     -PathType Leaf)) {
-            throw "The Windows Installer managed DS4Windows payload is " +
+            throw "The Windows Installer managed PureDS4 payload is " +
                 "missing or outside the protected Program Files location."
         }
         $script:Ds4WindowsRestartPath = $resolvedManagedPath
         Write-SetupLog (
-            "Windows Installer managed DS4Windows copy and startup target: " +
+            "Windows Installer managed PureDS4 copy and startup target: " +
             $script:Ds4WindowsRestartPath
         ) Green
     }
@@ -2394,9 +2394,9 @@ try {
         $sourceDs4WindowsDirectory = [IO.Path]::GetFullPath(
             (Split-Path -Parent $script:PackageExtrasRoot)).TrimEnd('\', '/')
         $sourceDs4WindowsPath = Join-Path $sourceDs4WindowsDirectory `
-            "DS4Windows.exe"
+            "PureDS4.exe"
         if (-not (Test-Path -LiteralPath $sourceDs4WindowsPath -PathType Leaf)) {
-            throw "The protected DS4Windows package snapshot is incomplete."
+            throw "The protected PureDS4 package snapshot is incomplete."
         }
         $taskTargetHash = (Get-FileHash -LiteralPath `
             $script:Ds4WindowsRestartPath -Algorithm SHA256).Hash
@@ -2404,16 +2404,16 @@ try {
             $sourceDs4WindowsPath -Algorithm SHA256).Hash
         if (-not [string]::Equals($taskTargetHash, $sourceTargetHash,
                 [StringComparison]::OrdinalIgnoreCase)) {
-            throw "The currently running DS4Windows executable changed " +
+            throw "The currently running PureDS4 executable changed " +
                 "while setup was starting. Close it, extract a complete " +
                 "release ZIP, and run Install / Repair again."
         }
 
     if ($script:KeepDs4WindowsPortable) {
         # Keep the exact package executable that initiated setup. No
-        # DS4Windows files are copied into Program Files in portable mode.
+        # PureDS4 files are copied into Program Files in portable mode.
         Write-SetupLog (
-            "Portable DS4Windows retained; elevated startup target: " +
+            "Portable PureDS4 retained; elevated startup target: " +
             $script:Ds4WindowsRestartPath
         ) Yellow
     }
@@ -2423,19 +2423,19 @@ try {
         # Standard Install / Repair promotes the verified managed copy.
         $script:Ds4WindowsRestartPath = $managedDs4WindowsPath
         Write-SetupLog (
-            "Managed DS4Windows copy and elevated startup target: " +
+            "Managed PureDS4 copy and elevated startup target: " +
             $script:Ds4WindowsRestartPath
         ) Green
     }
     }
 
     # VIIPER is always an elevated Program Files component. Lock its task
-    # target regardless of where the unprivileged DS4Windows UI lives.
+    # target regardless of where the unprivileged PureDS4 UI lives.
     Protect-ElevatedTaskTargetFile $viiperPath "VIIPER"
     if (-not $script:KeepDs4WindowsPortable) {
         # Program Files inheritance protects the managed app package tree.
         Protect-ElevatedTaskTargetFile $script:Ds4WindowsRestartPath `
-            "DS4Windows"
+            "PureDS4"
     }
 
     # Preserve the setting that launched the built-in installer. The standard
@@ -2465,7 +2465,7 @@ try {
             -Confirm:$false `
             -ErrorAction SilentlyContinue
         Write-SetupLog (
-            "Run at Startup is disabled; no DS4Windows or VIIPER logon " +
+            "Run at Startup is disabled; no PureDS4 or VIIPER logon " +
             "task was retained."
         ) Green
     }
@@ -2568,7 +2568,7 @@ try {
         }
 
         if (-not (Stop-Ds4WindowsProcesses "usbip-win2 driver upgrade")) {
-            throw "Unable to quiesce DS4Windows before the usbip-win2 driver upgrade."
+            throw "Unable to quiesce PureDS4 before the usbip-win2 driver upgrade."
         }
         if (-not (Stop-ViiperProcesses "usbip-win2 driver upgrade")) {
             throw "Unable to quiesce VIIPER before the usbip-win2 driver upgrade. " +
@@ -2603,7 +2603,7 @@ try {
                     $script:BundledUsbipInstallerPath -PathType Leaf)) {
                 $missingUsbipName = Split-Path -Leaf `
                     $script:BundledUsbipInstallerPath
-                throw "The offline DS4Windows package is incomplete: " +
+                throw "The offline PureDS4 package is incomplete: " +
                     "missing $missingUsbipName."
             }
             Write-SetupLog (
@@ -2723,7 +2723,7 @@ try {
         else {
             Write-SetupLog (
                 "Run at Startup remains disabled. Restart Windows, then " +
-                "launch DS4Windows manually to finish readiness checks."
+                "launch PureDS4 manually to finish readiness checks."
             ) Yellow
         }
     }
@@ -2772,13 +2772,13 @@ try {
             $script:RebootRecommended) {
         "Setup complete, but not Ready. Restart Windows before using a virtual controller; run Repair if the usbip ABI probe still fails."
     } else {
-        "Setup complete. VIIPER is ready for DS4Windows."
+        "Setup complete. VIIPER is ready for PureDS4."
     }
     if ($script:UsbipRuntimeReady -and -not $script:RebootRecommended) {
         Commit-InfrastructureReadiness
         Write-SetupLog $finish Green
         if ($script:Ds4WindowsRestartPath -and -not $script:InstallerMode) {
-            Write-SetupLog "SUCCESSFUL: restarting DS4Windows in 2 seconds." Green
+            Write-SetupLog "SUCCESSFUL: restarting PureDS4 in 2 seconds." Green
             Start-Sleep -Seconds 2
             if (-not $script:KeepDs4WindowsPortable) {
                 Stop-InstallerHostForStandardMigration

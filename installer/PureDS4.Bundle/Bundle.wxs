@@ -7,12 +7,12 @@
       Version="$(var.BundleVersion)"
       UpgradeCode="E0DC119F-B6A6-4425-8FEB-FAA6232FE346"
       Tag="PureDS4ManagedV1"
-      IconSourceFile="$(var.ExtrasRoot)\..\DS4Windows\DS4W.ico"
+      IconSourceFile="$(var.ExtrasRoot)\..\PureDS4\DS4W.ico"
       Compressed="yes"
       AboutUrl="https://github.com/meiameiameia/pureds4"
       HelpUrl="https://github.com/meiameiameia/pureds4/issues">
 
-    <BootstrapperApplication SourceFile="$(var.BootstrapperRoot)\DS4Windows.Bootstrapper.exe" />
+    <BootstrapperApplication SourceFile="$(var.BootstrapperRoot)\PureDS4.Bootstrapper.exe" />
 
     <Variable Name="CreateDesktopShortcut" Type="numeric" Value="1" />
     <Variable Name="InstallHidHide" Type="numeric" Value="1" />
@@ -42,7 +42,7 @@
     <util:FileSearch
         Id="ManagedViiperExecutableSearch"
         Variable="ManagedViiperPresent"
-        Path="[ProgramFiles64Folder]DS4Windows\VIIPER\viiper.exe"
+        Path="[ProgramFiles64Folder]PureDS4\VIIPER\viiper.exe"
         Result="exists" />
     <util:RegistrySearch
         Id="HidHideSearch"
@@ -64,22 +64,22 @@
            user or third-party content left under the install root. -->
       <ExePackage
           Id="PostUninstallCleanup"
-          CacheId="DS4WindowsSetupActionsPostUninstall-$(var.SetupActionsHash)"
-          Name="DS4Windows.SetupActions.PostUninstall.exe"
+          CacheId="PureDS4SetupActionsPostUninstall-$(var.SetupActionsHash)"
+          Name="PureDS4.SetupActions.PostUninstall.exe"
           SourceFile="$(var.SetupActionsPath)"
           PerMachine="yes"
           Permanent="yes"
           Vital="yes"
           DetectCondition="0"
-          InstallArguments="postuninstall --correlation-id &quot;[SetupCorrelationId]&quot; --install-root &quot;[ProgramFiles64Folder]DS4Windows&quot;">
+          InstallArguments="postuninstall --correlation-id &quot;[SetupCorrelationId]&quot; --install-root &quot;[ProgramFiles64Folder]PureDS4&quot;">
         <ExitCode Value="0" Behavior="success" />
         <ExitCode Behavior="error" />
       </ExePackage>
 
       <ExePackage
           Id="CloseRunningApplications"
-          CacheId="DS4WindowsSetupActionsPreflight-$(var.SetupActionsHash)"
-          Name="DS4Windows.SetupActions.Preflight.exe"
+          CacheId="PureDS4SetupActionsPreflight-$(var.SetupActionsHash)"
+          Name="PureDS4.SetupActions.Preflight.exe"
           SourceFile="$(var.SetupActionsPath)"
           PerMachine="yes"
           Permanent="yes"
@@ -91,22 +91,22 @@
       </ExePackage>
 
       <MsiPackage
-          Id="DS4WindowsMsi"
+          Id="PureDS4Msi"
           SourceFile="$(var.MsiPath)"
           Visible="no"
           Vital="yes" />
 
       <ExePackage
           Id="ViiperUsbipSetup"
-          CacheId="DS4WindowsSetupActionsInfrastructure-$(var.SetupActionsHash)"
+          CacheId="PureDS4SetupActionsInfrastructure-$(var.SetupActionsHash)"
           SourceFile="$(var.SetupActionsPath)"
           PerMachine="yes"
           Permanent="yes"
           Vital="yes"
           DetectCondition="InfrastructureInstalled = &quot;VIIPER-0.1.0+USBIP-0.9.7.7&quot; OR ManagedInstallRegistered OR ManagedViiperPresent"
-          InstallArguments="install --correlation-id &quot;[SetupCorrelationId]&quot; --install-root &quot;[ProgramFiles64Folder]DS4Windows&quot; --bundle-source &quot;[WixBundleOriginalSource]&quot; --desktop-shortcut &quot;[CreateDesktopShortcut]&quot; --target-user-sid &quot;[TargetUserSid]&quot; --target-user-name &quot;[TargetUserName]&quot; --target-local-appdata &quot;[TargetLocalAppData]&quot; --target-roaming-appdata &quot;[TargetRoamingAppData]&quot;"
-          RepairArguments="repair --correlation-id &quot;[SetupCorrelationId]&quot; --install-root &quot;[ProgramFiles64Folder]DS4Windows&quot; --bundle-source &quot;[WixBundleOriginalSource]&quot; --desktop-shortcut &quot;[CreateDesktopShortcut]&quot; --target-user-sid &quot;[TargetUserSid]&quot; --target-user-name &quot;[TargetUserName]&quot; --target-local-appdata &quot;[TargetLocalAppData]&quot; --target-roaming-appdata &quot;[TargetRoamingAppData]&quot;"
-          UninstallArguments="uninstall --correlation-id &quot;[SetupCorrelationId]&quot; --install-root &quot;[ProgramFiles64Folder]DS4Windows&quot;">
+          InstallArguments="install --correlation-id &quot;[SetupCorrelationId]&quot; --install-root &quot;[ProgramFiles64Folder]PureDS4&quot; --bundle-source &quot;[WixBundleOriginalSource]&quot; --desktop-shortcut &quot;[CreateDesktopShortcut]&quot; --target-user-sid &quot;[TargetUserSid]&quot; --target-user-name &quot;[TargetUserName]&quot; --target-local-appdata &quot;[TargetLocalAppData]&quot; --target-roaming-appdata &quot;[TargetRoamingAppData]&quot;"
+          RepairArguments="repair --correlation-id &quot;[SetupCorrelationId]&quot; --install-root &quot;[ProgramFiles64Folder]PureDS4&quot; --bundle-source &quot;[WixBundleOriginalSource]&quot; --desktop-shortcut &quot;[CreateDesktopShortcut]&quot; --target-user-sid &quot;[TargetUserSid]&quot; --target-user-name &quot;[TargetUserName]&quot; --target-local-appdata &quot;[TargetLocalAppData]&quot; --target-roaming-appdata &quot;[TargetRoamingAppData]&quot;"
+          UninstallArguments="uninstall --correlation-id &quot;[SetupCorrelationId]&quot; --install-root &quot;[ProgramFiles64Folder]PureDS4&quot;">
         <ExitCode Value="0" Behavior="success" />
         <ExitCode Value="3010" Behavior="scheduleReboot" />
         <ExitCode Behavior="error" />
@@ -140,14 +140,14 @@
            A direct uninstall explicitly plans this one-shot action instead. -->
       <ExePackage
           Id="ViiperUsbipUninstall"
-          CacheId="DS4WindowsSetupActionsInfrastructureUninstall-$(var.SetupActionsHash)"
-          Name="DS4Windows.SetupActions.InfrastructureUninstall.exe"
+          CacheId="PureDS4SetupActionsInfrastructureUninstall-$(var.SetupActionsHash)"
+          Name="PureDS4.SetupActions.InfrastructureUninstall.exe"
           SourceFile="$(var.SetupActionsPath)"
           PerMachine="yes"
           Permanent="yes"
           Vital="yes"
           DetectCondition="0"
-          InstallArguments="uninstall --correlation-id &quot;[SetupCorrelationId]&quot; --install-root &quot;[ProgramFiles64Folder]DS4Windows&quot;">
+          InstallArguments="uninstall --correlation-id &quot;[SetupCorrelationId]&quot; --install-root &quot;[ProgramFiles64Folder]PureDS4&quot;">
         <ExitCode Value="0" Behavior="success" />
         <ExitCode Value="3010" Behavior="scheduleReboot" />
         <ExitCode Behavior="error" />
@@ -155,12 +155,12 @@
 
       <!-- Burn removes packages in reverse chain order. Keep a second,
            install-only invocation of the verified preflight helper at the
-           tail so uninstall quiesces DS4Windows and VIIPER before any owned
+           tail so uninstall quiesces PureDS4 and VIIPER before any owned
            package is removed. The BA plans exactly one of the two preflights. -->
       <ExePackage
           Id="CloseRunningApplicationsForUninstall"
-          CacheId="DS4WindowsSetupActionsUninstallPreflight-$(var.SetupActionsHash)"
-          Name="DS4Windows.SetupActions.UninstallPreflight.exe"
+          CacheId="PureDS4SetupActionsUninstallPreflight-$(var.SetupActionsHash)"
+          Name="PureDS4.SetupActions.UninstallPreflight.exe"
           SourceFile="$(var.SetupActionsPath)"
           PerMachine="yes"
           Permanent="yes"

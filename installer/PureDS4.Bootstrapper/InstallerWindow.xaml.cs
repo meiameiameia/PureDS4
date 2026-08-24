@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using WixToolset.BootstrapperApplicationApi;
 
-namespace DS4Windows.Bootstrapper
+namespace PureDS4.Bootstrapper
 {
     public partial class InstallerWindow : Window
     {

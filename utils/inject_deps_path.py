@@ -13,7 +13,7 @@ if not os.path.exists(tempfile):
 
 # Open file
 temp_json = None
-pattern = re.compile(r"^DS4Windows/")
+pattern = re.compile(r"^PureDS4/")
 with open(tempfile) as input_file:
   temp_json = json.load(input_file)
   for k, v in temp_json["libraries"].items():

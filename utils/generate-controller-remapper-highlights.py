@@ -949,7 +949,7 @@ def main() -> None:
     parser.add_argument("--preview-dir", type=Path,
                         help="Write visual QC contact sheets to this directory")
     args = parser.parse_args()
-    resources = Path(__file__).resolve().parents[1] / "DS4Windows" / "Resources"
+    resources = Path(__file__).resolve().parents[1] / "PureDS4" / "Resources"
     jobs = [
         (Artwork("DualShock 4 Controller.png", "DualShock4-Config_Highlights.png", 384, 247), dualshock4_shapes()),
         (Artwork("DualSense Edge Controller.png", "DualSenseEdge-Config_Highlights.png", 1558, 1009), dualsense_edge_shapes()),

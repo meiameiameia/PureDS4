@@ -39,9 +39,9 @@ def write_fixture(root: Path, *, blocked: bool = False) -> Path:
     license_path.parent.mkdir(parents=True)
     license_path.write_text("Permission notice\n", encoding="utf-8")
     (root / "installer").mkdir()
-    project_dir = root / "DS4Windows"
+    project_dir = root / "PureDS4"
     project_dir.mkdir()
-    (project_dir / "DS4WinWPF.csproj").write_text(
+    (project_dir / "PureDS4.csproj").write_text(
         "<Project><ItemGroup>"
         '<Content Include="..\\payload\\component.dll" />'
         "</ItemGroup></Project>",
@@ -97,7 +97,7 @@ def main() -> None:
         write_fixture(root)
         extra_artifact = root / "payload" / "unmanifested.exe"
         extra_artifact.write_bytes(b"not declared\n")
-        project = root / "DS4Windows" / "DS4WinWPF.csproj"
+        project = root / "PureDS4" / "PureDS4.csproj"
         project.write_text(
             "<Project><ItemGroup>"
             '<Content Include="..\\payload\\component.dll" />'

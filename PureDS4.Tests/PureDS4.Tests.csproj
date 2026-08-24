@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DS4Windows\DS4WinWPF.csproj" />
+    <ProjectReference Include="..\PureDS4\PureDS4.csproj" />
   </ItemGroup>
 
 </Project>

@@ -46,7 +46,7 @@ def validate_named_xaml_resources(source_root: Path) -> None:
     """
     declared: set[str] = set()
     referenced: dict[str, set[str]] = {}
-    xaml_files = sorted((source_root / "DS4Windows").rglob("*.xaml"))
+    xaml_files = sorted((source_root / "PureDS4").rglob("*.xaml"))
     for path in xaml_files:
         source = path.read_text(encoding="utf-8-sig")
         declared.update(re.findall(r'x:Key\s*=\s*["\']([^"\']+)', source))
@@ -137,7 +137,7 @@ def main() -> int:
 
     generated_wix_path = (
         args.bundle_source.parent.parent
-        / "DS4Windows.Package"
+        / "PureDS4.Package"
         / "GeneratedFiles.wxs"
     )
     generated_wix_xml = ET.fromstring(
@@ -180,7 +180,7 @@ def main() -> int:
         'Name="InstallHidHide"',
         'Name="InstallFakerInput"',
         'Id="ViiperUsbipSetup"',
-        'Id="DS4WindowsMsi"',
+        'Id="PureDS4Msi"',
         'Id="PostUninstallCleanup"',
         'Id="CloseRunningApplications"',
         'Id="CloseRunningApplicationsForUninstall"',
@@ -192,9 +192,9 @@ def main() -> int:
         '--target-roaming-appdata',
         'Variable="ManagedInstallRegistered"',
         'Variable="ManagedViiperPresent"',
-        'CacheId="DS4WindowsSetupActionsPreflight-$(var.SetupActionsHash)"',
-        'CacheId="DS4WindowsSetupActionsUninstallPreflight-$(var.SetupActionsHash)"',
-        'CacheId="DS4WindowsSetupActionsInfrastructure-$(var.SetupActionsHash)"',
+        'CacheId="PureDS4SetupActionsPreflight-$(var.SetupActionsHash)"',
+        'CacheId="PureDS4SetupActionsUninstallPreflight-$(var.SetupActionsHash)"',
+        'CacheId="PureDS4SetupActionsInfrastructure-$(var.SetupActionsHash)"',
         'Id="HidHide"',
         'Id="FakerInput"',
         'Vital="yes"',
@@ -218,7 +218,7 @@ def main() -> int:
         "PostUninstallCleanup",
         "CloseRunningApplications",
         "CloseRunningApplicationsForUninstall",
-        "DS4WindowsMsi",
+        "PureDS4Msi",
         "ViiperUsbipSetup",
     ):
         if package_id not in packages:
@@ -261,7 +261,7 @@ def main() -> int:
     for contract in [
         'Get-FileHash -LiteralPath $setupActions -Algorithm SHA256',
         '-p:SetupActionsHash=$setupActionsHash',
-        'Global\\DS4Windows-Installer-Build',
+        'Global\\PureDS4-Installer-Build',
         'previous orphaned WiX/MSI build',
         'Publish-InstallerFileAtomically',
         '$pendingInstaller',
@@ -326,7 +326,7 @@ def main() -> int:
                 contract
             )
 
-    product = (args.bundle_source.parent.parent / "DS4Windows.Package" / "Product.wxs").read_text(encoding="utf-8")
+    product = (args.bundle_source.parent.parent / "PureDS4.Package" / "Product.wxs").read_text(encoding="utf-8")
     for contract in [
         '<MajorUpgrade',
         'Scope="perMachine"',
@@ -338,7 +338,7 @@ def main() -> int:
     installer_root = args.bundle_source.parent.parent
     bootstrapper = (
         installer_root
-        / "DS4Windows.Bootstrapper"
+        / "PureDS4.Bootstrapper"
         / "InstallerApplication.cs"
     ).read_text(encoding="utf-8")
     for contract in [
@@ -361,9 +361,9 @@ def main() -> int:
                 contract
             )
 
-    setup_actions = (installer_root / "DS4Windows.SetupActions" / "Program.cs").read_text(encoding="utf-8")
+    setup_actions = (installer_root / "PureDS4.SetupActions" / "Program.cs").read_text(encoding="utf-8")
     for contract in [
-        r'@"Global\DS4Windows-VIIPER-Setup"',
+        r'@"Global\PureDS4-VIIPER-Setup"',
         'SetupResumeShortcut',
         'KillProcessTree(process)',
         'IsInfrastructureCommitted()',
@@ -375,7 +375,7 @@ def main() -> int:
         'EnsureDirectoryPathHasNoReparsePoints(resumeRoot)',
         'ProtectResumeDirectory(resumeRoot, targetUser.Sid)',
         'HashesEqual(bundleSource, stagedBundle)',
-        '=== DS4Windows setup invocation ',
+        '=== PureDS4 setup invocation ',
         'IsRecognizedProductProcess(process, processName',
         'FileVersionInfo.GetVersionInfo(executablePath)',
         'EnsureDirectoryPathHasNoReparsePoints(InstallerLogRoot)',
@@ -393,7 +393,7 @@ def main() -> int:
     ]:
         if contract not in setup_actions:
             raise SystemExit("Setup action safety contract missing: " + contract)
-    if 'SetValue("DS4WindowsSetupResume"' in setup_actions:
+    if 'SetValue("PureDS4SetupResume"' in setup_actions:
         raise SystemExit("Setup must not create a custom HKLM RunOnce entry.")
 
     backend_script = (
@@ -402,7 +402,7 @@ def main() -> int:
         / "install-viiper-backend.ps1"
     ).read_text(encoding="utf-8")
     for contract in [
-        '"Global\\DS4Windows-VIIPER-Setup"',
+        '"Global\\PureDS4-VIIPER-Setup"',
         "Test-SafePackageRelativePath",
         "Assert-SafeManagedDirectory",
         "Install-ViiperAtomically",
@@ -450,10 +450,10 @@ def main() -> int:
                 "legacy network acquisition found: " + contract
             )
 
-    bootstrapper = (installer_root / "DS4Windows.Bootstrapper" / "InstallerApplication.cs").read_text(encoding="utf-8")
+    bootstrapper = (installer_root / "PureDS4.Bootstrapper" / "InstallerApplication.cs").read_text(encoding="utf-8")
     for contract in [
         'command.Resume == ResumeType.Reboot',
-        r'@"Global\DS4Windows-Installer-Transaction"',
+        r'@"Global\PureDS4-Installer-Transaction"',
         'if (command.Resume != ResumeType.Reboot)',
         'result = 3010;',
         'CloseWithCurrentResult()',
@@ -479,7 +479,7 @@ def main() -> int:
         if contract not in bootstrapper:
             raise SystemExit("Bootstrapper lifecycle contract missing: " + contract)
 
-    probe = (installer_root / "DS4Windows.Bootstrapper" / "InfrastructureProbe.cs").read_text(encoding="utf-8")
+    probe = (installer_root / "PureDS4.Bootstrapper" / "InfrastructureProbe.cs").read_text(encoding="utf-8")
     for contract in [
         '"InfrastructureState"',
         'BeginOutputReadLine()',
@@ -507,7 +507,7 @@ def main() -> int:
 
     setup_manager = (
         args.bundle_source.parent.parent.parent
-        / "DS4Windows"
+        / "PureDS4"
         / "DS4Control"
         / "Viiper"
         / "ViiperSetupManager.cs"

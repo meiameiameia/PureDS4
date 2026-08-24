@@ -136,15 +136,15 @@ in step with those tables.
 
 Not yet done, and each item is a separate change:
 
-1. `DS4Windows/DS4WinWPF.csproj` — `ApplicationIcon`.
+1. `PureDS4/PureDS4.csproj` — `ApplicationIcon`.
 2. `DS4Windows/DS4Control/ScpUtil.cs` — `iconChoiceResources`.
 3. `DS4Windows/DS4Forms/ViewModels/TrayIconViewModel.cs` — the percentage
    mapping, from eleven buckets to five plus charging.
 4. Automatic light/dark tray selection. `Util.SystemAppsUsingDarkTheme()`
    already exists; a `WM_SETTINGCHANGE` handler does not.
-5. `installer/DS4Windows.Bootstrapper/InstallerWindow.xaml` and
-   `installer/DS4Windows.Bundle/Bundle.wxs` — installer and bundle icons.
-6. Shortcut icons in `installer/DS4Windows.SetupActions/Program.cs`.
+5. `installer/PureDS4.Bootstrapper/InstallerWindow.xaml` and
+   `installer/PureDS4.Bundle/Bundle.wxs` — installer and bundle icons.
+6. Shortcut icons in `installer/PureDS4.SetupActions/Program.cs`.
 7. `README.md` — repository and release presentation.
 
 Item 3 changes what the tray communicates and item 4 changes runtime behaviour,

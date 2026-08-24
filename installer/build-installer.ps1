@@ -67,7 +67,7 @@ function Assert-ReleaseSignature([string]$path) {
 }
 
 $buildMutex = [Threading.Mutex]::new($false,
-    "Global\DS4Windows-Installer-Build")
+    "Global\PureDS4-Installer-Build")
 $buildMutexOwned = $false
 try {
     try {
@@ -89,7 +89,7 @@ try {
     # line points into this repository before starting another composition.
     $repoPattern = [regex]::Escape($repoRoot.TrimEnd('\', '/'))
     $installerProjectPattern =
-        '(?i)(DS4Windows\.Package|DS4Windows\.Bundle|build-installer\.ps1)'
+        '(?i)(PureDS4\.Package|PureDS4\.Bundle|build-installer\.ps1)'
     $orphanedBuilds = @()
     for ($attempt = 0; $attempt -lt 120; $attempt++) {
         $orphanedBuilds = @(Get-CimInstance Win32_Process `
@@ -139,7 +139,7 @@ if ([string]::IsNullOrWhiteSpace($DisplayVersion) -or
 }
 
 if (-not $SkipApplicationPublish) {
-    & dotnet publish (Join-Path $repoRoot "DS4Windows\DS4WinWPF.csproj") `
+    & dotnet publish (Join-Path $repoRoot "PureDS4\PureDS4.csproj") `
         -c Release -p:Platform=x64 -r win-x64 --self-contained true `
         -p:RestoreLockedMode=true `
         -p:AssemblyVersion=$ProductVersion -p:FileVersion=$ProductVersion `
@@ -168,45 +168,45 @@ if (-not [string]::Equals($publishedRelease, $DisplayVersion,
     )
 }
 
-$generatedWix = Join-Path $repoRoot "installer\DS4Windows.Package\GeneratedFiles.wxs"
+$generatedWix = Join-Path $repoRoot "installer\PureDS4.Package\GeneratedFiles.wxs"
 $manifestPath = Join-Path $publishPath "package-manifest.json"
 & python (Join-Path $repoRoot "utils\generate-installer-files.py") `
     $publishPath $generatedWix $manifestPath --version $DisplayVersion
 if ($LASTEXITCODE -ne 0) { throw "Installer manifest generation failed." }
 
-& dotnet publish (Join-Path $repoRoot "installer\DS4Windows.SetupActions\DS4Windows.SetupActions.csproj") `
+& dotnet publish (Join-Path $repoRoot "installer\PureDS4.SetupActions\PureDS4.SetupActions.csproj") `
     -c Release -p:Platform=x64 -p:Version=$ProductVersion `
     -p:RestoreLockedMode=true `
     -r win-x64 --self-contained true `
-    -o (Join-Path $repoRoot "installer\DS4Windows.SetupActions\bin\x64\Release\publish")
+    -o (Join-Path $repoRoot "installer\PureDS4.SetupActions\bin\x64\Release\publish")
 if ($LASTEXITCODE -ne 0) { throw "Setup action host build failed." }
-$setupActions = Join-Path $repoRoot "installer\DS4Windows.SetupActions\bin\x64\Release\publish\DS4Windows.SetupActions.exe"
+$setupActions = Join-Path $repoRoot "installer\PureDS4.SetupActions\bin\x64\Release\publish\PureDS4.SetupActions.exe"
 Invoke-SignAndVerify $setupActions
 
-& dotnet publish (Join-Path $repoRoot "installer\DS4Windows.Bootstrapper\DS4Windows.Bootstrapper.csproj") `
+& dotnet publish (Join-Path $repoRoot "installer\PureDS4.Bootstrapper\PureDS4.Bootstrapper.csproj") `
     -c Release -p:Platform=x64 -p:Version=$ProductVersion `
     -p:RestoreLockedMode=true `
     -r win-x64 --self-contained true `
-    -o (Join-Path $repoRoot "installer\DS4Windows.Bootstrapper\bin\x64\Release\publish")
+    -o (Join-Path $repoRoot "installer\PureDS4.Bootstrapper\bin\x64\Release\publish")
 if ($LASTEXITCODE -ne 0) { throw "Bootstrapper UI build failed." }
-$baRoot = Join-Path $repoRoot "installer\DS4Windows.Bootstrapper\bin\x64\Release\publish"
-Invoke-SignAndVerify (Join-Path $baRoot "DS4Windows.Bootstrapper.exe")
+$baRoot = Join-Path $repoRoot "installer\PureDS4.Bootstrapper\bin\x64\Release\publish"
+Invoke-SignAndVerify (Join-Path $baRoot "PureDS4.Bootstrapper.exe")
 
-$packageProject = Join-Path $repoRoot "installer\DS4Windows.Package\DS4Windows.Package.wixproj"
+$packageProject = Join-Path $repoRoot "installer\PureDS4.Package\PureDS4.Package.wixproj"
 & dotnet build $packageProject -t:Rebuild -c Release -p:Platform=x64 `
     -p:RestoreLockedMode=true `
     -p:Version=$ProductVersion -p:ProductVersion=$ProductVersion `
     -p:PublishRoot=$publishPath
 if ($LASTEXITCODE -ne 0) { throw "PureDS4 MSI build failed." }
 
-$msiPath = Join-Path $repoRoot "installer\DS4Windows.Package\bin\x64\Release\PureDS4_${ProductVersion}_x64.msi"
+$msiPath = Join-Path $repoRoot "installer\PureDS4.Package\bin\x64\Release\PureDS4_${ProductVersion}_x64.msi"
 Invoke-SignAndVerify $msiPath
 $setupActionsHash = (Get-FileHash -LiteralPath $setupActions -Algorithm SHA256).Hash
 if ($setupActionsHash -notmatch '^[0-9A-F]{64}$') {
     throw "Could not derive a content-addressed setup-helper cache identity."
 }
 $extrasRoot = Join-Path $repoRoot "extras"
-$bundleProject = Join-Path $repoRoot "installer\DS4Windows.Bundle\DS4Windows.Bundle.wixproj"
+$bundleProject = Join-Path $repoRoot "installer\PureDS4.Bundle\PureDS4.Bundle.wixproj"
 & dotnet build $bundleProject -t:Rebuild -c Release -p:Platform=x64 `
     -p:RestoreLockedMode=true `
     -p:Version=$ProductVersion -p:BundleVersion=$BundleVersion `
@@ -216,7 +216,7 @@ $bundleProject = Join-Path $repoRoot "installer\DS4Windows.Bundle\DS4Windows.Bun
     -p:ExtrasRoot=$extrasRoot
 if ($LASTEXITCODE -ne 0) { throw "PureDS4 Burn bundle build failed." }
 
-$builtInstaller = Join-Path $repoRoot "installer\DS4Windows.Bundle\bin\x64\Release\PureDS4_${DisplayVersion}_Setup_x64.exe"
+$builtInstaller = Join-Path $repoRoot "installer\PureDS4.Bundle\bin\x64\Release\PureDS4_${DisplayVersion}_Setup_x64.exe"
 New-Item -ItemType Directory -Path $outputPath -Force | Out-Null
 $finalInstaller = Join-Path $outputPath "PureDS4_${DisplayVersion}_Setup_x64.exe"
 $finalManifest = Join-Path $outputPath "package-manifest.json"
@@ -262,7 +262,7 @@ if ($LASTEXITCODE -ne 0) {
 
 & python (Join-Path $repoRoot "utils\validate-installer.py") `
     --publish-root $publishPath --manifest $manifestPath `
-    --installer $pendingInstaller --bundle-source (Join-Path $repoRoot "installer\DS4Windows.Bundle\Bundle.wxs")
+    --installer $pendingInstaller --bundle-source (Join-Path $repoRoot "installer\PureDS4.Bundle\Bundle.wxs")
 if ($LASTEXITCODE -ne 0) { throw "Installer validation failed." }
 
 Invoke-SignAndVerify $pendingInstaller

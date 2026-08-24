@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace DS4Windows.Bootstrapper
+namespace PureDS4.Bootstrapper
 {
     internal static class InfrastructureProbe
     {
@@ -23,7 +23,7 @@ namespace DS4Windows.Bootstrapper
             try
             {
                 var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-                var viiper = Path.Combine(programFiles, "DS4Windows", "VIIPER", "viiper.exe");
+                var viiper = Path.Combine(programFiles, "PureDS4", "VIIPER", "viiper.exe");
                 var usbip = Path.Combine(programFiles, "USBip", "usbip.exe");
                 if (!File.Exists(viiper) || !File.Exists(usbip)) return false;
 

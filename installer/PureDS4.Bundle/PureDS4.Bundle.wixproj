@@ -5,9 +5,9 @@
     <BundleVersion Condition="'$(BundleVersion)' == ''">5.1.0-beta.1</BundleVersion>
     <DisplayVersion Condition="'$(DisplayVersion)' == ''">$(BundleVersion)</DisplayVersion>
     <OutputName>PureDS4_$(DisplayVersion)_Setup_x64</OutputName>
-    <MsiPath Condition="'$(MsiPath)' == ''">$(MSBuildThisFileDirectory)..\DS4Windows.Package\bin\x64\Release\PureDS4_5.1.0_x64.msi</MsiPath>
-    <BootstrapperRoot Condition="'$(BootstrapperRoot)' == ''">$(MSBuildThisFileDirectory)..\DS4Windows.Bootstrapper\bin\x64\Release\net48\win-x64</BootstrapperRoot>
-    <SetupActionsPath Condition="'$(SetupActionsPath)' == ''">$(MSBuildThisFileDirectory)..\DS4Windows.SetupActions\bin\x64\Release\net48\DS4Windows.SetupActions.exe</SetupActionsPath>
+    <MsiPath Condition="'$(MsiPath)' == ''">$(MSBuildThisFileDirectory)..\PureDS4.Package\bin\x64\Release\PureDS4_5.1.0_x64.msi</MsiPath>
+    <BootstrapperRoot Condition="'$(BootstrapperRoot)' == ''">$(MSBuildThisFileDirectory)..\PureDS4.Bootstrapper\bin\x64\Release\net48\win-x64</BootstrapperRoot>
+    <SetupActionsPath Condition="'$(SetupActionsPath)' == ''">$(MSBuildThisFileDirectory)..\PureDS4.SetupActions\bin\x64\Release\net48\PureDS4.SetupActions.exe</SetupActionsPath>
     <ExtrasRoot Condition="'$(ExtrasRoot)' == ''">$(MSBuildThisFileDirectory)..\..\extras</ExtrasRoot>
     <DefineConstants>BundleVersion=$(BundleVersion);DisplayVersion=$(DisplayVersion);MsiPath=$(MsiPath);BootstrapperRoot=$(BootstrapperRoot);SetupActionsPath=$(SetupActionsPath);SetupActionsHash=$(SetupActionsHash);ExtrasRoot=$(ExtrasRoot)</DefineConstants>
   </PropertyGroup>

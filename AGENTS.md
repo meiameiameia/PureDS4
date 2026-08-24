@@ -64,7 +64,7 @@ Never turn build success, protocol tests, a component health check, or test coun
 
 - Baseline: annotated tag `upstream-baseline`, commit `3579450dc8f50a74d9532e711249589c732c460b`. That commit is also `upstream/main` and upstream tag `VIIPERRC4.3`, so this fork currently sits exactly on top of the maintained project's main branch rather than behind it. Re-check that before assuming it still holds; upstream's newer work (for example the native UdeCx backend) lives on branches and draft pull requests.
 - `main` tracks derivative remote `origin/main`; `upstream` is `https://github.com/hbashton/DS4Windows.git`. Preserve upstream history; do not rebase it away.
-- `DS4WindowsWPF.sln` contains the .NET 8 Windows WPF application (`DS4Windows/DS4WinWPF.csproj`) and MSTest project (`DS4WindowsTests/DS4WindowsTests.csproj`). Installer projects under `installer/` are outside the solution.
+- `PureDS4.sln` contains the .NET 8 Windows WPF application (`PureDS4/PureDS4.csproj`) and MSTest project (`PureDS4.Tests/PureDS4.Tests.csproj`). Installer projects under `installer/` are outside the solution.
 - `DS4Windows/App.xaml.cs` is application startup/composition. `DS4Windows/DS4Control/ControlService.cs` owns broad runtime orchestration. `DS4Windows/DS4Control/Mapping.cs` is the input-mapping hot path. `DS4Windows/DS4Library/` and `HidLibrary/` implement controller/HID protocols. `DS4Windows/DS4Control/Viiper/` implements the virtual-output backend. `DS4Windows/DS4Control/DTOXml/` and `BackingStore` in `ScpUtil.cs` own persisted settings/profile formats. `DS4Windows/DS4Forms/` contains WPF views and view models.
 - Generated resource/settings designer files should be regenerated through their source `.resx`/`.settings` workflow, not hand-edited without a specific reason.
 
@@ -73,10 +73,10 @@ Never turn build success, protocol tests, a component health check, or test coun
 Use native Windows/PowerShell tooling and repository-local configuration. `global.json` pins the SDK to `8.0.421` with `rollForward` disabled, so a machine without that exact SDK will fail to restore rather than silently build against another one.
 
 ```powershell
-dotnet restore DS4WindowsWPF.sln
-dotnet build DS4WindowsWPF.sln -c Debug -p:Platform=x64
-dotnet test DS4WindowsWPF.sln -c Debug -p:Platform=x64
-dotnet build DS4WindowsWPF.sln -c Release -p:Platform=x64
+dotnet restore PureDS4.sln
+dotnet build PureDS4.sln -c Debug -p:Platform=x64
+dotnet test PureDS4.sln -c Debug -p:Platform=x64
+dotnet build PureDS4.sln -c Release -p:Platform=x64
 ```
 
 Current baseline on `pt-BR`, after the controller-family removals: Debug x64 builds with 0 errors and 8 unique warnings, all inherited. 596 tests discover, with 593 passed and 3 skipped. The three skipped `LiveProcessCapture*` tests become inconclusive when a suitable live Windows audio session is unavailable. Warning counts must come from a `--no-incremental` build; an incremental build reports zero because nothing recompiles.

@@ -26,7 +26,7 @@ namespace DS4Windows.SetupActions
             Guid.NewGuid().ToString("N");
         private static readonly string InstallerLogRoot = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-            "DS4Windows", "Installer");
+            "PureDS4", "Installer");
         private static readonly string InfrastructureLogPath = Path.Combine(
             InstallerLogRoot, "infrastructure-actions.log");
 
@@ -35,13 +35,13 @@ namespace DS4Windows.SetupActions
         {
             CorrelationId = NormalizeCorrelationId(
                 ReadArgument(args, "--correlation-id"));
-            WriteFallbackLog("=== DS4Windows setup invocation " +
+            WriteFallbackLog("=== PureDS4 setup invocation " +
                 CorrelationId + " started ===");
             try
             {
                 var action = args.FirstOrDefault()?.Trim().ToLowerInvariant() ?? "install";
                 var installRoot = ReadArgument(args, "--install-root") ??
-                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "DS4Windows");
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "PureDS4");
                 var bundleSource = ReadArgument(args, "--bundle-source");
 
                 if (action != "preflight")
@@ -71,14 +71,14 @@ namespace DS4Windows.SetupActions
                     default:
                         throw new ArgumentException("Unknown setup action: " + action);
                 }
-                WriteFallbackLog("=== DS4Windows setup invocation " +
+                WriteFallbackLog("=== PureDS4 setup invocation " +
                     CorrelationId + " completed with exit code " +
                     exitCode + " ===");
                 return exitCode;
             }
             catch (Exception ex)
             {
-                WriteFallbackLog("=== DS4Windows setup invocation " +
+                WriteFallbackLog("=== PureDS4 setup invocation " +
                     CorrelationId + " failed ===" + Environment.NewLine + ex);
                 return 1;
             }
@@ -87,12 +87,12 @@ namespace DS4Windows.SetupActions
         private static int InstallOrRepair(string installRoot,
             string bundleSource, string[] args)
         {
-            var ds4Path = Path.Combine(installRoot, "DS4Windows.exe");
+            var ds4Path = Path.Combine(installRoot, "PureDS4.exe");
             var extrasRoot = Path.Combine(installRoot, "extras");
             var scriptPath = Path.Combine(extrasRoot, "install-viiper-backend.ps1");
             if (!File.Exists(ds4Path) || !File.Exists(scriptPath))
             {
-                throw new FileNotFoundException("The managed DS4Windows installation is incomplete.", scriptPath);
+                throw new FileNotFoundException("The managed PureDS4 installation is incomplete.", scriptPath);
             }
 
             RemoveObsoleteBundledViiperPayloads(installRoot,
@@ -203,7 +203,7 @@ namespace DS4Windows.SetupActions
 
         private static int PreflightLocked()
         {
-            foreach (var processName in new[] { "DS4Windows", "viiper" })
+            foreach (var processName in new[] { "PureDS4", "viiper" })
             {
                 foreach (var process in Process.GetProcessesByName(processName))
                 {
@@ -215,7 +215,7 @@ namespace DS4Windows.SetupActions
                         {
                             throw new InvalidOperationException(
                                 "A process named " + processName + " (PID " +
-                                process.Id + ") is not a verified DS4Windows " +
+                                process.Id + ") is not a verified PureDS4 " +
                                 "package executable. Close it manually before " +
                                 "setup continues. Observed path: " +
                                 (executablePath ?? "<unavailable>"));
@@ -250,12 +250,12 @@ namespace DS4Windows.SetupActions
                 }
 
                 var version = FileVersionInfo.GetVersionInfo(executablePath);
-                if (string.Equals(processName, "DS4Windows",
+                if (string.Equals(processName, "PureDS4",
                         StringComparison.OrdinalIgnoreCase))
                 {
-                    return string.Equals(version.ProductName, "DS4Windows",
+                    return string.Equals(version.ProductName, "PureDS4",
                                StringComparison.OrdinalIgnoreCase) ||
-                           string.Equals(version.FileDescription, "DS4Windows",
+                           string.Equals(version.FileDescription, "PureDS4",
                                StringComparison.OrdinalIgnoreCase);
                 }
                 return string.Equals(version.ProductName, "VIIPER",
@@ -273,7 +273,7 @@ namespace DS4Windows.SetupActions
         {
             var viiper = Path.Combine(installRoot, "VIIPER", "viiper.exe");
             var usbip = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "USBip", "usbip.exe");
-            var healthy = File.Exists(Path.Combine(installRoot, "DS4Windows.exe")) && File.Exists(viiper) && File.Exists(usbip);
+            var healthy = File.Exists(Path.Combine(installRoot, "PureDS4.exe")) && File.Exists(viiper) && File.Exists(usbip);
             return healthy ? 0 : 1;
         }
 
@@ -289,22 +289,22 @@ namespace DS4Windows.SetupActions
         {
             var workingDirectory = Path.GetDirectoryName(ds4Path) ??
                 throw new InvalidOperationException(
-                    "DS4Windows working directory is unavailable.");
+                    "PureDS4 working directory is unavailable.");
             var programsDirectory = Path.Combine(
                 Environment.GetFolderPath(
                     Environment.SpecialFolder.CommonPrograms),
-                "DS4Windows");
+                "PureDS4");
             Directory.CreateDirectory(programsDirectory);
             CreateShellShortcut(Path.Combine(programsDirectory,
-                    "DS4Windows Reworked.lnk"), ds4Path, workingDirectory);
+                    "PureDS4.lnk"), ds4Path, workingDirectory);
             var legacyStartShortcut = Path.Combine(programsDirectory,
-                "DS4Windows.lnk");
+                "PureDS4 (legacy).lnk");
             if (File.Exists(legacyStartShortcut)) File.Delete(legacyStartShortcut);
 
             var desktopPath = Path.Combine(
                 Environment.GetFolderPath(
                     Environment.SpecialFolder.CommonDesktopDirectory),
-                "DS4Windows Reworked.lnk");
+                "PureDS4.lnk");
             if (desktopShortcut)
             {
                 CreateShellShortcut(desktopPath, ds4Path, workingDirectory);
@@ -316,7 +316,7 @@ namespace DS4Windows.SetupActions
             var legacyDesktopPath = Path.Combine(
                 Environment.GetFolderPath(
                     Environment.SpecialFolder.CommonDesktopDirectory),
-                "DS4Windows.lnk");
+                "PureDS4 (legacy).lnk");
             if (File.Exists(legacyDesktopPath)) File.Delete(legacyDesktopPath);
         }
 
@@ -351,18 +351,18 @@ namespace DS4Windows.SetupActions
             var startMenuDirectory = Path.Combine(
                 Environment.GetFolderPath(
                     Environment.SpecialFolder.CommonPrograms),
-                "DS4Windows");
+                "PureDS4");
             var startMenuShortcut = Path.Combine(startMenuDirectory,
-                "DS4Windows Reworked.lnk");
+                "PureDS4.lnk");
             var legacyStartMenuShortcut = Path.Combine(startMenuDirectory,
-                "DS4Windows.lnk");
+                "PureDS4 (legacy).lnk");
             var desktopDirectory =
                 Environment.GetFolderPath(
                     Environment.SpecialFolder.CommonDesktopDirectory);
             var desktopShortcut = Path.Combine(desktopDirectory,
-                "DS4Windows Reworked.lnk");
+                "PureDS4.lnk");
             var legacyDesktopShortcut = Path.Combine(desktopDirectory,
-                "DS4Windows.lnk");
+                "PureDS4 (legacy).lnk");
             foreach (var path in new[] { startMenuShortcut,
                 legacyStartMenuShortcut, desktopShortcut,
                 legacyDesktopShortcut })
@@ -414,7 +414,7 @@ namespace DS4Windows.SetupActions
             }
 
             // USB-IP, HidHide, and FakerInput are shared system drivers. They are
-            // deliberately not removed with DS4Windows; each has its own ARP entry.
+            // deliberately not removed with PureDS4; each has its own ARP entry.
             return 0;
         }
 
@@ -493,7 +493,7 @@ namespace DS4Windows.SetupActions
         private static int RunWithSetupMutex(Func<int> action)
         {
             using (var setupMutex = new Mutex(false,
-                       @"Global\DS4Windows-VIIPER-Setup"))
+                       @"Global\PureDS4-VIIPER-Setup"))
             {
                 var mutexOwned = false;
                 try
@@ -509,7 +509,7 @@ namespace DS4Windows.SetupActions
                     if (!mutexOwned)
                     {
                         WriteFallbackLog(
-                            "Another DS4Windows VIIPER setup owns the global " +
+                            "Another PureDS4 VIIPER setup owns the global " +
                             "setup mutex; returning Windows Installer busy (1618).");
                         return 1618;
                     }
@@ -647,13 +647,13 @@ namespace DS4Windows.SetupActions
             var resumeRoot = Path.Combine(
                 Environment.GetFolderPath(
                     Environment.SpecialFolder.CommonApplicationData),
-                "DS4Windows", "Installer", "resume");
+                "PureDS4", "Installer", "resume");
             EnsureDirectoryPathHasNoReparsePoints(resumeRoot);
             Directory.CreateDirectory(resumeRoot);
             EnsureDirectoryPathHasNoReparsePoints(resumeRoot);
             ProtectResumeDirectory(resumeRoot, targetUser.Sid);
             var stagedBundle = Path.Combine(resumeRoot,
-                "DS4Windows-Reworked_Setup_x64.exe");
+                "PureDS4_Setup_x64.exe");
             if (!string.Equals(Path.GetFullPath(bundleSource),
                     Path.GetFullPath(stagedBundle),
                     StringComparison.OrdinalIgnoreCase))
@@ -672,7 +672,7 @@ namespace DS4Windows.SetupActions
             Directory.CreateDirectory(startupDirectory);
             EnsureDirectoryPathHasNoReparsePoints(startupDirectory);
             var shortcutPath = Path.Combine(startupDirectory,
-                "DS4Windows Reworked Setup Resume.lnk");
+                "PureDS4 Setup Resume.lnk");
             try
             {
                 CreateShortcut(shortcutPath, stagedBundle, "/repair",
@@ -704,7 +704,7 @@ namespace DS4Windows.SetupActions
                            @"SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce",
                            writable: true))
                 {
-                    runOnce?.DeleteValue("DS4WindowsSetupResume", false);
+                    runOnce?.DeleteValue("PureDS4SetupResume", false);
                 }
             }
             catch (Exception ex)
@@ -741,12 +741,12 @@ namespace DS4Windows.SetupActions
             var resumeRoot = Path.Combine(
                 Environment.GetFolderPath(
                     Environment.SpecialFolder.CommonApplicationData),
-                "DS4Windows", "Installer", "resume");
+                "PureDS4", "Installer", "resume");
             try
             {
                 EnsureDirectoryPathHasNoReparsePoints(resumeRoot);
                 var stagedBundle = Path.Combine(resumeRoot,
-                    "DS4Windows-Reworked_Setup_x64.exe");
+                    "PureDS4_Setup_x64.exe");
                 if (File.Exists(stagedBundle) &&
                     (File.GetAttributes(stagedBundle) &
                      FileAttributes.ReparsePoint) == 0)
@@ -839,7 +839,7 @@ namespace DS4Windows.SetupActions
         {
             if (string.IsNullOrWhiteSpace(path) ||
                 !string.Equals(Path.GetFileName(path),
-                    "DS4Windows Setup Resume.lnk",
+                    "PureDS4 Setup Resume.lnk",
                     StringComparison.OrdinalIgnoreCase))
             {
                 return false;
@@ -930,7 +930,7 @@ namespace DS4Windows.SetupActions
 
             var expected = Path.GetFullPath(Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-                "DS4Windows")).TrimEnd(Path.DirectorySeparatorChar);
+                "PureDS4")).TrimEnd(Path.DirectorySeparatorChar);
             var actual = Path.GetFullPath(installRoot)
                 .TrimEnd(Path.DirectorySeparatorChar);
             if (!string.Equals(actual, expected,
@@ -983,7 +983,7 @@ namespace DS4Windows.SetupActions
             var managedPrefix = Path.GetFullPath(installRoot)
                 .TrimEnd(Path.DirectorySeparatorChar) +
                 Path.DirectorySeparatorChar;
-            foreach (var processName in new[] { "DS4Windows", "viiper" })
+            foreach (var processName in new[] { "PureDS4", "viiper" })
             {
                 foreach (var process in Process.GetProcessesByName(processName))
                 {
