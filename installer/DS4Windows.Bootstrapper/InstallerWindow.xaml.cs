@@ -37,23 +37,23 @@ namespace DS4Windows.Bootstrapper
             switch (mode)
             {
                 case InstallerMode.Update:
-                    ModeTitle.Text = "Update DS4Windows Reworked";
+                    ModeTitle.Text = "Update PureDS4";
                     ModeDescription.Text = "A managed DS4Windows installation was found. It will be upgraded in place while profiles and settings are preserved.";
                     ActionButton.Content = "Update";
                     break;
                 case InstallerMode.Repair:
-                    ModeTitle.Text = "Repair DS4Windows Reworked";
+                    ModeTitle.Text = "Repair PureDS4";
                     ModeDescription.Text = "This version is already installed. Setup will verify and repair its managed components.";
                     ActionButton.Content = "Repair";
                     break;
                 case InstallerMode.Uninstall:
-                    ModeTitle.Text = "Uninstall DS4Windows Reworked";
-                    ModeDescription.Text = "DS4Windows Reworked and its managed VIIPER installation will be removed. Profiles, settings, and shared system drivers are preserved.";
+                    ModeTitle.Text = "Uninstall PureDS4";
+                    ModeDescription.Text = "PureDS4 and its managed VIIPER installation will be removed. Profiles, settings, and shared system drivers are preserved.";
                     ActionButton.Content = "Uninstall";
                     OptionsCard.Visibility = Visibility.Collapsed;
                     break;
                 default:
-                    ModeTitle.Text = "Install DS4Windows Reworked";
+                    ModeTitle.Text = "Install PureDS4";
                     ModeDescription.Text = "Everything needed for a standard x64 installation is included and works offline.";
                     ActionButton.Content = "Install";
                     break;
@@ -94,7 +94,7 @@ namespace DS4Windows.Bootstrapper
         internal void ShowApplying()
         {
             OverallProgress.IsIndeterminate = false;
-            ProgressTitle.Text = mode == InstallerMode.Uninstall ? "Removing DS4Windows Reworked…" : "Installing DS4Windows Reworked…";
+            ProgressTitle.Text = mode == InstallerMode.Uninstall ? "Removing PureDS4…" : "Installing PureDS4…";
             ProgressDetail.Text = "Administrator permission is requested once";
         }
 
@@ -103,7 +103,7 @@ namespace DS4Windows.Bootstrapper
             switch (packageId)
             {
                 case "CloseRunningApplications": ProgressDetail.Text = "Closing running DS4Windows and VIIPER processes"; break;
-                case "DS4WindowsMsi": ProgressDetail.Text = "Installing DS4Windows Reworked"; break;
+                case "DS4WindowsMsi": ProgressDetail.Text = "Installing PureDS4"; break;
                 case "ViiperUsbipSetup": ProgressDetail.Text = "Verifying VIIPER and USB-IP"; break;
                 case "HidHide": ProgressDetail.Text = "Installing optional HidHide"; break;
                 case "FakerInput": ProgressDetail.Text = "Installing optional FakerInput"; break;
@@ -131,7 +131,7 @@ namespace DS4Windows.Bootstrapper
             applying = false;
             if (action == LaunchAction.Uninstall)
             {
-                CompleteTitle.Text = "DS4Windows Reworked was removed";
+                CompleteTitle.Text = "PureDS4 was removed";
                 CompleteDescription.Text = "Profiles, settings, and shared system drivers were preserved.";
                 LaunchCheckBox.Visibility = Visibility.Collapsed;
             }
