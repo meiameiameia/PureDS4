@@ -43,7 +43,7 @@ def emit_directory(lines: list[str], root: Path, directory: Path, files: list[Pa
     for file_path in sorted((p for p in files if p.parent == directory), key=lambda p: p.name.lower()):
         rel = file_path.relative_to(root).as_posix()
         component_id = wix_id("cmp", rel)
-        file_id = "fil_DS4Windows_exe" if rel.lower() == "ds4windows.exe" else wix_id("fil", rel)
+        file_id = "fil_PureDS4_exe" if rel.lower() == "pureds4.exe" else wix_id("fil", rel)
         guid = str(uuid.uuid5(NAMESPACE, rel.lower())).upper()
         lines.append(f'{indent}<Component Id="{component_id}" Guid="{guid}">')
         lines.append(f'{indent}  <File Id="{file_id}" Source="$(var.PublishRoot)\\{xml(rel.replace("/", chr(92)))}" KeyPath="yes" />')
@@ -78,7 +78,7 @@ def main() -> int:
     args = parser.parse_args()
 
     root = args.publish_root.absolute()
-    if not (root / "DS4Windows.exe").is_file():
+    if not (root / "PureDS4.exe").is_file():
         raise SystemExit(f"Publish root is incomplete: {root}")
     if is_reparse_point(root):
         raise SystemExit(f"Publish root cannot be a reparse point: {root}")
@@ -100,7 +100,7 @@ def main() -> int:
         raise SystemExit("Publish tree contains case-insensitive duplicate paths.")
     manifest = {
         "schema": 1,
-        "product": "DS4Windows",
+        "product": "PureDS4",
         "version": args.version,
         "architecture": "x64",
         "files": [

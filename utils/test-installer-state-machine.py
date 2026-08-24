@@ -1,4 +1,4 @@
-"""Deterministic release-gate simulation for DS4Windows installer ownership.
+"""Deterministic release-gate simulation for PureDS4 installer ownership.
 
 This deliberately models transitions rather than launching a kernel-driver
 installer on the build machine. Source-contract checks below tie every modeled
@@ -133,7 +133,7 @@ def main() -> None:
     )
     require(
         bundle,
-        'Tag="DS4WindowsManagedV2"',
+        'Tag="PureDS4ManagedV1"',
         'Id="PostUninstallCleanup"',
         'Id="ViiperUsbipUninstall"',
         'Name="DS4Windows.SetupActions.InfrastructureUninstall.exe"',

@@ -17,7 +17,7 @@ namespace DS4Windows.SetupActions
 {
     internal static class Program
     {
-        private const string RegistryKeyPath = @"SOFTWARE\DS4Windows";
+        private const string RegistryKeyPath = @"SOFTWARE\PureDS4";
         private const string InfrastructureVersion =
             "VIIPER-0.1.0+USBIP-0.9.7.7";
         private const string CurrentBundledViiperName =

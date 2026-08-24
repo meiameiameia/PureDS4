@@ -12,8 +12,8 @@ from pathlib import Path, PurePosixPath
 
 
 REQUIRED_PUBLISH_FILES = {
-    "DS4Windows.exe",
-    "DS4Windows.release",
+    "PureDS4.exe",
+    "PureDS4.release",
     "extras/install-viiper-backend.ps1",
     "extras/VIIPER-0.1.0-x64.exe",
     "extras/VIIPER-0.1.0-x64.exe.sha256",
@@ -89,16 +89,16 @@ def main() -> int:
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
     if (
         manifest.get("schema") != 1
-        or manifest.get("product") != "DS4Windows"
+        or manifest.get("product") != "PureDS4"
         or manifest.get("architecture") != "x64"
         or not isinstance(manifest.get("files"), list)
     ):
         raise SystemExit("Installer package manifest metadata is invalid.")
-    release_id = (args.publish_root / "DS4Windows.release").read_text(
+    release_id = (args.publish_root / "PureDS4.release").read_text(
         encoding="utf-8-sig"
     ).strip()
     if manifest.get("version") != release_id:
-        raise SystemExit("Package manifest version does not match DS4Windows.release.")
+        raise SystemExit("Package manifest version does not match PureDS4.release.")
 
     manifest_paths = [entry.get("path") for entry in manifest["files"]]
     if any(not isinstance(path, str) or not path for path in manifest_paths):
@@ -330,7 +330,7 @@ def main() -> int:
     for contract in [
         '<MajorUpgrade',
         'Scope="perMachine"',
-        'Root="HKLM" Key="Software\\DS4Windows"',
+        'Root="HKLM" Key="Software\\PureDS4"',
     ]:
         if contract not in product:
             raise SystemExit("MSI upgrade contract missing: " + contract)
@@ -578,7 +578,7 @@ def main() -> int:
     for contract in [
         "is_reparse_point",
         "Refusing to replace output containing a reparse point",
-        ".ds4windows-managed-files.txt",
+        ".pureds4-managed-files.txt",
         'Path(__file__).resolve().with_name("inject_deps_path.py")',
     ]:
         if contract not in post_build:

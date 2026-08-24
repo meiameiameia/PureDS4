@@ -49,7 +49,7 @@ namespace DS4WinWPF
         public static bool HasTaskEntry()
         {
             using TaskService ts = new TaskService();
-            using Task tasker = ts.GetTask(@"\RunDS4Windows");
+            using Task tasker = ts.GetTask(@"\RunPureDS4");
             return tasker != null && TaskTargetsCurrentExecutable(tasker);
         }
 
@@ -152,7 +152,7 @@ namespace DS4WinWPF
         public static void LaunchOldTask()
         {
             TaskService ts = new TaskService();
-            Task tasker = ts.GetTask(@"\RunDS4Windows");
+            Task tasker = ts.GetTask(@"\RunPureDS4");
             if (tasker != null)
             {
                 tasker.Run("");

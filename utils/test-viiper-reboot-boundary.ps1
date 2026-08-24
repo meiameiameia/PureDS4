@@ -70,8 +70,8 @@ try {
         param([string]$message, $color)
     }
     $script:FakeStartupTasks = @{
-        RunVIIPER = $true
-        RunDS4Windows = $true
+        RunPureDS4VIIPER = $true
+        RunPureDS4 = $true
     }
     function Test-HighestLogonTask {
         param(
@@ -173,18 +173,18 @@ try {
     Suspend-StartupTasksUntilInfrastructureReady `
         (Join-Path $testRoot "viiper.exe") `
         (Join-Path $testRoot "DS4Windows.exe")
-    if ($script:FakeStartupTasks.RunVIIPER -or
-            $script:FakeStartupTasks.RunDS4Windows) {
+    if ($script:FakeStartupTasks.RunPureDS4VIIPER -or
+            $script:FakeStartupTasks.RunPureDS4) {
         throw "Startup tasks could race phase-two USB-IP setup after reboot."
     }
 
-    $script:FakeStartupTasks.RunVIIPER = $true
-    $script:FakeStartupTasks.RunDS4Windows = $true
+    $script:FakeStartupTasks.RunPureDS4VIIPER = $true
+    $script:FakeStartupTasks.RunPureDS4 = $true
     Set-InfrastructureStartupFailClosed `
         (Join-Path $testRoot "viiper.exe") `
         (Join-Path $testRoot "DS4Windows.exe")
-    if ($script:FakeStartupTasks.RunVIIPER -or
-            $script:FakeStartupTasks.RunDS4Windows) {
+    if ($script:FakeStartupTasks.RunPureDS4VIIPER -or
+            $script:FakeStartupTasks.RunPureDS4) {
         throw "Failed setup could leave an owned startup task enabled."
     }
 

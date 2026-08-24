@@ -44,7 +44,7 @@ namespace DS4Windows.Bootstrapper
                 using (var machine = RegistryKey.OpenBaseKey(
                            RegistryHive.LocalMachine,
                            RegistryView.Registry64))
-                using (var key = machine.OpenSubKey(@"SOFTWARE\DS4Windows"))
+                using (var key = machine.OpenSubKey(@"SOFTWARE\PureDS4"))
                 {
                     if (!string.Equals(key?.GetValue("InfrastructureVersion") as string,
                             ExpectedMarker, StringComparison.Ordinal) ||

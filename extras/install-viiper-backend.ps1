@@ -2450,18 +2450,18 @@ try {
             Unregister-ScheduledTask -TaskPath "\" -TaskName "RunPureDS4VIIPER" `
                 -Confirm:$false `
                 -ErrorAction SilentlyContinue
-            throw "Could not register the elevated RunDS4Windows startup task."
+            throw "Could not register the elevated RunPureDS4 startup task."
         }
         Write-SetupLog (
-            "Registered and verified enabled elevated RunVIIPER and " +
-            "RunDS4Windows tasks for $script:TargetUserName before driver setup."
+            "Registered and verified enabled elevated RunPureDS4VIIPER and " +
+            "RunPureDS4 tasks for $script:TargetUserName before driver setup."
         ) Green
     }
     else {
         Unregister-ScheduledTask -TaskPath "\" -TaskName "RunPureDS4VIIPER" `
             -Confirm:$false `
             -ErrorAction SilentlyContinue
-        Unregister-ScheduledTask -TaskPath "\" -TaskName "RunDS4Windows" `
+        Unregister-ScheduledTask -TaskPath "\" -TaskName "RunPureDS4" `
             -Confirm:$false `
             -ErrorAction SilentlyContinue
         Write-SetupLog (
@@ -2686,9 +2686,9 @@ try {
         }
 
         if ($script:RunAtStartupEnabled) {
-            if (-not (Test-HighestLogonTask "RunVIIPER" $viiperPath `
+            if (-not (Test-HighestLogonTask "RunPureDS4VIIPER" $viiperPath `
                         "server" (Split-Path -Parent $viiperPath)) -or
-                    -not (Test-HighestLogonTask "RunDS4Windows" `
+                    -not (Test-HighestLogonTask "RunPureDS4" `
                         $script:Ds4WindowsRestartPath "-m" `
                         (Split-Path -Parent $script:Ds4WindowsRestartPath))) {
                 throw "A verified startup task changed during setup."
@@ -2699,7 +2699,7 @@ try {
             $unexpectedTasks = @(
                 Get-ScheduledTask -TaskPath "\" -ErrorAction SilentlyContinue |
                     Where-Object { $_.TaskName -in @(
-                        "RunVIIPER", "RunDS4Windows") }
+                        "RunPureDS4VIIPER", "RunPureDS4") }
             )
             if ($unexpectedTasks.Count -gt 0) {
                 throw "A startup task was recreated while Run at Startup is disabled."
@@ -2732,7 +2732,7 @@ try {
     $viiperStarted = $false
     if ($script:UsbipRuntimeReady -and -not $script:RebootRecommended) {
         $viiperStarted = if ($script:RunAtStartupEnabled) {
-            $startedFromTask = Start-AndVerifyViiper "RunVIIPER"
+            $startedFromTask = Start-AndVerifyViiper "RunPureDS4VIIPER"
             if (-not $startedFromTask) {
                 Write-SetupLog (
                     "The verified startup task did not start VIIPER in this " +
@@ -2786,7 +2786,7 @@ try {
             }
             if ($script:RunAtStartupEnabled) {
                 Start-ScheduledTask -TaskPath "\" `
-                    -TaskName "RunDS4Windows" -ErrorAction Stop
+                    -TaskName "RunPureDS4" -ErrorAction Stop
             }
             else {
                 Start-Process -FilePath $script:Ds4WindowsRestartPath `

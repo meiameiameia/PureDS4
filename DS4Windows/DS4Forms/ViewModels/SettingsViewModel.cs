@@ -498,7 +498,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             }
 
             runAtStartup = runStartProg || runStartTask;
-            // RunDS4Windows is host-owned infrastructure. The application may
+            // RunPureDS4 is host-owned infrastructure. The application may
             // inspect it, but only the per-user Startup shortcut remains an
             // application-managed startup option.
             canWriteTask = false;
