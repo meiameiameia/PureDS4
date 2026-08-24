@@ -21,7 +21,7 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <Image Source="/PureDS4;component/Resources/DS4W.ico"
+            <Image Source="/PureDS4;component/Resources/AppIcon.png"
                    Width="48" Height="48" Margin="0,0,12,0"
                    AutomationProperties.Name="DS4Windows Reworked Mapped Pad icon" />
             <StackPanel Grid.Column="1">

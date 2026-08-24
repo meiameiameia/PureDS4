@@ -20,5 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="..\..\DS4Windows\DS4W.ico" Link="DS4W.ico" />
+    <!-- The .ico stores every frame as PNG, which the WPF ICO decoder
+         renders poorly at display sizes. Ship the real PNG for on-screen
+         use and keep the .ico for the window and shell icon. -->
+    <Resource Include="..\..\DS4Windows\Resources\AppIcon.png" Link="AppIcon.png" />
   </ItemGroup>
 </Project>

@@ -77,15 +77,7 @@
     <Grid Grid.Row="0" Margin="0,0,0,20">
       <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
       <Border Width="58" Height="58" CornerRadius="2" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-        <Image Width="42" Height="42" Stretch="Uniform">
-          <Image.Source>
-            <!-- Without an explicit decode size the ICO decoder selects the
-                 smallest frame and scales it up, which reads as a blurry
-                 icon. Decode at twice the layout size so a high-DPI display
-                 still gets a sharp frame. -->
-            <BitmapImage UriSource="DS4W.ico" DecodePixelWidth="84" />
-          </Image.Source>
-        </Image>
+        <Image Source="AppIcon.png" Width="42" Height="42" Stretch="Uniform" />
       </Border>
       <StackPanel Grid.Column="1" Margin="16,2,0,0">
         <TextBlock Text="PureDS4" FontSize="25" FontWeight="SemiBold" />
