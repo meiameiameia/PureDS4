@@ -126,7 +126,7 @@ namespace DS4WinWPF.DS4Forms
             }
 
             var resourceUri = new Uri(
-                $"/DS4Windows;component/Resources/{resourceName}",
+                $"/PureDS4;component/Resources/{resourceName}",
                 UriKind.Relative);
             System.Windows.Resources.StreamResourceInfo resource =
                 Application.GetResourceStream(resourceUri);

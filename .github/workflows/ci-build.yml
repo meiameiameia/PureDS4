@@ -117,7 +117,7 @@ jobs:
         shell: pwsh
         run: |
           .\installer\build-installer.ps1 `
-            -PublishRoot ".\bin\${{ matrix.platform }}\Release\DS4Windows" `
+            -PublishRoot ".\bin\${{ matrix.platform }}\Release\PureDS4" `
             -ProductVersion "${{ env.PRODUCT_VERSION }}" `
             -BundleVersion "${{ env.BUNDLE_VERSION }}" `
             -DisplayVersion "${{ env.VERSION }}" `
@@ -127,7 +127,7 @@ jobs:
       - name: Validate offline installer layout plan
         shell: pwsh
         run: |
-          $installer = ".\bin\${{ matrix.platform }}\Release\installer\DS4Windows-Reworked_${{ env.VERSION }}_Setup_${{ matrix.platform }}.exe"
+          $installer = ".\bin\${{ matrix.platform }}\Release\installer\PureDS4_${{ env.VERSION }}_Setup_${{ matrix.platform }}.exe"
           $layout = ".\bin\${{ matrix.platform }}\Release\installer-layout"
           $process = Start-Process -FilePath $installer `
             -ArgumentList "/layout `"$layout`" /quiet" `
@@ -142,9 +142,9 @@ jobs:
       - name: Exercise MSI install, repair, and uninstall lifecycle
         shell: pwsh
         run: |
-          $msi = (Resolve-Path ".\installer\DS4Windows.Package\bin\x64\Release\DS4Windows-Reworked_${{ env.PRODUCT_VERSION }}_x64.msi").Path
+          $msi = (Resolve-Path ".\installer\DS4Windows.Package\bin\x64\Release\PureDS4_${{ env.PRODUCT_VERSION }}_x64.msi").Path
           $msiexec = Join-Path $env:SystemRoot "System32\msiexec.exe"
-          $logRoot = Join-Path $env:RUNNER_TEMP "ds4windows-msi-lifecycle"
+          $logRoot = Join-Path $env:RUNNER_TEMP "pureds4-msi-lifecycle"
           New-Item -ItemType Directory -Path $logRoot -Force | Out-Null
           function Invoke-Msi([string]$arguments, [string]$phase) {
             $process = Start-Process -FilePath $msiexec `
@@ -156,7 +156,7 @@ jobs:
           }
           try {
             Invoke-Msi "/i `"$msi`"" "install"
-            if (-not (Test-Path "$env:ProgramFiles\DS4Windows\DS4Windows.exe")) {
+            if (-not (Test-Path "$env:ProgramFiles\PureDS4\PureDS4.exe")) {
               throw "MSI install completed without its application keypath."
             }
             Invoke-Msi "/fa `"$msi`"" "repair"
@@ -164,9 +164,9 @@ jobs:
           finally {
             Invoke-Msi "/x `"$msi`"" "uninstall"
           }
-          if (Test-Path "HKLM:\SOFTWARE\DS4Windows") {
+          if (Test-Path "HKLM:\SOFTWARE\PureDS4") {
             $installPath = Get-ItemPropertyValue `
-              -Path "HKLM:\SOFTWARE\DS4Windows" -Name InstallPath `
+              -Path "HKLM:\SOFTWARE\PureDS4" -Name InstallPath `
               -ErrorAction SilentlyContinue
             if ($installPath) {
               throw "MSI uninstall left its machine registration behind."
@@ -177,22 +177,22 @@ jobs:
         id: upload_portable
         uses: actions/upload-artifact@v4
         with:
-          name: DS4Windows-Reworked_${{ env.VERSION }}_${{ matrix.platform }}_Portable
-          path: .\bin\${{ matrix.platform }}\Release\DS4Windows-Reworked_${{ env.VERSION }}_${{ matrix.platform }}.zip
+          name: PureDS4_${{ env.VERSION }}_${{ matrix.platform }}_Portable
+          path: .\bin\${{ matrix.platform }}\Release\PureDS4_${{ env.VERSION }}_${{ matrix.platform }}.zip
           if-no-files-found: error
 
       - name: Upload standard installer EXE
         id: upload_installer
         uses: actions/upload-artifact@v4
         with:
-          name: DS4Windows-Reworked_${{ env.VERSION }}_Setup_${{ matrix.platform }}
-          path: .\bin\${{ matrix.platform }}\Release\installer\DS4Windows-Reworked_${{ env.VERSION }}_Setup_${{ matrix.platform }}.exe
+          name: PureDS4_${{ env.VERSION }}_Setup_${{ matrix.platform }}
+          path: .\bin\${{ matrix.platform }}\Release\installer\PureDS4_${{ env.VERSION }}_Setup_${{ matrix.platform }}.exe
           if-no-files-found: error
 
       - name: Publish artifact link to run summary
         shell: bash
         run: |
-          echo "### DS4Windows Reworked ${{ matrix.platform }} build" >> "$GITHUB_STEP_SUMMARY"
+          echo "### PureDS4 ${{ matrix.platform }} build" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "Version: \`${{ env.VERSION }}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"

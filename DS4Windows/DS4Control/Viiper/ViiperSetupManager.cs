@@ -208,7 +208,7 @@ namespace DS4Windows
             "FakerInput_0.1.0_x64.msi";
         private const string TerminateForeignViiperArgument =
             "--terminate-foreign-viiper";
-        private const string ViiperStartupTaskName = "RunVIIPER";
+        private const string ViiperStartupTaskName = "RunPureDS4VIIPER";
         private const int ForeignViiperHelperTimeoutMilliseconds = 15000;
         private const string UsbipRelativePath = @"USBip\usbip.exe";
         private const int UsbipProbeTimeoutMilliseconds = 3000;
@@ -938,13 +938,13 @@ namespace DS4Windows
                 !Directory.Exists(sourceRoot))
             {
                 throw new InvalidOperationException(
-                    "The DS4Windows release package root is missing.");
+                    "The PureDS4 release package root is missing.");
             }
             EnsurePathDoesNotTraverseReparsePoints(sourceRoot,
                 requireExisting: true);
 
             string manifestPath = Path.Combine(sourceRoot,
-                ".ds4windows-managed-files.txt");
+                ".pureds4-managed-files.txt");
             EnsurePathDoesNotTraverseReparsePoints(manifestPath,
                 requireExisting: true);
             string stagedRoot = Path.Combine(setupDirectory, "package");
@@ -1040,7 +1040,7 @@ namespace DS4Windows
             }
 
             string stagedManifest = Path.Combine(stagedRoot,
-                ".ds4windows-managed-files.txt");
+                ".pureds4-managed-files.txt");
             using (FileStream target = new FileStream(stagedManifest,
                        FileMode.CreateNew, FileAccess.Write, FileShare.None))
             using (StreamWriter writer = new StreamWriter(target,
@@ -1058,7 +1058,7 @@ namespace DS4Windows
             string stagedExtras = Path.Combine(stagedRoot, "extras");
             string[] requiredOfflineFiles =
             {
-                Path.Combine(stagedRoot, "DS4Windows.exe"),
+                Path.Combine(stagedRoot, "PureDS4.exe"),
                 Path.Combine(stagedExtras, InstallerScriptName),
                 Path.Combine(stagedExtras, BundledViiperName),
                 Path.Combine(stagedExtras, BundledViiperHashName),
@@ -1466,7 +1466,7 @@ namespace DS4Windows
                     service.GetTask(@"\" + ViiperStartupTaskName);
                 if (task == null)
                 {
-                    failureMessage = "RunVIIPER is not registered.";
+                    failureMessage = "RunPureDS4VIIPER is not registered.";
                     return false;
                 }
 
@@ -1483,7 +1483,7 @@ namespace DS4Windows
                         definition.Actions[0] is not ExecAction action ||
                         definition.Triggers[0] is not LogonTrigger trigger)
                     {
-                        failureMessage = "RunVIIPER does not have the exact " +
+                        failureMessage = "RunPureDS4VIIPER does not have the exact " +
                             "enabled, elevated logon-task shape.";
                         return false;
                     }
@@ -1506,7 +1506,7 @@ namespace DS4Windows
                             currentSid, StringComparison.OrdinalIgnoreCase));
                     if (!valid)
                     {
-                        failureMessage = "RunVIIPER does not target the " +
+                        failureMessage = "RunPureDS4VIIPER does not target the " +
                             "selected backend for the current Windows account.";
                     }
 
@@ -1515,7 +1515,7 @@ namespace DS4Windows
             }
             catch (Exception ex)
             {
-                failureMessage = "RunVIIPER could not be verified: " +
+                failureMessage = "RunPureDS4VIIPER could not be verified: " +
                     ex.Message;
                 return false;
             }
@@ -1657,7 +1657,7 @@ namespace DS4Windows
             conflictMessage = "VIIPER startup blocked: another viiper.exe " +
                 $"is not the selected copy at {canonicalPath} " +
                 $"({string.Join("; ", conflicts)}). Close it or approve the " +
-                "administrator prompt so DS4Windows can stop it safely.";
+                "administrator prompt so PureDS4 can stop it safely.";
             return false;
         }
 

@@ -28,15 +28,15 @@ if not target_dir.is_dir() or is_reparse_point(target_dir):
     raise SystemExit(f"Publish directory is missing or unsafe: {target_dir}")
 
 
-# A published DS4Windows build is an offline installer. Fail package
+# A published PureDS4 build is an offline installer. Fail package
 # composition if any required runtime or installer payload is absent instead
 # of producing an archive that later needs a network recovery path.
 #
 # The self-contained single-file publish bundles the runtime, including
-# coreclr and hostfxr, inside DS4Windows.exe. Only the native libraries that
+# coreclr and hostfxr, inside PureDS4.exe. Only the native libraries that
 # cannot be bundled stay beside it, so those are what this check can see.
 required_offline_files = (
-    "DS4Windows.exe",
+    "PureDS4.exe",
     "D3DCompiler_47_cor3.dll",
     "PenImc_cor3.dll",
     "PresentationNative_cor3.dll",
@@ -59,7 +59,7 @@ missing_offline_files = [
 if missing_offline_files:
     missing = ", ".join(missing_offline_files)
     raise FileNotFoundError(
-        f"Cannot compose the offline DS4Windows package; missing: {missing}"
+        f"Cannot compose the offline PureDS4 package; missing: {missing}"
     )
 
 
@@ -79,12 +79,12 @@ viiper_hash_path.write_text(
 )
 
 # A single-file publish bundles the managed assemblies, the satellite
-# resource assemblies, and the dependency manifest inside DS4Windows.exe, so
+# resource assemblies, and the dependency manifest inside PureDS4.exe, so
 # neither the language layout nor the dependency-path rewrite below has
 # anything on disk to act on. Detect the layout from the loose application
 # assembly rather than guessing, so a multi-file publish still gets both
 # steps and still fails loudly when a payload is genuinely missing.
-is_single_file_publish = not (target_dir / "DS4Windows.dll").is_file()
+is_single_file_publish = not (target_dir / "PureDS4.dll").is_file()
 
 langs = ["ar", "cs", "de", "el", "es", "fi", "fr", "he", "hu-HU", "idn", "it", "ja", "ms",
          "nl", "pl", "pt", "pt-BR", "ru", "se", "tr", "uk-UA", "vi", "zh-Hans", "zh-Hant", "zh-CN"]
@@ -127,7 +127,7 @@ if not is_single_file_publish:
     lang_script = Path(__file__).resolve().with_name("inject_deps_path.py")
     if not lang_script.is_file():
         raise FileNotFoundError(f"Dependency-path helper is missing: {lang_script}")
-    deps_json_path = target_dir / "DS4Windows.deps.json"
+    deps_json_path = target_dir / "PureDS4.deps.json"
     if not deps_json_path.is_file():
         raise FileNotFoundError(
             f"Multi-file publish is missing its dependency manifest: {deps_json_path}"
@@ -138,13 +138,13 @@ if not is_single_file_publish:
 # packages. The numeric Windows file version cannot distinguish an RC from a
 # stable build, so Settings and the updater use this marker to include the
 # installed prerelease notes without exposing prereleases to stable users.
-release_marker = target_dir / "DS4Windows.release"
+release_marker = target_dir / "PureDS4.release"
 release_marker.write_text(version.strip() + "\n", encoding="utf-8")
 
 # Record every file owned by this package. DS4Updater uses this manifest on the
 # next update to remove package files that no longer ship, without touching
 # profiles, settings, plugins, or other user-created content.
-manifest_name = ".ds4windows-managed-files.txt"
+manifest_name = ".pureds4-managed-files.txt"
 manifest_path = target_dir / manifest_name
 package_entries = list(target_dir.rglob("*"))
 reparse_entry = next(
@@ -165,8 +165,8 @@ if len({path.casefold() for path in managed_files}) != len(managed_files):
 manifest_path.write_text("\n".join(managed_files) + "\n", encoding="utf-8")
 
 
-# rename target dir (net8.0-windows) to DS4Windows
-renamed_dir = target_dir.parent / "DS4Windows"
+# rename target dir (net8.0-windows) to PureDS4
+renamed_dir = target_dir.parent / "PureDS4"
 if renamed_dir.exists():
     if is_reparse_point(renamed_dir):
         raise SystemExit(f"Refusing to replace reparse-point output: {renamed_dir}")
@@ -185,12 +185,12 @@ os.rename(target_dir, renamed_dir)
 
 # create a zip
 arch = target_dir.parents[1].name
-zip_name = f"DS4Windows-Reworked_{version}_{arch}"
+zip_name = f"PureDS4_{version}_{arch}"
 target_zip_path = target_dir.parent / f"{zip_name}.zip"
 if target_zip_path.exists():
     os.remove(target_zip_path)
 
-# Archive only the newly composed DS4Windows directory. Using the whole
+# Archive only the newly composed PureDS4 directory. Using the whole
 # Release directory could recursively include an older ZIP from a prior local
 # build and silently double the artifact size.
 zip_dir = shutil.make_archive(

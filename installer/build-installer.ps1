@@ -78,7 +78,7 @@ try {
     }
     if (-not $buildMutexOwned) {
         throw (
-            "Another DS4Windows installer composition is already running. " +
+            "Another PureDS4 installer composition is already running. " +
             "Wait for that build to finish instead of overlapping WiX/MSI validation."
         )
     }
@@ -145,18 +145,18 @@ if (-not $SkipApplicationPublish) {
         -p:AssemblyVersion=$ProductVersion -p:FileVersion=$ProductVersion `
         -p:Version=$ProductVersion -p:InformationalVersion=$DisplayVersion `
         -o $publishPath
-    if ($LASTEXITCODE -ne 0) { throw "DS4Windows publish failed." }
+    if ($LASTEXITCODE -ne 0) { throw "PureDS4 publish failed." }
 }
-if (-not (Test-Path -LiteralPath (Join-Path $publishPath "DS4Windows.exe") -PathType Leaf)) {
-    throw "DS4Windows publish output is incomplete: $publishPath"
+if (-not (Test-Path -LiteralPath (Join-Path $publishPath "PureDS4.exe") -PathType Leaf)) {
+    throw "PureDS4 publish output is incomplete: $publishPath"
 }
-Invoke-SignAndVerify (Join-Path $publishPath "DS4Windows.exe")
+Invoke-SignAndVerify (Join-Path $publishPath "PureDS4.exe")
 # VIIPER is an immutable upstream release payload. Its compiled-in SHA-256
 # and generated package sidecar are validated below; signing it here would
-# mutate the executable after DS4Windows has pinned that identity.
-$releaseMarker = Join-Path $publishPath "DS4Windows.release"
+# mutate the executable after PureDS4 has pinned that identity.
+$releaseMarker = Join-Path $publishPath "PureDS4.release"
 if (-not (Test-Path -LiteralPath $releaseMarker -PathType Leaf)) {
-    throw "DS4Windows publish output has no release identity: $releaseMarker"
+    throw "PureDS4 publish output has no release identity: $releaseMarker"
 }
 $publishedRelease = (Get-Content -LiteralPath $releaseMarker -Raw).Trim()
 if (-not [string]::Equals($publishedRelease, $DisplayVersion,
@@ -197,9 +197,9 @@ $packageProject = Join-Path $repoRoot "installer\DS4Windows.Package\DS4Windows.P
     -p:RestoreLockedMode=true `
     -p:Version=$ProductVersion -p:ProductVersion=$ProductVersion `
     -p:PublishRoot=$publishPath
-if ($LASTEXITCODE -ne 0) { throw "DS4Windows MSI build failed." }
+if ($LASTEXITCODE -ne 0) { throw "PureDS4 MSI build failed." }
 
-$msiPath = Join-Path $repoRoot "installer\DS4Windows.Package\bin\x64\Release\DS4Windows-Reworked_${ProductVersion}_x64.msi"
+$msiPath = Join-Path $repoRoot "installer\DS4Windows.Package\bin\x64\Release\PureDS4_${ProductVersion}_x64.msi"
 Invoke-SignAndVerify $msiPath
 $setupActionsHash = (Get-FileHash -LiteralPath $setupActions -Algorithm SHA256).Hash
 if ($setupActionsHash -notmatch '^[0-9A-F]{64}$') {
@@ -214,11 +214,11 @@ $bundleProject = Join-Path $repoRoot "installer\DS4Windows.Bundle\DS4Windows.Bun
     -p:MsiPath=$msiPath -p:BootstrapperRoot=$baRoot `
     -p:SetupActionsPath=$setupActions -p:SetupActionsHash=$setupActionsHash `
     -p:ExtrasRoot=$extrasRoot
-if ($LASTEXITCODE -ne 0) { throw "DS4Windows Burn bundle build failed." }
+if ($LASTEXITCODE -ne 0) { throw "PureDS4 Burn bundle build failed." }
 
-$builtInstaller = Join-Path $repoRoot "installer\DS4Windows.Bundle\bin\x64\Release\DS4Windows-Reworked_${DisplayVersion}_Setup_x64.exe"
+$builtInstaller = Join-Path $repoRoot "installer\DS4Windows.Bundle\bin\x64\Release\PureDS4_${DisplayVersion}_Setup_x64.exe"
 New-Item -ItemType Directory -Path $outputPath -Force | Out-Null
-$finalInstaller = Join-Path $outputPath "DS4Windows-Reworked_${DisplayVersion}_Setup_x64.exe"
+$finalInstaller = Join-Path $outputPath "PureDS4_${DisplayVersion}_Setup_x64.exe"
 $finalManifest = Join-Path $outputPath "package-manifest.json"
 $publishId = [Guid]::NewGuid().ToString("N")
 $pendingInstaller = $finalInstaller + ".pending-" + $publishId

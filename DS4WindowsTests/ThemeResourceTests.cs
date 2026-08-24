@@ -24,19 +24,19 @@ namespace DS4WindowsTests
                     var defaultTheme = new ResourceDictionary();
                     application.Resources.MergedDictionaries.Add(defaultTheme);
                     defaultTheme.Source = new Uri(
-                        "/DS4Windows;component/DS4Forms/Themes/DefaultTheme.xaml",
+                        "/PureDS4;component/DS4Forms/Themes/DefaultTheme.xaml",
                         UriKind.Relative);
 
                     var foundation = new ResourceDictionary();
                     application.Resources.MergedDictionaries.Add(foundation);
                     foundation.Source = new Uri(
-                        "/DS4Windows;component/DS4Forms/Themes/Foundation.xaml",
+                        "/PureDS4;component/DS4Forms/Themes/Foundation.xaml",
                         UriKind.Relative);
 
                     var bridgeStyles = new ResourceDictionary();
                     application.Resources.MergedDictionaries.Add(bridgeStyles);
                     bridgeStyles.Source = new Uri(
-                        "/DS4Windows;component/DS4Forms/Themes/BridgeShellStyles.xaml",
+                        "/PureDS4;component/DS4Forms/Themes/BridgeShellStyles.xaml",
                         UriKind.Relative);
 
                     Assert.IsNotNull(application.TryFindResource(
@@ -107,11 +107,11 @@ namespace DS4WindowsTests
 
                     application.Resources.MergedDictionaries.Clear();
                     LoadDictionary(application,
-                        "/DS4Windows;component/DS4Forms/Themes/DarkTheme.xaml");
+                        "/PureDS4;component/DS4Forms/Themes/DarkTheme.xaml");
                     LoadDictionary(application,
-                        "/DS4Windows;component/DS4Forms/Themes/Foundation.xaml");
+                        "/PureDS4;component/DS4Forms/Themes/Foundation.xaml");
                     LoadDictionary(application,
-                        "/DS4Windows;component/DS4Forms/Themes/BridgeShellStyles.xaml");
+                        "/PureDS4;component/DS4Forms/Themes/BridgeShellStyles.xaml");
                     AssertFoundationResources(application, "dark");
                 }
                 catch (Exception ex)

@@ -55,7 +55,7 @@ namespace DS4WindowsTests
         {
             Assembly assembly = typeof(ProductIdentity).Assembly;
 
-            Assert.AreEqual("DS4Windows", assembly.GetName().Name);
+            Assert.AreEqual("PureDS4", assembly.GetName().Name);
             Assert.AreEqual(new System.Version(5, 1, 0, 0),
                 assembly.GetName().Version);
             Assert.AreEqual(ProductIdentity.Name,

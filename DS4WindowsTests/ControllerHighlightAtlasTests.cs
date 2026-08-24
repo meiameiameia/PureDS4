@@ -466,7 +466,7 @@ namespace DS4WindowsTests
         private static BitmapSource LoadResource(string resourceName)
         {
             var uri = new Uri(
-                $"/DS4Windows;component/Resources/{resourceName}",
+                $"/PureDS4;component/Resources/{resourceName}",
                 UriKind.Relative);
             System.Windows.Resources.StreamResourceInfo resource =
                 Application.GetResourceStream(uri);

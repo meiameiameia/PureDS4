@@ -2,15 +2,15 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
      xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
   <Bundle
-      Name="DS4Windows Reworked"
+      Name="PureDS4"
       Manufacturer="meiameiameia"
       Version="$(var.BundleVersion)"
-      UpgradeCode="BC70CCB1-AD65-42A0-B468-8A7278A37A62"
-      Tag="DS4WindowsManagedV2"
+      UpgradeCode="E0DC119F-B6A6-4425-8FEB-FAA6232FE346"
+      Tag="PureDS4ManagedV1"
       IconSourceFile="$(var.ExtrasRoot)\..\DS4Windows\DS4W.ico"
       Compressed="yes"
-      AboutUrl="https://github.com/meiameiameia/ds4windows-reworked"
-      HelpUrl="https://github.com/meiameiameia/ds4windows-reworked/issues">
+      AboutUrl="https://github.com/meiameiameia/pureds4"
+      HelpUrl="https://github.com/meiameiameia/pureds4/issues">
 
     <BootstrapperApplication SourceFile="$(var.BootstrapperRoot)\DS4Windows.Bootstrapper.exe" />
 
@@ -27,7 +27,7 @@
         Id="InfrastructureMarkerSearch"
         Variable="InfrastructureInstalled"
         Root="HKLM"
-        Key="SOFTWARE\DS4Windows"
+        Key="SOFTWARE\PureDS4"
         Value="InfrastructureVersion"
         Result="value"
         Bitness="always64" />
@@ -35,7 +35,7 @@
         Id="ManagedInstallRegistrationSearch"
         Variable="ManagedInstallRegistered"
         Root="HKLM"
-        Key="SOFTWARE\DS4Windows"
+        Key="SOFTWARE\PureDS4"
         Value="InstallPath"
         Result="exists"
         Bitness="always64" />

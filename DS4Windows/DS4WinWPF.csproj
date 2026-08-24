@@ -19,7 +19,7 @@
 		<IncludeNativeLibrariesForSelfExtract>false</IncludeNativeLibrariesForSelfExtract>
 		<EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
 		<RootNamespace>DS4WinWPF</RootNamespace>
-		<AssemblyName>DS4Windows</AssemblyName>
+		<AssemblyName>PureDS4</AssemblyName>
 		<ApplicationIcon>DS4W.ico</ApplicationIcon>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<StartupObject>DS4WinWPF.App</StartupObject>
@@ -94,7 +94,7 @@
 	<Target Name="GenerateReleaseChannelMarker" AfterTargets="Publish"
 		BeforeTargets="GenerateManagedFileManifest">
 		<WriteLinesToFile
-			File="$(PublishDir)DS4Windows.release"
+			File="$(PublishDir)PureDS4.release"
 			Lines="$(InformationalVersion)"
 			Overwrite="true"
 			Encoding="ASCII" />
@@ -126,11 +126,11 @@
 		DependsOnTargets="GenerateReleaseChannelMarker;GenerateViiperPackageChecksum">
 		<ItemGroup>
 			<_ManagedPackageFile Include="$(PublishDir)**\*"
-				Exclude="$(PublishDir).ds4windows-managed-files.txt" />
+				Exclude="$(PublishDir).pureds4-managed-files.txt" />
 			<_ManagedPackageRelative Include="@(_ManagedPackageFile->'%(RecursiveDir)%(Filename)%(Extension)')" />
 		</ItemGroup>
 		<WriteLinesToFile
-			File="$(PublishDir).ds4windows-managed-files.txt"
+			File="$(PublishDir).pureds4-managed-files.txt"
 			Lines="@(_ManagedPackageRelative)"
 			Overwrite="true"
 			Encoding="UTF-8" />

@@ -286,7 +286,7 @@ namespace DS4WinWPF
             if (firstRun && !CreateConfDirSkeleton())
             {
                 MessageBox.Show($"Cannot create config folder structure in {DS4Windows.Global.appdatapath}. Exiting",
-                    "DS4Windows", MessageBoxButton.OK, MessageBoxImage.Error);
+                    DS4Windows.ProductIdentity.Name, MessageBoxButton.OK, MessageBoxImage.Error);
                 Current.Shutdown(1);
                 return;
             }
@@ -432,7 +432,7 @@ namespace DS4WinWPF
             {
                 MessageBox.Show(
                     "Another DS4Windows instance is already running under a different permission level. " +
-                    "Open it from the notification area, or close the existing DS4Windows.exe in Task Manager and try again.",
+                    "Open it from the notification area, or close the existing PureDS4.exe in Task Manager and try again.",
                     "DS4Windows is already running", MessageBoxButton.OK,
                     MessageBoxImage.Information);
             }
@@ -569,7 +569,7 @@ namespace DS4WinWPF
         {
             if (!DS4Windows.Global.Save()) //if can't write to file
             {
-                if (MessageBox.Show("Cannot write at current location\nCopy Settings to appdata?", "DS4Windows",
+                if (MessageBox.Show("Cannot write at current location\nCopy Settings to appdata?", DS4Windows.ProductIdentity.Name,
                     MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                 {
                     try
@@ -587,12 +587,12 @@ namespace DS4WinWPF
                     }
                     catch { }
                     MessageBox.Show("Copy complete, please relaunch DS4Windows and remove settings from Program Directory",
-                        "DS4Windows");
+                        DS4Windows.ProductIdentity.Name);
                 }
                 else
                 {
                     MessageBox.Show("DS4Windows cannot edit settings here, This will now close",
-                        "DS4Windows");
+                        DS4Windows.ProductIdentity.Name);
                 }
 
                 DS4Windows.Global.appdatapath = null;
@@ -647,7 +647,8 @@ namespace DS4WinWPF
             else if (parser.Command)
             {
                 IntPtr hWndDS4WindowsForm = IntPtr.Zero;
-                hWndDS4WindowsForm = FindWindow(ReadIPCClassNameMMF(), "DS4Windows");
+                hWndDS4WindowsForm = FindWindow(ReadIPCClassNameMMF(),
+                    DS4Windows.ProductIdentity.Name);
                 if (hWndDS4WindowsForm != IntPtr.Zero)
                 {
                     bool bDoSendMsg = true;
@@ -728,7 +729,7 @@ namespace DS4WinWPF
 
                 DS4Windows.Program.rootHub = rootHub;
                 requestClient = new HttpClient();
-                requestClient.DefaultRequestHeaders.Add("User-Agent", "DS4Windows");
+                requestClient.DefaultRequestHeaders.Add("User-Agent", DS4Windows.ProductIdentity.Name);
             });
             controlThread.Priority = ThreadPriority.Normal;
             controlThread.IsBackground = true;
@@ -743,7 +744,7 @@ namespace DS4WinWPF
             {
                 DS4Windows.Program.rootHub = rootHub;
                 requestClient = new HttpClient();
-                requestClient.DefaultRequestHeaders.Add("User-Agent", "DS4Windows");
+                requestClient.DefaultRequestHeaders.Add("User-Agent", DS4Windows.ProductIdentity.Name);
             });
             controlThread.Priority = ThreadPriority.Normal;
             controlThread.IsBackground = true;

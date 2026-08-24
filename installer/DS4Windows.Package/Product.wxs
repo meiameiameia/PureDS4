@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Package
-      Name="DS4Windows Reworked"
+      Name="PureDS4"
       Manufacturer="meiameiameia"
       Version="$(var.ProductVersion)"
-      UpgradeCode="65E808E3-D35A-4825-AE11-8D9415F16446"
+      UpgradeCode="FE00C21E-C0E6-4509-81EA-2D4B34D377A1"
       Scope="perMachine"
       InstallerVersion="500"
       Compressed="yes">
-    <SummaryInformation Description="DS4Windows Reworked controller mapping and virtual game output" />
-    <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of DS4Windows Reworked is already installed." />
+    <SummaryInformation Description="PureDS4 controller mapping and virtual game output" />
+    <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of PureDS4 is already installed." />
     <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
 
-    <Icon Id="DS4WindowsIcon" SourceFile="$(var.PublishRoot)\DS4Windows.exe" />
-    <Property Id="ARPPRODUCTICON" Value="DS4WindowsIcon" />
-    <Property Id="ARPHELPLINK" Value="https://github.com/meiameiameia/ds4windows-reworked/issues" />
-    <Property Id="ARPURLINFOABOUT" Value="https://github.com/meiameiameia/ds4windows-reworked" />
+    <Icon Id="PureDS4Icon" SourceFile="$(var.PublishRoot)\PureDS4.exe" />
+    <Property Id="ARPPRODUCTICON" Value="PureDS4Icon" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/meiameiameia/pureds4/issues" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/meiameiameia/pureds4" />
 
     <StandardDirectory Id="ProgramFiles64Folder">
-      <Directory Id="INSTALLFOLDER" Name="DS4Windows" />
+      <Directory Id="INSTALLFOLDER" Name="PureDS4" />
     </StandardDirectory>
 
-    <Component Id="ManagedInstallRegistration" Directory="INSTALLFOLDER" Guid="7BB57999-6B69-4A38-B0E3-B5AD0E25E35C">
-      <RegistryValue Root="HKLM" Key="Software\DS4Windows" Name="InstallPath" Value="[INSTALLFOLDER]" Type="string" KeyPath="yes" />
-      <RegistryValue Root="HKLM" Key="Software\DS4Windows" Name="Version" Value="[ProductVersion]" Type="string" />
+    <Component Id="ManagedInstallRegistration" Directory="INSTALLFOLDER" Guid="EFF37CF6-5757-46CF-8180-6AC595300073">
+      <RegistryValue Root="HKLM" Key="Software\PureDS4" Name="InstallPath" Value="[INSTALLFOLDER]" Type="string" KeyPath="yes" />
+      <RegistryValue Root="HKLM" Key="Software\PureDS4" Name="Version" Value="[ProductVersion]" Type="string" />
     </Component>
 
-    <Feature Id="MainFeature" Title="DS4Windows Reworked" Level="1">
+    <Feature Id="MainFeature" Title="PureDS4" Level="1">
       <ComponentGroupRef Id="PublishedFiles" />
       <ComponentRef Id="ManagedInstallRegistration" />
     </Feature>

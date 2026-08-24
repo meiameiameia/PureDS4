@@ -244,7 +244,7 @@ namespace DS4Windows.Bootstrapper
         {
             var task = new ProcessStartInfo(
                 Path.Combine(Environment.SystemDirectory, "schtasks.exe"),
-                "/Run /TN \"RunDS4Windows\"")
+                "/Run /TN \"RunPureDS4\"")
             {
                 UseShellExecute = false,
                 CreateNoWindow = true,

@@ -384,8 +384,8 @@ namespace DS4Windows.SetupActions
         private static int UninstallLocked(string installRoot)
         {
             StopManagedProcesses(installRoot);
-            RemoveOwnedTask("RunVIIPER", Path.Combine(installRoot, "VIIPER", "viiper.exe"));
-            RemoveOwnedTask("RunDS4Windows", Path.Combine(installRoot, "DS4Windows.exe"));
+            RemoveOwnedTask("RunPureDS4VIIPER", Path.Combine(installRoot, "VIIPER", "viiper.exe"));
+            RemoveOwnedTask("RunPureDS4", Path.Combine(installRoot, "PureDS4.exe"));
             RemoveObsoleteBundledViiperPayloads(installRoot,
                 preserveCurrent: false);
 

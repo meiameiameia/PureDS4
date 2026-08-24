@@ -935,7 +935,7 @@ function Remove-MismatchedUsbipPackage($entry, [Version]$installedVersion,
 
 function Disable-ViiperStartup {
     try {
-        Unregister-ScheduledTask -TaskPath "\" -TaskName "RunVIIPER" `
+        Unregister-ScheduledTask -TaskPath "\" -TaskName "RunPureDS4VIIPER" `
             -Confirm:$false `
             -ErrorAction SilentlyContinue
     }
@@ -1522,7 +1522,7 @@ function Remove-PortableDs4WindowsPackageForStandardMode {
     $portableDirectory = Assert-SafeManagedDirectory $portableDirectory `
         "portable DS4Windows package" -RequireExisting
     $manifestPath = Join-Path $portableDirectory `
-        ".ds4windows-managed-files.txt"
+        ".pureds4-managed-files.txt"
     if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) {
         throw "The old portable DS4Windows package has no managed-file " +
             "manifest, so setup will not guess which files are safe to remove."
@@ -1866,16 +1866,16 @@ function Register-ViiperRunTask([string]$viiperPath, [string]$taskName) {
 }
 
 function Register-Ds4WindowsRunTask([string]$ds4WindowsPath) {
-    return Register-HighestLogonTask "RunDS4Windows" $ds4WindowsPath "-m" `
+    return Register-HighestLogonTask "RunPureDS4" $ds4WindowsPath "-m" `
         (Split-Path -Parent $ds4WindowsPath)
 }
 
 function Suspend-StartupTasksUntilInfrastructureReady(
         [string]$viiperPath, [string]$ds4WindowsPath) {
     $contracts = @(
-        @("RunVIIPER", $viiperPath, "server",
+        @("RunPureDS4VIIPER", $viiperPath, "server",
             (Split-Path -Parent $viiperPath)),
-        @("RunDS4Windows", $ds4WindowsPath, "-m",
+        @("RunPureDS4", $ds4WindowsPath, "-m",
             (Split-Path -Parent $ds4WindowsPath))
     )
 
@@ -1917,9 +1917,9 @@ function Suspend-StartupTasksUntilInfrastructureReady(
 function Set-InfrastructureStartupFailClosed(
         [string]$viiperPath, [string]$ds4WindowsPath) {
     $contracts = @(
-        @("RunVIIPER", $viiperPath, "server",
+        @("RunPureDS4VIIPER", $viiperPath, "server",
             (Split-Path -Parent $viiperPath)),
-        @("RunDS4Windows", $ds4WindowsPath, "-m",
+        @("RunPureDS4", $ds4WindowsPath, "-m",
             (Split-Path -Parent $ds4WindowsPath))
     )
 
@@ -2036,7 +2036,7 @@ function Install-Ds4WindowsPackage([string]$sourceDirectory,
         throw "The DS4Windows source and managed destination may not contain one another."
     }
 
-    $manifestName = ".ds4windows-managed-files.txt"
+    $manifestName = ".pureds4-managed-files.txt"
     $sourceManifest = Join-Path $source $manifestName
     if (-not (Test-Path -LiteralPath $sourceManifest -PathType Leaf)) {
         throw "The DS4Windows package manifest is missing. Extract and run the complete release ZIP instead of a raw build folder."
@@ -2442,12 +2442,12 @@ try {
     # Burn installer retains its existing startup-enabled default because it
     # does not pass -SkipStartupTasks.
     if ($script:RunAtStartupEnabled) {
-        if (-not (Register-ViiperRunTask $viiperPath "RunVIIPER")) {
-            throw "Could not create the elevated RunVIIPER startup task."
+        if (-not (Register-ViiperRunTask $viiperPath "RunPureDS4VIIPER")) {
+            throw "Could not create the elevated RunPureDS4VIIPER startup task."
         }
         if (-not (Register-Ds4WindowsRunTask `
                 $script:Ds4WindowsRestartPath)) {
-            Unregister-ScheduledTask -TaskPath "\" -TaskName "RunVIIPER" `
+            Unregister-ScheduledTask -TaskPath "\" -TaskName "RunPureDS4VIIPER" `
                 -Confirm:$false `
                 -ErrorAction SilentlyContinue
             throw "Could not register the elevated RunDS4Windows startup task."
@@ -2458,7 +2458,7 @@ try {
         ) Green
     }
     else {
-        Unregister-ScheduledTask -TaskPath "\" -TaskName "RunVIIPER" `
+        Unregister-ScheduledTask -TaskPath "\" -TaskName "RunPureDS4VIIPER" `
             -Confirm:$false `
             -ErrorAction SilentlyContinue
         Unregister-ScheduledTask -TaskPath "\" -TaskName "RunDS4Windows" `
