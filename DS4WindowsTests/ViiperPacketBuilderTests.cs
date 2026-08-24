@@ -7,16 +7,6 @@ namespace DS4WindowsTests
     public class ViiperPacketBuilderTests
     {
         [TestMethod]
-        public void DualSenseMotionUsesControllerAxisOrder()
-        {
-            DS4State state = CreateMotionState();
-
-            byte[] packet = BuildViiperStatePacket(ViiperVirtualDeviceType.DualSense, state);
-
-            AssertSonyMotion(packet, 21);
-        }
-
-        [TestMethod]
         public void DualShock4MotionUsesControllerAxisOrder()
         {
             DS4State state = CreateMotionState();
@@ -83,8 +73,6 @@ namespace DS4WindowsTests
         }
 
         [DataTestMethod]
-        [DataRow(ViiperVirtualDeviceType.DualSense)]
-        [DataRow(ViiperVirtualDeviceType.DualSenseEdge)]
         [DataRow(ViiperVirtualDeviceType.DualShock4)]
         public void SonyNeutralPacketCentersEveryStick(ViiperVirtualDeviceType type)
         {
@@ -94,25 +82,6 @@ namespace DS4WindowsTests
             Assert.AreEqual(0, packet[1], "LY should be centered");
             Assert.AreEqual(0, packet[2], "RX should be centered");
             Assert.AreEqual(0, packet[3], "RY should be centered");
-        }
-
-        [DataTestMethod]
-        [DataRow(ViiperVirtualDeviceType.DualSense,
-            "dualsensecombinedaudioduplexv5")]
-        [DataRow(ViiperVirtualDeviceType.DualSenseEdge,
-            "dualsenseedgecombinedaudioduplexv5")]
-        public void DualSenseFamiliesSelectOnlyV5Contract(
-            ViiperVirtualDeviceType type, string expectedName)
-        {
-            Type builderType = typeof(ViiperVirtualDeviceType).Assembly.GetType(
-                "DS4Windows.ViiperStatePacketBuilder",
-                throwOnError: true);
-            MethodInfo method = builderType.GetMethod(
-                "GetViiperDeviceName",
-                BindingFlags.Public | BindingFlags.Static);
-
-            Assert.AreEqual(expectedName,
-                (string)method.Invoke(null, new object[] { type }));
         }
 
         private static DS4State CreateMotionState()

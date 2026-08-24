@@ -977,16 +977,8 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                         type = 1;
                         break;
 
-                    case OutContType.ViiperDualSense:
-                        type = 2;
-                        break;
-
-                    case OutContType.ViiperDualSenseEdge:
-                        type = 3;
-                        break;
-
                     case OutContType.ViiperSwitch2Pro:
-                        type = 4;
+                        type = 2;
                         break;
 
                     default: break;
@@ -1031,9 +1023,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             {
                 0 => OutContType.ViiperDS4,
                 1 => OutContType.ViiperX360,
-                2 => OutContType.ViiperDualSense,
-                3 => OutContType.ViiperDualSenseEdge,
-                4 => OutContType.ViiperSwitch2Pro,
+                2 => OutContType.ViiperSwitch2Pro,
                 _ => OutContType.ViiperX360,
             };
         }
@@ -3142,44 +3132,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             get => presetMenuUtil;
         }
 
-        public int DualSenseRumbleEmulationPerIndex
-        {
-            get
-            {
-                switch(Global.DualSenseRumbleEmulationMode[device])
-                {
-                    case DualSenseDevice.RumbleEmulationMode.Disabled: return 2;
-                    case DualSenseDevice.RumbleEmulationMode.Legacy: return 1;
-                    case DualSenseDevice.RumbleEmulationMode.Accurate: return 0;
-                    default: return 0;
-                }
-            }
-            set
-            {
-                DualSenseDevice.RumbleEmulationMode temp;
-                switch(value)
-                {
-                    case 2: temp = DualSenseDevice.RumbleEmulationMode.Disabled; break;
-                    case 1: temp = DualSenseDevice.RumbleEmulationMode.Legacy; break;
-                    case 0: temp = DualSenseDevice.RumbleEmulationMode.Accurate; break;
-                    default: temp = DualSenseDevice.RumbleEmulationMode.Accurate; break;
-                }
-                Global.DualSenseRumbleEmulationMode[device] = temp;
-            }
-        }
-
-        public int DualSenseHapticPowerLevelPerIndex
-        {
-            get => Global.DualSenseHapticPowerLevel[device];
-            set => Global.DualSenseHapticPowerLevel[device] = (byte)value;
-        }
-
-        public bool EnableGenericRumbleStrRescaleForDualSenseDevices
-        {
-            get => Global.UseGenericRumbleStrRescaleForDualSenses[device];
-            set => Global.UseGenericRumbleStrRescaleForDualSenses[device] = value;
-        }
-
         public bool DualSenseEnableSpeakerOutput
         {
             get => Global.DualSenseEnableSpeakerOutput[device];
@@ -3212,7 +3164,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             {
                 string endpointId = Global.DualSenseAudioCaptureEndpointId[device];
                 return string.Equals(endpointId,
-                    DualSenseAudioPassthrough.AutoDetectGameAudioEndpointId,
+                    ControllerAudioEndpoints.AutoDetectGameAudioEndpointId,
                     StringComparison.Ordinal) ? string.Empty : endpointId;
             }
             set

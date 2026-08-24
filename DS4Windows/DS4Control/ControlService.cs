@@ -38,9 +38,7 @@ namespace DS4Windows
 {
     public partial class ControlService
     {
-        private readonly DualSenseAudioPassthrough dualSenseAudioPassthrough = new DualSenseAudioPassthrough();
         private readonly DualShock4AudioPassthrough dualShock4AudioPassthrough = new DualShock4AudioPassthrough();
-        private readonly DualSenseMicrophonePassthrough dualSenseMicrophonePassthrough = new DualSenseMicrophonePassthrough();
         private readonly ViiperOutDevice[] playStationFeatureOutputDevices =
             new ViiperOutDevice[MAX_DS4_CONTROLLER_COUNT];
         private readonly object playStationFeatureOutputLock = new object();
@@ -671,13 +669,6 @@ namespace DS4Windows
 
         private void PrepareDS4DeviceSettingHooks(DS4Device device)
         {
-            if (device.DeviceType == InputDevices.InputDeviceType.DualSense)
-            {
-                InputDevices.DualSenseDevice tempDSDev = device as InputDevices.DualSenseDevice;
-
-                DualSenseControllerOptions dSOpts = tempDSDev.NativeOptionsStore;
-                dSOpts.LedModeChanged += (sender, e) => { tempDSDev.CheckControllerNumDeviceSettings(activeControllers); };
-            }
         }
 
         public bool CheckForSupportedDevice(HidDevice device, VidPidInfo metaInfo)
@@ -687,9 +678,6 @@ namespace DS4Windows
             {
                 case InputDevices.InputDeviceType.DS4:
                     result = deviceOptions.DS4DeviceOpts.Enabled;
-                    break;
-                case InputDevices.InputDeviceType.DualSense:
-                    result = deviceOptions.DualSenseOpts.Enabled;
                     break;
                 case InputDevices.InputDeviceType.DS3:
                     result = deviceOptions.DS3DeviceOpts.Enabled;
@@ -942,19 +930,6 @@ namespace DS4Windows
             List<DS4Controls> result = new List<DS4Controls>();
             switch (dev.DeviceType)
             {
-                case InputDevices.InputDeviceType.DualSense:
-                    {
-                        InputDevices.DualSenseDevice tempDev = dev as InputDevices.DualSenseDevice;
-                        if (tempDev != null &&
-                            tempDev.SubType == InputDevices.DualSenseDevice.DeviceSubType.DSEdge)
-                        {
-                            // Added extra DualSense Edge buttons as extra in the mapper.
-                            // Keeps from checking non-existent buttons on other device types.
-                            result.AddRange(new DS4Controls[] { DS4Controls.FnL, DS4Controls.FnR, DS4Controls.BLP, DS4Controls.BRP });
-                        }
-                    }
-
-                    break;
                 default:
                     break;
             }
@@ -2287,15 +2262,9 @@ namespace DS4Windows
                 if (showlog)
                     LogDebug(DS4WinWPF.Properties.Resources.StoppingDS4);
 
-                StartupDiag("ControlService.Stop DualSenseAudio reset begin");
-                dualSenseAudioPassthrough.ResetForServiceStop();
-                StartupDiag("ControlService.Stop DualSenseAudio reset end");
                 StartupDiag("ControlService.Stop DualShock4Audio reset begin");
                 dualShock4AudioPassthrough.ResetForServiceStop();
                 StartupDiag("ControlService.Stop DualShock4Audio reset end");
-                StartupDiag("ControlService.Stop DualSenseMicrophone stop begin");
-                dualSenseMicrophonePassthrough.Stop();
-                StartupDiag("ControlService.Stop DualSenseMicrophone stop end");
                 StartupDiag("ControlService.Stop PlayStation feature outputs begin");
                 StopAllPlayStationFeatureOutputs();
                 StartupDiag("ControlService.Stop PlayStation feature outputs end");
@@ -2814,158 +2783,49 @@ namespace DS4Windows
             device.setRumble(0, 0);
             device.LightBarColor = Global.getMainColor(ind);
 
-            // DualSense specific profile settings
-            if (device is InputDevices.DualSenseDevice dualsense)
+            bool speakerEnabled = IsControllerSpeakerEnabled(ind);
+            string speakerCaptureEndpointId =
+                GetControllerSpeakerCaptureEndpointId(ind);
+            bool headsetOnlyAudio = IsControllerHeadsetOnlyAudio(ind);
+            byte physicalSpeakerVolume = headsetOnlyAudio
+                ? (byte)0
+                : DualSenseSpeakerVolume[ind];
+            bool useViiperControllerMicrophone =
+                ControllerMicrophoneRoutePolicy.CanRouteDirectViiperMicrophone(
+                    DualSenseEnableMicrophonePassthrough[ind], device,
+                    playStationFeatureOutputType,
+                    playStationFeatureOutput);
+            // VIIPER opens the physical microphone only while a Windows
+            // client is actively recording. Do not arm it during profile
+            // load and consume Bluetooth bandwidth before that point.
+            bool microphoneEnabled =
+                ControllerMicrophoneRoutePolicy.ShouldArmPhysicalBluetoothMicrophone(
+                    DualSenseEnableMicrophonePassthrough[ind], device,
+                    playStationFeatureOutputType,
+                    playStationFeatureOutput);
+            bool audioConfigured = device.ConfigureBluetoothAudioForProfile(
+                speakerEnabled,
+                microphoneEnabled,
+                physicalSpeakerVolume,
+                DualSenseHeadphoneVolume[ind],
+                useViiperControllerMicrophone ? byte.MaxValue :
+                    DualSenseMicrophoneVolume[ind]);
+
+            if (audioConfigured && speakerEnabled)
             {
-                dualShock4AudioPassthrough.Stop(ind);
-                switch (DualSenseRumbleEmulationMode[ind])
-                {
-                    case InputDevices.DualSenseDevice.RumbleEmulationMode.Disabled:
-                        dualsense.UseRumble = false;
-                        dualsense.UseAccurateRumble = false;
-                        break;
-                    case InputDevices.DualSenseDevice.RumbleEmulationMode.Legacy:
-                        dualsense.UseRumble = true;
-                        dualsense.UseAccurateRumble = false;
-                        break;
-                    case InputDevices.DualSenseDevice.RumbleEmulationMode.Accurate:
-                    default:
-                        dualsense.UseRumble = true;
-                        dualsense.UseAccurateRumble = true;
-                        break;
-                }
-                dualsense.HapticPowerLevel = DualSenseHapticPowerLevel[ind];
-                bool speakerEnabled = IsControllerSpeakerEnabled(ind);
-                bool silentHapticsCarrier =
-                    RequiresDualSenseBluetoothMediaCarrier(
-                        dualsense.ConnectionType, speakerEnabled,
-                        playStationFeatureOutputType);
-                bool mediaCarrierEnabled = speakerEnabled ||
-                    silentHapticsCarrier;
-                string speakerCaptureEndpointId =
-                    GetControllerSpeakerCaptureEndpointId(ind);
-                byte activeSpeakerVolume = speakerEnabled ?
-                    DualSenseSpeakerVolume[ind] : (byte)0;
-                byte activeHeadphoneVolume = speakerEnabled ?
-                    DualSenseHeadphoneVolume[ind] : (byte)0;
-                dualsense.EnableSpeakerOutput = mediaCarrierEnabled;
-                dualsense.SpeakerVolume = activeSpeakerVolume;
-                dualsense.HeadphoneVolume = activeHeadphoneVolume;
-                bool headsetOnlyAudio = speakerEnabled &&
-                    IsControllerHeadsetOnlyAudio(ind);
-                bool headsetOutputRouteChanged =
-                    dualsense.HeadsetOnlyAudio != headsetOnlyAudio;
-                dualsense.HeadsetOnlyAudio = headsetOnlyAudio;
-                bool useViiperControllerMicrophone =
-                    ControllerMicrophoneRoutePolicy.CanRouteDirectViiperMicrophone(
-                        DualSenseEnableMicrophonePassthrough[ind], dualsense,
-                        playStationFeatureOutputType,
-                        playStationFeatureOutput);
-                // The profile volume is applied once in the shared software
-                // microphone processor. Request the top of the profile range;
-                // DualSenseDevice maps it to the controller's 0x40 ADC ceiling
-                // at the physical protocol boundary.
-                dualsense.MicrophoneVolume = useViiperControllerMicrophone ?
-                    byte.MaxValue : DualSenseMicrophoneVolume[ind];
-
-                if (mediaCarrierEnabled)
-                {
-                    // Audio Haptics and native game haptics use the same
-                    // proven continuous 0x36 media carrier as speaker audio.
-                    // Turning off audible speaker streaming therefore mutes
-                    // this carrier at the controller instead of disposing it.
-                    // The capture/encoder remains clocked, while a zero
-                    // hardware volume guarantees that no speaker or AUX audio
-                    // leaks from the disabled UI setting.
-                    dualSenseAudioPassthrough.Start(ind, dualsense,
-                        activeSpeakerVolume,
-                        (DualSenseSpeakerCompression)Global.DualSenseSpeakerCompression[ind],
-                        Global.DualSenseSpeakerBassBoost[ind],
-                        speakerCaptureEndpointId,
-                        DualSenseAudioSpeakerEndpointId[ind],
-                        playStationFeatureOutputType,
-                        playStationFeatureOutput,
-                        () => GetPlayStationFeatureOutput(ind));
-
-                    // Speaker/AUX selection is an atomic state update on the
-                    // active combined transport. Restarting the capture and
-                    // media pacer here loses the live stream and can leave the
-                    // replacement generation waiting indefinitely. Keep the
-                    // existing pipeline and publish only the new route bits.
-                    if (headsetOutputRouteChanged &&
-                        !dualsense.RearmBluetoothHeadsetOutputRoute())
-                    {
-                        AppLogger.LogToGui(
-                            $"DualSense audio output route update failed for controller {ind + 1}: {dualsense.LastBluetoothHapticsWriteStatus}",
-                            true);
-                    }
-                }
-                else
-                {
-                    dualSenseAudioPassthrough.Stop(ind);
-                }
-
-                if (DualSenseEnableMicrophonePassthrough[ind] &&
-                    !useViiperControllerMicrophone)
-                {
-                    dualSenseMicrophonePassthrough.Start(DualSenseMicrophoneVolume[ind],
-                        DualSenseMicrophoneCaptureEndpointId[ind],
-                        DualSenseMicrophoneOutputEndpointId[ind]);
-                }
-                else
-                {
-                    dualSenseMicrophonePassthrough.Stop();
-                }
+                dualShock4AudioPassthrough.Start(ind, device,
+                    physicalSpeakerVolume,
+                    (DualSenseSpeakerCompression)Global.DualSenseSpeakerCompression[ind],
+                    Global.DualSenseSpeakerBassBoost[ind],
+                    speakerCaptureEndpointId,
+                    playStationFeatureOutputType,
+                    playStationFeatureOutput,
+                    headsetOnlyAudio,
+                    () => GetPlayStationFeatureOutput(ind));
             }
             else
             {
-                dualSenseAudioPassthrough.Stop(ind);
-                bool speakerEnabled = IsControllerSpeakerEnabled(ind);
-                string speakerCaptureEndpointId =
-                    GetControllerSpeakerCaptureEndpointId(ind);
-                bool headsetOnlyAudio = IsControllerHeadsetOnlyAudio(ind);
-                byte physicalSpeakerVolume = headsetOnlyAudio
-                    ? (byte)0
-                    : DualSenseSpeakerVolume[ind];
-                bool useViiperControllerMicrophone =
-                    ControllerMicrophoneRoutePolicy.CanRouteDirectViiperMicrophone(
-                        DualSenseEnableMicrophonePassthrough[ind], device,
-                        playStationFeatureOutputType,
-                        playStationFeatureOutput);
-                // VIIPER opens the physical microphone only while a Windows
-                // client is actively recording. Do not arm it during profile
-                // load and consume Bluetooth bandwidth before that point.
-                bool microphoneEnabled =
-                    ControllerMicrophoneRoutePolicy.ShouldArmPhysicalBluetoothMicrophone(
-                        DualSenseEnableMicrophonePassthrough[ind], device,
-                        playStationFeatureOutputType,
-                        playStationFeatureOutput);
-                bool audioConfigured = device.ConfigureBluetoothAudioForProfile(
-                    speakerEnabled,
-                    microphoneEnabled,
-                    physicalSpeakerVolume,
-                    DualSenseHeadphoneVolume[ind],
-                    useViiperControllerMicrophone ? byte.MaxValue :
-                        DualSenseMicrophoneVolume[ind]);
-
-                if (audioConfigured && speakerEnabled)
-                {
-                    dualShock4AudioPassthrough.Start(ind, device,
-                        physicalSpeakerVolume,
-                        (DualSenseSpeakerCompression)Global.DualSenseSpeakerCompression[ind],
-                        Global.DualSenseSpeakerBassBoost[ind],
-                        speakerCaptureEndpointId,
-                        playStationFeatureOutputType,
-                        playStationFeatureOutput,
-                        headsetOnlyAudio,
-                        () => GetPlayStationFeatureOutput(ind));
-                }
-                else
-                {
-                    dualShock4AudioPassthrough.Stop(ind);
-                }
-
-                dualSenseMicrophonePassthrough.Stop();
+                dualShock4AudioPassthrough.Stop(ind);
             }
 
             if (!startUp)
@@ -3326,9 +3186,7 @@ namespace DS4Windows
                     }
                     if (!exposureRelease)
                     {
-                        dualSenseAudioPassthrough.Stop(ind);
                         dualShock4AudioPassthrough.Stop(ind);
-                        dualSenseMicrophonePassthrough.Stop();
                         DisconnectPlayStationFeatureOutput(ind);
                     }
                     /*Stopwatch sw = new Stopwatch();
@@ -3391,12 +3249,9 @@ namespace DS4Windows
         private bool gameBarVerboseDetectionLogInitialized = false;
         private bool gameBarVerboseLastVisible = false;
         private DateTime gameBarVerboseLastDetectionLogUtc = DateTime.MinValue;
-        private bool[] dualSenseMuteButtonWasDown = new bool[MAX_DS4_CONTROLLER_COUNT] { false, false, false, false, false, false, false, false };
         private bool[] dualSenseMuteLedOn = new bool[MAX_DS4_CONTROLLER_COUNT] { false, false, false, false, false, false, false, false };
-        private bool[] dualSenseMuteLedOverrideActive = new bool[MAX_DS4_CONTROLLER_COUNT] { false, false, false, false, false, false, false, false };
         private bool[] dualSenseMuteProfilePending = new bool[MAX_DS4_CONTROLLER_COUNT] { false, false, false, false, false, false, false, false };
         private string[] dualSenseMuteRequestedProfileName = new string[MAX_DS4_CONTROLLER_COUNT] { string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty };
-        private string[] dualSenseMuteRememberedOffProfileName = new string[MAX_DS4_CONTROLLER_COUNT] { string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty };
 
         public ControllerRuntimeSignals GetControllerRuntimeSignals(int index)
         {
@@ -3455,9 +3310,7 @@ namespace DS4Windows
                 ControllerRuntimeLaneState.NotRequired;
             if (speakerRequired)
             {
-                speaker = device is InputDevices.DualSenseDevice
-                    ? dualSenseAudioPassthrough.GetStatus(index)
-                    : dualShock4AudioPassthrough.GetStatus(index);
+                speaker = dualShock4AudioPassthrough.GetStatus(index);
             }
 
             bool microphoneRequired = physicalPresent &&
@@ -3478,14 +3331,6 @@ namespace DS4Windows
                         : playStationFeatureOutput?.IsRuntimeConnected == true
                             ? ControllerRuntimeLaneState.Unavailable
                             : ControllerRuntimeLaneState.Starting;
-                }
-                else if (device is InputDevices.DualSenseDevice)
-                {
-                    microphone = dualSenseMicrophonePassthrough.IsRunningFor(
-                            Global.DualSenseMicrophoneCaptureEndpointId[index],
-                            Global.DualSenseMicrophoneOutputEndpointId[index])
-                        ? ControllerRuntimeLaneState.Ready
-                        : ControllerRuntimeLaneState.Unavailable;
                 }
                 else
                 {
@@ -3994,77 +3839,6 @@ namespace DS4Windows
             }
         }
 
-        private void CheckDualSenseMuteButtonProfileActions(int ind, DS4State cState)
-        {
-            if (!(DS4Controllers[ind] is InputDevices.DualSenseDevice dualSenseDevice))
-            {
-                dualSenseMuteButtonWasDown[ind] = false;
-                dualSenseMuteLedOverrideActive[ind] = false;
-                dualSenseMuteRememberedOffProfileName[ind] = string.Empty;
-                return;
-            }
-
-            bool muteMicrophoneEnabled = Global.DualSenseMuteButtonMutesMicrophone[ind];
-            bool muteLightEnabled = Global.DualSenseMuteButtonLightEnabled[ind] ||
-                muteMicrophoneEnabled;
-            if (!muteLightEnabled)
-            {
-                if (dualSenseMuteLedOverrideActive[ind])
-                {
-                    dualSenseDevice.SetProfileMuteLedState(false, false);
-                    dualSenseMuteLedOverrideActive[ind] = false;
-                }
-
-                dualSenseDevice.SetProfileMicrophoneMuteState(false, false);
-                dualSenseMuteButtonWasDown[ind] = cState.Mute;
-                return;
-            }
-
-            bool muteDown = cState.Mute;
-            if (muteDown && !dualSenseMuteButtonWasDown[ind])
-            {
-                dualSenseMuteLedOn[ind] = !dualSenseMuteLedOn[ind];
-                dualSenseDevice.SetProfileMuteLedState(true, dualSenseMuteLedOn[ind]);
-                dualSenseMuteLedOverrideActive[ind] = true;
-
-                if (!muteMicrophoneEnabled)
-                {
-                    string requestedProfileName;
-                    if (dualSenseMuteLedOn[ind])
-                    {
-                        requestedProfileName = Global.DualSenseMuteOnProfileName[ind];
-                        dualSenseMuteRememberedOffProfileName[ind] = Global.DualSenseMuteOffProfileName[ind];
-                    }
-                    else
-                    {
-                        requestedProfileName = Global.DualSenseMuteOffProfileName[ind];
-                        if (string.IsNullOrEmpty(requestedProfileName))
-                        {
-                            requestedProfileName = dualSenseMuteRememberedOffProfileName[ind];
-                        }
-                    }
-
-                    QueueDualSenseMuteProfile(ind, requestedProfileName);
-                }
-            }
-            else if (!dualSenseMuteLedOverrideActive[ind])
-            {
-                dualSenseDevice.SetProfileMuteLedState(true, dualSenseMuteLedOn[ind]);
-                dualSenseMuteLedOverrideActive[ind] = true;
-            }
-
-            dualSenseDevice.SetProfileMicrophoneMuteState(muteMicrophoneEnabled,
-                dualSenseMuteLedOn[ind]);
-            if (muteMicrophoneEnabled)
-            {
-                dualSenseMuteRememberedOffProfileName[ind] = string.Empty;
-                dualSenseMuteButtonWasDown[ind] = muteDown;
-                return;
-            }
-
-            dualSenseMuteButtonWasDown[ind] = muteDown;
-        }
-
         private void StartGameBarStateTimer()
         {
             if (gameBarStateTimer != null)
@@ -4225,7 +3999,6 @@ namespace DS4Windows
                 }
 
                 CheckGameBarHomeButton(ind, cState, tempControlState, pState);
-                CheckDualSenseMuteButtonProfileActions(ind, cState);
 
                 if (getEnableTouchToggle(ind))
                 {

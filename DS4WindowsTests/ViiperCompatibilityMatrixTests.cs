@@ -12,14 +12,11 @@ namespace DS4WindowsTests
         {
             ViiperVirtualDeviceType.Xbox360,
             ViiperVirtualDeviceType.DualShock4,
-            ViiperVirtualDeviceType.DualSense,
-            ViiperVirtualDeviceType.DualSenseEdge,
             ViiperVirtualDeviceType.Switch2Pro,
         };
 
         [DataTestMethod]
         [DataRow(InputDeviceType.DS4)]
-        [DataRow(InputDeviceType.DualSense)]
         public void EverySupportedPhysicalFamilyCanFeedEveryViiperOutput(
             InputDeviceType physicalType)
         {
@@ -42,8 +39,6 @@ namespace DS4WindowsTests
         [DataTestMethod]
         [DataRow(ViiperVirtualDeviceType.Xbox360, 20)]
         [DataRow(ViiperVirtualDeviceType.DualShock4, 31)]
-        [DataRow(ViiperVirtualDeviceType.DualSense, 33)]
-        [DataRow(ViiperVirtualDeviceType.DualSenseEdge, 33)]
         [DataRow(ViiperVirtualDeviceType.Switch2Pro, 24)]
         public void ViiperOutputReportsKeepTheirProtocolLength(
             ViiperVirtualDeviceType outputType, int expectedLength)

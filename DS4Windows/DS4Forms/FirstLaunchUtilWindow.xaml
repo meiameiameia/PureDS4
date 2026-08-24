@@ -31,10 +31,6 @@
                                   Content="{lex:Loc FirstLaunch.DS4EnableCkbLabel}" FontWeight="SemiBold" />
                         <TextBlock Text="{lex:Loc FirstLaunch.DS4EnableText}" Margin="24,3,0,12"
                                    Style="{StaticResource FoundationSecondaryTextStyle}" />
-                        <CheckBox Name="dualSenseSupportEnableCkb" IsChecked="{Binding EnableDualSense}"
-                                  Content="{lex:Loc FirstLaunch.DSEnableCkbLabel}" FontWeight="SemiBold" />
-                        <TextBlock Text="{lex:Loc FirstLaunch.DSEnableText}" Margin="24,3,0,12"
-                                   Style="{StaticResource FoundationSecondaryTextStyle}" />
                         <CheckBox Name="ds3SupportEnableCkb" IsChecked="{Binding EnableDS3}"
                                   Content="{lex:Loc FirstLaunch.DS3EnableCkbLabel}" FontWeight="SemiBold" />
                         <TextBlock Text="{lex:Loc FirstLaunch.DS3EnableText}" Margin="24,3,0,4"

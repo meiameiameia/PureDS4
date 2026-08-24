@@ -2232,14 +2232,6 @@ namespace DS4WinWPF.DS4Forms
                     {
                         var rumbleBoost = profileSettingsVM.RumbleBoost;
 
-                        // Check if device is DualSense and adjust/update accordingly
-                        if (d is DS4Windows.InputDevices.DualSenseDevice dualsense)
-                        {
-                            UpdateDualSenseRumble(dualsense);
-                            if (!profileSettingsVM.EnableGenericRumbleStrRescaleForDualSenseDevices)
-                                rumbleBoost = 100;
-                        }
-
                         if (type == RumbleType.Heavy)
                             profileSettingsVM.HeavyRumbleActive = true;
                         else
@@ -2300,10 +2292,7 @@ namespace DS4WinWPF.DS4Forms
 
         private int ResolvePreviewRumbleBoost(DS4Device device)
         {
-            return device is DualSenseDevice &&
-                !profileSettingsVM.
-                    EnableGenericRumbleStrRescaleForDualSenseDevices ?
-                100 : profileSettingsVM.RumbleBoost;
+            return profileSettingsVM.RumbleBoost;
         }
 
         private void ClearRumblePreview()
@@ -2319,27 +2308,6 @@ namespace DS4WinWPF.DS4Forms
 
             profileSettingsVM.HeavyRumbleActive = false;
             profileSettingsVM.LightRumbleActive = false;
-        }
-
-    private void UpdateDualSenseRumble(DS4Windows.InputDevices.DualSenseDevice dualsense)
-        {
-                switch ((DS4Windows.InputDevices.DualSenseDevice.RumbleEmulationMode)profileSettingsVM.DualSenseRumbleEmulationPerIndex)
-                {
-                    case DS4Windows.InputDevices.DualSenseDevice.RumbleEmulationMode.Disabled:
-                        dualsense.UseRumble = false;
-                        dualsense.UseAccurateRumble = false;
-                        break;
-                    case DS4Windows.InputDevices.DualSenseDevice.RumbleEmulationMode.Legacy:
-                        dualsense.UseRumble = true;
-                        dualsense.UseAccurateRumble = false;
-                        break;
-                    case DS4Windows.InputDevices.DualSenseDevice.RumbleEmulationMode.Accurate:
-                    default:
-                        dualsense.UseRumble = true;
-                        dualsense.UseAccurateRumble = true;
-                        break;
-                }
-                dualsense.HapticPowerLevel = (byte)profileSettingsVM.DualSenseHapticPowerLevelPerIndex;
         }
 
         private void CustomEditorBtn_Click(object sender, RoutedEventArgs e)

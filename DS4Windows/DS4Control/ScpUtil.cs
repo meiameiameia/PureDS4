@@ -80,6 +80,12 @@ namespace DS4Windows
             {
                 OutContType.X360 => OutContType.ViiperX360,
                 OutContType.DS4 => OutContType.ViiperDS4,
+                // Retired output types. The members remain so existing
+                // profiles and output-slot files still deserialize; a
+                // controller that had one selected now presents as a
+                // DualShock 4.
+                OutContType.ViiperDualSense => OutContType.ViiperDS4,
+                OutContType.ViiperDualSenseEdge => OutContType.ViiperDS4,
                 _ => type,
             };
         }
@@ -90,8 +96,6 @@ namespace DS4Windows
             {
                 OutContType.ViiperX360 => "Xbox 360",
                 OutContType.ViiperDS4 => "DualShock 4",
-                OutContType.ViiperDualSense => "DualSense",
-                OutContType.ViiperDualSenseEdge => "DualSense Edge",
                 OutContType.ViiperSwitch2Pro => "Switch 2 Pro",
                 _ => "None",
             };
@@ -2034,14 +2038,6 @@ namespace DS4Windows
         public static byte[] RumbleBoost => m_Config.rumble;
         public static byte getRumbleBoost(int index)
         {
-            if (Program.rootHub.DS4Controllers[index] is DualSenseDevice)
-            {
-                if (!UseGenericRumbleStrRescaleForDualSenses[index])
-                {
-                    return 100;
-                }
-
-            }
             return m_Config.rumble[index];
         }
 
@@ -2560,24 +2556,6 @@ namespace DS4Windows
 
         // Start of DualSense specific profile settings
         //
-        public static DualSenseDevice.RumbleEmulationMode[] DualSenseRumbleEmulationMode
-        {
-            get => m_Config.dualSenseRumbleEmulationMode;
-            set => m_Config.dualSenseRumbleEmulationMode = value;
-        }
-
-        public static bool[] UseGenericRumbleStrRescaleForDualSenses
-        {
-            get => m_Config.useGenericRumbleRescaleForDualSenses;
-            set => m_Config.useGenericRumbleRescaleForDualSenses = value;
-        }
-
-        public static byte[] DualSenseHapticPowerLevel
-        {
-            get => m_Config.dualSenseHapticPowerLevel;
-            set => m_Config.dualSenseHapticPowerLevel = value;
-        }
-
         public static bool[] DualSenseEnableSpeakerOutput
         {
             get => m_Config.dualSenseEnableSpeakerOutput;
@@ -3988,15 +3966,6 @@ namespace DS4Windows
 
         // Start of DualSense specific profile options
         //  
-        public DualSenseDevice.RumbleEmulationMode[] dualSenseRumbleEmulationMode = new DualSenseDevice.RumbleEmulationMode[Global.TEST_PROFILE_ITEM_COUNT]
-        {
-            0,0,0,0,0,0,0,0,0
-        };
-        public bool[] useGenericRumbleRescaleForDualSenses = new bool[Global.TEST_PROFILE_ITEM_COUNT] { false, false, false, false, false, false, false, false, false };
-        public byte[] dualSenseHapticPowerLevel = new byte[Global.TEST_PROFILE_ITEM_COUNT]
-        {
-            0,0,0,0,0,0,0,0,0
-        };
         public bool[] dualSenseEnableSpeakerOutput = new bool[Global.TEST_PROFILE_ITEM_COUNT] { false, false, false, false, false, false, false, false, false };
         public bool[] dualSenseHeadsetOnlyAudio = new bool[Global.TEST_PROFILE_ITEM_COUNT] { false, false, false, false, false, false, false, false, false };
         public byte[] dualSenseSpeakerVolume = new byte[Global.TEST_PROFILE_ITEM_COUNT] { 128, 128, 128, 128, 128, 128, 128, 128, 128 };
@@ -5177,13 +5146,7 @@ namespace DS4Windows
 
                 XmlNode xmlTouchButtonMode = m_Xdoc.CreateNode(XmlNodeType.Element, "TouchpadButtonMode", null); xmlTouchButtonMode.InnerText = touchpadButtonMode[device].ToString(); rootElement.AppendChild(xmlTouchButtonMode);
                 // Start of DualSense specific settings
-                // xmlDSRumbleGroupElement.AppendChild();
                 XmlElement xmlDualSenseControllerSettingsElement = m_Xdoc.CreateElement("DualSenseControllerSettings");
-                XmlElement xmlDSRumbleGroupElement = m_Xdoc.CreateElement("RumbleSettings"); xmlDualSenseControllerSettingsElement.AppendChild(xmlDSRumbleGroupElement);
-                XmlNode xmlDSREmulationModeElement = m_Xdoc.CreateNode(XmlNodeType.Element, "EmulationMode", null); xmlDSREmulationModeElement.InnerText = dualSenseRumbleEmulationMode[device].ToString(); xmlDSRumbleGroupElement.AppendChild(xmlDSREmulationModeElement);
-                XmlNode xmlDSREnableGenericRumbleRescaleElement = m_Xdoc.CreateNode(XmlNodeType.Element, "EnableGenericRumbleRescale", null); xmlDSREnableGenericRumbleRescaleElement.InnerText = useGenericRumbleRescaleForDualSenses[device].ToString(); xmlDSRumbleGroupElement.AppendChild(xmlDSREnableGenericRumbleRescaleElement);
-                XmlNode xmlDSRHapticPowerLevelElement = m_Xdoc.CreateNode(XmlNodeType.Element, "HapticPowerLevel", null); xmlDSRHapticPowerLevelElement.InnerText = dualSenseHapticPowerLevel[device].ToString(); xmlDSRumbleGroupElement.AppendChild(xmlDSRHapticPowerLevelElement);
-
                 XmlElement xmlDSAudioGroupElement = m_Xdoc.CreateElement("AudioSettings"); xmlDualSenseControllerSettingsElement.AppendChild(xmlDSAudioGroupElement);
                 XmlNode xmlDSEnableSpeakerOutputElement = m_Xdoc.CreateNode(XmlNodeType.Element, "EnableSpeakerOutput", null); xmlDSEnableSpeakerOutputElement.InnerText = dualSenseEnableSpeakerOutput[device].ToString(); xmlDSAudioGroupElement.AppendChild(xmlDSEnableSpeakerOutputElement);
                 XmlNode xmlDSHeadsetOnlyAudioElement = m_Xdoc.CreateNode(XmlNodeType.Element, "HeadsetOnlyAudio", null); xmlDSHeadsetOnlyAudioElement.InnerText = dualSenseHeadsetOnlyAudio[device].ToString(); xmlDSAudioGroupElement.AppendChild(xmlDSHeadsetOnlyAudioElement);
@@ -7570,42 +7533,6 @@ namespace DS4Windows
                 bool dSControllerSettingsGroup = xmlDualSenseControllerSettingsElement != null;
                 if (dSControllerSettingsGroup)
                 {
-                    XmlNode xmlDSRumbleGroupElement =
-                        xmlDualSenseControllerSettingsElement.SelectSingleNode("RumbleSettings");
-                    bool dSRumbleGroup = xmlDSRumbleGroupElement != null;
-
-                    if (dSRumbleGroup)
-                    {
-                        try
-                        {
-                            Item = xmlDSRumbleGroupElement.SelectSingleNode("EmulationMode");
-                            DualSenseDevice.RumbleEmulationMode.TryParse(Item.InnerText, out DualSenseDevice.RumbleEmulationMode temp);
-                            dualSenseRumbleEmulationMode[device] = temp;
-                        }
-                        catch { missingSetting = true; }
-
-                        try
-                        {
-                            Item = xmlDSRumbleGroupElement.SelectSingleNode("EnableGenericRumbleRescale");
-                            bool.TryParse(Item.InnerText, out bool temp);
-                            useGenericRumbleRescaleForDualSenses[device] = temp;
-                        }
-                        catch { missingSetting = true; }
-
-                        try
-                        {
-                            Item = xmlDSRumbleGroupElement.SelectSingleNode("HapticPowerLevel");
-                            byte.TryParse(Item.InnerText, out byte temp);
-                            dualSenseHapticPowerLevel[device] = temp;
-                        }
-                        catch { missingSetting = true; }
-
-                    }
-                    else
-                    {
-                        missingSetting = true;
-                    }
-
                     XmlNode xmlDSAudioGroupElement =
                         xmlDualSenseControllerSettingsElement.SelectSingleNode("AudioSettings");
                     if (xmlDSAudioGroupElement != null)
@@ -8767,7 +8694,9 @@ namespace DS4Windows
                                 XmlNode item = xmlDualSenseSupport.SelectSingleNode("Enabled");
                                 if (bool.TryParse(item?.InnerText ?? "", out bool temp))
                                 {
-                                    deviceOptions.DualSenseOpts.Enabled = temp;
+                                    // DualSense support has been removed; the
+                                    // element is read and ignored so older
+                                    // configurations still load.
                                 }
                             }
                             catch { }
@@ -8968,13 +8897,6 @@ namespace DS4Windows
             xmlDS4Enabled.InnerText = deviceOptions.DS4DeviceOpts.Enabled.ToString();
             xmlDS4Support.AppendChild(xmlDS4Enabled);
             xmlDeviceOptions.AppendChild(xmlDS4Support);
-
-            XmlElement xmlDualSenseSupport = m_Xdoc.CreateElement("DualSenseSupportSettings", null);
-            XmlElement xmlDualSenseEnabled = m_Xdoc.CreateElement("Enabled", null);
-            xmlDualSenseEnabled.InnerText = deviceOptions.DualSenseOpts.Enabled.ToString();
-            xmlDualSenseSupport.AppendChild(xmlDualSenseEnabled);
-
-            xmlDeviceOptions.AppendChild(xmlDualSenseSupport);
 
             rootElement.AppendChild(xmlDeviceOptions);
 

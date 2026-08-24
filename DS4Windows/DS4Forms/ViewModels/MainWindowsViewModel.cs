@@ -62,8 +62,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
     public class MainWindowsViewModel
     {
-        private static readonly int[] dualSenseHapticPercentages =
-            { 100, 87, 75, 62, 50, 37, 25, 12 };
 
         private ObservableCollection<CompositeDeviceModel> controllerCol = new();
 
@@ -104,8 +102,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             {
                 new("Xbox 360", OutContType.ViiperX360),
                 new("DualShock 4", OutContType.ViiperDS4),
-                new("DualSense", OutContType.ViiperDualSense),
-                new("DualSense Edge", OutContType.ViiperDualSenseEdge),
                 new("Switch 2 Pro", OutContType.ViiperSwitch2Pro),
             };
 
@@ -302,13 +298,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 if (!HasValidSelectedDevice) return 0;
 
                 int deviceIndex = selectedController.DevIndex;
-                if (selectedController.Device.DeviceType == InputDeviceType.DualSense)
-                {
-                    int levelIndex = Math.Clamp(Global.DualSenseHapticPowerLevel[deviceIndex],
-                        0, dualSenseHapticPercentages.Length - 1);
-                    return dualSenseHapticPercentages[levelIndex];
-                }
-
                 return Math.Clamp((int)Global.RumbleBoost[deviceIndex], 0, 100);
             }
             set
@@ -317,24 +306,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
                 int deviceIndex = selectedController.DevIndex;
                 int requested = Math.Clamp(value, 0, 100);
-                if (selectedController.Device.DeviceType == InputDeviceType.DualSense)
-                {
-                    int nearestIndex = 0;
-                    int nearestDistance = int.MaxValue;
-                    for (int i = 0; i < dualSenseHapticPercentages.Length; i++)
-                    {
-                        int distance = Math.Abs(dualSenseHapticPercentages[i] - requested);
-                        if (distance < nearestDistance)
-                        {
-                            nearestDistance = distance;
-                            nearestIndex = i;
-                        }
-                    }
-
-                    if (Global.DualSenseHapticPowerLevel[deviceIndex] == nearestIndex) return;
-                    Global.DualSenseHapticPowerLevel[deviceIndex] = (byte)nearestIndex;
-                }
-                else
                 {
                     if (Global.RumbleBoost[deviceIndex] == requested) return;
                     Global.RumbleBoost[deviceIndex] = (byte)requested;

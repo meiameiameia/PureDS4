@@ -21,27 +21,30 @@ namespace DS4WindowsTests
         public void ClassifiesControllerAudioEndpointIdentity(string identity, int expected)
         {
             Assert.AreEqual((ControllerAudioEndpointKind)expected,
-                DualSenseAudioPassthrough.ClassifyEndpointIdentity(identity));
+                ControllerAudioEndpoints.ClassifyEndpointIdentity(identity));
         }
 
         [DataTestMethod]
         [DataRow(OutContType.ViiperDS4, (int)ControllerAudioEndpointKind.DualShock4)]
-        [DataRow(OutContType.ViiperDualSense, (int)ControllerAudioEndpointKind.DualSense)]
-        [DataRow(OutContType.ViiperDualSenseEdge, (int)ControllerAudioEndpointKind.DualSense)]
+        // The DualSense output types are retired. Profiles that still name
+        // one are normalized to the DualShock 4 backend, so they select the
+        // DualShock 4 audio endpoint.
+        [DataRow(OutContType.ViiperDualSense, (int)ControllerAudioEndpointKind.DualShock4)]
+        [DataRow(OutContType.ViiperDualSenseEdge, (int)ControllerAudioEndpointKind.DualShock4)]
         // Legacy profiles that serialized "DS4" are migrated to the VIIPER
         // DualShock 4 backend before audio endpoint selection.
         [DataRow(OutContType.DS4, (int)ControllerAudioEndpointKind.DualShock4)]
         public void MapsVirtualOutputToPreferredAudioEndpoint(OutContType output, int expected)
         {
             Assert.AreEqual((ControllerAudioEndpointKind)expected,
-                DualSenseAudioPassthrough.GetEndpointKind(output));
+                ControllerAudioEndpoints.GetEndpointKind(output));
         }
 
         [DataTestMethod]
         [DataRow("", false, true)]
-        [DataRow(DualSenseAudioPassthrough.AutoDetectGameAudioEndpointId,
+        [DataRow(ControllerAudioEndpoints.AutoDetectGameAudioEndpointId,
             false, true)]
-        [DataRow(DualSenseAudioPassthrough.DefaultSystemAudioEndpointId,
+        [DataRow(ControllerAudioEndpoints.DefaultSystemAudioEndpointId,
             true, false)]
         [DataRow("{0.0.0.00000000}.{virtual-controller}", true, true)]
         [DataRow("{0.0.0.00000000}.{other-endpoint}", false, false)]
@@ -50,7 +53,7 @@ namespace DS4WindowsTests
             string endpointId, bool endpointOwnedByDirectSource, bool expected)
         {
             Assert.AreEqual(expected,
-                DualSenseAudioPassthrough.IsDirectSpeakerRequest(endpointId,
+                ControllerAudioEndpoints.IsDirectSpeakerRequest(endpointId,
                     endpointOwnedByDirectSource));
         }
 
@@ -61,7 +64,7 @@ namespace DS4WindowsTests
         [DataRow("", true, true,
             (int)DirectSpeakerEndpointOwnership.Unresolved,
             (int)DirectSpeakerRouteDecision.Direct)]
-        [DataRow(DualSenseAudioPassthrough.DefaultSystemAudioEndpointId,
+        [DataRow(ControllerAudioEndpoints.DefaultSystemAudioEndpointId,
             true, true, (int)DirectSpeakerEndpointOwnership.Owned,
             (int)DirectSpeakerRouteDecision.Loopback)]
         [DataRow("explicit", true, true,
@@ -93,7 +96,7 @@ namespace DS4WindowsTests
             int expected)
         {
             Assert.AreEqual((DirectSpeakerRouteDecision)expected,
-                DualSenseAudioPassthrough.DecideDirectSpeakerRoute(endpointId,
+                ControllerAudioEndpoints.DecideDirectSpeakerRoute(endpointId,
                     capable, active,
                     (DirectSpeakerEndpointOwnership)ownership));
         }
@@ -121,7 +124,7 @@ namespace DS4WindowsTests
             bool usbIpAncestor, int endpointPort, int sourcePort, int expected)
         {
             Assert.AreEqual((DirectSpeakerEndpointOwnership)expected,
-                DualSenseAudioPassthrough.
+                ControllerAudioEndpoints.
                     ClassifyDirectSpeakerEndpointOwnership(endpointActive,
                         identityMatches, interfacePathAvailable,
                         usbIpQueryResolved, usbIpAncestor, endpointPort,
@@ -190,7 +193,7 @@ namespace DS4WindowsTests
             int savedEndpointKind, int currentOutputKind, bool expected)
         {
             Assert.AreEqual(expected,
-                DualSenseAudioPassthrough.IsControllerEndpointSelection(
+                ControllerAudioEndpoints.IsControllerEndpointSelection(
                     (ControllerAudioEndpointKind)savedEndpointKind,
                     (ControllerAudioEndpointKind)currentOutputKind));
         }
@@ -907,10 +910,6 @@ namespace DS4WindowsTests
             Assert.AreEqual(1000, ViiperStateWriteRateSettings.GetDefaultRateHz(
                 ViiperVirtualDeviceType.DualShock4));
             Assert.AreEqual(1000, ViiperStateWriteRateSettings.GetDefaultRateHz(
-                ViiperVirtualDeviceType.DualSense));
-            Assert.AreEqual(1000, ViiperStateWriteRateSettings.GetDefaultRateHz(
-                ViiperVirtualDeviceType.DualSenseEdge));
-            Assert.AreEqual(1000, ViiperStateWriteRateSettings.GetDefaultRateHz(
                 ViiperVirtualDeviceType.Xbox360));
             Assert.AreEqual(1000, ViiperStateWriteRateSettings.GetDefaultRateHz(
                 ViiperVirtualDeviceType.Switch2Pro));
@@ -931,13 +930,10 @@ namespace DS4WindowsTests
         {
             Assert.AreEqual(200,
                 ViiperStateWriteRateSettings.ResolveConfiguredRateHz(
-                    ViiperVirtualDeviceType.DualSense, "200"));
-            Assert.AreEqual(250,
-                ViiperStateWriteRateSettings.ResolveConfiguredRateHz(
-                    ViiperVirtualDeviceType.DualSenseEdge, "250"));
+                    ViiperVirtualDeviceType.DualShock4, "200"));
             Assert.AreEqual(1000,
                 ViiperStateWriteRateSettings.ResolveConfiguredRateHz(
-                    ViiperVirtualDeviceType.DualSense, "immediate"));
+                    ViiperVirtualDeviceType.DualShock4, "immediate"));
             Assert.AreEqual(100,
                 ViiperStateWriteRateSettings.ResolveConfiguredRateHz(
                     ViiperVirtualDeviceType.DualShock4, "100"));

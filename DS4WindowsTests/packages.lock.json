@@ -40,15 +40,6 @@
         "resolved": "2.3.2",
         "contentHash": "DxnFhxZqMYJl08gs3b75UUjTN86YUN29hRPYXova3eS3q+XTi1kW9I/bHuBH2VDn33F6fE2XlKkVu7Jz/gzGxw=="
       },
-      "Concentus": {
-        "type": "Transitive",
-        "resolved": "2.2.2",
-        "contentHash": "2B9YmHPKO+k7YpAAnqmiXwiMJnfjfj1C868RszOll2iZWLnGTAiC1q21L/d7CvTan7T+hyqU8dR0Dcy3cpjVfQ==",
-        "dependencies": {
-          "System.Memory": "4.5.4",
-          "System.Numerics.Vectors": "4.5.0"
-        }
-      },
       "DotNetProjects.Extended.Wpf.Toolkit": {
         "type": "Transitive",
         "resolved": "5.0.106",
@@ -242,11 +233,6 @@
         "resolved": "4.5.5",
         "contentHash": "XIWiDvKPXaTveaB7HVganDlOCRoj03l+jrwNvcge/t8vhGYKvqV+dMv6G4SAX2NoNmN0wZfVPTAlFwZcZvVOUw=="
       },
-      "System.Numerics.Vectors": {
-        "type": "Transitive",
-        "resolved": "4.5.0",
-        "contentHash": "QQTlPTl06J/iiDbJCiepZ4H//BVraReU4O4EoRw1U02H5TLUIT7xn3GnDp9AXPSlJUDyFs4uWjWafNX6WrAojQ=="
-      },
       "System.Reflection.Metadata": {
         "type": "Transitive",
         "resolved": "1.6.0",
@@ -299,7 +285,6 @@
       "DS4Windows": {
         "type": "Project",
         "dependencies": {
-          "Concentus": "[2.2.2, )",
           "DotNetProjects.Extended.Wpf.Toolkit": "[5.0.106, )",
           "H.NotifyIcon.Wpf": "[2.0.74, )",
           "MdXaml": "[1.27.0, )",

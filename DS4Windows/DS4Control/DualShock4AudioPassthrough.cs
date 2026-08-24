@@ -61,12 +61,12 @@ namespace DS4Windows
             DualShock4BluetoothSpeakerPassthrough previous;
             int generation;
             ControllerAudioEndpointKind endpointKind =
-                DualSenseAudioPassthrough.GetEndpointKind(emulatedControllerType);
+                ControllerAudioEndpoints.GetEndpointKind(emulatedControllerType);
             ViiperOutDevice currentDirectSpeakerSource =
                 ResolveDirectSpeakerSource(directSpeakerSourceResolver,
                     directSpeakerSource);
             DirectSpeakerRouteDecision initialRoute =
-                DualSenseAudioPassthrough.EvaluateDirectSpeakerRoute(
+                ControllerAudioEndpoints.EvaluateDirectSpeakerRoute(
                     captureEndpointId, endpointKind,
                     currentDirectSpeakerSource);
             if (initialRoute == DirectSpeakerRouteDecision.Loopback)
@@ -232,7 +232,7 @@ namespace DS4Windows
                     !ProcessLoopbackWaveCapture.IsProcessEndpointId(
                         captureEndpointId) &&
                     !string.Equals(captureEndpointId,
-                        DualSenseAudioPassthrough.DefaultSystemAudioEndpointId,
+                        ControllerAudioEndpoints.DefaultSystemAudioEndpointId,
                         StringComparison.Ordinal);
                 if (directRouteExpected && currentDirectSpeakerSource == null)
                 {
@@ -248,7 +248,7 @@ namespace DS4Windows
                 }
 
                 DirectSpeakerRouteDecision route =
-                    DualSenseAudioPassthrough.EvaluateDirectSpeakerRoute(
+                    ControllerAudioEndpoints.EvaluateDirectSpeakerRoute(
                         captureEndpointId, endpointKind,
                         currentDirectSpeakerSource);
                 if (route == DirectSpeakerRouteDecision.Pending)

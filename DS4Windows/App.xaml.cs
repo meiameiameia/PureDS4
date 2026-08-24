@@ -163,14 +163,6 @@ namespace DS4WinWPF
                 return;
             }
 
-            if (DS4Windows.InputDevices.DualSenseBluetoothAudioPacer.
-                TryRunHelper(e.Args))
-            {
-                runShutdown = false;
-                Current.Shutdown();
-                return;
-            }
-
             if (DS4Windows.GameBarIntegration.TryRunProbeCommand(e.Args))
             {
                 runShutdown = false;

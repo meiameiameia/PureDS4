@@ -8,16 +8,6 @@
         "resolved": "2.3.2",
         "contentHash": "DxnFhxZqMYJl08gs3b75UUjTN86YUN29hRPYXova3eS3q+XTi1kW9I/bHuBH2VDn33F6fE2XlKkVu7Jz/gzGxw=="
       },
-      "Concentus": {
-        "type": "Direct",
-        "requested": "[2.2.2, )",
-        "resolved": "2.2.2",
-        "contentHash": "2B9YmHPKO+k7YpAAnqmiXwiMJnfjfj1C868RszOll2iZWLnGTAiC1q21L/d7CvTan7T+hyqU8dR0Dcy3cpjVfQ==",
-        "dependencies": {
-          "System.Memory": "4.5.4",
-          "System.Numerics.Vectors": "4.5.0"
-        }
-      },
       "DotNetProjects.Extended.Wpf.Toolkit": {
         "type": "Direct",
         "requested": "[5.0.106, )",
@@ -259,11 +249,6 @@
         "dependencies": {
           "Microsoft.Win32.SystemEvents": "6.0.0"
         }
-      },
-      "System.Numerics.Vectors": {
-        "type": "Transitive",
-        "resolved": "4.5.0",
-        "contentHash": "QQTlPTl06J/iiDbJCiepZ4H//BVraReU4O4EoRw1U02H5TLUIT7xn3GnDp9AXPSlJUDyFs4uWjWafNX6WrAojQ=="
       },
       "System.Security.AccessControl": {
         "type": "Transitive",

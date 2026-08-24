@@ -139,7 +139,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 return new ControllerMicrophoneUiState(
                     ControllerMicrophoneUiStatus.RequiresCompatibleController,
                     canEnable: false,
-                    "Controller microphone routing requires a genuine Sony DualShock 4 or DualSense.");
+                    "Controller microphone routing requires a genuine Sony DualShock 4.");
             }
 
             if (IsDualSense &&
@@ -156,7 +156,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 return new ControllerMicrophoneUiState(
                     ControllerMicrophoneUiStatus.RequiresBluetooth,
                     canEnable: false,
-                    "Direct controller microphone input requires a Bluetooth DualShock 4 or DualSense.");
+                    "Direct controller microphone input requires a Bluetooth DualShock 4.");
             }
 
             if (!ControllerMicrophoneRoutePolicy

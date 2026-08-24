@@ -224,8 +224,6 @@ namespace DS4Windows
             new VidPidInfo(SONY_VID, 0xBA0, "Sony WA", InputDeviceType.DS4),
             new VidPidInfo(SONY_VID, 0x5C4, "DS4 v.1"),
             new VidPidInfo(SONY_VID, 0x09CC, "DS4 v.2", InputDeviceType.DS4),
-            new VidPidInfo(SONY_VID, 0x0CE6, "DualSense", InputDeviceType.DualSense, VidPidFeatureSet.DefaultDS4, DualSenseDevice.DetermineConnectionType),
-            new VidPidInfo(SONY_VID, 0x0DF2, "DualSense Edge", InputDeviceType.DualSense, VidPidFeatureSet.DefaultDS4, DualSenseDevice.DetermineConnectionType),
             new VidPidInfo(RAZER_VID, 0x1000, "Razer Raiju PS4"),
             new VidPidInfo(RAZER_VID, 0x1100, "Razer Raion Fightpad PS4", InputDeviceType.DS4, VidPidFeatureSet.NoGyroCalib),
             new VidPidInfo(NACON_VID, 0x0D01, "Nacon Revol Pro v.1", InputDeviceType.DS4, VidPidFeatureSet.NoGyroCalib), // Nacon Revolution Pro v1 and v2 doesn't support DS4 gyro calibration routines
@@ -590,11 +588,7 @@ namespace DS4Windows
                     {
                         //string serial = hDevice.ReadSerial();
                         string serial = DS4Device.BLANK_SERIAL;
-                        if (metainfo.inputDevType == InputDeviceType.DualSense)
-                        {
-                            serial = hDevice.ReadSerial(DualSenseDevice.SERIAL_FEATURE_ID);
-                        }
-                        else if (metainfo.inputDevType == InputDeviceType.DS4 &&
+                        if (metainfo.inputDevType == InputDeviceType.DS4 &&
                             metainfo.checkConnection(hDevice) == ConnectionType.SONYWA ||
                             metainfo.inputDevType == InputDeviceType.DS3)
                         {

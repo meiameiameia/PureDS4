@@ -175,12 +175,6 @@ namespace DS4Windows.Tests
             Assert.AreEqual(0,
                 ViiperOutDevice.GetFeedbackSpeakerMaximumAgeMilliseconds(
                     ViiperVirtualDeviceType.DualShock4));
-            Assert.AreEqual(8,
-                ViiperOutDevice.GetFeedbackSpeakerQueueCapacity(
-                    ViiperVirtualDeviceType.DualSense));
-            Assert.AreEqual(0,
-                ViiperOutDevice.GetFeedbackSpeakerMaximumAgeMilliseconds(
-                    ViiperVirtualDeviceType.DualSense));
             Assert.AreEqual(0,
                 ViiperOutDevice.GetFeedbackSpeakerQueueCapacity(
                     ViiperVirtualDeviceType.Xbox360));
@@ -195,12 +189,6 @@ namespace DS4Windows.Tests
             Assert.AreEqual(32000,
                 ViiperOutDevice.GetVirtualSpeakerPcmSampleRate(
                     ViiperVirtualDeviceType.DualShock4));
-            Assert.AreEqual(48000,
-                ViiperOutDevice.GetVirtualSpeakerPcmSampleRate(
-                    ViiperVirtualDeviceType.DualSense));
-            Assert.AreEqual(48000,
-                ViiperOutDevice.GetVirtualSpeakerPcmSampleRate(
-                    ViiperVirtualDeviceType.DualSenseEdge));
             Assert.AreEqual(0,
                 ViiperOutDevice.GetVirtualSpeakerPcmSampleRate(
                     ViiperVirtualDeviceType.Xbox360));

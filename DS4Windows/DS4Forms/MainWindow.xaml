@@ -833,7 +833,7 @@
                                         <TextBlock x:Name="viiperStatusText"
                                                    Text="VIIPER status unknown"
                                                    TextWrapping="Wrap" MaxWidth="520" />
-                                        <TextBlock Text="Required for VIIPER outputs: DualSense, DualSense Edge, Switch 2 Pro, DS4, and Xbox 360 over USB/IP."
+                                        <TextBlock Text="Required for VIIPER outputs: DualShock 4, Switch 2 Pro, and Xbox 360 over USB/IP."
                                                    TextWrapping="Wrap" MaxWidth="520" Opacity="0.75" Margin="0,6,0,0" />
                                     </StackPanel>
                                 </Expander>

@@ -19,7 +19,6 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
-using Concentus;
 using DS4Windows.InputDevices;
 using SBC;
 
@@ -69,8 +68,6 @@ namespace DS4Windows
             {
                 case ViiperVirtualDeviceType.Xbox360:
                 case ViiperVirtualDeviceType.DualShock4:
-                case ViiperVirtualDeviceType.DualSense:
-                case ViiperVirtualDeviceType.DualSenseEdge:
                 case ViiperVirtualDeviceType.Switch2Pro:
                     // Every virtual controller exposes a one-millisecond
                     // maximum input opportunity. This remains adaptive rather
@@ -116,8 +113,6 @@ namespace DS4Windows
     {
         Xbox360,
         DualShock4,
-        DualSense,
-        DualSenseEdge,
         Switch2Pro,
     }
 
@@ -141,7 +136,6 @@ namespace DS4Windows
         private const int DualSenseCombinedExtendedFeedbackLength = DualSenseCombinedBluetoothReportOffset + DualSenseCombinedBluetoothReportLength;
         internal const int DualSenseAtomicFeedbackLength =
             DualSenseCombinedExtendedFeedbackLength;
-        private const int DualSenseMicrophoneOpusFrameLength = 71;
         private const int DualSenseMicrophoneFramesPerPacket = 480;
         private const int DualSenseMicrophonePcmFrameLength = DualSenseMicrophoneFramesPerPacket * 2 * sizeof(short);
         private const int DualShock4VirtualMicrophoneFramesPerPacket = 160;
@@ -272,7 +266,6 @@ namespace DS4Windows
         private Thread microphoneInterfaceThread;
         private byte[] pendingStatePacket;
         private long pendingStatePacketQueuedTimestamp;
-        private IOpusDecoder microphoneDecoder;
         private SbcDecoder microphoneSbcDecoder;
         private DS4Device microphoneSourceDevice;
         private DS4Device legacyDualSenseRumbleDevice;
@@ -314,7 +307,6 @@ namespace DS4Windows
         private long microphoneArmAttempts;
         private long microphoneArmFailures;
         private long microphoneCompressedFramesReceived;
-        private long microphoneOpusFramesReceived;
         private long microphoneSbcFramesReceived;
         private long microphoneFramesDecoded;
         private long microphoneFramesProcessed;
@@ -373,7 +365,6 @@ namespace DS4Windows
 
         private enum MicrophoneCodec : byte
         {
-            Opus,
             Sbc,
         }
 
@@ -414,11 +405,9 @@ namespace DS4Windows
                 Math.Max(1, GetFeedbackSpeakerQueueCapacity(viiperType)),
                 FeedbackSpeakerSlotLength,
                 DualSenseCombinedExtendedFeedbackLength,
-                IsDualSenseVirtualType(viiperType) ?
-                    FeedbackOrderedControlQueueCapacity : 0,
+                0,
                 GetFeedbackSpeakerMaximumAgeMilliseconds(viiperType),
-                IsDualSenseVirtualType(viiperType) ?
-                    FeedbackOrderedControlMaximumAgeMilliseconds : 0);
+                0);
             client = new ViiperClient(DefaultHost, DefaultPort);
         }
 
@@ -429,9 +418,6 @@ namespace DS4Windows
             {
                 ViiperVirtualDeviceType.DualShock4 =>
                     DualShock4FeedbackSpeakerQueueCapacity,
-                ViiperVirtualDeviceType.DualSense or
-                    ViiperVirtualDeviceType.DualSenseEdge =>
-                    DualSenseFeedbackSpeakerQueueCapacity,
                 _ => 0,
             };
         }
@@ -443,9 +429,6 @@ namespace DS4Windows
             {
                 ViiperVirtualDeviceType.DualShock4 =>
                     DualShock4FeedbackSpeakerMaximumAgeMilliseconds,
-                ViiperVirtualDeviceType.DualSense or
-                    ViiperVirtualDeviceType.DualSenseEdge =>
-                    DualSenseFeedbackSpeakerMaximumAgeMilliseconds,
                 _ => 0,
             };
         }
@@ -457,8 +440,6 @@ namespace DS4Windows
             {
                 ViiperVirtualDeviceType.DualShock4 =>
                     DualShock4BluetoothAudioProtocol.SpeakerSampleRate,
-                ViiperVirtualDeviceType.DualSense or
-                    ViiperVirtualDeviceType.DualSenseEdge => 48000,
                 _ => 0,
             };
         }
@@ -657,7 +638,6 @@ namespace DS4Windows
             Interlocked.Exchange(ref microphoneArmAttempts, 0);
             Interlocked.Exchange(ref microphoneArmFailures, 0);
             Interlocked.Exchange(ref microphoneCompressedFramesReceived, 0);
-            Interlocked.Exchange(ref microphoneOpusFramesReceived, 0);
             Interlocked.Exchange(ref microphoneSbcFramesReceived, 0);
             Interlocked.Exchange(ref microphoneFramesDecoded, 0);
             Interlocked.Exchange(ref microphoneFramesProcessed, 0);
@@ -753,40 +733,6 @@ namespace DS4Windows
             activeStreamFrameVersion = 0;
             Volatile.Write(ref virtualMicrophoneInterfaceActive, 0);
             Volatile.Write(ref virtualMicrophoneInterfaceStateKnown, 0);
-
-            if (viiperType == ViiperVirtualDeviceType.DualSense)
-            {
-                ViiperDeviceStream stream = client.CreateDeviceAndOpenStream(
-                    audioOnlySidecar ? "dualsenseaudioonlyduplexv5" :
-                        gamepadOnly ? "dualsensegamepadv5" :
-                            "dualsensecombinedaudioduplexv5");
-                activeFeedbackLength = DualSenseCombinedExtendedFeedbackLength;
-                activeStreamUsesFramedProtocol = true;
-                activeStreamSupportsMicrophone = !gamepadOnly;
-                activeStreamSupportsDirectSpeaker = !gamepadOnly;
-                activeStreamSupportsAtomicAudioHaptics = !gamepadOnly;
-                activeStreamSupportsRealtimeHaptics = !gamepadOnly;
-                activeStreamUsesV5AudioSource = !gamepadOnly;
-                activeStreamUsesAudioOnlyDescriptor = audioOnlySidecar;
-                activeStreamFrameVersion = ViiperStreamFrameVersionV5;
-                return stream;
-            }
-
-            if (viiperType == ViiperVirtualDeviceType.DualSenseEdge)
-            {
-                ViiperDeviceStream stream = client.CreateDeviceAndOpenStream(
-                    gamepadOnly ? "dualsenseedgegamepadv5" :
-                        "dualsenseedgecombinedaudioduplexv5");
-                activeFeedbackLength = DualSenseCombinedExtendedFeedbackLength;
-                activeStreamUsesFramedProtocol = true;
-                activeStreamSupportsMicrophone = !gamepadOnly;
-                activeStreamSupportsDirectSpeaker = !gamepadOnly;
-                activeStreamSupportsAtomicAudioHaptics = !gamepadOnly;
-                activeStreamSupportsRealtimeHaptics = !gamepadOnly;
-                activeStreamUsesV5AudioSource = !gamepadOnly;
-                activeStreamFrameVersion = ViiperStreamFrameVersionV5;
-                return stream;
-            }
 
             if (viiperType == ViiperVirtualDeviceType.DualShock4)
             {
@@ -892,7 +838,6 @@ namespace DS4Windows
             feedbackControlSignal.Set();
             WaitForFeedbackDispatchCallbacks();
             ClearNativeGameOutputProcessLease();
-            ReleaseNativeDualSenseFeedbackOwnership();
             // A real output-device disconnect must not inherit the interface
             // monitor's debounce period. The generation change prevents the
             // old monitor from reattaching after this synchronous detach.
@@ -948,25 +893,6 @@ namespace DS4Windows
             StopFeedbackReader();
             StopFeedbackDispatchWorkers();
             feedbackDispatchBuffer.ClearPending();
-        }
-
-        private void ReleaseNativeDualSenseFeedbackOwnership()
-        {
-            if (!IsDualSenseType() || audioOnlySidecar || Program.rootHub == null)
-            {
-                return;
-            }
-
-            int deviceIndex = Volatile.Read(ref lastInputDeviceIndex);
-            if (deviceIndex < 0 ||
-                deviceIndex >= Program.rootHub.DS4Controllers.Length ||
-                Program.rootHub.DS4Controllers[deviceIndex] is not
-                    DualSenseDevice dualSenseDevice)
-            {
-                return;
-            }
-
-            dualSenseDevice.ReleaseNativeGameOutputOwnership();
         }
 
         private void StopFeedbackReader()
@@ -2129,52 +2055,10 @@ namespace DS4Windows
         {
             switch (frame.Codec)
             {
-                case MicrophoneCodec.Opus:
-                    WriteMicrophoneOpusFrame(frame.Data);
-                    break;
                 case MicrophoneCodec.Sbc:
                     WriteMicrophoneSbcFrame(frame.Sequence,
                         frame.HasSequence, frame.Data);
                     break;
-            }
-        }
-
-        private void WriteMicrophoneOpusFrame(byte[] opusFrame)
-        {
-            if (!activeStreamSupportsMicrophone ||
-                !activeStreamUsesFramedProtocol ||
-                opusFrame == null ||
-                opusFrame.Length != DualSenseMicrophoneOpusFrameLength)
-            {
-                return;
-            }
-
-            lock (microphoneProcessingLock)
-            {
-                bool muted = Volatile.Read(ref microphoneMuted) == 1;
-                IOpusDecoder decoder = microphoneDecoder;
-                if (decoder == null)
-                {
-                    decoder = OpusCodecFactory.CreateDecoder(48000, 1);
-                    microphoneDecoder = decoder;
-                }
-
-                // Opus prediction state must advance for every physical frame.
-                // Muting only the final PCM payload avoids a stale-decoder
-                // transient when the user restores microphone audio.
-                int decodedSamples = decoder.Decode(opusFrame.AsSpan(),
-                    microphoneMonoPcm.AsSpan(),
-                    DualSenseMicrophoneFramesPerPacket, false);
-                if (decodedSamples <= 0)
-                {
-                    Interlocked.Increment(ref microphoneDecodeFailures);
-                    return;
-                }
-
-                Interlocked.Increment(ref microphoneFramesDecoded);
-                int frames = Math.Min(decodedSamples,
-                    DualSenseMicrophoneFramesPerPacket);
-                SubmitMicrophonePcm(frames, muted);
             }
         }
 
@@ -2764,7 +2648,7 @@ namespace DS4Windows
                 activeStreamSupportsDirectSpeaker ?
                     MultimediaThreadRegistration.EnterProAudio() :
                     MultimediaThreadRegistration.EnterGames();
-            int bufferLength = IsDualSenseType() ? Math.Max(feedbackLength, DualSenseCombinedExtendedFeedbackLength) : feedbackLength;
+            int bufferLength = feedbackLength;
             byte[] buffer = new byte[bufferLength];
             byte[] framedPayload = new byte[ushort.MaxValue];
             try
@@ -2800,12 +2684,7 @@ namespace DS4Windows
                             {
                                 int targetDeviceIndex = Volatile.Read(
                                     ref lastInputDeviceIndex);
-                                bool queued = IsDualSenseType() ?
-                                    feedbackDispatchBuffer
-                                        .TryEnqueueOrderedControl(
-                                            framedPayload, payloadLength,
-                                            readStreamGeneration,
-                                            targetDeviceIndex) :
+                                bool queued =
                                     feedbackDispatchBuffer.QueueControl(
                                         framedPayload, payloadLength,
                                         readStreamGeneration,
@@ -2980,10 +2859,7 @@ namespace DS4Windows
             // Xbox/Switch profile's rumble, lightbar, or trigger state. The
             // V4 atomic 0x36 carrier remains eligible because it is the audio
             // and haptics payload generated by the sidecar endpoint itself.
-            if (audioOnlySidecar &&
-                !(IsDualSenseType() &&
-                    feedbackLength >= DualSenseCombinedExtendedFeedbackLength &&
-                    feedback[DualSenseCombinedBluetoothReportOffset] == 0x36))
+            if (audioOnlySidecar)
             {
                 return;
             }
@@ -3009,61 +2885,6 @@ namespace DS4Windows
                     }
                     break;
 
-                case ViiperVirtualDeviceType.DualSense:
-                case ViiperVirtualDeviceType.DualSenseEdge:
-                    if (feedbackLength >= DualSenseBaseFeedbackLength)
-                    {
-                        bool nativeForwardingAllowed = IsNativeDualSenseFeedbackCompatible(device);
-                        if (nativeForwardingAllowed &&
-                            TryApplyBluetoothCombinedHapticsOutputReport(device,
-                                deviceIndex, feedback, feedbackLength,
-                                freshNativeOutput))
-                        {
-                            break;
-                        }
-
-                        if (nativeForwardingAllowed &&
-                            TryApplyBluetoothHapticsOutputReport(device,
-                                deviceIndex, feedback, feedbackLength))
-                        {
-                            break;
-                        }
-
-                        if (nativeForwardingAllowed &&
-                            TryApplyNativeDualSenseOutputReport(device, deviceIndex, feedback, feedbackLength))
-                        {
-                            break;
-                        }
-
-                        byte lightFast = feedback[1];
-                        byte heavySlow = feedback[0];
-                        if (device is not DualSenseDevice)
-                        {
-                            int hapticsReportOffset =
-                                feedbackLength >= DualSenseCombinedExtendedFeedbackLength &&
-                                feedback[DualSenseCombinedBluetoothReportOffset] == 0x36 ?
-                                    DualSenseCombinedBluetoothReportOffset :
-                                    DualSenseBluetoothHapticsReportOffset;
-                            DualSenseHapticsTranslator.Translate(feedback, feedbackLength,
-                                hapticsReportOffset, out lightFast, out heavySlow);
-                        }
-
-                        if (device is DualSenseDevice ||
-                            ShouldApplyLegacyDualSenseRumble(device, lightFast,
-                                heavySlow))
-                        {
-                            Program.rootHub.SetDevRumble(device, lightFast,
-                                heavySlow, deviceIndex);
-                        }
-                        if (ShouldApplyGameLightbar(deviceIndex))
-                        {
-                            ApplyLightbar(device, feedback[2], feedback[3],
-                                feedback[4], 0, 0);
-                        }
-                        ApplyDualSenseTriggerFeedback(device, deviceIndex, feedback, feedbackLength);
-                    }
-                    break;
-
                 case ViiperVirtualDeviceType.Switch2Pro:
                     if (feedbackLength >= 34)
                     {
@@ -3073,18 +2894,6 @@ namespace DS4Windows
                     }
                     break;
             }
-        }
-
-        private bool IsDualSenseType()
-        {
-            return IsDualSenseVirtualType(viiperType);
-        }
-
-        private static bool IsDualSenseVirtualType(
-            ViiperVirtualDeviceType type)
-        {
-            return type == ViiperVirtualDeviceType.DualSense ||
-                type == ViiperVirtualDeviceType.DualSenseEdge;
         }
 
         private void UpdateBluetoothMicrophoneSource(int deviceIndex,
@@ -3109,15 +2918,12 @@ namespace DS4Windows
             }
 
             DS4Device source = Program.rootHub.DS4Controllers[deviceIndex];
-            DualSenseDevice dualSenseSource = source as DualSenseDevice;
-            bool validDualSense = dualSenseSource != null &&
-                IsCurrentPhysicalSonyDualSense(dualSenseSource);
             bool validDualShock4 = source != null &&
                 source.DeviceType == InputDeviceType.DS4 &&
                 IsCurrentPhysicalSonyDualShock4(source);
             bool eligibleBluetoothSource =
                 ControllerMicrophoneRoutePolicy.IsEligibleBluetoothSource(
-                    source) && (validDualSense || validDualShock4);
+                    source) && validDualShock4;
             bool routeEligible =
                 ControllerMicrophoneRoutePolicy.CanRouteDirectViiperMicrophone(
                     profileEnabled, eligibleBluetoothSource, outputType,
@@ -3149,8 +2955,7 @@ namespace DS4Windows
                     Global.DualSenseMicrophoneNoiseSuppression[deviceIndex] :
                     (byte)DualSenseMicrophoneNoiseSuppression.Balanced);
 
-            Volatile.Write(ref microphoneMuted,
-                dualSenseSource?.IsProfileMicrophoneMuted == true ? 1 : 0);
+            Volatile.Write(ref microphoneMuted, 0);
 
             bool sourceAlreadyAttached;
             lock (microphoneSourceLock)
@@ -3181,12 +2986,6 @@ namespace DS4Windows
                 lock (microphoneSourceLock)
                 {
                     microphoneSourceDevice = source;
-                    if (source is DualSenseDevice attachedDualSense)
-                    {
-                        attachedDualSense.BluetoothMicrophoneOpusFrameReceived +=
-                            BluetoothMicrophoneOpusFrameReceived;
-                    }
-                    else
                     {
                         source.BluetoothMicrophoneSbcFrameReceived +=
                             BluetoothMicrophoneSbcFrameReceived;
@@ -3323,7 +3122,6 @@ namespace DS4Windows
             }
             lock (microphoneProcessingLock)
             {
-                microphoneDecoder = null;
                 ResetDualShock4MicrophoneDecodeState(
                     preserveSequence: false);
                 microphoneSbcDecoder = null;
@@ -3356,19 +3154,16 @@ namespace DS4Windows
                 lastProcessed);
             string submittedAge = FormatMicrophoneLivenessAge(now,
                 lastSubmitted);
-            DualSenseDevice dualSenseSource = source as DualSenseDevice;
-            int rejectedTag = dualSenseSource?.BluetoothLastRejectedInputTag ?? -1;
-            string rejectedTagText = rejectedTag < 0 ? "none" : $"0x{rejectedTag:X2}";
-            long physicalFrames = dualSenseSource?.BluetoothMicrophoneFramesReceived ??
+            const string rejectedTagText = "none";
+            long physicalFrames =
                 source.DualShock4BluetoothMicrophoneFramesReceived;
-            long rejectedInputs = dualSenseSource?.BluetoothRejectedInputFrames ?? 0;
+            long rejectedInputs = 0;
             int microphoneQueueDepth;
             lock (microphoneQueueLock)
             {
                 microphoneQueueDepth = pendingMicrophoneFrames.Count;
             }
-            string armStatus = dualSenseSource?.LastBluetoothMicrophoneWriteStatus ??
-                source.LastBluetoothAudioWriteStatus;
+            string armStatus = source.LastBluetoothAudioWriteStatus;
             ViiperMicrophoneBufferSnapshot virtualBuffer = Volatile.Read(
                 ref virtualMicrophoneBufferSnapshot);
             AppLogger.LogToGui(
@@ -3381,7 +3176,6 @@ namespace DS4Windows
                 $"armFailures={Interlocked.Read(ref microphoneArmFailures)} " +
                 $"physicalFrames={physicalFrames} " +
                 $"compressedFrames={Interlocked.Read(ref microphoneCompressedFramesReceived)} " +
-                $"opusFrames={Interlocked.Read(ref microphoneOpusFramesReceived)} " +
                 $"sbcFrames={Interlocked.Read(ref microphoneSbcFramesReceived)} " +
                 $"decodedFrames={Interlocked.Read(ref microphoneFramesDecoded)} " +
                 $"processedFrames={Interlocked.Read(ref microphoneFramesProcessed)} " +
@@ -3479,16 +3273,8 @@ namespace DS4Windows
                     if (microphoneSourceDevice != null)
                     {
                         source = microphoneSourceDevice;
-                        if (source is DualSenseDevice dualSenseSource)
-                        {
-                            dualSenseSource.BluetoothMicrophoneOpusFrameReceived -=
-                                BluetoothMicrophoneOpusFrameReceived;
-                        }
-                        else
-                        {
-                            source.BluetoothMicrophoneSbcFrameReceived -=
-                                BluetoothMicrophoneSbcFrameReceived;
-                        }
+                        source.BluetoothMicrophoneSbcFrameReceived -=
+                            BluetoothMicrophoneSbcFrameReceived;
                         microphoneSourceDevice = null;
                         resetProcessor = true;
                     }
@@ -3530,11 +3316,9 @@ namespace DS4Windows
             }
             lock (microphoneProcessingLock)
             {
-                resetProcessor |= microphoneDecoder != null ||
-                    microphoneSbcDecoder != null ||
+                resetProcessor |= microphoneSbcDecoder != null ||
                     dualShock4DecodedPcmFifoCount > 0 ||
                     dualShock4MicrophoneSequenceKnown;
-                microphoneDecoder = null;
                 ResetDualShock4MicrophoneDecodeState(
                     preserveSequence: false);
                 microphoneSbcDecoder = null;
@@ -3625,48 +3409,7 @@ namespace DS4Windows
         private static bool SetPhysicalBluetoothMicrophoneStreaming(
             DS4Device source, bool enabled)
         {
-            return source is DualSenseDevice dualSenseSource ?
-                dualSenseSource.SetBluetoothMicrophoneStreaming(enabled) :
-                source.SetDualShock4BluetoothMicrophoneStreaming(enabled);
-        }
-
-        private void BluetoothMicrophoneOpusFrameReceived(DualSenseDevice source,
-            byte[] opusFrame)
-        {
-            if (opusFrame == null || opusFrame.Length != DualSenseMicrophoneOpusFrameLength)
-            {
-                return;
-            }
-
-            lock (microphoneSourceLock)
-            {
-                if (!connected || !ReferenceEquals(source, microphoneSourceDevice))
-                {
-                    return;
-                }
-
-                Interlocked.Increment(ref microphoneCompressedFramesReceived);
-                Interlocked.Increment(ref microphoneOpusFramesReceived);
-                Interlocked.Exchange(ref lastMicrophoneCompressedRxTimestamp,
-                    Stopwatch.GetTimestamp());
-                byte[] copy = new byte[DualSenseMicrophoneOpusFrameLength];
-                Buffer.BlockCopy(opusFrame, 0, copy, 0, copy.Length);
-                lock (microphoneQueueLock)
-                {
-                    while (pendingMicrophoneFrames.Count >= MaxPendingMicrophoneFrames)
-                    {
-                        pendingMicrophoneFrames.Dequeue();
-                        Interlocked.Increment(ref microphoneFramesDropped);
-                    }
-                    pendingMicrophoneFrames.Enqueue(new PendingMicrophoneFrame(
-                        MicrophoneCodec.Opus, copy));
-                    microphoneTelemetry.ObserveCompressedQueueDepth(
-                        pendingMicrophoneFrames.Count);
-                }
-            }
-
-            EnsureMicrophoneWriterAlive();
-            microphoneWriterSignal.Set();
+            return source.SetDualShock4BluetoothMicrophoneStreaming(enabled);
         }
 
         private void BluetoothMicrophoneSbcFrameReceived(DS4Device source,
@@ -3705,132 +3448,6 @@ namespace DS4Windows
 
             EnsureMicrophoneWriterAlive();
             microphoneWriterSignal.Set();
-        }
-
-        private void ApplyDualSenseTriggerFeedback(DS4Device device, int deviceIndex,
-            byte[] feedback, int feedbackLength)
-        {
-            if (feedbackLength < DualSenseExtendedFeedbackLength ||
-                device is not DualSenseDevice dualSenseDevice ||
-                !IsCurrentPhysicalSonyDualSense(dualSenseDevice))
-            {
-                return;
-            }
-
-            int r2Offset = DualSenseTriggerFeedbackOffset;
-            int l2Offset = DualSenseTriggerFeedbackOffset + DualSenseTriggerEffectLength;
-            bool r2Changed = !TriggerFeedbackEquals(feedback, r2Offset, lastR2TriggerFeedback);
-            bool l2Changed = !TriggerFeedbackEquals(feedback, l2Offset, lastL2TriggerFeedback);
-
-            if (r2Changed)
-            {
-                CopyTriggerFeedback(feedback, r2Offset, lastR2TriggerFeedback);
-                ApplyRawTriggerEffect(dualSenseDevice, TriggerId.RightTrigger, feedback, r2Offset);
-            }
-
-            if (l2Changed)
-            {
-                CopyTriggerFeedback(feedback, l2Offset, lastL2TriggerFeedback);
-                ApplyRawTriggerEffect(dualSenseDevice, TriggerId.LeftTrigger, feedback, l2Offset);
-            }
-        }
-
-        private static void ApplyRawTriggerEffect(DualSenseDevice device, TriggerId trigger, byte[] feedback, int offset)
-        {
-            device.PrepareRawTriggerEffect(trigger,
-                feedback[offset],
-                feedback[offset + 1],
-                feedback[offset + 2],
-                feedback[offset + 3],
-                feedback[offset + 4],
-                feedback[offset + 5],
-                feedback[offset + 6],
-                feedback[offset + 9]);
-        }
-
-        private bool TryApplyNativeDualSenseOutputReport(DS4Device device, int deviceIndex, byte[] feedback, int feedbackLength)
-        {
-            if (feedbackLength < DualSenseBluetoothHapticsReportOffset ||
-                device is not DualSenseDevice dualSenseDevice ||
-                feedback[DualSenseNativeOutputReportOffset] != 0x02)
-            {
-                return false;
-            }
-
-            TraceNativeGameOutput(feedback,
-                DualSenseNativeOutputReportOffset);
-            byte[] report = PrepareNativeDualSenseOutputReportForProfile(feedback,
-                deviceIndex);
-            return dualSenseDevice.WriteRawOutputReportFromGame(report,
-                0,
-                DualSenseNativeOutputReportLength);
-        }
-
-        private static byte[] PrepareNativeDualSenseOutputReportForProfile(byte[] feedback,
-            int deviceIndex)
-        {
-            byte[] report = new byte[DualSenseNativeOutputReportLength];
-            Array.Copy(feedback, DualSenseNativeOutputReportOffset, report, 0, report.Length);
-
-            return report;
-        }
-
-        private static bool TryApplyBluetoothHapticsOutputReport(DS4Device device,
-            int deviceIndex, byte[] feedback, int feedbackLength)
-        {
-            if (feedbackLength < DualSenseExtendedFeedbackLength ||
-                device is not DualSenseDevice dualSenseDevice ||
-                feedback[DualSenseBluetoothHapticsReportOffset] != 0x32)
-            {
-                return false;
-            }
-
-
-            return dualSenseDevice.WriteBluetoothHapticsSamples(feedback,
-                DualSenseBluetoothHapticsReportOffset + 13, 64);
-        }
-
-        private bool TryApplyBluetoothCombinedHapticsOutputReport(
-            DS4Device device, int deviceIndex, byte[] feedback,
-            int feedbackLength, bool freshNativeOutput)
-        {
-            if (feedbackLength < DualSenseCombinedExtendedFeedbackLength ||
-                device is not DualSenseDevice dualSenseDevice ||
-                feedback[DualSenseCombinedBluetoothReportOffset] != 0x36)
-            {
-                return false;
-            }
-
-            // The dispatch buffer owns this frame until ApplyFeedback returns,
-            // so patching it in place avoids a managed allocation on every
-            // combined audio/HID feedback packet.
-            byte[] report = feedback;
-            int reportOffset = DualSenseCombinedBluetoothReportOffset;
-            bool hasNativeGameState =
-                freshNativeOutput &&
-                feedback.Length >= DualSenseNativeOutputReportOffset +
-                    DualSenseNativeOutputReportLength &&
-                feedback[DualSenseNativeOutputReportOffset] == 0x02;
-            if (hasNativeGameState)
-            {
-                TraceNativeGameOutput(feedback,
-                    DualSenseNativeOutputReportOffset);
-                // VIIPER's combined carrier contains the persistent media
-                // snapshot. This callback represents one exact game-authored
-                // SET_REPORT, so replace its common-state section before the
-                // atomic compositor applies local overrides.
-                byte[] exactGameReport =
-                    PrepareNativeDualSenseOutputReportForProfile(feedback,
-                        deviceIndex);
-                Buffer.BlockCopy(exactGameReport, 1, report,
-                    reportOffset + 13,
-                    DualSenseNativeOutputReportLength - 1);
-            }
-
-            return dualSenseDevice.WriteBluetoothCombinedHapticsAudioOutputReport(report,
-                DualSenseCombinedBluetoothReportOffset,
-                DualSenseCombinedBluetoothReportLength,
-                hasNativeGameState);
         }
 
         private void TraceNativeGameOutput(byte[] feedback, int offset)
@@ -3970,7 +3587,6 @@ namespace DS4Windows
             ownerProcess.Dispose();
             if (released)
             {
-                ReleaseNativeDualSenseFeedbackOwnership();
                 AppLogger.LogToGui(
                     $"DualSense native game-output owner {ownerName ?? "game"} exited; restored the active profile lightbar, player LEDs, triggers, and rumble.",
                     false);
@@ -4125,78 +3741,6 @@ namespace DS4Windows
         [DllImport("user32.dll")]
         private static extern uint GetWindowThreadProcessId(IntPtr window,
             out uint processId);
-
-        private bool IsNativeDualSenseFeedbackCompatible(DS4Device device)
-        {
-            if (device is not DualSenseDevice dualSenseDevice ||
-                !IsCurrentPhysicalSonyDualSense(dualSenseDevice))
-            {
-                return false;
-            }
-
-            if (viiperType != ViiperVirtualDeviceType.DualSenseEdge ||
-                dualSenseDevice.SubType == DualSenseDevice.DeviceSubType.DSEdge)
-            {
-                return true;
-            }
-
-            if (Interlocked.Exchange(ref edgePhysicalMismatchLogged, 1) == 0)
-            {
-                AppLogger.LogToGui("VIIPER DualSense Edge native feedback is not being forwarded to a physical non-Edge DualSense. Use DualSense output for normal DualSense controllers, or connect a DualSense Edge for Edge native feedback.", true);
-            }
-
-            return false;
-        }
-
-        private bool IsCurrentPhysicalSonyDualSense(DualSenseDevice device)
-        {
-            if (!IsGenuineSonyDualSense(device))
-            {
-                return false;
-            }
-
-            string devicePath = device.HidDevice.DevicePath ?? string.Empty;
-            lock (physicalDualSenseIdentityLock)
-            {
-                if (string.Equals(devicePath, physicalDualSenseIdentityPath, StringComparison.OrdinalIgnoreCase))
-                {
-                    return physicalDualSenseIdentityVerified;
-                }
-            }
-
-            bool isPhysical;
-            try
-            {
-                isPhysical = !DS4Devices.IsOwnVirtualDevice(devicePath) &&
-                    !Global.CheckIfVirtualDevice(devicePath);
-            }
-            catch
-            {
-                // Treat an unverified controller as ineligible for raw output.
-                // Generic rumble remains available through the normal fallback.
-                isPhysical = false;
-            }
-
-            lock (physicalDualSenseIdentityLock)
-            {
-                physicalDualSenseIdentityPath = devicePath;
-                physicalDualSenseIdentityVerified = isPhysical;
-            }
-
-            return isPhysical;
-        }
-
-        private static bool IsGenuineSonyDualSense(DualSenseDevice device)
-        {
-            if (device?.HidDevice?.Attributes == null)
-            {
-                return false;
-            }
-
-            int vendorId = device.HidDevice.Attributes.VendorId;
-            int productId = device.HidDevice.Attributes.ProductId;
-            return vendorId == DS4Devices.SONY_VID && (productId == 0x0CE6 || productId == 0x0DF2);
-        }
 
         private bool IsCurrentPhysicalSonyDualShock4(DS4Device device)
         {
@@ -5930,10 +5474,6 @@ namespace DS4Windows
             {
                 ViiperVirtualDeviceType.Xbox360 => "xbox360",
                 ViiperVirtualDeviceType.DualShock4 => "dualshock4",
-                ViiperVirtualDeviceType.DualSense =>
-                    "dualsensecombinedaudioduplexv5",
-                ViiperVirtualDeviceType.DualSenseEdge =>
-                    "dualsenseedgecombinedaudioduplexv5",
                 ViiperVirtualDeviceType.Switch2Pro => "ns2pro",
                 _ => "xbox360",
             };
@@ -5945,8 +5485,6 @@ namespace DS4Windows
             {
                 ViiperVirtualDeviceType.Xbox360 => 2,
                 ViiperVirtualDeviceType.DualShock4 => 7,
-                ViiperVirtualDeviceType.DualSense => DualSenseFeedbackPacketSize,
-                ViiperVirtualDeviceType.DualSenseEdge => DualSenseFeedbackPacketSize,
                 ViiperVirtualDeviceType.Switch2Pro => 34,
                 _ => 0,
             };
@@ -5958,8 +5496,6 @@ namespace DS4Windows
             {
                 ViiperVirtualDeviceType.Xbox360 => BuildXbox360(state, device),
                 ViiperVirtualDeviceType.DualShock4 => BuildDualShock4(state, device),
-                ViiperVirtualDeviceType.DualSense => BuildDualSense(state, device),
-                ViiperVirtualDeviceType.DualSenseEdge => BuildDualSense(state, device),
                 ViiperVirtualDeviceType.Switch2Pro => BuildSwitch2Pro(state, device),
                 _ => BuildXbox360(state, device),
             };

@@ -939,10 +939,6 @@ namespace DS4WinWPF.DS4Control.DTOXml
                 {
                     Enabled = source.deviceOptions.DS4DeviceOpts.Enabled,
                 },
-                DualSenseSupportSettings = new DualSenseSupportSettings()
-                {
-                    Enabled = source.deviceOptions.DualSenseOpts.Enabled,
-                },
                 DS3SupportSettings = new DS3SupportSettings()
                 {
                     Enabled = source.deviceOptions.DS3DeviceOpts.Enabled,
@@ -1040,7 +1036,6 @@ namespace DS4WinWPF.DS4Control.DTOXml
             }
 
             destination.deviceOptions.DS4DeviceOpts.Enabled = DeviceOptions.DS4SupportSettings.Enabled;
-            destination.deviceOptions.DualSenseOpts.Enabled = DeviceOptions.DualSenseSupportSettings.Enabled;
             destination.deviceOptions.DS3DeviceOpts.Enabled = DeviceOptions.DS3SupportSettings.Enabled;
 
             LightbarDS4WinInfo[] tempLightArray = new LightbarDS4WinInfo[]
@@ -1096,11 +1091,6 @@ namespace DS4WinWPF.DS4Control.DTOXml
             get; set;
         } = new DS4SupportSettingsGroup();
 
-        public DualSenseSupportSettings DualSenseSupportSettings
-        {
-            get; set;
-        } = new DualSenseSupportSettings();
-
 
 
         public DS3SupportSettings DS3SupportSettings
@@ -1144,14 +1134,6 @@ namespace DS4WinWPF.DS4Control.DTOXml
         public DS3SupportSettings() : base()
         {
             Enabled = DS3DeviceOptions.DEFAULT_ENABLE;
-        }
-    }
-
-    public class DualSenseSupportSettings : BaseInputDeviceSettingsGroup
-    {
-        public DualSenseSupportSettings() : base()
-        {
-            Enabled = DualSenseDeviceOptions.DEFAULT_ENABLE;
         }
     }
 

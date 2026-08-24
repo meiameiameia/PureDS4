@@ -250,7 +250,7 @@ namespace DS4WindowsTests
                     .ApplyTemporaryOutputControllerSelection(device,
                         ref selectedIndex, 2));
 
-                Assert.AreEqual(OutContType.ViiperDualSense,
+                Assert.AreEqual(OutContType.ViiperSwitch2Pro,
                     ProfileSettingsViewModel.GetOutputControllerType(
                         selectedIndex));
                 Assert.AreEqual((byte)DualSenseSpeakerCompression.Strong,

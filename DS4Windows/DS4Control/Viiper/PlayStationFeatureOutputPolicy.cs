@@ -71,7 +71,6 @@ namespace DS4Windows
             return outputType.Normalize() switch
             {
                 OutContType.ViiperDS4 => ViiperVirtualDeviceType.DualShock4,
-                OutContType.ViiperDualSense => ViiperVirtualDeviceType.DualSense,
                 _ => throw new System.ArgumentOutOfRangeException(
                     nameof(outputType), outputType,
                     "Audio-only sidecars are available only for PlayStation outputs."),

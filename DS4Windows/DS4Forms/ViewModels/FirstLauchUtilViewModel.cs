@@ -35,12 +35,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             set => serviceDeviceOpts.DS4DeviceOpts.Enabled = value;
         }
 
-        public bool EnableDualSense
-        {
-            get => serviceDeviceOpts.DualSenseOpts.Enabled;
-            set => serviceDeviceOpts.DualSenseOpts.Enabled = value;
-        }
-
         public bool EnableDS3
         {
             get => serviceDeviceOpts.DS3DeviceOpts.Enabled;

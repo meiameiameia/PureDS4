@@ -18,7 +18,6 @@
         <DockPanel>
             <StackPanel DockPanel.Dock="Top">
                 <CheckBox Content="{lex:Loc ControllerSupportDS4}" IsChecked="{Binding DS4DeviceOpts.Enabled}" />
-                <CheckBox Content="{lex:Loc ControllerSupportDualSense}" IsChecked="{Binding DSDeviceOpts.Enabled}" />
                 <CheckBox Content="{lex:Loc ControllerSupportDS3}" IsChecked="{Binding DS3DeviceOpts.Enabled}" />
                 <CheckBox Content="Accept Moonlight / Sunshine virtual controllers"
                           IsChecked="{Binding UseMoonlight}"
@@ -59,20 +58,6 @@
                 </StackPanel>
             </TabItem>
             
-            <TabItem x:Name="dualSenseOptsTabItem" Header="DualSense" Visibility="Collapsed">
-                <StackPanel Visibility="{Binding Visible, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="4">
-                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                        <Label Content="{lex:Loc ControllerRegOptWin.PlayerLEDMode}" ContentStringFormat="{}{0}:" />
-                        <ComboBox ItemsSource="{Binding Path=DsLEDModes}" DisplayMemberPath="DisplayName" SelectedValuePath="ChoiceValue" SelectedValue="{Binding Options.LedMode}" Margin="8,0,0,0" />
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                        <Label Content="{lex:Loc ControllerRegOptWin.MuteLEDMode}" ContentStringFormat="{}{0}:" />
-                        <ComboBox ItemsSource="{Binding Path=DsMuteLEDModes}" DisplayMemberPath="DisplayName" SelectedValuePath="ChoiceValue" SelectedValue="{Binding Options.MuteLedMode}" Margin="8,0,0,0" />
-                    </StackPanel>
-                </StackPanel>
-            </TabItem>
-
             <TabItem x:Name="switchProOptsTabItem" Header="Switch Pro" Visibility="Collapsed">
                 <StackPanel Visibility="{Binding Visible, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="4">
                     <TextBlock Foreground="{DynamicResource StateErrorBrush}" FontWeight="Bold">

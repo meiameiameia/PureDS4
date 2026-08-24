@@ -1819,12 +1819,6 @@ namespace DS4WinWPF.DS4Control.DTOXml
 
             DualSenseControllerSettings = new DualSenseControllerSettings()
             {
-                RumbleSettingsGroup = new DualSenseControllerSettings.RumbleSettings()
-                {
-                    EmulationMode = source.dualSenseRumbleEmulationMode[deviceIndex],
-                    EnableGenericRumbleRescale = source.useGenericRumbleRescaleForDualSenses[deviceIndex],
-                    HapticPowerLevel = source.dualSenseHapticPowerLevel[deviceIndex],
-                },
                 AudioSettingsGroup = new DualSenseControllerSettings.AudioSettings()
                 {
                     EnableSpeakerOutput = source.dualSenseEnableSpeakerOutput[deviceIndex],
@@ -2462,13 +2456,6 @@ namespace DS4WinWPF.DS4Control.DTOXml
 
             if (DualSenseControllerSettings != null)
             {
-                if (DualSenseControllerSettings.RumbleSettingsGroup != null)
-                {
-                    destination.dualSenseRumbleEmulationMode[deviceIndex] = DualSenseControllerSettings.RumbleSettingsGroup.EmulationMode;
-                    destination.useGenericRumbleRescaleForDualSenses[deviceIndex] = DualSenseControllerSettings.RumbleSettingsGroup.EnableGenericRumbleRescale;
-                    destination.dualSenseHapticPowerLevel[deviceIndex] = DualSenseControllerSettings.RumbleSettingsGroup.HapticPowerLevel;
-                }
-
                 if (DualSenseControllerSettings.AudioSettingsGroup != null)
                 {
                     destination.dualSenseEnableSpeakerOutput[deviceIndex] = DualSenseControllerSettings.AudioSettingsGroup.EnableSpeakerOutput;
@@ -3232,42 +3219,6 @@ namespace DS4WinWPF.DS4Control.DTOXml
 
     public class DualSenseControllerSettings
     {
-        public class RumbleSettings
-        {
-            [XmlElement("EmulationMode")]
-            public DualSenseDevice.RumbleEmulationMode EmulationMode
-            {
-                get; set;
-            }
-
-            private bool _enableGenericRumbleRescale;
-            [XmlIgnore]
-            public bool EnableGenericRumbleRescale
-            {
-                get => _enableGenericRumbleRescale;
-                set => _enableGenericRumbleRescale = value;
-            }
-
-            [XmlElement("EnableGenericRumbleRescale")]
-            public string EnableGenericRumbleRescaleString
-            {
-                get => _enableGenericRumbleRescale.ToString();
-                set => _enableGenericRumbleRescale = XmlDataUtilities.StrToBool(value);
-            }
-
-            [XmlElement("HapticPowerLevel")]
-            public byte HapticPowerLevel
-            {
-                get; set;
-            }
-        }
-
-        [XmlElement("RumbleSettings")]
-        public RumbleSettings RumbleSettingsGroup
-        {
-            get; set;
-        }
-
         public class AudioSettings
         {
             [XmlElement("EnableSpeakerOutput")]
@@ -3366,7 +3317,6 @@ namespace DS4WinWPF.DS4Control.DTOXml
 
         public DualSenseControllerSettings()
         {
-            RumbleSettingsGroup = new RumbleSettings();
             AudioSettingsGroup = new AudioSettings();
         }
     }

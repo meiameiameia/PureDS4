@@ -106,7 +106,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 new(BuildAutomaticControllerAudioName(automaticOutputType,
                     automaticUsbipPort), string.Empty),
                 new("Default · all system audio",
-                    DualSenseAudioPassthrough.DefaultSystemAudioEndpointId),
+                    ControllerAudioEndpoints.DefaultSystemAudioEndpointId),
             };
 
             var appEndpointIds = new HashSet<string>(StringComparer.Ordinal);
@@ -158,7 +158,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         {
             endpoints ??= RenderEndpoints;
             ControllerAudioEndpointKind preferredKind =
-                DualSenseAudioPassthrough.GetEndpointKind(outputType);
+                ControllerAudioEndpoints.GetEndpointKind(outputType);
 
             AudioEndpointSnapshot endpoint = endpoints
                 .Where(item => item.IsControllerAudio)
@@ -307,13 +307,13 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     string name = endpoint.FriendlyName ?? string.Empty;
                     string id = endpoint.ID ?? string.Empty;
                     bool controllerAudio = flow == DataFlow.Render &&
-                        DualSenseAudioPassthrough.IsControllerAudioEndpoint(endpoint);
+                        ControllerAudioEndpoints.IsControllerAudioEndpoint(endpoint);
                     ControllerAudioEndpointKind controllerKind = controllerAudio
-                        ? DualSenseAudioPassthrough.ClassifyEndpointIdentity(
+                        ? ControllerAudioEndpoints.ClassifyEndpointIdentity(
                             $"{name} {id}")
                         : ControllerAudioEndpointKind.Any;
                     int usbipPort = controllerAudio &&
-                        DualSenseAudioPassthrough.TryGetEndpointUsbipPort(
+                        ControllerAudioEndpoints.TryGetEndpointUsbipPort(
                             endpoint, out int resolvedUsbipPort)
                         ? resolvedUsbipPort
                         : -1;

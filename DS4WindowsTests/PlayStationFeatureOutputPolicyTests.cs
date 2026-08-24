@@ -20,15 +20,13 @@ namespace DS4WindowsTests
         public void AudioAndGamepadRolesAreMutuallyExclusive()
         {
             Assert.ThrowsException<System.ArgumentException>(() =>
-                new ViiperOutDevice(OutContType.ViiperDualSense,
-                    ViiperVirtualDeviceType.DualSense,
+                new ViiperOutDevice(OutContType.ViiperDS4,
+                    ViiperVirtualDeviceType.DualShock4,
                     audioOnlySidecar: true, gamepadOnly: true));
         }
 
         [DataTestMethod]
         [DataRow((int)OutContType.ViiperDS4)]
-        [DataRow((int)OutContType.ViiperDualSense)]
-        [DataRow((int)OutContType.ViiperDualSenseEdge)]
         public void PlayStationPrimaryOutputsOwnCompositeAudio(int outputType)
         {
             var manager = new OutputSlotManager();
@@ -78,8 +76,6 @@ namespace DS4WindowsTests
 
         [DataTestMethod]
         [DataRow((int)OutContType.ViiperDS4)]
-        [DataRow((int)OutContType.ViiperDualSense)]
-        [DataRow((int)OutContType.ViiperDualSenseEdge)]
         public void PlayStationCompositeOutputDoesNotCreateSidecar(
             int primaryType)
         {

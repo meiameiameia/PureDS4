@@ -627,7 +627,7 @@ namespace DS4Windows
             }
 
             bool useSystemDefault = string.Equals(endpointId,
-                DualSenseAudioPassthrough.DefaultSystemAudioEndpointId,
+                ControllerAudioEndpoints.DefaultSystemAudioEndpointId,
                 StringComparison.Ordinal) ||
                 (string.IsNullOrEmpty(endpointId) &&
                     endpointKind == ControllerAudioEndpointKind.Any);
@@ -640,7 +640,7 @@ namespace DS4Windows
             using var enumerator = new MMDeviceEnumerator();
             bool autoDetect = string.IsNullOrEmpty(endpointId) ||
                 string.Equals(endpointId,
-                    DualSenseAudioPassthrough.AutoDetectGameAudioEndpointId,
+                    ControllerAudioEndpoints.AutoDetectGameAudioEndpointId,
                     StringComparison.Ordinal);
             MMDevice endpoint = null;
             if (!autoDetect)
@@ -662,7 +662,7 @@ namespace DS4Windows
 
             if (endpoint == null)
             {
-                endpoint = DualSenseAudioPassthrough.FindActiveGameAudioEndpoint(
+                endpoint = ControllerAudioEndpoints.FindActiveGameAudioEndpoint(
                     enumerator, autoDetect ? null : endpointId, endpointKind);
             }
 

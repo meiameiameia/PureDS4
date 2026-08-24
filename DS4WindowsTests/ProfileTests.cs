@@ -333,8 +333,6 @@ namespace DS4WindowsTests
             {
                 OutContType.ViiperX360,
                 OutContType.ViiperDS4,
-                OutContType.ViiperDualSense,
-                OutContType.ViiperDualSenseEdge,
                 OutContType.ViiperSwitch2Pro,
             };
 
@@ -352,6 +350,29 @@ namespace DS4WindowsTests
 
                 Assert.AreEqual(outputType, target.OutputContDevice, $"{outputType} should round-trip through profile XML.");
             }
+        }
+
+        [DataTestMethod]
+        [DataRow(OutContType.ViiperDualSense)]
+        [DataRow(OutContType.ViiperDualSenseEdge)]
+        public void RetiredDualSenseOutputTypesNormalizeToDualShock4(
+            OutContType retired)
+        {
+            // The enum members are kept so existing profiles and output-slot
+            // files still deserialize. Support for the DualSense output was
+            // removed, so a profile naming one now presents a DualShock 4.
+            ProfileDTO source = new ProfileDTO
+            {
+                OutputContDevice = retired,
+            };
+
+            ProfileDTO target = new ProfileDTO
+            {
+                OutputContDeviceString = source.OutputContDeviceString,
+            };
+
+            Assert.AreEqual(OutContType.ViiperDS4, target.OutputContDevice,
+                $"{retired} should be retired to the DualShock 4 output.");
         }
 
         [TestMethod]
