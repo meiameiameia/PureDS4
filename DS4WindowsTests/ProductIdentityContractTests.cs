@@ -8,15 +8,46 @@ namespace DS4WindowsTests
     public class ProductIdentityContractTests
     {
         [TestMethod]
-        public void PublicIdentityUsesReworkedAliasAndRepository()
+        public void PublicIdentityUsesPureDS4NameAndRepository()
         {
-            Assert.AreEqual("DS4Windows Reworked", ProductIdentity.Name);
+            Assert.AreEqual("PureDS4", ProductIdentity.Name);
             Assert.AreEqual("meiameiameia", ProductIdentity.Publisher);
             Assert.AreEqual(
-                "https://github.com/meiameiameia/ds4windows-reworked",
+                "https://github.com/meiameiameia/pureds4",
                 ProductIdentity.RepositoryUrl);
             Assert.AreEqual(ProductIdentity.RepositoryUrl + "/issues",
                 ProductIdentity.IssuesUrl);
+        }
+
+        [TestMethod]
+        public void HostIdentityDoesNotCollideWithDS4Windows()
+        {
+            // PureDS4 has to be installable next to DS4Windows. Anything
+            // both products could claim must be on a PureDS4 name.
+            Assert.AreEqual("PureDS4", ProductIdentity.DataFolderName);
+            StringAssert.StartsWith(ProductIdentity.IpcClassNameMapName,
+                "PureDS4_");
+            StringAssert.StartsWith(ProductIdentity.IpcResultDataMapName,
+                "PureDS4_");
+            StringAssert.StartsWith(ProductIdentity.IpcResultReadyEventName,
+                "PureDS4_");
+
+            // The inherited single-instance handle would make each product
+            // treat the other as an existing instance of itself.
+            Assert.AreNotEqual("{a52b5b20-d9ee-4f32-8518-307fa14aa0c6}",
+                ProductIdentity.SingleInstanceEventName);
+        }
+
+        [TestMethod]
+        public void HidHideBlacklistLockStaysSharedAcrossProducts()
+        {
+            // Deliberately not a PureDS4 name. The HidHide blacklist is one
+            // shared resource, so both products must serialise against the
+            // same machine-wide lock; per-product locks would let them
+            // mutate the list at the same time.
+            Assert.AreEqual(
+                @"Global\DS4Windows-Reworked-HidHide-Blacklist",
+                ProductIdentity.HidHideBlacklistMutexName);
         }
 
         [TestMethod]

@@ -37,7 +37,7 @@ namespace DS4Windows
     internal static class HidHideBlacklistMutationGateway
     {
         internal const string MachineMutexName =
-            @"Global\DS4Windows-Reworked-HidHide-Blacklist";
+            ProductIdentity.HidHideBlacklistMutexName;
         private static readonly object processLock = new object();
         private static readonly TimeSpan MutexTimeout = TimeSpan.FromSeconds(5);
 

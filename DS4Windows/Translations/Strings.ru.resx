@@ -1152,7 +1152,7 @@
     <value>Program Folder</value>
   </data>
   <data name="SaveWhere.AppDataDescText" xml:space="preserve">
-    <value>Для тех, кто предпочитает обычную установку. Настройки сохраняются по пути %appdata%\DS4Windows</value>
+    <value>Для тех, кто предпочитает обычную установку. Настройки сохраняются по пути %appdata%\PureDS4</value>
   </data>
   <data name="SaveWhere.DontDelete" xml:space="preserve">
     <value>Не удаляйте другие настройки пока</value>

@@ -103,7 +103,8 @@ namespace DS4WinWPF
         private bool exitApp;
         private Thread testThread;
         private bool exitComThread = false;
-        private const string SingleAppComEventName = "{a52b5b20-d9ee-4f32-8518-307fa14aa0c6}";
+        private const string SingleAppComEventName =
+            DS4Windows.ProductIdentity.SingleInstanceEventName;
         private EventWaitHandle threadComEvent = null;
         private static LoggerHolder logHolder;
 
@@ -680,7 +681,7 @@ namespace DS4WinWPF
                                 // This process owns the inter-process sync mutex obj. Let's proceed with creating the output MMF file and waiting for a result.
                                 bWaitResultData = true;
                                 CreateIPCResultDataMMF();
-                                ipcNotifyEvent = new EventWaitHandle(false, EventResetMode.AutoReset, "DS4Windows_IPCResultData_ReadyEvent");
+                                ipcNotifyEvent = new EventWaitHandle(false, EventResetMode.AutoReset, DS4Windows.ProductIdentity.IpcResultReadyEventName);
                             }
                             else
                                 // If the mtx failed then something must be seriously wrong. Cannot do anything in that case because MMF file may be modified by concurrent processes.
@@ -854,7 +855,7 @@ namespace DS4WinWPF
                 {
                     byte[] buffer = ASCIIEncoding.ASCII.GetBytes(wndClassNameStr.ToString());
 
-                    ipcClassNameMMF = MemoryMappedFile.CreateNew("DS4Windows_IPCClassName.dat", 128);
+                    ipcClassNameMMF = MemoryMappedFile.CreateNew(DS4Windows.ProductIdentity.IpcClassNameMapName, 128);
                     MemoryMappedViewAccessor ipcClassNameMMA_Now = ipcClassNameMMF.CreateViewAccessor(0, buffer.Length);
                     ipcClassNameMMA_Now.WriteArray(0, buffer, 0, buffer.Length);
                     ipcClassNameMMA_Now?.Dispose();
@@ -875,7 +876,7 @@ namespace DS4WinWPF
             try
             {
                 byte[] buffer = new byte[128];
-                mmf = MemoryMappedFile.OpenExisting("DS4Windows_IPCClassName.dat");
+                mmf = MemoryMappedFile.OpenExisting(DS4Windows.ProductIdentity.IpcClassNameMapName);
                 mma = mmf.CreateViewAccessor(0, 128);
                 mma.ReadArray(0, buffer, 0, buffer.Length);
                 return ASCIIEncoding.ASCII.GetString(buffer);
@@ -901,7 +902,7 @@ namespace DS4WinWPF
 
             try
             {
-                ipcResultDataMMF = MemoryMappedFile.CreateNew("DS4Windows_IPCResultData.dat", 256);
+                ipcResultDataMMF = MemoryMappedFile.CreateNew(DS4Windows.ProductIdentity.IpcResultDataMapName, 256);
                 // The MMF file is alive as long this process holds the file handle open
             }
             catch (Exception)
@@ -947,10 +948,10 @@ namespace DS4WinWPF
 
             try
             {
-                ipcNotifyEvent = EventWaitHandle.OpenExisting("DS4Windows_IPCResultData_ReadyEvent");
+                ipcNotifyEvent = EventWaitHandle.OpenExisting(DS4Windows.ProductIdentity.IpcResultReadyEventName);
 
                 byte[] buffer = ASCIIEncoding.ASCII.GetBytes(dataStr);
-                mmf = MemoryMappedFile.OpenExisting("DS4Windows_IPCResultData.dat");
+                mmf = MemoryMappedFile.OpenExisting(DS4Windows.ProductIdentity.IpcResultDataMapName);
                 mma = mmf.CreateViewAccessor(0, 256);
                 mma.WriteArray(0, buffer, 0, (buffer.Length >= 256 ? 256 : buffer.Length));
             }

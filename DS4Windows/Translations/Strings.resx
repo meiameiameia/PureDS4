@@ -1262,7 +1262,7 @@ Disabled:
     <value>Program Folder</value>
   </data>
   <data name="SaveWhere.AppDataDescText" xml:space="preserve">
-    <value>For those who prefer a regular install. Settings saved at %appdata%\DS4Windows</value>
+    <value>For those who prefer a regular install. Settings saved at %appdata%\PureDS4</value>
   </data>
   <data name="SaveWhere.DontDelete" xml:space="preserve">
     <value>Don't Delete the other settings yet</value>

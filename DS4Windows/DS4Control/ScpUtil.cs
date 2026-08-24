@@ -637,8 +637,10 @@ namespace DS4Windows
         public static string appdatapath;
         public static bool firstRun = false;
         public static bool multisavespots = false;
-        public static string appDataPpath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\DS4Windows";
-        public static string localAppDataPpath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DS4Windows");
+        public static string appDataPpath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\" +
+            ProductIdentity.DataFolderName;
+        public static string localAppDataPpath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            ProductIdentity.DataFolderName);
         public static bool runHotPlug = false;
         public static string[] tempprofilename = new string[TEST_PROFILE_ITEM_COUNT] { string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty };
         public static bool[] useTempProfile = new bool[TEST_PROFILE_ITEM_COUNT] { false, false, false, false, false, false, false, false, false };

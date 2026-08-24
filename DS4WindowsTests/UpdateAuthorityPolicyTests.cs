@@ -27,7 +27,7 @@ namespace DS4WindowsTests
             Assert.AreEqual(0,
                 (await Changelog.GetChangelog(allVersions: true)).Count);
             StringAssert.Contains(Changelog.GITHUB_RELEASES_API_URI,
-                "meiameiameia/ds4windows-reworked");
+                "meiameiameia/pureds4");
             Assert.IsFalse(Changelog.GITHUB_RELEASES_API_URI.Contains(
                 "hbashton", System.StringComparison.OrdinalIgnoreCase));
         }

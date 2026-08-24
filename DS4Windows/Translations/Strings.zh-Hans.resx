@@ -1279,7 +1279,7 @@
     <value>常规</value>
   </data>
   <data name="SaveWhere.AppDataDescText" xml:space="preserve">
-    <value>对于那些偏好常规安装的人，设置保存路径在 %appdata%\DS4Windows</value>
+    <value>对于那些偏好常规安装的人，设置保存路径在 %appdata%\PureDS4</value>
   </data>
   <data name="SaveWhere.DontDelete" xml:space="preserve">
     <value>先不要删除其他设置</value>

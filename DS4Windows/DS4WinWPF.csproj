@@ -41,9 +41,9 @@
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 		<Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
 		<Platform Condition=" '$(Platform)' == '' ">x64</Platform>
-		<Product>DS4Windows Reworked</Product>
+		<Product>PureDS4</Product>
 		<Title>DS4Windows Reworked</Title>
-		<AssemblyTitle>DS4Windows Reworked</AssemblyTitle>
+		<AssemblyTitle>PureDS4</AssemblyTitle>
 		<Copyright>Copyright © Scarlet.Crush Productions 2012, 2013; InhexSTER, HecticSeptic, electrobrains 2013, 2014; Jays2Kings 2013, 2014, 2015, 2016; Ryochan7 2017-2023; schmaldeo 2024; hbashton 2026; meiameiameia 2026</Copyright>
 		<Description>Dependable Windows controller mapping and virtual game output</Description>
 		<Authors>meiameiameia</Authors>

@@ -670,7 +670,7 @@ Verbind gewoon je DualShock 4 en PC met een micro-USB kabel.
     <value>Program Folder</value>
   </data>
   <data name="SaveWhere.AppDataDescText" xml:space="preserve">
-    <value>Voor wie een normale installatie wil. Instellingen worden opgeslagen in %appdata%\DS4Windows</value>
+    <value>Voor wie een normale installatie wil. Instellingen worden opgeslagen in %appdata%\PureDS4</value>
   </data>
   <data name="SaveWhere.DontDelete" xml:space="preserve">
     <value>Verwijder de andere instellingen nog niet</value>

@@ -1224,7 +1224,8 @@ namespace DS4Windows
 
         private static string GetCanonicalViiperExePath()
         {
-            return Path.Combine(GetNativeProgramFilesPath(), "DS4Windows", "VIIPER",
+            return Path.Combine(GetNativeProgramFilesPath(),
+                ProductIdentity.DataFolderName, "VIIPER",
                 "viiper.exe");
         }
 

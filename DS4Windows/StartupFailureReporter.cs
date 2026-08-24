@@ -67,11 +67,12 @@ namespace DS4WinWPF
                 Environment.SpecialFolder.LocalApplicationData);
             if (!string.IsNullOrWhiteSpace(localAppData))
             {
-                yield return Path.Combine(localAppData, "DS4Windows",
-                    "Logs");
+                yield return Path.Combine(localAppData,
+                    DS4Windows.ProductIdentity.DataFolderName, "Logs");
             }
 
-            yield return Path.Combine(Path.GetTempPath(), "DS4Windows");
+            yield return Path.Combine(Path.GetTempPath(),
+                DS4Windows.ProductIdentity.DataFolderName);
         }
 
         private static string BuildPayload(Exception exception,
