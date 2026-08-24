@@ -1,8 +1,8 @@
-﻿# DS4Windows Reworked
+﻿# PureDS4
 
 ## Working agreement
 
-This is a maintainable DS4Windows derivative for a solo product owner. Lead with outcomes in plain language; explain material tradeoffs, risks, validation limits, and decisions without assuming the owner reads code. Work autonomously on safe, bounded tasks, preserve unrelated work, and distinguish verified facts from hypotheses and product choices.
+This is a narrowed DS4Windows derivative for a solo product owner. The tree, the executable and the configuration paths still carry the inherited DS4Windows identity; renaming them is tracked under Identity separation below. Lead with outcomes in plain language; explain material tradeoffs, risks, validation limits, and decisions without assuming the owner reads code. Work autonomously on safe, bounded tasks, preserve unrelated work, and distinguish verified facts from hypotheses and product choices.
 
 Controller correctness and reliability come first, followed by latency consistency, maintainability, understandable architecture, testability, setup experience, and reversibility. Architectural elegance alone is not a reason to change working code.
 
@@ -40,13 +40,13 @@ There are no existing users, so no migration is owed. A first-run import from an
 - Keep the `upstream` remote and the `upstream-baseline` tag. They remain useful for understanding inherited behaviour and for picking up upstream bug fixes in shared code.
 
 - DualShock 4 is the reference hardware. Bluetooth and USB are both supported paths and both have now been owner-validated (detection, physical input, Managed/Virtual readiness, and Native Physical mode transitions); see the validation records below for exactly which build each was exercised on.
-- DualSense and DualSense Edge are out of scope and are being removed. Do not add, repair or defend that code; do not claim it works.
+- DualSense and DualSense Edge are out of scope and **have been removed**, physical support and the virtual output targets alike. Do not reintroduce, repair or defend that code; do not claim it works. The retired `OutContType` members survive only so existing profiles deserialize, and normalize to the DualShock 4 output.
 - DS3 is an intended supported target for the pivoted tool, not merely an inherited family. Genuine hardware is available for manual validation through the owner's friend. Existing ScpToolkit/ScpTools driver state and coexistence must be characterized before changing setup or runtime behavior; do not claim DS3 support until the real hardware path is validated.
-- Joy-Con, Switch Pro and other inherited controller families are out of scope and are being removed. Removal is staged and verified rather than done in one pass, because DS4, DS3 and DualSense share a device class hierarchy and the seams are not all obvious.
+- Joy-Con and Switch Pro input support has been removed. Removal was staged and verified rather than done in one pass, because DS4, DS3 and DualSense shared a device class hierarchy whose seams were not all obvious. A Switch 2 Pro virtual output target still exists.
 - The first dependable product journey is a normal Windows user reaching working in-game controller output without learning VIIPER, USB-IP, HidHide internals, hashes, or installation modes. Do not weaken integrity or identity checks to simplify setup.
 - Owner-validated, on the promoted canonical `Dev\current` runtime after the controller-exposure recovery milestone: the app launches through `RunDS4Windows`; a DS4 connects over Bluetooth, is detected, and supplies physical input; **Continue without virtual output** works; the application reports Managed/Virtual as Ready; the transition to Native Physical exposure, and back to Managed/Virtual, both complete; Forza Horizon 6 recognizes the Managed/Virtual Xbox 360 output and responds normally to gameplay input; controller disconnect/reconnect works; and app close/relaunch through `RunDS4Windows` works.
 - Owner-validated on the single-file build installed by the reworked installer, from a fully clean machine with no prior DS4Windows, VIIPER, usbip-win2 or HidHide present: the installer provisions VIIPER, usbip-win2 and HidHide and completes without error; the install root contains only the intended six files and four content directories; a DS4 connects over **USB**, is detected, supplies physical input, reports Managed/Virtual as Ready, and the transition to Native Physical exposure works. A DS4 over Bluetooth also reaches Ready on this build.
-- Not yet owner-validated: **uninstall**. The fix that caches the uninstall-only Burn packages is committed but has not been exercised end to end, so no claim is made that an install produced by this installer can be removed by it. DualSense hardware remains unvalidated, as does the upgrade path from the previous multi-file layout, which may leave orphaned assemblies and language folders behind. Rumble, audio, haptics, and other advanced output behavior have not been claimed unless separately exercised.
+- Not yet owner-validated: **uninstall**. The fix that caches the uninstall-only Burn packages is committed but has not been exercised end to end, so no claim is made that an install produced by this installer can be removed by it. The upgrade path from the previous multi-file layout is likewise unvalidated and may leave orphaned assemblies and language folders behind. Rumble, audio, haptics, and other advanced output behavior have not been claimed unless separately exercised.
 
 Never turn build success, protocol tests, a component health check, or test count into a hardware/runtime claim. Record exactly what was exercised.
 
@@ -57,6 +57,7 @@ Never turn build success, protocol tests, a component health check, or test coun
 - `Dev\current` is the latest owner-approved and committed milestone. `Dev\rollback` is the immediately previous owner-approved milestone. Disposable validation publishes never become the daily driver.
 - Promotion sequence: build/tests → disposable publish → owner validation → commit/push → promote.
 - `RunDS4Windows` is persistent host-level infrastructure and remains pointed at `Dev\current`. Normal build, validation, promotion, rollback, cleanup, and release work must never recreate or retarget it, including to a disposable or versioned publish. Promote a validated build by replacing `Dev\current`, then manually smoke-test that canonical runtime.
+- Current host state, recorded because it diverges from the contract above. `Dev\current` holds a Release self-contained single-file build of the post-removal tree; it launches, detects a DS4 over USB and creates the Xbox 360 output, but it is **not** owner-validated, so the promotion sequence has been run out of order and the validation records below still describe the previous build. `Dev\rollback` holds the previously installed build. `RunDS4Windows` is **disabled** and still points at `C:\Program Files\DS4Windows\DS4Windows.exe`; retargeting it needs the owner because the scheduled-task surface is not agent-writable here. `RunVIIPER` is untouched and still serves the backend from the installed tree, which is why an application running from `Dev\current` still reaches VIIPER.
 - `RunVIIPER` is likewise host infrastructure and must not be modified by normal development or promotion work.
 
 ## Repository and stack
@@ -69,7 +70,7 @@ Never turn build success, protocol tests, a component health check, or test coun
 
 ## Build and checks
 
-Use native Windows/PowerShell tooling and repository-local configuration. No `global.json` is currently present.
+Use native Windows/PowerShell tooling and repository-local configuration. `global.json` pins the SDK to `8.0.421` with `rollForward` disabled, so a machine without that exact SDK will fail to restore rather than silently build against another one.
 
 ```powershell
 dotnet restore DS4WindowsWPF.sln
@@ -78,9 +79,9 @@ dotnet test DS4WindowsWPF.sln -c Debug -p:Platform=x64
 dotnet build DS4WindowsWPF.sln -c Release -p:Platform=x64
 ```
 
-Fresh baseline on `pt-BR`: Debug x64 builds with 0 errors and 15 warnings; 760 tests discover, with 755 passed, 2 failed, and 3 skipped. `CheckSettingsRead` and `CheckSettingsSave` fail because `AppSettingsDTO.LastCheckString` writes `MM/dd/yyyy HH:mm:ss` but parses with the current culture. Fix serialization/parsing, not assertions; validate explicitly under `en-US`, `pt-BR`, and another non-US culture. The three skipped `LiveProcessCapture*` tests become inconclusive when a suitable live Windows audio session is unavailable.
+Current baseline on `pt-BR`, after the controller-family removals: Debug x64 builds with 0 errors and 8 unique warnings, all inherited. 596 tests discover, with 593 passed and 3 skipped. The three skipped `LiveProcessCapture*` tests become inconclusive when a suitable live Windows audio session is unavailable. Warning counts must come from a `--no-incremental` build; an incremental build reports zero because nothing recompiles.
 
-For a change, run the narrowest relevant test first, then the full x64 suite and build. Report existing and introduced failures separately. Run Release/publish/installer checks when the changed surface reaches packaging. Do not treat the CI test filter as permission to ignore a local failure.
+For a change, run the narrowest relevant test first, then the full x64 suite and build. Report existing and introduced failures separately. Run Release/publish/installer checks when the changed surface reaches packaging — a change to the publish shape is one of those, because `utils/post-build.py` composes the offline package and depends on the published layout.
 
 ## Architecture and change discipline
 

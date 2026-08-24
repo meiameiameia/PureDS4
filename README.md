@@ -1,9 +1,23 @@
-﻿# DS4Windows Reworked
+﻿# PureDS4
 
-![DS4Windows Reworked Mapped Pad icon](branding/mapped-pad/mapped-pad-512.png)
+![PureDS4 Mapped Pad icon](branding/mapped-pad/mapped-pad-512.png)
 
-This repository is a maintainable DS4Windows derivative focused on dependable
-controller input, profile mapping, and Windows virtual-controller output.
+PureDS4 is a deliberately narrow DualShock 4 and DualShock 3 tool for Windows.
+It exists because [`hbashton/DS4Windows`](https://github.com/hbashton/DS4Windows)
+is a catch-all that also carries DualSense, DualSense Edge, Switch Pro and
+Joy-Con, and someone who owns only a DS4 or a DS3 has to carry all of it.
+PureDS4 covers exactly two controllers and aims to make every feature of those
+two work the way it would on a console. It is a complement to DS4Windows, not a
+replacement.
+
+Support for DualSense, DualSense Edge, Switch Pro and Joy-Con has been removed,
+along with the subsystems that existed only to serve them. DualShock 4 speaker
+and headset-jack audio are native DS4 features and remain.
+
+The application still identifies itself as DS4Windows Reworked and still uses
+the inherited DS4Windows install, registry, configuration and scheduled-task
+identities. Until that separation is done, **do not install this alongside
+DS4Windows** — the two would contend for the same locations.
 
 ## Current validation status
 
@@ -32,16 +46,20 @@ or HidHide present:
   Managed/Virtual as Ready, and completes the transition to Native Physical
   exposure.
 
+Both records above predate the removal of the other controller families. They
+describe a build that no longer exists, and nothing in them has been re-checked
+against the current tree by hand.
+
 Not yet validated: **uninstall**. The fix that caches the uninstall-only
 installer packages is committed but has not been exercised end to end, so no
 claim is made that an install produced by this installer can be removed by it.
-DualSense hardware is unvalidated, as is the upgrade path from the previous
-multi-file layout. Rumble, audio, haptics, and other advanced output behavior
-are not claimed unless separately exercised.
+The upgrade path from the previous multi-file layout is also unvalidated.
+Rumble, audio, haptics, and other advanced output behavior are not claimed
+unless separately exercised, and none of them have been re-exercised since the
+removals.
 
 DualShock 4 is the reference hardware, and both the Bluetooth and USB paths
-have now been owner-validated. DualSense and DualSense Edge compatibility is
-preserved, but no DualSense hardware has been validated.
+were owner-validated before the removals.
 
 DualShock 3 compatibility is a future candidate. Potential access to genuine
 DS3 hardware is available for later owner-assisted validation, but existing
@@ -59,14 +77,14 @@ dotnet test DS4WindowsWPF.sln -c Debug -p:Platform=x64
 ## Relationship to DS4Windows
 
 [`hbashton/DS4Windows`](https://github.com/hbashton/DS4Windows) is the
-maintained DS4Windows and keeps that identity. This repository is a personal
-derivative: it exists so its owner can run the controller setup he wants, and
-as a place to develop work that is offered back upstream by pull request.
+maintained DS4Windows and keeps that identity. PureDS4 is a derivative of it,
+narrowed to two controllers, and credits that lineage openly.
 
-There is no planned release. The version identifiers in the tree
+Publication is intended but not scheduled, and no readiness claim should be
+inferred from this repository. The version identifiers in the tree
 (`5.1.0-beta.1` and friends) record identity only, and the executable and
-established DS4Windows configuration paths are unchanged for compatibility.
-If you are looking for DS4Windows to install and use, go upstream.
+configuration paths are still the inherited DS4Windows ones. If you want
+DS4Windows to install and use today, go upstream.
 
 See [`docs/RELEASE_CONTRACT.md`](docs/RELEASE_CONTRACT.md) for the version,
 upgrade, compatibility, and artifact contract those identifiers follow.
