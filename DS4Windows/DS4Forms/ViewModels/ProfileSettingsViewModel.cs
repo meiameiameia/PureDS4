@@ -65,17 +65,11 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         public bool ShowControllerAudioSettings =>
             controllerUiCapabilities.ShowControllerAudioSettings;
 
-        public bool ShowDualSenseHardwareControls =>
-            controllerUiCapabilities.ShowDualSenseHardwareControls;
-
         public bool ShowPlayStationControllerSettings =>
             controllerUiCapabilities.ShowPlayStationControllerSettings;
 
         public bool SupportsAdaptiveTriggers =>
             controllerUiCapabilities.SupportsAdaptiveTriggers;
-
-        public bool ShowUsbDualSenseSpeakerSelector =>
-            controllerUiCapabilities.ShowUsbDualSenseSpeakerSelector;
 
         public bool ShowLegacyMicrophoneRouting =>
             controllerUiCapabilities.ShowLegacyMicrophoneRouting;

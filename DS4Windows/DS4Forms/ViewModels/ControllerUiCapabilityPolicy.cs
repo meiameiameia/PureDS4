@@ -44,7 +44,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         private ControllerUiCapabilities(InputDeviceType? deviceType,
             string controllerName, string imageResourceName,
             bool isPlayStationController, bool showControllerAudioSettings,
-            bool showDualSenseHardwareControls, string feedbackLabel,
+            string feedbackLabel,
             string audioHeader, string audioDescription,
             string microphoneToggleLabel,
             string microphoneDescription)
@@ -54,7 +54,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             ImageResourceName = imageResourceName;
             IsPlayStationController = isPlayStationController;
             ShowControllerAudioSettings = showControllerAudioSettings;
-            ShowDualSenseHardwareControls = showDualSenseHardwareControls;
             FeedbackLabel = feedbackLabel;
             AudioHeader = audioHeader;
             AudioDescription = audioDescription;
@@ -68,20 +67,20 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         internal bool HasControllerArtwork => ImageResourceName != null;
         internal bool IsPlayStationController { get; }
         internal bool IsDualShock4 => DeviceType == InputDeviceType.DS4;
-        internal bool IsDualSense => DeviceType == InputDeviceType.DualSense;
         internal ConnectionType? ConnectionType { get; private set; }
         internal int? VendorId { get; private set; }
         internal int? ProductId { get; private set; }
         internal bool PhysicalIdentityKnown { get; private set; }
         internal bool ShowControllerAudioSettings { get; }
-        internal bool ShowDualSenseHardwareControls { get; }
         internal bool ShowPlayStationControllerSettings =>
-            ShowControllerAudioSettings || ShowDualSenseHardwareControls;
-        // With no physical controller selected, keep the complete profile
-        // surface available so offline profile editing never loses features.
-        internal bool SupportsAdaptiveTriggers => DeviceType == null || IsDualSense;
-        internal bool SupportsAdvancedHaptics => DeviceType == null || IsDualSense;
-        internal bool SupportsMuteButton => DeviceType == null || IsDualSense;
+            ShowControllerAudioSettings;
+        // Adaptive triggers, voice-coil haptics and the mute button were
+        // DualSense hardware features. Neither supported controller has them,
+        // so these stay false even for a profile with no controller attached:
+        // offering them would promise hardware this tool no longer supports.
+        internal bool SupportsAdaptiveTriggers => false;
+        internal bool SupportsAdvancedHaptics => false;
+        internal bool SupportsMuteButton => false;
         internal string FeedbackLabel { get; }
         internal string AudioHeader { get; }
         internal string AudioDescription { get; }
@@ -98,7 +97,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             {
                 if (!PhysicalIdentityKnown)
                 {
-                    return DeviceType == InputDeviceType.DS4 || IsDualSense;
+                    return DeviceType == InputDeviceType.DS4;
                 }
 
                 if (!IsGenuineSonyController)
@@ -106,20 +105,12 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     return false;
                 }
 
-                return IsDualSense ?
-                    ConnectionType == DS4Windows.ConnectionType.BT ||
-                        ConnectionType == DS4Windows.ConnectionType.USB :
-                    IsDualShock4 && ConnectionType == DS4Windows.ConnectionType.BT;
+                return IsDualShock4 &&
+                    ConnectionType == DS4Windows.ConnectionType.BT;
             }
         }
 
-        internal bool ShowUsbDualSenseSpeakerSelector => IsDualSense &&
-            PhysicalIdentityKnown && IsGenuineSonyController &&
-            ConnectionType == DS4Windows.ConnectionType.USB;
-
-        internal bool ShowLegacyMicrophoneRouting => DeviceType == null ||
-            IsDualSense && PhysicalIdentityKnown && IsGenuineSonyController &&
-            ConnectionType == DS4Windows.ConnectionType.USB;
+        internal bool ShowLegacyMicrophoneRouting => DeviceType == null;
 
         internal ControllerMicrophoneUiState GetMicrophoneUiState(
             OutContType outputType, bool activeStreamSupportsMicrophone,
@@ -134,21 +125,12 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             }
 
             if (!IsGenuineSonyController ||
-                (!IsDualShock4 && !IsDualSense))
+                !IsDualShock4)
             {
                 return new ControllerMicrophoneUiState(
                     ControllerMicrophoneUiStatus.RequiresCompatibleController,
                     canEnable: false,
                     "Controller microphone routing requires a genuine Sony DualShock 4.");
-            }
-
-            if (IsDualSense &&
-                ConnectionType == DS4Windows.ConnectionType.USB)
-            {
-                return new ControllerMicrophoneUiState(
-                    ControllerMicrophoneUiStatus.UsbLegacyRoute,
-                    canEnable: true,
-                    "USB DualSense microphone routing uses the capture and virtual-output endpoints in Advanced audio.");
             }
 
             if (ConnectionType != DS4Windows.ConnectionType.BT)
@@ -181,8 +163,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 string.Empty);
         }
 
-        internal bool IsMappingControlAvailable(DS4Controls control,
-            bool isDualSenseEdge)
+        internal bool IsMappingControlAvailable(DS4Controls control)
         {
             if (DeviceType == null)
             {
@@ -201,43 +182,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     control != DS4Controls.BRP;
             }
 
-            if (IsDualSense)
-            {
-                if (control == DS4Controls.Capture ||
-                    control == DS4Controls.SideL ||
-                    control == DS4Controls.SideR)
-                {
-                    return false;
-                }
-
-                if (!isDualSenseEdge &&
-                    (control == DS4Controls.FnL ||
-                        control == DS4Controls.FnR ||
-                        control == DS4Controls.BLP ||
-                        control == DS4Controls.BRP))
-                {
-                    return false;
-                }
-            }
-
             return true;
-        }
-
-        internal bool IsControllerMapListOnlyControl(DS4Controls control,
-            bool isDualSenseEdge)
-        {
-            if (!IsDualSense || !isDualSenseEdge)
-            {
-                return false;
-            }
-
-            // The current controller artwork is the standard DualSense front
-            // view. Edge-only controls remain fully remappable from the list,
-            // but must not claim inaccurate hit targets on that diagram.
-            return control == DS4Controls.FnL ||
-                control == DS4Controls.FnR ||
-                control == DS4Controls.BLP ||
-                control == DS4Controls.BRP;
         }
 
         internal static ControllerUiCapabilities ForDevice(DS4Device device)
@@ -278,7 +223,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     "DualShock 4 Controller.png",
                     isPlayStationController: true,
                     showControllerAudioSettings: true,
-                    showDualSenseHardwareControls: false,
                     feedbackLabel: "Rumble strength",
                     audioHeader: "DualShock 4 audio",
                     audioDescription:
@@ -286,29 +230,12 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     microphoneToggleLabel: "Enable headset microphone input",
                     microphoneDescription:
                         "DualShock 4 microphone input comes from a headset connected to the controller's 3.5 mm jack."),
-                InputDeviceType.DualSense => new ControllerUiCapabilities(
-                    deviceType,
-                    productId == 0x0DF2 ? "DualSense Edge" : "DualSense",
-                    productId == 0x0DF2
-                        ? "DualSense Edge Controller.png"
-                        : "DualSense Controller.png",
-                    isPlayStationController: true,
-                    showControllerAudioSettings: true,
-                    showDualSenseHardwareControls: true,
-                    feedbackLabel: "Haptic feedback strength",
-                    audioHeader: "DualSense audio",
-                    audioDescription:
-                        "Speaker and microphone routing for the selected physical DualSense.",
-                    microphoneToggleLabel: "Enable controller microphone input",
-                    microphoneDescription:
-                        "Uses the DualSense built-in microphone or a headset connected to the controller."),
                 InputDeviceType.DS3 => new ControllerUiCapabilities(
                     deviceType,
                     "DualShock 3",
                     "DualShock 4 Controller.png",
                     isPlayStationController: true,
                     showControllerAudioSettings: false,
-                    showDualSenseHardwareControls: false,
                     feedbackLabel: "Rumble strength",
                     audioHeader: "Controller audio",
                     audioDescription: "Controller audio is not available on DualShock 3.",
@@ -320,21 +247,19 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     null,
                     isPlayStationController: false,
                     showControllerAudioSettings: true,
-                    showDualSenseHardwareControls: true,
-                    feedbackLabel: "Feedback strength",
-                    audioHeader: "PlayStation controller audio",
+                    feedbackLabel: "Rumble strength",
+                    audioHeader: "Controller audio",
                     audioDescription:
-                        "Speaker and microphone settings for compatible PlayStation controllers.",
-                    microphoneToggleLabel: "Enable controller microphone input",
+                        "Speaker and headset-mic settings for a DualShock 4.",
+                    microphoneToggleLabel: "Enable headset microphone input",
                     microphoneDescription:
-                        "These settings become active when the profile is used with a compatible PlayStation controller."),
+                        "These settings become active when the profile is used with a DualShock 4."),
                 _ => new ControllerUiCapabilities(
                     deviceType,
                     "Controller",
                     null,
                     isPlayStationController: false,
                     showControllerAudioSettings: false,
-                    showDualSenseHardwareControls: false,
                     feedbackLabel: "Rumble strength",
                     audioHeader: "PlayStation controller audio",
                     audioDescription:
@@ -358,8 +283,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             {
                 InputDeviceType.DS4 => productId == 0x05C4 ||
                     productId == 0x09CC,
-                InputDeviceType.DualSense => productId == 0x0CE6 ||
-                    productId == 0x0DF2,
                 _ => false,
             };
         }

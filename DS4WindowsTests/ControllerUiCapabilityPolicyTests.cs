@@ -8,7 +8,7 @@ namespace DS4WindowsTests
     public class ControllerUiCapabilityPolicyTests
     {
         [TestMethod]
-        public void DualShock4UsesDs4ArtworkAndHidesDualSenseHardware()
+        public void DualShock4UsesDs4ArtworkAndRumbleWording()
         {
             ControllerUiCapabilities capabilities =
                 ControllerUiCapabilities.For(InputDeviceType.DS4);
@@ -20,96 +20,54 @@ namespace DS4WindowsTests
             Assert.AreEqual("Enable headset microphone input",
                 capabilities.MicrophoneToggleLabel);
             Assert.IsTrue(capabilities.ShowControllerAudioSettings);
-            Assert.IsFalse(capabilities.ShowDualSenseHardwareControls);
             Assert.IsFalse(capabilities.SupportsAdaptiveTriggers);
             Assert.IsFalse(capabilities.SupportsMuteButton);
         }
 
         [TestMethod]
-        public void DualSenseUsesDualSenseArtworkAndHardwareControls()
-        {
-            ControllerUiCapabilities capabilities =
-                ControllerUiCapabilities.For(InputDeviceType.DualSense);
-
-            Assert.AreEqual("DualSense Controller.png",
-                capabilities.ImageResourceName);
-            Assert.AreEqual("Haptic feedback strength",
-                capabilities.FeedbackLabel);
-            Assert.AreEqual("DualSense audio", capabilities.AudioHeader);
-            Assert.IsTrue(capabilities.ShowControllerAudioSettings);
-            Assert.IsTrue(capabilities.ShowDualSenseHardwareControls);
-            Assert.IsTrue(capabilities.SupportsAdaptiveTriggers);
-            Assert.IsTrue(capabilities.SupportsMuteButton);
-        }
-
-        [TestMethod]
-        public void OfflineProfileEditingKeepsCompleteBackendSurfaceAvailable()
+        public void OfflineProfileEditingDoesNotOfferRemovedHardware()
         {
             ControllerUiCapabilities capabilities =
                 ControllerUiCapabilities.For(null);
 
+            // A profile with no controller attached still edits the full
+            // audio surface, but must not offer adaptive triggers, voice-coil
+            // haptics or a mute button: no supported controller has them.
             Assert.IsTrue(capabilities.ShowControllerAudioSettings);
-            Assert.IsTrue(capabilities.ShowDualSenseHardwareControls);
-            Assert.IsTrue(capabilities.SupportsAdaptiveTriggers);
-            Assert.IsTrue(capabilities.SupportsMuteButton);
+            Assert.IsFalse(capabilities.SupportsAdaptiveTriggers);
+            Assert.IsFalse(capabilities.SupportsAdvancedHaptics);
+            Assert.IsFalse(capabilities.SupportsMuteButton);
         }
 
         [TestMethod]
-        public void MappingAvailabilityMatchesPhysicalPlayStationControls()
+        public void MappingAvailabilityMatchesPhysicalDualShock4Controls()
         {
             ControllerUiCapabilities dualShock4 =
                 ControllerUiCapabilities.For(InputDeviceType.DS4);
-            ControllerUiCapabilities dualSense =
-                ControllerUiCapabilities.For(InputDeviceType.DualSense);
+            ControllerUiCapabilities offlineProfile =
+                ControllerUiCapabilities.For(null);
 
             Assert.IsTrue(dualShock4.IsMappingControlAvailable(
-                DS4Controls.Cross, isDualSenseEdge: false));
-            Assert.IsFalse(dualShock4.IsMappingControlAvailable(
-                DS4Controls.Mute, isDualSenseEdge: false));
-            Assert.IsFalse(dualShock4.IsMappingControlAvailable(
-                DS4Controls.FnL, isDualSenseEdge: false));
+                DS4Controls.Cross));
 
-            Assert.IsTrue(dualSense.IsMappingControlAvailable(
-                DS4Controls.Mute, isDualSenseEdge: false));
-            Assert.IsFalse(dualSense.IsMappingControlAvailable(
-                DS4Controls.FnL, isDualSenseEdge: false));
-            Assert.IsTrue(dualSense.IsMappingControlAvailable(
-                DS4Controls.FnL, isDualSenseEdge: true));
-            Assert.IsFalse(dualSense.IsMappingControlAvailable(
-                DS4Controls.Capture, isDualSenseEdge: true));
+            // Controls that only ever existed on a DualSense or an Edge stay
+            // unavailable on the physical DualShock 4 diagram, while their
+            // saved backend mappings are preserved.
+            foreach (DS4Controls absent in new[]
+            {
+                DS4Controls.Mute, DS4Controls.Capture, DS4Controls.SideL,
+                DS4Controls.SideR, DS4Controls.FnL, DS4Controls.FnR,
+                DS4Controls.BLP, DS4Controls.BRP,
+            })
+            {
+                Assert.IsFalse(dualShock4.IsMappingControlAvailable(
+                    absent),
+                    $"{absent} is not a DualShock 4 control.");
+            }
 
-            Assert.IsTrue(dualSense.IsControllerMapListOnlyControl(
-                DS4Controls.FnL, isDualSenseEdge: true));
-            Assert.IsTrue(dualSense.IsControllerMapListOnlyControl(
-                DS4Controls.BRP, isDualSenseEdge: true));
-            Assert.IsFalse(dualSense.IsControllerMapListOnlyControl(
-                DS4Controls.Cross, isDualSenseEdge: true));
-            Assert.IsFalse(dualSense.IsControllerMapListOnlyControl(
-                DS4Controls.FnL, isDualSenseEdge: false));
-            Assert.IsFalse(dualShock4.IsControllerMapListOnlyControl(
-                DS4Controls.FnL, isDualSenseEdge: true));
-        }
-
-        [TestMethod]
-        public void DualSenseEdgeExtrasStayRemappableAndAreMarkedListOnly()
-        {
-            MappingListViewModel mappings = new MappingListViewModel(
-                Global.TEST_PROFILE_INDEX, OutContType.ViiperDualSenseEdge,
-                InputDeviceType.DualSense,
-                physicalControllerIsDualSenseEdge: true);
-
-            MappedControl functionLeft = mappings.ControlMap[DS4Controls.FnL];
-            MappedControl bottomRightPaddle =
-                mappings.ControlMap[DS4Controls.BRP];
-            MappedControl cross = mappings.ControlMap[DS4Controls.Cross];
-
-            Assert.IsTrue(functionLeft.IsAvailableOnPhysicalController);
-            Assert.IsTrue(functionLeft.IsControllerMapListOnly);
-            Assert.IsTrue(functionLeft.PhysicalControllerAvailabilityHint
-                .Contains("fully remappable"));
-            Assert.IsTrue(bottomRightPaddle.IsAvailableOnPhysicalController);
-            Assert.IsTrue(bottomRightPaddle.IsControllerMapListOnly);
-            Assert.IsFalse(cross.IsControllerMapListOnly);
+            // Offline editing keeps every control remappable.
+            Assert.IsTrue(offlineProfile.IsMappingControlAvailable(
+                DS4Controls.FnL));
         }
 
         [DataTestMethod]
@@ -117,14 +75,6 @@ namespace DS4WindowsTests
             0x054C, 0x09CC, true)]
         [DataRow((int)InputDeviceType.DS4, (int)ConnectionType.USB,
             0x054C, 0x09CC, false)]
-        [DataRow((int)InputDeviceType.DualSense, (int)ConnectionType.BT,
-            0x054C, 0x0CE6, true)]
-        [DataRow((int)InputDeviceType.DualSense, (int)ConnectionType.USB,
-            0x054C, 0x0CE6, true)]
-        [DataRow((int)InputDeviceType.DualSense, (int)ConnectionType.BT,
-            0x054C, 0x0DF2, true)]
-        [DataRow((int)InputDeviceType.DualSense, (int)ConnectionType.BT,
-            0x1234, 0x0CE6, false)]
         [DataRow((int)InputDeviceType.DS4, (int)ConnectionType.BT,
             0x054C, 0xFFFF, false)]
         public void PhysicalAudioCapabilityMatchesConnectionAndSonyIdentity(
@@ -139,28 +89,16 @@ namespace DS4WindowsTests
         }
 
         [TestMethod]
-        public void UsbSpeakerAndLegacyMicSelectorsOnlyAppearForUsbDualSense()
+        public void LegacyMicRoutingOnlyAppearsForOfflineProfileEditing()
         {
             ControllerUiCapabilities offlineProfile =
                 ControllerUiCapabilities.For(null);
-            ControllerUiCapabilities usbDualSense =
-                ControllerUiCapabilities.For(InputDeviceType.DualSense,
-                    ConnectionType.USB, 0x054C, 0x0CE6);
-            ControllerUiCapabilities bluetoothDualSense =
-                ControllerUiCapabilities.For(InputDeviceType.DualSense,
-                    ConnectionType.BT, 0x054C, 0x0CE6);
             ControllerUiCapabilities bluetoothDualShock4 =
                 ControllerUiCapabilities.For(InputDeviceType.DS4,
                     ConnectionType.BT, 0x054C, 0x09CC);
 
-            Assert.IsFalse(offlineProfile.ShowUsbDualSenseSpeakerSelector);
             Assert.IsTrue(offlineProfile.ShowLegacyMicrophoneRouting,
                 "Offline editing keeps the legacy endpoint settings available under Advanced audio.");
-            Assert.IsTrue(usbDualSense.ShowUsbDualSenseSpeakerSelector);
-            Assert.IsTrue(usbDualSense.ShowLegacyMicrophoneRouting);
-            Assert.IsFalse(bluetoothDualSense.ShowUsbDualSenseSpeakerSelector);
-            Assert.IsFalse(bluetoothDualSense.ShowLegacyMicrophoneRouting);
-            Assert.IsFalse(bluetoothDualShock4.ShowUsbDualSenseSpeakerSelector);
             Assert.IsFalse(bluetoothDualShock4.ShowLegacyMicrophoneRouting);
         }
 
@@ -169,36 +107,14 @@ namespace DS4WindowsTests
             0x054C, 0x09CC, (int)OutContType.ViiperDS4, true,
             (int)ControllerMicrophoneUiStatus.Ready, true)]
         [DataRow((int)InputDeviceType.DS4, (int)ConnectionType.BT,
-            0x054C, 0x09CC, (int)OutContType.ViiperDualSense, true,
-            (int)ControllerMicrophoneUiStatus.Ready, true)]
-        [DataRow((int)InputDeviceType.DualSense, (int)ConnectionType.BT,
-            0x054C, 0x0CE6, (int)OutContType.ViiperDS4, true,
-            (int)ControllerMicrophoneUiStatus.Ready, true)]
-        [DataRow((int)InputDeviceType.DualSense, (int)ConnectionType.BT,
-            0x054C, 0x0CE6, (int)OutContType.ViiperDualSense, true,
-            (int)ControllerMicrophoneUiStatus.Ready, true)]
-        [DataRow((int)InputDeviceType.DualSense, (int)ConnectionType.BT,
-            0x054C, 0x0DF2, (int)OutContType.ViiperDualSenseEdge, true,
-            (int)ControllerMicrophoneUiStatus.Ready, true)]
-        [DataRow((int)InputDeviceType.DualSense, (int)ConnectionType.BT,
-            0x054C, 0x0CE6, (int)OutContType.X360, true,
+            0x054C, 0x09CC, (int)OutContType.ViiperDS4, true,
             (int)ControllerMicrophoneUiStatus.Ready, true)]
         [DataRow((int)InputDeviceType.DS4, (int)ConnectionType.BT,
             0x054C, 0x09CC, (int)OutContType.ViiperSwitch2Pro, true,
             (int)ControllerMicrophoneUiStatus.Ready, true)]
-        [DataRow((int)InputDeviceType.DualSense, (int)ConnectionType.BT,
-            0x054C, 0x0CE6, (int)OutContType.ViiperDualSense, false,
-            (int)ControllerMicrophoneUiStatus.OutputStarting, false)]
-        [DataRow((int)InputDeviceType.DualSense, (int)ConnectionType.USB,
-            0x054C, 0x0CE6, (int)OutContType.X360, false,
-            (int)ControllerMicrophoneUiStatus.UsbLegacyRoute, true)]
         [DataRow((int)InputDeviceType.DS4, (int)ConnectionType.USB,
             0x054C, 0x09CC, (int)OutContType.ViiperDS4, true,
             (int)ControllerMicrophoneUiStatus.RequiresBluetooth, false)]
-        [DataRow((int)InputDeviceType.DualSense, (int)ConnectionType.BT,
-            0x1234, 0x0CE6, (int)OutContType.ViiperDualSense, true,
-            (int)ControllerMicrophoneUiStatus.RequiresCompatibleController,
-            false)]
         public void MicrophoneUiStateExplainsPhysicalPersonaAndStreamReadiness(
             int deviceType, int connectionType, int vendorId, int productId,
             int outputType, bool activeStreamSupportsMicrophone,

@@ -34,7 +34,6 @@ namespace DS4WinWPF
     public enum AutoProfileDeviceOption
     {
         Any,
-        DualSense,
         DS4,
         DS3,
     }
@@ -272,8 +271,6 @@ namespace DS4WinWPF
             {
                 case AutoProfileDeviceOption.Any:
                     return true;
-                case AutoProfileDeviceOption.DualSense:
-                    return deviceType == DS4Windows.InputDevices.InputDeviceType.DualSense;
                 case AutoProfileDeviceOption.DS4:
                     return deviceType == DS4Windows.InputDevices.InputDeviceType.DS4;
                 case AutoProfileDeviceOption.DS3:

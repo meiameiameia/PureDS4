@@ -337,8 +337,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
         public bool IsDualShock4 => UiCapabilities.IsDualShock4;
 
-        public bool IsDualSense => UiCapabilities.IsDualSense;
-
         public bool SupportsAdaptiveTriggers =>
             UiCapabilities.SupportsAdaptiveTriggers;
 

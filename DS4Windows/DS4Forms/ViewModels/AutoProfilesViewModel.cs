@@ -96,7 +96,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             new List<EnumChoiceSelection<AutoProfileDeviceOption>>()
             {
                 new EnumChoiceSelection<AutoProfileDeviceOption>("Any", AutoProfileDeviceOption.Any),
-                new EnumChoiceSelection<AutoProfileDeviceOption>("DualSense", AutoProfileDeviceOption.DualSense),
                 new EnumChoiceSelection<AutoProfileDeviceOption>("DS4", AutoProfileDeviceOption.DS4),
                 new EnumChoiceSelection<AutoProfileDeviceOption>("DS3", AutoProfileDeviceOption.DS3),
             };

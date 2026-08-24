@@ -75,8 +75,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         private List<MappedControl> extraControls = new List<MappedControl>();
 
         public MappingListViewModel(int devIndex, OutContType devType,
-            InputDeviceType? physicalControllerType = null,
-            bool physicalControllerIsDualSenseEdge = false)
+            InputDeviceType? physicalControllerType = null)
         {
             mappings.Add(new MappedControl(devIndex, DS4Controls.Cross, "Cross", devType));
             mappings.Add(new MappedControl(devIndex, DS4Controls.Circle, "Circle", devType));
@@ -136,11 +135,9 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             foreach (MappedControl mapped in mappings)
             {
                 bool available = uiCapabilities.IsMappingControlAvailable(
-                    mapped.Control, physicalControllerIsDualSenseEdge);
+                    mapped.Control);
                 mapped.SetPhysicalControllerAvailability(
-                    available, uiCapabilities.ControllerName,
-                    available && uiCapabilities.IsControllerMapListOnlyControl(
-                        mapped.Control, physicalControllerIsDualSenseEdge));
+                    available, uiCapabilities.ControllerName);
                 controlMap.Add(mapped.Control, mapped);
                 controlIndexMap.Add(mapped.Control, controlIndex);
                 controlIndex++;

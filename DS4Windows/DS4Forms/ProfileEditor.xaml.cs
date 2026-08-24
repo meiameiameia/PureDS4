@@ -45,20 +45,8 @@ namespace DS4WinWPF.DS4Forms
         private MappingListViewModel mappingListVM;
         private ProfileEntity currentProfile;
         private SpecialActionsListViewModel specialActionsVM;
-        private enum ControllerDiagramKind
-        {
-            DualShock4,
-            DualSense,
-            DualSenseEdge,
-            Switch2Pro,
-        }
-
-        private ControllerDiagramKind controllerDiagramKind;
-        private bool controllerDiagramSelectorReady;
         private double controllerCoordinateScale = 1.0;
         private double controllerCoordinateOffsetX;
-        private bool usingDualSenseDiagram =>
-            controllerDiagramKind == ControllerDiagramKind.DualSense;
 
         public event EventHandler Closed;
         public event EventHandler ProfileNameChanged;
@@ -110,20 +98,10 @@ namespace DS4WinWPF.DS4Forms
             picBoxHover.Visibility = Visibility.Hidden;
             picBoxHover2.Visibility = Visibility.Hidden;
 
-            bool physicalControllerIsDualSenseEdge =
-                physicalController?.HidDevice?.Attributes?.ProductId == 0x0DF2;
-            ControllerDiagramKind defaultDiagram = physicalControllerIsDualSenseEdge
-                ? ControllerDiagramKind.DualSenseEdge
-                : physicalController?.DeviceType switch
-                {
-                    InputDeviceType.DualSense => ControllerDiagramKind.DualSense,
-                    _ => ControllerDiagramKind.DualShock4,
-                };
-            ConfigureControllerDiagram(defaultDiagram, true);
+            ConfigureControllerDiagram();
 
             mappingListVM = new MappingListViewModel(deviceNum,
-                profileSettingsVM.ContType, physicalController?.DeviceType,
-                physicalControllerIsDualSenseEdge);
+                profileSettingsVM.ContType, physicalController?.DeviceType);
             specialActionsVM = new SpecialActionsListViewModel(device);
 
             touchButtonUC = new TouchButtonUserControl(device);
@@ -147,10 +125,8 @@ namespace DS4WinWPF.DS4Forms
             SetupEvents();
         }
 
-        private void ConfigureControllerDiagram(ControllerDiagramKind diagramKind,
-            bool updateSelector = false)
+        private void ConfigureControllerDiagram()
         {
-            controllerDiagramKind = diagramKind;
             controllerHoverImages.Clear();
             vectorHoverGeometries.Clear();
             rasterHitGeometryButtons.Clear();
@@ -174,97 +150,7 @@ namespace DS4WinWPF.DS4Forms
             lightbarRect.RadiusY = 2;
             ds4LightbarColorBtn.Clip = null;
 
-            if (updateSelector)
-            {
-                controllerDiagramSelector.SelectedIndex = (int)diagramKind;
-                controllerDiagramSelectorReady = true;
-            }
-
-            switch (diagramKind)
-            {
-                case ControllerDiagramKind.DualSense:
-                    ConfigureDualSenseDiagram();
-                    break;
-                case ControllerDiagramKind.DualSenseEdge:
-                    ConfigureDualSenseEdgeDiagram();
-                    break;
-                case ControllerDiagramKind.Switch2Pro:
-                    ConfigureSwitch2ProDiagram();
-                    break;
-                default:
-                    ConfigureDualShock4Diagram();
-                    break;
-            }
-        }
-
-        private void ConfigureDualSenseDiagram()
-        {
-            ConfigureControllerRaster("DualSense Config.png",
-                "DualSense remapping layout", 880, 440);
-
-            SetCanvasButtonBounds(crossConBtn, 333, 127, 27, 27);
-            SetCanvasButtonBounds(circleConBtn, 363, 100, 27, 27);
-            SetCanvasButtonBounds(squareConBtn, 303, 100, 27, 27);
-            SetCanvasButtonBounds(triangleConBtn, 333, 76, 27, 27);
-
-            SetCanvasButtonBounds(l1ConBtn, 68, 25, 64, 27);
-            SetCanvasButtonBounds(r1ConBtn, 309, 25, 64, 27);
-            SetCanvasButtonBounds(l2ConBtn, 72, 0, 57, 27);
-            SetCanvasButtonBounds(r2ConBtn, 314, 0, 57, 27);
-
-            SetCanvasButtonBounds(shareConBtn, 115, 54, 20, 30);
-            SetCanvasButtonBounds(optionsConBtn, 306, 54, 20, 30);
-            SetCanvasButtonBounds(guideConBtn, 210, 151, 22, 23);
-            SetCanvasButtonBounds(muteConBtn, 210, 177, 22, 14);
-            muteConBtn.Visibility = Visibility.Visible;
-
-            SetCanvasButtonBounds(leftTouchConBtn, 145, 77, 52, 52);
-            SetCanvasButtonBounds(multiTouchConBtn, 197, 77, 46, 52);
-            SetCanvasButtonBounds(rightTouchConBtn, 243, 77, 56, 52);
-            SetCanvasButtonBounds(topTouchConBtn, 143, 49, 158, 28);
-
-            SetCanvasButtonBounds(l3ConBtn, 133, 145, 47, 48);
-            SetCanvasButtonBounds(lsuConBtn, 146, 145, 21, 15);
-            SetCanvasButtonBounds(lsrConBtn, 166, 161, 14, 21);
-            SetCanvasButtonBounds(lsdConBtn, 146, 178, 21, 15);
-            SetCanvasButtonBounds(lslConBtn, 133, 161, 14, 21);
-
-            SetCanvasButtonBounds(r3ConBtn, 261, 145, 47, 48);
-            SetCanvasButtonBounds(rsuConBtn, 274, 145, 21, 15);
-            SetCanvasButtonBounds(rsrConBtn, 294, 161, 14, 21);
-            SetCanvasButtonBounds(rsdConBtn, 274, 178, 21, 15);
-            SetCanvasButtonBounds(rslConBtn, 261, 161, 14, 21);
-
-            SetCanvasButtonBounds(upConBtn, 84, 76, 23, 31);
-            SetCanvasButtonBounds(rightConBtn, 103, 96, 33, 23);
-            SetCanvasButtonBounds(downConBtn, 84, 111, 23, 31);
-            SetCanvasButtonBounds(leftConBtn, 55, 96, 33, 23);
-
-            Canvas.SetLeft(ds4LightbarColorBtn, 134);
-            Canvas.SetTop(ds4LightbarColorBtn, 49);
-            ds4LightbarColorBtn.Width = 172;
-            ds4LightbarColorBtn.Height = 83;
-            lightbarRect.OpacityMask = new ImageBrush(LoadResourceImage("DualSense lightbar.png"));
-
-            PopulateControllerHoverAtlas("DualSense-Config_Highlights.png",
-                includeMute: true, includeTouch: false,
-                includeEdgeControls: false, includeCapture: false);
-            controllerHoverImages[leftTouchConBtn] =
-                LoadResourceImage("DualSense-Config_TouchLeft.png");
-            controllerHoverImages[multiTouchConBtn] =
-                LoadResourceImage("DualSense-Config_TouchMulti.png");
-            controllerHoverImages[rightTouchConBtn] =
-                LoadResourceImage("DualSense-Config_TouchRight.png");
-            controllerHoverImages[topTouchConBtn] =
-                LoadResourceImage("DualSense-Config_TouchUpper.png");
-            PopulateDualSenseHitGeometries();
-            // The painted mute highlight is correct, so use that same raster
-            // surface as its input target. The old hand-authored rectangle sat
-            // below the visible button and made hover/click feel disconnected.
-            AssignControllerRasterHitGeometry(muteConBtn,
-                "DualSense-Config_Highlights.png", 11);
-            PopulateControllerStickAtlas("DualSense-Stick_Highlights.png");
-            ApplyControllerButtonClips();
+            ConfigureDualShock4Diagram();
         }
 
         private void ConfigureDualShock4Diagram()
@@ -319,135 +205,6 @@ namespace DS4WinWPF.DS4Forms
             PopulateControllerStickAtlas("DualShock4-Stick_Highlights.png");
             lightbarRect.OpacityMask = new ImageBrush(
                 LoadResourceImage("DualShock4-Mapping-Lightbar.png"));
-            ApplyControllerButtonClips();
-        }
-
-        private void ConfigureDualSenseEdgeDiagram()
-        {
-            ConfigureControllerRaster("DualSense Edge Controller.png",
-                "DualSense Edge remapping layout", 1558, 1009);
-
-            SetCanvasButtonBounds(crossConBtn, 326, 119, 29, 29);
-            SetCanvasButtonBounds(circleConBtn, 353, 90, 30, 29);
-            SetCanvasButtonBounds(squareConBtn, 297, 90, 29, 29);
-            SetCanvasButtonBounds(triangleConBtn, 326, 61, 29, 29);
-
-            SetCanvasButtonBounds(l1ConBtn, 69, 27, 61, 30);
-            SetCanvasButtonBounds(r1ConBtn, 310, 27, 61, 30);
-            SetCanvasButtonBounds(l2ConBtn, 70, 5, 57, 25);
-            SetCanvasButtonBounds(r2ConBtn, 313, 5, 57, 25);
-            SetCanvasButtonBounds(shareConBtn, 123, 56, 15, 20);
-            SetCanvasButtonBounds(optionsConBtn, 304, 56, 15, 20);
-            SetCanvasButtonBounds(guideConBtn, 206, 144, 27, 27);
-            SetCanvasButtonBounds(muteConBtn, 210, 179, 21, 9);
-            muteConBtn.Visibility = Visibility.Visible;
-
-            SetCanvasButtonBounds(topTouchConBtn, 141, 44, 159, 21);
-            SetCanvasButtonBounds(leftTouchConBtn, 142, 64, 57, 54);
-            SetCanvasButtonBounds(multiTouchConBtn, 198, 64, 45, 54);
-            SetCanvasButtonBounds(rightTouchConBtn, 242, 64, 57, 54);
-
-            SetCanvasButtonBounds(l3ConBtn, 132, 130, 55, 55);
-            SetCanvasButtonBounds(lsuConBtn, 148, 130, 23, 16);
-            SetCanvasButtonBounds(lsrConBtn, 171, 146, 16, 23);
-            SetCanvasButtonBounds(lsdConBtn, 148, 169, 23, 16);
-            SetCanvasButtonBounds(lslConBtn, 132, 146, 16, 23);
-            SetCanvasButtonBounds(r3ConBtn, 253, 130, 55, 55);
-            SetCanvasButtonBounds(rsuConBtn, 269, 130, 23, 16);
-            SetCanvasButtonBounds(rsrConBtn, 292, 146, 16, 23);
-            SetCanvasButtonBounds(rsdConBtn, 269, 169, 23, 16);
-            SetCanvasButtonBounds(rslConBtn, 253, 146, 16, 23);
-
-            SetCanvasButtonBounds(upConBtn, 88, 72, 25, 28);
-            SetCanvasButtonBounds(rightConBtn, 105, 92, 30, 25);
-            SetCanvasButtonBounds(downConBtn, 88, 109, 25, 28);
-            SetCanvasButtonBounds(leftConBtn, 66, 92, 30, 25);
-
-            // The front raster exposes the two Edge function surfaces exactly.
-            // Rear paddles stay fully editable in the list rather than claiming
-            // an inaccurate front-view hit target.
-            SetCanvasButtonBounds(fnlConBtn, 147, 205, 25, 15);
-            SetCanvasButtonBounds(fnrConBtn, 269, 205, 25, 15);
-            fnlConBtn.Visibility = Visibility.Visible;
-            fnrConBtn.Visibility = Visibility.Visible;
-
-            // The Edge light pipe wraps around the top and both sides of the
-            // touchpad. A short rectangle represented only its top center and
-            // painted over transparent space. Use the complete raster mask as
-            // both the colored surface and its exact pointer boundary.
-            Canvas.SetLeft(ds4LightbarColorBtn, 0);
-            Canvas.SetTop(ds4LightbarColorBtn, 0);
-            ds4LightbarColorBtn.Width = 440;
-            ds4LightbarColorBtn.Height = 220;
-            lightbarRect.RadiusX = 0;
-            lightbarRect.RadiusY = 0;
-            const string edgeLightbar =
-                "DualSenseEdge-Mapping-Lightbar.png";
-            lightbarRect.OpacityMask = new ImageBrush(
-                LoadResourceImage(edgeLightbar));
-            ds4LightbarColorBtn.Clip = RasterHighlightAtlas.Mask(
-                edgeLightbar, 0);
-
-            PopulateDualSenseEdgeVectorHighlights();
-            PopulateControllerHoverAtlas("DualSenseEdge-Config_Highlights.png",
-                includeMute: true, includeTouch: true,
-                includeEdgeControls: true, includeCapture: false);
-            PopulateControllerStickAtlas("DualSenseEdge-Stick_Highlights.png");
-            ApplyControllerButtonClips();
-        }
-
-        private void ConfigureSwitch2ProDiagram()
-        {
-            ConfigureControllerRaster("Switch 2 Pro Controller.png",
-                "Switch 2 Pro layout used for Switch Pro, Switch 2 Pro, and Joy-Con controllers",
-                1536, 1024);
-
-            SetCanvasButtonBounds(crossConBtn, 301, 104, 24, 26);
-            SetCanvasButtonBounds(circleConBtn, 328, 78, 25, 26);
-            SetCanvasButtonBounds(squareConBtn, 273, 78, 25, 26);
-            SetCanvasButtonBounds(triangleConBtn, 301, 53, 24, 26);
-            SetCanvasButtonBounds(l1ConBtn, 80, 25, 65, 31);
-            SetCanvasButtonBounds(r1ConBtn, 295, 25, 65, 31);
-            SetCanvasButtonBounds(l2ConBtn, 82, 5, 55, 21);
-            SetCanvasButtonBounds(r2ConBtn, 304, 5, 55, 21);
-            SetCanvasButtonBounds(shareConBtn, 165, 57, 21, 21);
-            SetCanvasButtonBounds(optionsConBtn, 251, 57, 21, 21);
-            SetCanvasButtonBounds(guideConBtn, 231, 82, 21, 22);
-            SetCanvasButtonBounds(captureConBtn, 185, 82, 21, 21);
-            captureConBtn.Visibility = Visibility.Visible;
-
-            SetCanvasButtonBounds(l3ConBtn, 93, 67, 50, 52);
-            SetCanvasButtonBounds(lsuConBtn, 108, 67, 20, 15);
-            SetCanvasButtonBounds(lsrConBtn, 128, 82, 15, 22);
-            SetCanvasButtonBounds(lsdConBtn, 108, 104, 20, 15);
-            SetCanvasButtonBounds(lslConBtn, 93, 82, 15, 22);
-            SetCanvasButtonBounds(r3ConBtn, 242, 118, 56, 56);
-            SetCanvasButtonBounds(rsuConBtn, 260, 118, 20, 16);
-            SetCanvasButtonBounds(rsrConBtn, 280, 135, 18, 22);
-            SetCanvasButtonBounds(rsdConBtn, 260, 158, 20, 16);
-            SetCanvasButtonBounds(rslConBtn, 242, 135, 18, 22);
-
-            SetCanvasButtonBounds(upConBtn, 154, 117, 22, 24);
-            SetCanvasButtonBounds(rightConBtn, 172, 133, 24, 23);
-            SetCanvasButtonBounds(downConBtn, 154, 149, 22, 27);
-            SetCanvasButtonBounds(leftConBtn, 134, 133, 24, 23);
-
-            SetCanvasButtonBounds(blpConBtn, 123, 198, 27, 22);
-            SetCanvasButtonBounds(brpConBtn, 286, 198, 27, 22);
-            blpConBtn.Visibility = Visibility.Visible;
-            brpConBtn.Visibility = Visibility.Visible;
-
-            leftTouchConBtn.Visibility = Visibility.Collapsed;
-            multiTouchConBtn.Visibility = Visibility.Collapsed;
-            rightTouchConBtn.Visibility = Visibility.Collapsed;
-            topTouchConBtn.Visibility = Visibility.Collapsed;
-            ds4LightbarColorBtn.Visibility = Visibility.Collapsed;
-
-            PopulateSwitch2ProHitGeometries();
-            PopulateControllerHoverAtlas("Switch2Pro-Config_Highlights.png",
-                includeMute: false, includeTouch: false,
-                includeEdgeControls: true, includeCapture: true);
-            PopulateControllerStickAtlas("Switch2Pro-Stick_Highlights.png");
             ApplyControllerButtonClips();
         }
 
@@ -732,23 +489,11 @@ namespace DS4WinWPF.DS4Forms
                 new Point(307, 220), new Point(293, 220), new Point(286, 214));
         }
 
-        private void ControllerDiagramSelector_SelectionChanged(object sender,
-            SelectionChangedEventArgs e)
-        {
-            if (!controllerDiagramSelectorReady || controllerDiagramSelector.SelectedIndex < 0)
-            {
-                return;
-            }
-
-            ConfigureControllerDiagram((ControllerDiagramKind)controllerDiagramSelector.SelectedIndex);
-        }
-
         private void PopulateControllerHoverAtlas(string resourceName,
             bool includeMute, bool includeTouch, bool includeEdgeControls,
             bool includeCapture)
         {
-            bool exactRasterHitTest = controllerDiagramKind !=
-                ControllerDiagramKind.DualSense;
+            const bool exactRasterHitTest = true;
             void Assign(Button button, int frameIndex)
             {
                 controllerHoverImages[button] = RasterHighlightAtlas.Frame(
@@ -1373,26 +1118,16 @@ namespace DS4WinWPF.DS4Forms
                 size = new Size(muteConBtn.Width, muteConBtn.Height)
             };
 
-            if (usingDualSenseDiagram)
-            {
-                HoverImageInfo dualSenseTouchOverlay = new HoverImageInfo()
-                    { point = new Point(0, 0), size = new Size(440, 220) };
-                hoverLocations[leftTouchConBtn] = dualSenseTouchOverlay;
-                hoverLocations[multiTouchConBtn] = dualSenseTouchOverlay;
-                hoverLocations[rightTouchConBtn] = dualSenseTouchOverlay;
-                hoverLocations[topTouchConBtn] = dualSenseTouchOverlay;
-            }
-            else
-            {
-                hoverLocations[leftTouchConBtn] = new HoverImageInfo()
-                    { point = new Point(144, 44), size = new Size(140, 98) };
-                hoverLocations[multiTouchConBtn] = new HoverImageInfo()
-                    { point = new Point(143, 42), size = new Size(158, 100) };
-                hoverLocations[rightTouchConBtn] = new HoverImageInfo()
-                    { point = new Point(156, 47), size = new Size(146, 94) };
-                hoverLocations[topTouchConBtn] = new HoverImageInfo()
-                    { point = new Point(155, 6), size = new Size(153, 114) };
-            }
+            hoverLocations[leftTouchConBtn] = new HoverImageInfo()
+                { point = new Point(144, 44), size = new Size(140, 98) };
+            hoverLocations[multiTouchConBtn] = new HoverImageInfo()
+                { point = new Point(143, 42), size = new Size(158, 100) };
+            hoverLocations[rightTouchConBtn] = new HoverImageInfo()
+                { point = new Point(156, 47), size = new Size(146, 94) };
+            hoverLocations[topTouchConBtn] = new HoverImageInfo()
+                { point = new Point(155, 6), size = new Size(153, 114) };
+        
+
 
             hoverLocations[l3ConBtn] = new HoverImageInfo()
             {
@@ -1569,27 +1304,27 @@ namespace DS4WinWPF.DS4Forms
 
             temp = sourceConverter.ConvertFromString(
                 $"{Global.ASSEMBLY_RESOURCE_PREFIX}component/Resources/" +
-                (usingDualSenseDiagram ? "DualSense-Config_Mute.png" : "DS4-Config_PS.png")) as ImageSource;
+                "DS4-Config_PS.png") as ImageSource;
             ImageBrush muteHover = new ImageBrush(temp);
 
             temp = sourceConverter.ConvertFromString(
                 $"{Global.ASSEMBLY_RESOURCE_PREFIX}component/Resources/" +
-                (usingDualSenseDiagram ? "DualSense-Config_TouchLeft.png" : "DS4-Config_TouchLeft.png")) as ImageSource;
+                "DS4-Config_TouchLeft.png") as ImageSource;
             ImageBrush leftTouchHover = new ImageBrush(temp);
 
             temp = sourceConverter.ConvertFromString(
                 $"{Global.ASSEMBLY_RESOURCE_PREFIX}component/Resources/" +
-                (usingDualSenseDiagram ? "DualSense-Config_TouchMulti.png" : "DS4-Config_TouchMulti.png")) as ImageSource;
+                "DS4-Config_TouchMulti.png") as ImageSource;
             ImageBrush multiTouchTouchHover = new ImageBrush(temp);
 
             temp = sourceConverter.ConvertFromString(
                 $"{Global.ASSEMBLY_RESOURCE_PREFIX}component/Resources/" +
-                (usingDualSenseDiagram ? "DualSense-Config_TouchRight.png" : "DS4-Config_TouchRight.png")) as ImageSource;
+                "DS4-Config_TouchRight.png") as ImageSource;
             ImageBrush rightTouchHover = new ImageBrush(temp);
 
             temp = sourceConverter.ConvertFromString(
                 $"{Global.ASSEMBLY_RESOURCE_PREFIX}component/Resources/" +
-                (usingDualSenseDiagram ? "DualSense-Config_TouchUpper.png" : "DS4-Config_TouchUpper.png")) as ImageSource;
+                "DS4-Config_TouchUpper.png") as ImageSource;
             ImageBrush topTouchHover = new ImageBrush(temp);
 
 

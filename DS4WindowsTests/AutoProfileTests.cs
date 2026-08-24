@@ -66,11 +66,10 @@ namespace DS4WindowsTests
         {
             AutoProfileEntity rule = new("*game.exe", string.Empty)
             {
-                DeviceOption = AutoProfileDeviceOption.DualSense,
+                DeviceOption = AutoProfileDeviceOption.DS4,
             };
 
-            Assert.IsTrue(rule.IsDeviceMatch(InputDeviceType.DualSense));
-            Assert.IsFalse(rule.IsDeviceMatch(InputDeviceType.DS4));
+            Assert.IsTrue(rule.IsDeviceMatch(InputDeviceType.DS4));
             Assert.IsFalse(rule.IsDeviceMatch(InputDeviceType.DS3));
         }
     }

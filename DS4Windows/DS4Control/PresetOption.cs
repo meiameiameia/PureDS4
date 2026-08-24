@@ -31,7 +31,6 @@ namespace DS4WinWPF.DS4Control
             None,
             Xbox360,
             DualShock4,
-            DualSense,
         }
 
         protected string name;
@@ -72,10 +71,6 @@ namespace DS4WinWPF.DS4Control
             {
                 DS4Windows.Global.LoadBlankDS4Profile(idx, false, App.rootHub, false);
             }
-            else if (outputCont == OutputContChoice.DualSense)
-            {
-                DS4Windows.Global.LoadBlankDS4Profile(idx, false, App.rootHub, false);
-            }
         }
     }
 
@@ -96,10 +91,6 @@ namespace DS4WinWPF.DS4Control
                 DS4Windows.Global.LoadDefaultGamepadGyroProfile(idx, false, App.rootHub, false);
             }
             else if (outputCont == OutputContChoice.DualShock4)
-            {
-                DS4Windows.Global.LoadDefaultDS4GamepadGyroProfile(idx, false, App.rootHub, false);
-            }
-            else if (outputCont == OutputContChoice.DualSense)
             {
                 DS4Windows.Global.LoadDefaultDS4GamepadGyroProfile(idx, false, App.rootHub, false);
             }
@@ -126,10 +117,6 @@ namespace DS4WinWPF.DS4Control
             {
                 DS4Windows.Global.LoadDefaultDS4MixedControlsProfile(idx, false, App.rootHub, false);
             }
-            else if (outputCont == OutputContChoice.DualSense)
-            {
-                DS4Windows.Global.LoadDefaultDS4MixedControlsProfile(idx, false, App.rootHub, false);
-            }
         }
     }
 
@@ -150,10 +137,6 @@ namespace DS4WinWPF.DS4Control
                 DS4Windows.Global.LoadDefaultMixedGyroMouseProfile(idx, false, App.rootHub, false);
             }
             else if (outputCont == OutputContChoice.DualShock4)
-            {
-                DS4Windows.Global.LoadDefaultDS4MixedGyroMouseProfile(idx, false, App.rootHub, false);
-            }
-            else if (outputCont == OutputContChoice.DualSense)
             {
                 DS4Windows.Global.LoadDefaultDS4MixedGyroMouseProfile(idx, false, App.rootHub, false);
             }
