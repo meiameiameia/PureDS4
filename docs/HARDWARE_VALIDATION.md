@@ -1,4 +1,4 @@
-# DualShock 4 hardware validation
+﻿# DualShock 4 hardware validation
 
 A manual pass over everything the application claims to do with a physical
 controller. It exists because build success and a passing test suite say
@@ -12,11 +12,13 @@ microphone need a trick, and both are described at the end.
 ## Before starting
 
 1. Confirm which build is running. This matters more than it sounds: an
-   installed copy in `C:\Program Files\DS4Windows` will be launched instead of
-   the one you meant to test.
+   installed copy under `C:\Program Files` — of PureDS4, or of a DS4Windows or
+   DS4Windows Reworked install that has not been removed yet — will be launched
+   instead of the one you meant to test.
 
    ```powershell
-   Get-Process DS4Windows | Select-Object Id, Path
+   Get-Process PureDS4, DS4Windows -ErrorAction SilentlyContinue |
+       Select-Object ProcessName, Id, Path
    ```
 
    The path must be the build under test.

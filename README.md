@@ -2,69 +2,67 @@
 
 ![PureDS4 Mapped Pad icon](branding/mapped-pad/mapped-pad-512.png)
 
-PureDS4 is a deliberately narrow DualShock 4 and DualShock 3 tool for Windows.
-It exists because [`hbashton/DS4Windows`](https://github.com/hbashton/DS4Windows)
-is a catch-all that also carries DualSense, DualSense Edge, Switch Pro and
-Joy-Con, and someone who owns only a DS4 or a DS3 has to carry all of it.
-PureDS4 covers exactly two controllers and aims to make every feature of those
-two work the way it would on a console. It is a complement to DS4Windows, not a
-replacement.
+PureDS4 is a deliberately narrow DualShock 4 tool for Windows. It exists
+because [`hbashton/DS4Windows`](https://github.com/hbashton/DS4Windows) is a
+catch-all that also carries DualSense, DualSense Edge, Switch Pro and Joy-Con,
+and someone who owns only a DS4 has to carry all of it. PureDS4 covers one
+controller and aims to make every feature of it work the way it would on a
+console.
 
-Support for DualSense, DualSense Edge, Switch Pro and Joy-Con has been removed,
-along with the subsystems that existed only to serve them. DualShock 4 speaker
-and headset-jack audio are native DS4 features and remain.
+**The first release supports the DualShock 4 only. If you use a DualSense,
+DualSense Edge, Switch Pro, Joy-Con or any other controller family, use
+[`hbashton/DS4Windows`](https://github.com/hbashton/DS4Windows) instead.**
 
-The application still identifies itself as DS4Windows Reworked and still uses
-the inherited DS4Windows install, registry, configuration and scheduled-task
-identities. Until that separation is done, **do not install this alongside
-DS4Windows** — the two would contend for the same locations.
+DualShock 3 is a **planned future milestone with no schedule**, and this
+release neither claims nor offers it. The DS3 implementation is kept dormant in
+the tree rather than deleted, because the work will be picked up when genuine
+hardware can be validated — but nothing in the first release turns it on.
 
-## Current validation status
+PureDS4 is meant to **replace** DS4Windows or an earlier DS4Windows Reworked
+installation on a machine, not to run beside one. Running both is not a
+supported outcome. PureDS4 nevertheless owns its own executable, install and
+registry roots, configuration and log paths, scheduled tasks, Startup shortcut,
+IPC identities, and installer upgrade codes, so that a package can never
+silently upgrade over another product and so that what PureDS4 owns can be
+audited and removed cleanly. The explicit replacement flow that detects and
+removes an older installation is **not implemented yet**; until it is, remove
+the old product yourself before installing this one.
 
-The following has been owner-validated on the canonical dogfood runtime after
-the controller-exposure recovery milestone:
+Removal of DualSense, DualSense Edge, Switch Pro and Joy-Con support is
+**in progress, not finished**. Physical detection, the profile output selector,
+the manual output picker and the mapping list no longer expose those families,
+and the Switch 2 Pro game output has been retired along with its packet writer
+and artwork. What remains is deliberate: retired members stay in the profile
+and output-slot formats so an existing file still loads, and each one is
+normalized to a supported output when it does. Some inherited code, strings and
+assets are still being characterized before deletion, so do not read this as a
+finished removal. DualShock 4 speaker and headset-jack audio are native DS4
+features and remain.
 
-- The committed local build launches successfully.
-- A DualShock 4 connects over Bluetooth, is detected, and supplies physical
-  input.
-- **Continue without virtual output** works.
-- The application reports Managed/Virtual as Ready, and the transition to
-  Native Physical exposure, and back to Managed/Virtual, both complete.
-- Forza Horizon 6 recognizes the Managed/Virtual Xbox 360 output and responds
-  normally to gameplay input.
-- Controller disconnect/reconnect and app close/relaunch both work.
+The two game outputs PureDS4 offers are **Xbox 360** and **DualShock 4**.
 
-Additionally validated on the single-file build installed by the reworked
-installer, starting from a machine with no prior DS4Windows, VIIPER, usbip-win2
-or HidHide present:
+## Validation status
 
-- The installer provisions VIIPER, usbip-win2 and HidHide and completes without
-  error.
-- The install root contains only the intended six files and four content
-  directories.
-- A DualShock 4 over **USB** is detected, supplies physical input, reports
-  Managed/Virtual as Ready, and completes the transition to Native Physical
-  exposure.
+Nothing in this repository is a hardware, runtime, or release claim.
 
-Both records above predate the removal of the other controller families. They
-describe a build that no longer exists, and nothing in them has been re-checked
-against the current tree by hand.
+- No owner hardware validation has been completed against the current tree.
+  Earlier validation records described builds that predate the controller-family
+  removals and the PureDS4 rename, so they are not carried forward here.
+- DualShock 4 is the reference hardware. Bluetooth and USB are separate claims
+  and neither is currently claimed for this tree.
+- DualShock 3 is **not supported and not claimed**. It is a planned milestone
+  with its own gate: DsHidMini setup, existing ScpToolkit/ScpTools driver
+  state, genuine hardware, installation, runtime, gameplay and uninstall all
+  have to be exercised on the target machine before any release mentions it as
+  working. That gate does not block the first release.
+- Installer replacement, upgrade, uninstall, reboot, and recovery behavior has
+  not been owner-validated.
+- `installer/release-inputs.json` currently calculates `releaseReady: false`
+  because the redistribution scope of the inherited FakerInput wrappers is
+  unresolved. No public artifact may be produced while that is true.
 
-Not yet validated: **uninstall**. The fix that caches the uninstall-only
-installer packages is committed but has not been exercised end to end, so no
-claim is made that an install produced by this installer can be removed by it.
-The upgrade path from the previous multi-file layout is also unvalidated.
-Rumble, audio, haptics, and other advanced output behavior are not claimed
-unless separately exercised, and none of them have been re-exercised since the
-removals.
-
-DualShock 4 is the reference hardware, and both the Bluetooth and USB paths
-were owner-validated before the removals.
-
-DualShock 3 compatibility is a future candidate. Potential access to genuine
-DS3 hardware is available for later owner-assisted validation, but existing
-ScpToolkit/ScpTools driver coexistence and migration must be characterized
-before changing behavior or claiming support.
+[`docs/HARDWARE_VALIDATION.md`](docs/HARDWARE_VALIDATION.md) describes the
+manual pass that a hardware claim requires.
 
 ## Build and test
 
@@ -80,14 +78,15 @@ dotnet test PureDS4.sln -c Debug -p:Platform=x64
 maintained DS4Windows and keeps that identity. PureDS4 is a derivative of it,
 narrowed to two controllers, and credits that lineage openly.
 
+Upstream history, the `upstream` remote, the annotated `upstream-baseline` tag,
+the original copyright notices, and the GPL notices are all preserved.
+
 Publication is intended but not scheduled, and no readiness claim should be
 inferred from this repository. The version identifiers in the tree
-(`5.1.0-beta.1` and friends) record identity only, and the executable and
-configuration paths are still the inherited DS4Windows ones. If you want
-DS4Windows to install and use today, go upstream.
+(`5.1.0-beta.1` and friends) record identity only; the owner has not chosen a
+first public PureDS4 version or a publication policy. If you want a controller
+mapper to install and use today, go upstream.
 
-See [`docs/HARDWARE_VALIDATION.md`](docs/HARDWARE_VALIDATION.md) for the
-manual pass that checks the controller paths against real hardware.
 See [`docs/RELEASE_CONTRACT.md`](docs/RELEASE_CONTRACT.md) for the version,
 upgrade, compatibility, and artifact contract those identifiers follow.
 See [`docs/visual-contract.md`](docs/visual-contract.md) for the interface,
@@ -97,7 +96,7 @@ identity, status, accessibility, and validation rules.
 
 The annotated `upstream-baseline` tag records the recoverable upstream starting
 point. The `main` branch is the derivative working line at
-<https://github.com/meiameiameia/ds4windows-reworked>; `AGENTS.md` contains the
+<https://github.com/meiameiameia/pureds4>; `AGENTS.md` contains the
 canonical project guidance.
 
 The project is licensed under GPLv3. See [`COPYING`](COPYING).

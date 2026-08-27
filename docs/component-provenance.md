@@ -1,4 +1,4 @@
-# Distributed component provenance
+﻿# Distributed component provenance
 
 This inventory is the release authority for third-party binary inputs. The
 machine-readable contract is [`installer/release-inputs.json`](../installer/release-inputs.json);
@@ -19,9 +19,9 @@ while any blocker exists.
 | usbip-win2 0.9.7.7 | `vadimgrn/usbip-win2` tag `v.0.9.7.7`, commit `7c219953101cc5d0ec9a0bcb3eb87259cf72bedd`; the official release asset exactly matches `extras/USBip-0.9.7.7-x64.exe` (`51620FA5F9F8BE5932BC9D786DEEE557CE06D5407A99CAB490DCFAC71F185FEA`) and has the pinned valid Cloudyne Systems signer. | BSD-2-Clause text in `extras/USBip-0.9.7.7-LICENSE.txt`. |
 | HidHide 1.5.230 | `nefarius/HidHide` tag `v1.5.230.0`, commit `722d997ce75db58f5aa36e40ca920f99022c020a`; the official release asset exactly matches `extras/HidHide_1.5.230_x64.exe` (`F4BBBCB82E6258641B887C74BC81C4C5F66E4AA811808DFC304347687B7605F6`) and has the pinned valid Nefarius signer. | MIT text in `extras/HidHide-1.5.230-LICENSE.txt`. |
 | FakerInput driver 0.1.0 | `Ryochan7/FakerInput` tag `v0.1.0`, commit `0bf881f603dc40c4a0a2eef3d8d8da6196c405dc`; both official MSI assets exactly match the bundled x64 and x86 files and have the pinned valid Travis Nickles signer. | MIT text in `extras/FakerInput-0.1.0-LICENSE.txt`. |
-| RNNoise.NET 0.1.9 | NuGet content hash `2lqIr0648oA0qiUlbcTshFe4dm010Lyv+BaP2GGKfN+CI5DOrR7tV3X0kwgYvf/V3DDHllflWiQXhWT7+LTsEg==`; source tag/commit `0.1.9` / `73189a685823d2db25a6c94edd7b69265309c0db`; published `rnnoise.dll` SHA-256 `12E19BF7A18D13E092A5FBE5A7C5B2081F5E7B56F6D77AEAB5837335F44CEEDF`. | MIT text in `DS4Windows/ThirdParty/RNNoise.NET-LICENSE.txt`, copied to output and publish. |
-| SharpOSC 0.2.0 | Both tracked binaries embed source commit `6cd3eb265e64d62a92679290a44083ebad1ea579`; x64 SHA-256 `6419A701CE8EF5BAAD072FF14C232A3557525BF8BB4E3FD6DED09B2D3F22F07E`, x86 `2BA7A8C0D6459F16A05725159903A2725955A3AF6D69018CBC1F15DEFF87F1CE`. | Upstream MIT text in `DS4Windows/ThirdParty/SharpOSC-LICENSE.txt`, copied to output and publish. |
-| SbcSharp codec | Vendored source revision and modifications are recorded in `DS4Windows/ThirdParty/SbcSharp/NOTICE.md`; compiled bytes are part of the application assembly. | `DS4Windows/ThirdParty/SbcSharp/LICENSE.txt` and `NOTICE.md`, both copied to output and publish. |
+| RNNoise.NET 0.1.9 | NuGet content hash `2lqIr0648oA0qiUlbcTshFe4dm010Lyv+BaP2GGKfN+CI5DOrR7tV3X0kwgYvf/V3DDHllflWiQXhWT7+LTsEg==`; source tag/commit `0.1.9` / `73189a685823d2db25a6c94edd7b69265309c0db`; published `rnnoise.dll` SHA-256 `12E19BF7A18D13E092A5FBE5A7C5B2081F5E7B56F6D77AEAB5837335F44CEEDF`. | MIT text in `PureDS4/ThirdParty/RNNoise.NET-LICENSE.txt`, copied to output and publish. |
+| SharpOSC 0.2.0 | Both tracked binaries embed source commit `6cd3eb265e64d62a92679290a44083ebad1ea579`; x64 SHA-256 `6419A701CE8EF5BAAD072FF14C232A3557525BF8BB4E3FD6DED09B2D3F22F07E`, x86 `2BA7A8C0D6459F16A05725159903A2725955A3AF6D69018CBC1F15DEFF87F1CE`. | Upstream MIT text in `PureDS4/ThirdParty/SharpOSC-LICENSE.txt`, copied to output and publish. |
+| SbcSharp codec | Vendored source revision and modifications are recorded in `PureDS4/ThirdParty/SbcSharp/NOTICE.md`; compiled bytes are part of the application assembly. | `PureDS4/ThirdParty/SbcSharp/LICENSE.txt` and `NOTICE.md`, both copied to output and publish. |
 
 The exact asset URLs, all individual artifact hashes, and signer certificate
 thumbprints are kept in the machine-readable contract rather than duplicated
@@ -77,7 +77,7 @@ redistributable license notice.
 `vJoyInterface.dll` is not bundled; inherited vJoy support probes an external
 installation. NVIDIA Audio Effects libraries are likewise optional files
 loaded only from NVIDIA locations under Windows Program Files. Their binaries
-and licenses are not release inputs for DS4Windows Reworked.
+and licenses are not release inputs for PureDS4.
 
-`DS4Windows/Resources/ControllerArtwork.NOTICE.txt` remains the controller
+`PureDS4/Resources/ControllerArtwork.NOTICE.txt` remains the controller
 artwork attribution and is copied into published output.

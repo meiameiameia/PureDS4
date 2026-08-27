@@ -1,6 +1,6 @@
-# Visual contract
+﻿# Visual contract
 
-DS4Windows Reworked is a compact Windows desktop tool. Its interface favors
+PureDS4 is a compact Windows desktop tool. Its interface favors
 scannable tables, property groups, explicit state, and predictable navigation
 over decorative cards or dashboard galleries. Light and dark themes share the
 same component geometry and interaction model.
@@ -13,9 +13,15 @@ blue tile, joined by an amber mapping seam. The canonical source is
 small Windows sizes as well as 256 px. Battery tray variants add a separate
 semantic badge and never replace the mark with a number.
 
-Product-facing names use **DS4Windows Reworked**, maintained by
-**meiameiameia**. Compatibility identifiers such as the executable, storage,
-IPC, and installer upgrade codes retain the established DS4Windows lineage.
+Product-facing names use **PureDS4**, maintained by **meiameiameia**. The
+executable, storage, IPC, task, shortcut, and installer upgrade identities are
+all PureDS4-owned; see [`RELEASE_CONTRACT.md`](RELEASE_CONTRACT.md) for the
+full list and for the two names that deliberately stay on the inherited
+lineage. Normal UI must not advertise DualSense, DualSense Edge, Switch Pro, or
+Joy-Con support, and must not offer controls that exist only on that hardware,
+including while a profile is edited with no controller attached. The first
+release supports the DualShock 4 only, so ordinary UI must not offer or imply
+DualShock 3 support either; that is a planned milestone with its own gate.
 
 ## Foundation
 

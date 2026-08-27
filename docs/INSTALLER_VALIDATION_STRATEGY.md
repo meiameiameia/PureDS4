@@ -1,8 +1,8 @@
-# Installer validation and recovery strategy
+﻿# Installer validation and recovery strategy
 
-The DS4Windows installer is treated as a transaction with one owner and one
+The PureDS4 installer is treated as a transaction with one owner and one
 commit point. A package is not considered installed merely because its child
-process returned zero; the complete DS4Windows, VIIPER, USB-IP, task, ABI, and
+process returned zero; the complete PureDS4, VIIPER, USB-IP, task, ABI, and
 API contract must be verified first.
 
 ## Transaction rules
@@ -33,7 +33,7 @@ API contract must be verified first.
     preflight, elevated helper, PowerShell phase, and reboot resume. In-app
     repair creates the same kind of transaction ID. Bounded append retries
     preserve diagnostics when a log reader briefly owns the file.
-11. The backend always lives under Program Files. "Keep DS4Windows portable"
+11. The backend always lives under Program Files. "Keep PureDS4 portable"
     changes only the UI/package location; it never creates an elevated task for
     a LocalAppData VIIPER executable.
 12. Start-menu and optional desktop shortcuts are all-users shell integration
@@ -55,7 +55,7 @@ API contract must be verified first.
 - The machine readiness marker must be
   `VIIPER-0.1.0+USBIP-0.9.7.7 / Ready` in the 64-bit registry view.
 
-DS4Windows repeats these identity and ABI checks at startup. Missing or
+PureDS4 repeats these identity and ABI checks at startup. Missing or
 mismatched prerequisites open an offline repair prompt; suppressing a location
 recommendation never suppresses a verification failure. The main UI remains
 available in degraded mode for Settings and diagnostics, while virtual output
@@ -65,7 +65,7 @@ continues to fail closed until a fresh readiness check passes.
 
 The downgrade is intentionally split across boots:
 
-1. Verify the exact 0.9.7.8 uninstall record, quiesce DS4Windows/VIIPER, detach
+1. Verify the exact 0.9.7.8 uninstall record, quiesce PureDS4/VIIPER, detach
    imports, remove 0.9.7.8, and persist the source/target versions plus the
    current boot identity.
 2. Leave 0.9.7.7 uninstalled in that boot, disable the two verified startup
@@ -91,7 +91,7 @@ build host.
 - Self-contained .NET 8 publication for both installer hosts.
 - Real MSI install, repair, and uninstall execution on the Windows CI runner.
 - Content-addressed payload manifest and hash validation.
-- Fail-fast equality between `DS4Windows.release` and the requested package
+- Fail-fast equality between `PureDS4.release` and the requested package
   identity before WiX or manifest generation can run.
 - USB-IP reboot-boundary simulation.
 - Installer state-machine simulation covering clean install, update, repair,

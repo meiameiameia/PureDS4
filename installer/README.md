@@ -1,15 +1,15 @@
-# DS4Windows standard installer
+﻿# PureDS4 standard installer
 
 `build-installer.ps1` composes the standard x64 distribution as a WiX 5 Burn
-bundle with a custom WPF interface. It contains the managed DS4Windows MSI,
+bundle with a custom WPF interface. It contains the managed PureDS4 MSI,
 VIIPER 0.1.0, USB-IP 0.9.7.7, and optional HidHide/FakerInput packages.
 
 The installer intentionally has no portable mode or destination selector. The
 portable ZIP remains a separate CI artifact. The standard installer places
-VIIPER under protected `%ProgramFiles%\DS4Windows\VIIPER`. A portable package
+VIIPER under protected `%ProgramFiles%\PureDS4\VIIPER`. A portable package
 may use a VIIPER executable only when it exactly matches the SHA-256 identity
-pinned by that Reworked build. Portable and release artifacts must never
-create or retarget the persistent `RunDS4Windows` or `RunVIIPER` tasks; the
+pinned by that PureDS4 build. Portable and release artifacts must never
+create or retarget the persistent `RunPureDS4` or `RunPureDS4VIIPER` tasks;
 installer gate must enforce that boundary before public distribution.
 
 ```powershell
@@ -23,30 +23,35 @@ installer gate must enforce that boundary before public distribution.
 
 Installer logs are written by Burn and by the elevated helpers. Process
 preflight diagnostics are stored in
-`%ProgramData%\DS4Windows\Installer\setup-actions.log`; VIIPER, USB-IP, startup
+`%ProgramData%\PureDS4\Installer\setup-actions.log`; VIIPER, USB-IP, startup
 task, and runtime verification is stored in
-`%ProgramData%\DS4Windows\Installer\infrastructure-actions.log`. The in-app
+`%ProgramData%\PureDS4\Installer\infrastructure-actions.log`. The in-app
 repair host records failures that occur before its helper starts in
-`%ProgramData%\DS4Windows\Installer\viiper-setup-host.log`.
+`%ProgramData%\PureDS4\Installer\viiper-setup-host.log`.
 One transaction ID is preserved across Burn, setup actions, the infrastructure
 backend, and reboot resume so those logs can be correlated without timestamp
 guesswork.
 
-The output is named
-`DS4Windows-Reworked_5.1.0-beta.1_Setup_x64.exe` while the installed executable
-remains `DS4Windows.exe` for compatibility.
+The output is named `PureDS4_5.1.0-beta.1_Setup_x64.exe` and the installed
+executable is `PureDS4.exe`. That version line records identity only; no first
+public PureDS4 version has been chosen.
+
+Authenticode signing is supported but **not decided as release policy**.
+Whether a public PureDS4 artifact must be signed is an open owner decision;
+this section describes the mechanism only.
 
 Set `DS4W_SIGN_CERT_PATH`, `DS4W_SIGN_CERT_PASSWORD`, and optionally
-`DS4W_SIGN_TIMESTAMP_URL` to Authenticode-sign the application, setup hosts,
-MSI, and final EXE in a protected release environment. Public release builds
-pass `-RequireSigning`; they fail closed unless DS4Windows and the packaged
-VIIPER binary both have valid signatures. GitHub release jobs require the
-`DS4W_SIGN_CERT_BASE64` and `DS4W_SIGN_CERT_PASSWORD` secrets.
+`DS4W_SIGN_TIMESTAMP_URL` to sign the application, setup hosts, MSI, and final
+EXE in a protected release environment. Passing `-RequireSigning` makes the
+build fail closed unless PureDS4 and the packaged VIIPER binary both have
+valid signatures; a release job that signs also needs the
+`DS4W_SIGN_CERT_BASE64` and `DS4W_SIGN_CERT_PASSWORD` secrets. If the owner
+settles on unsigned releases, `-RequireSigning` is simply not passed.
 
 The PowerShell infrastructure backend is the sole VIIPER/USB-IP mutation
 engine. Burn and the in-app repair surface only validate, stage, elevate, and
 report that same engine. HidHide and FakerInput are optional non-vital packages:
-their failure is reported without rolling back a healthy DS4Windows + VIIPER
+their failure is reported without rolling back a healthy PureDS4 + VIIPER
 installation.
 
 VIIPER's legacy Windows network installer is developer-only and fail-closed by
