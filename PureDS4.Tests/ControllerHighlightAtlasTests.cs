@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using DS4WinWPF.DS4Forms;
@@ -13,7 +13,6 @@ namespace DS4WindowsTests
             "DualSense-Stick_Highlights.png",
             "DualShock4-Stick_Highlights.png",
             "DualSenseEdge-Stick_Highlights.png",
-            "Switch2Pro-Stick_Highlights.png",
         };
 
         [TestMethod]
@@ -145,9 +144,6 @@ namespace DS4WindowsTests
                 ["DualSenseEdge-Config_Highlights.png"] =
                     Enumerable.Range(0, 12).Concat(Enumerable.Range(14, 10))
                         .ToArray(),
-                ["Switch2Pro-Config_Highlights.png"] =
-                    Enumerable.Range(0, 11).Concat(Enumerable.Range(14, 4))
-                        .Concat(new[] { 24, 25, 26 }).ToArray(),
             };
 
             foreach ((string atlas, int[] frames) in usedFrames)
@@ -170,7 +166,6 @@ namespace DS4WindowsTests
             {
                 "DualShock4-Mapping_Highlights.png",
                 "DualSenseEdge-Mapping_Highlights.png",
-                "Switch2Pro-Mapping_Highlights.png",
             })
             {
                 byte[] alpha = AlphaPixels(
@@ -189,7 +184,6 @@ namespace DS4WindowsTests
             {
                 ("DualShock4-Config_Highlights.png", 440, 220),
                 ("DualSenseEdge-Config_Highlights.png", 440, 220),
-                ("Switch2Pro-Config_Highlights.png", 440, 220),
                 ("Xbox360-Action_Highlights.png", 630, 247),
             })
             {
@@ -218,12 +212,8 @@ namespace DS4WindowsTests
         }
 
         [TestMethod]
-        public void SwitchAndXboxShouldersStayBoundedToTheirPaintedCaps()
+        public void XboxShouldersStayBoundedToTheirPaintedCaps()
         {
-            AssertPairedControlBounds("Switch2Pro-Config_Highlights.png",
-                440, 220, 4, 5, 40, 52, 18, 28);
-            AssertPairedControlBounds("Switch2Pro-Config_Highlights.png",
-                440, 220, 6, 7, 33, 45, 12, 22);
             AssertPairedControlBounds("Xbox360-Action_Highlights.png",
                 630, 247, 4, 5, 78, 84, 30, 38);
             AssertPairedControlBounds("Xbox360-Action_Highlights.png",
@@ -237,8 +227,6 @@ namespace DS4WindowsTests
                 "DualShock4-Config_Highlights.png", 440, 220);
             AssertAtlasStaysOnArtwork("DualSense Edge Controller.png", 1558,
                 1009, "DualSenseEdge-Config_Highlights.png", 440, 220);
-            AssertAtlasStaysOnArtwork("Switch 2 Pro Controller.png", 1536,
-                1024, "Switch2Pro-Config_Highlights.png", 440, 220);
             AssertAtlasStaysOnArtwork("360 map.png", 1323, 439,
                 "Xbox360-Action_Highlights.png", 630, 247);
         }

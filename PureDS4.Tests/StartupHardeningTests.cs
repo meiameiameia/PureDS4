@@ -95,8 +95,26 @@ namespace DS4Windows.Tests
         [TestMethod]
         public void StartupShortcutUsesProductDisplayName()
         {
-            Assert.AreEqual("DS4Windows Reworked.lnk",
+            Assert.AreEqual(ProductIdentity.StartupShortcutFileName,
                 Path.GetFileName(StartupMethods.lnkpath));
+        }
+
+        [TestMethod]
+        public void RuntimeDoesNotAdoptAnotherProductsStartupShortcut()
+        {
+            // Reading, migrating or deleting the DS4Windows or DS4Windows
+            // Reworked Startup shortcut made an ordinary preference change
+            // mutate another product. That belongs to an explicit,
+            // owner-visible replacement flow, not to this class.
+            const BindingFlags callable = BindingFlags.Public |
+                BindingFlags.NonPublic | BindingFlags.Static;
+
+            Assert.IsNull(typeof(StartupMethods).GetMethod(
+                "MigrateLegacyStartProgEntry", callable));
+            Assert.IsNull(typeof(StartupMethods).GetField(
+                "legacyLnkPath", callable));
+            Assert.IsNull(typeof(StartupMethods).GetField(
+                "LegacyStartupShortcutName", callable));
         }
     }
 }

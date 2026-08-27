@@ -333,7 +333,6 @@ namespace DS4WindowsTests
             {
                 OutContType.ViiperX360,
                 OutContType.ViiperDS4,
-                OutContType.ViiperSwitch2Pro,
             };
 
             foreach (OutContType outputType in outputTypes)
@@ -353,14 +352,16 @@ namespace DS4WindowsTests
         }
 
         [DataTestMethod]
-        [DataRow(OutContType.ViiperDualSense)]
-        [DataRow(OutContType.ViiperDualSenseEdge)]
-        public void RetiredDualSenseOutputTypesNormalizeToDualShock4(
-            OutContType retired)
+        [DataRow(OutContType.ViiperDualSense, OutContType.ViiperDS4)]
+        [DataRow(OutContType.ViiperDualSenseEdge, OutContType.ViiperDS4)]
+        [DataRow(OutContType.ViiperSwitch2Pro, OutContType.ViiperX360)]
+        public void RetiredOutputTypesNormalizeToASupportedOutput(
+            OutContType retired, OutContType expected)
         {
             // The enum members are kept so existing profiles and output-slot
-            // files still deserialize. Support for the DualSense output was
-            // removed, so a profile naming one now presents a DualShock 4.
+            // files still deserialize. The two PlayStation personas present a
+            // DualShock 4; Switch 2 Pro has no PlayStation equivalent and
+            // presents the Xbox 360 output, which is the application default.
             ProfileDTO source = new ProfileDTO
             {
                 OutputContDevice = retired,
@@ -371,8 +372,30 @@ namespace DS4WindowsTests
                 OutputContDeviceString = source.OutputContDeviceString,
             };
 
-            Assert.AreEqual(OutContType.ViiperDS4, target.OutputContDevice,
-                $"{retired} should be retired to the DualShock 4 output.");
+            Assert.AreEqual(expected, target.OutputContDevice,
+                $"{retired} should be retired to the {expected} output.");
+            Assert.AreEqual(expected, retired.Normalize(),
+                $"{retired} must normalize deterministically.");
+        }
+
+        [DataTestMethod]
+        [DataRow("Switch 2 Pro (VIIPER)")]
+        [DataRow("Switch2Pro")]
+        [DataRow("ViiperSwitch2Pro")]
+        public void LegacySwitchOutputSlotNamesStillLoadAndConvert(
+            string storedName)
+        {
+            // An output-slot file written before Switch 2 Pro was retired has
+            // to keep loading. It must resolve to the retired value and then
+            // be written back as the supported output it now presents.
+            OutContType parsed = OutputSlotPersistDTO.ParseOutputDeviceType(
+                storedName, OutContType.None);
+
+            Assert.AreEqual(OutContType.ViiperSwitch2Pro, parsed,
+                $"{storedName} must still deserialize.");
+            Assert.AreEqual("ViiperX360",
+                OutputSlotPersistDTO.FormatOutputDeviceType(parsed),
+                $"{storedName} must be written back as a supported output.");
         }
 
         [TestMethod]

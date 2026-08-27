@@ -50,9 +50,14 @@ namespace DS4WindowsTests
             Assert.IsTrue(dualShock4.IsMappingControlAvailable(
                 DS4Controls.Cross));
 
+            Assert.IsTrue(offlineProfile.IsMappingControlAvailable(
+                DS4Controls.Cross));
+
             // Controls that only ever existed on a DualSense or an Edge stay
-            // unavailable on the physical DualShock 4 diagram, while their
-            // saved backend mappings are preserved.
+            // unavailable, while their saved backend mappings are preserved.
+            // This holds while editing a profile with no controller attached
+            // too: neither supported controller has these buttons, so offering
+            // them offline would promise hardware this tool does not support.
             foreach (DS4Controls absent in new[]
             {
                 DS4Controls.Mute, DS4Controls.Capture, DS4Controls.SideL,
@@ -63,11 +68,38 @@ namespace DS4WindowsTests
                 Assert.IsFalse(dualShock4.IsMappingControlAvailable(
                     absent),
                     $"{absent} is not a DualShock 4 control.");
+                Assert.IsFalse(offlineProfile.IsMappingControlAvailable(
+                    absent),
+                    $"{absent} must not be offered while editing offline.");
             }
+        }
 
-            // Offline editing keeps every control remappable.
-            Assert.IsTrue(offlineProfile.IsMappingControlAvailable(
+        [TestMethod]
+        public void DualShock3KeepsTheSameUnsupportedControlBoundary()
+        {
+            ControllerUiCapabilities dualShock3 =
+                ControllerUiCapabilities.For(InputDeviceType.DS3);
+
+            Assert.IsTrue(dualShock3.IsMappingControlAvailable(
+                DS4Controls.Cross));
+            Assert.IsFalse(dualShock3.IsMappingControlAvailable(
                 DS4Controls.FnL));
+            Assert.IsFalse(dualShock3.IsMappingControlAvailable(
+                DS4Controls.Mute));
+        }
+
+        [TestMethod]
+        public void UnavailableControlHintNamesSupportedHardwareWhenOffline()
+        {
+            // "not available on Generic profile" told the user nothing. With
+            // no controller attached the hint has to describe the hardware
+            // this release actually supports, which is the DualShock 4 alone.
+            Assert.AreEqual("a DualShock 4",
+                ControllerUiCapabilities.For(null)
+                    .MappingAvailabilityScopeName);
+            Assert.AreEqual("DualShock 4",
+                ControllerUiCapabilities.For(InputDeviceType.DS4)
+                    .MappingAvailabilityScopeName);
         }
 
         [DataTestMethod]
@@ -109,6 +141,8 @@ namespace DS4WindowsTests
         [DataRow((int)InputDeviceType.DS4, (int)ConnectionType.BT,
             0x054C, 0x09CC, (int)OutContType.ViiperDS4, true,
             (int)ControllerMicrophoneUiStatus.Ready, true)]
+        // Retired serialized value. It normalizes to the Xbox 360 output, so
+        // a stale profile still reports that output's microphone readiness.
         [DataRow((int)InputDeviceType.DS4, (int)ConnectionType.BT,
             0x054C, 0x09CC, (int)OutContType.ViiperSwitch2Pro, true,
             (int)ControllerMicrophoneUiStatus.Ready, true)]
@@ -161,12 +195,14 @@ namespace DS4WindowsTests
                 Global.DualSenseSpeakerBassBoost[device] = 6;
                 Global.DualSenseHeadphoneVolume[device] = 173;
 
-                int selectedIndex = 1;
+                // Switching the emulated output must not discard the audio
+                // processing the profile configured for the physical pad.
+                int selectedIndex = 0;
                 Assert.IsTrue(ProfileSettingsViewModel
                     .ApplyTemporaryOutputControllerSelection(device,
-                        ref selectedIndex, 2));
+                        ref selectedIndex, 1));
 
-                Assert.AreEqual(OutContType.ViiperSwitch2Pro,
+                Assert.AreEqual(OutContType.ViiperX360,
                     ProfileSettingsViewModel.GetOutputControllerType(
                         selectedIndex));
                 Assert.AreEqual((byte)DualSenseSpeakerCompression.Strong,

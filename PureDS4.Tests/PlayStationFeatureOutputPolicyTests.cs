@@ -1,4 +1,4 @@
-using DS4Windows;
+﻿using DS4Windows;
 using DS4Windows.InputDevices;
 
 namespace DS4WindowsTests
@@ -8,7 +8,6 @@ namespace DS4WindowsTests
     {
         [DataTestMethod]
         [DataRow((int)OutContType.ViiperX360)]
-        [DataRow((int)OutContType.ViiperSwitch2Pro)]
         public void NonPlayStationPersonaNeedsAudioOnlyCompanion(
             int outputType)
         {
@@ -40,7 +39,6 @@ namespace DS4WindowsTests
 
         [DataTestMethod]
         [DataRow((int)OutContType.ViiperX360)]
-        [DataRow((int)OutContType.ViiperSwitch2Pro)]
         public void NonPlayStationPrimaryOutputsDoNotOwnAudio(int outputType)
         {
             var manager = new OutputSlotManager();

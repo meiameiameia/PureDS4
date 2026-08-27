@@ -1,4 +1,4 @@
-using DS4WinWPF.DS4Control.DTOXml;
+﻿using DS4WinWPF.DS4Control.DTOXml;
 using System.Xml.Serialization;
 using DS4Windows;
 
@@ -22,7 +22,6 @@ namespace DS4WindowsTests
         [DataRow(OutContType.X360)]
         [DataRow(OutContType.DS4)]
         [DataRow(OutContType.ViiperX360)]
-        [DataRow(OutContType.ViiperSwitch2Pro)]
         public void DoesNotCreateCompanionForOtherOutputs(OutContType outputType)
         {
             Assert.IsFalse(ControlService.ShouldUseGameBarControllerCompatibility(
@@ -40,7 +39,6 @@ namespace DS4WindowsTests
 
         [DataTestMethod]
         [DataRow(OutContType.ViiperX360)]
-        [DataRow(OutContType.ViiperSwitch2Pro)]
         [DataRow(OutContType.None)]
         public void ActiveCompanionRetiresBeforeNonPlayStationProfileAppears(
             OutContType requestedOutputType)

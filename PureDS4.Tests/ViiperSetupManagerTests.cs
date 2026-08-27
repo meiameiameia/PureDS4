@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
 
@@ -58,12 +58,15 @@ namespace DS4Windows.Tests
                 GetInfrastructureActionsLogPath();
             string host = ViiperSetupManager.GetInstallerHostLogPath();
 
+            // The elevated backend script and the installer projects log to
+            // %ProgramData%\PureDS4\Installer. The in-app paths have to name
+            // the same owned directory or they read a log nothing writes.
             StringAssert.Contains(infrastructure,
-                Path.Combine("DS4Windows", "Installer"));
+                Path.Combine(ProductIdentity.DataFolderName, "Installer"));
             StringAssert.EndsWith(infrastructure,
                 "infrastructure-actions.log");
             StringAssert.Contains(host,
-                Path.Combine("DS4Windows", "Installer"));
+                Path.Combine(ProductIdentity.DataFolderName, "Installer"));
             StringAssert.EndsWith(host, "viiper-setup-host.log");
         }
 

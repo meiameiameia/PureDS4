@@ -1,4 +1,4 @@
-using DS4Windows;
+﻿using DS4Windows;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
@@ -209,6 +209,8 @@ namespace DS4WindowsTests
         [DataRow(OutContType.ViiperDualSenseEdge, true)]
         [DataRow(OutContType.X360, true)]
         [DataRow(OutContType.ViiperX360, true)]
+        // Retired serialized value. It normalizes to the Xbox 360 output, so
+        // the route it reports has to match that output rather than fail.
         [DataRow(OutContType.ViiperSwitch2Pro, true)]
         public void DirectRouteSupportsPrimaryOrAudioOnlyFeatureOutput(
             OutContType outputType, bool expected)
@@ -259,13 +261,13 @@ namespace DS4WindowsTests
             Assert.IsFalse(
                 ControllerMicrophoneRoutePolicy.ShouldArmPhysicalBluetoothMicrophone(
                     profileEnabled: true, eligibleBluetoothSource: true,
-                    outputType: OutContType.ViiperSwitch2Pro,
+                    outputType: OutContType.ViiperX360,
                     activeStreamSupportsMicrophone: true,
                     virtualMicrophoneInterfaceActive: false));
             Assert.IsTrue(
                 ControllerMicrophoneRoutePolicy.ShouldArmPhysicalBluetoothMicrophone(
                     profileEnabled: true, eligibleBluetoothSource: true,
-                    outputType: OutContType.ViiperSwitch2Pro,
+                    outputType: OutContType.ViiperX360,
                     activeStreamSupportsMicrophone: true,
                     virtualMicrophoneInterfaceActive: true));
         }
@@ -911,8 +913,6 @@ namespace DS4WindowsTests
                 ViiperVirtualDeviceType.DualShock4));
             Assert.AreEqual(1000, ViiperStateWriteRateSettings.GetDefaultRateHz(
                 ViiperVirtualDeviceType.Xbox360));
-            Assert.AreEqual(1000, ViiperStateWriteRateSettings.GetDefaultRateHz(
-                ViiperVirtualDeviceType.Switch2Pro));
             Assert.AreEqual(1000,
                 ViiperStateWriteRateSettings.Parse(null, defaultRate));
             Assert.AreEqual(1000,
@@ -942,7 +942,7 @@ namespace DS4WindowsTests
                     ViiperVirtualDeviceType.Xbox360, null));
             Assert.AreEqual(1000,
                 ViiperStateWriteRateSettings.ResolveConfiguredRateHz(
-                    ViiperVirtualDeviceType.Switch2Pro, null));
+                    ViiperVirtualDeviceType.Xbox360, "immediate"));
         }
 
         [TestMethod]
@@ -963,6 +963,10 @@ namespace DS4WindowsTests
         [TestMethod]
         public void NativeGameOwnerFilteringRejectsShellAndInfrastructureOnly()
         {
+            Assert.IsTrue(ViiperOutDevice.IsExcludedNativeGameOwner(
+                "PureDS4"));
+            // A predecessor install that has not been replaced yet is still
+            // infrastructure, never the native game owner.
             Assert.IsTrue(ViiperOutDevice.IsExcludedNativeGameOwner(
                 "DS4Windows"));
             Assert.IsTrue(ViiperOutDevice.IsExcludedNativeGameOwner(

@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DS4WinWPF.DS4Forms;
 using System;
 using System.Threading;
@@ -15,12 +15,14 @@ namespace DS4WindowsTests
         [TestMethod]
         public void DefaultThemeLoadsBridgeShellStylesOnFreshConfiguration()
         {
-            Exception failure = null;
-            Thread thread = new Thread(() =>
+            WpfTestHost.Run(() =>
             {
-                try
+                // The shared host owns the single WPF Application. Clearing
+                // its merged dictionaries still gives this test the fresh
+                // configuration it checks.
+                var application = Application.Current;
+                application.Resources.MergedDictionaries.Clear();
                 {
-                    var application = new Application();
                     var defaultTheme = new ResourceDictionary();
                     application.Resources.MergedDictionaries.Add(defaultTheme);
                     defaultTheme.Source = new Uri(
@@ -114,19 +116,7 @@ namespace DS4WindowsTests
                         "/PureDS4;component/DS4Forms/Themes/BridgeShellStyles.xaml");
                     AssertFoundationResources(application, "dark");
                 }
-                catch (Exception ex)
-                {
-                    failure = ex;
-                }
             });
-            thread.SetApartmentState(ApartmentState.STA);
-            thread.Start();
-            Assert.IsTrue(thread.Join(TimeSpan.FromSeconds(15)),
-                "Theme resource loading did not finish.");
-            if (failure != null)
-            {
-                Assert.Fail(failure.ToString());
-            }
         }
 
         private static void LoadDictionary(Application application, string source)

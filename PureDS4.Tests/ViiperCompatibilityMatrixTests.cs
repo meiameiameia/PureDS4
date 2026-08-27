@@ -12,7 +12,6 @@ namespace DS4WindowsTests
         {
             ViiperVirtualDeviceType.Xbox360,
             ViiperVirtualDeviceType.DualShock4,
-            ViiperVirtualDeviceType.Switch2Pro,
         };
 
         [DataTestMethod]
@@ -39,7 +38,6 @@ namespace DS4WindowsTests
         [DataTestMethod]
         [DataRow(ViiperVirtualDeviceType.Xbox360, 20)]
         [DataRow(ViiperVirtualDeviceType.DualShock4, 31)]
-        [DataRow(ViiperVirtualDeviceType.Switch2Pro, 24)]
         public void ViiperOutputReportsKeepTheirProtocolLength(
             ViiperVirtualDeviceType outputType, int expectedLength)
         {
