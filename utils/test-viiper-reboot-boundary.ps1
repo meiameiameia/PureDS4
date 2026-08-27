@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
     [string]$BackendScript
@@ -40,7 +40,7 @@ foreach ($functionName in @(
 }
 
 $testRoot = Join-Path ([IO.Path]::GetTempPath()) (
-    "DS4Windows-Usbip-Reboot-Test-" + [Guid]::NewGuid().ToString("N"))
+    "PureDS4-Usbip-Reboot-Test-" + [Guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $testRoot | Out-Null
 
 try {
@@ -172,7 +172,7 @@ try {
 
     Suspend-StartupTasksUntilInfrastructureReady `
         (Join-Path $testRoot "viiper.exe") `
-        (Join-Path $testRoot "DS4Windows.exe")
+        (Join-Path $testRoot "PureDS4.exe")
     if ($script:FakeStartupTasks.RunPureDS4VIIPER -or
             $script:FakeStartupTasks.RunPureDS4) {
         throw "Startup tasks could race phase-two USB-IP setup after reboot."
@@ -182,7 +182,7 @@ try {
     $script:FakeStartupTasks.RunPureDS4 = $true
     Set-InfrastructureStartupFailClosed `
         (Join-Path $testRoot "viiper.exe") `
-        (Join-Path $testRoot "DS4Windows.exe")
+        (Join-Path $testRoot "PureDS4.exe")
     if ($script:FakeStartupTasks.RunPureDS4VIIPER -or
             $script:FakeStartupTasks.RunPureDS4) {
         throw "Failed setup could leave an owned startup task enabled."

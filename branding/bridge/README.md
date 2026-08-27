@@ -1,6 +1,6 @@
-# "The Bridge" icon family
+﻿# "The Bridge" icon family
 
-Original icon family for DS4Windows Reworked. It replaces the inherited DS4W
+Original icon family for PureDS4. It replaces the inherited DS4W
 mark, which combined a DualShock 4 silhouette with the Windows logo — a
 combination that reproduces PlayStation trade dress and a Microsoft trademark,
 and whose monochrome variant is a solid white fill that is invisible in a light

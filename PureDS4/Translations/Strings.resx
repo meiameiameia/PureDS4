@@ -160,7 +160,7 @@
     <value>Check For Update Now</value>
   </data>
   <data name="CheckUpdateStartup" xml:space="preserve">
-    <value>Check for updates at DS4Windows startup</value>
+    <value>Check for updates at PureDS4 startup</value>
   </data>
   <data name="Clear" xml:space="preserve">
     <value>Clear</value>
@@ -360,9 +360,9 @@ Changes to this option takes effect at the gamepad connection time.</value>
     <value>Custom Exe Name</value>
   </data>
   <data name="CustomExeNameInfo" xml:space="preserve">
-    <value>Some games implement a block that causes DS4 input to be ignored if a game detects either DS4Windows.exe or InputMapper.exe running at the time. A workaround to the block is to rename DS4Windows.exe so the check in the game fails. Specifying a custom exe name here allows DS4Updater to automatically update a custom copy of DS4Windows to the desired file name. Make sure to omit the extension.
+    <value>Some games implement a block that causes DS4 input to be ignored if a game detects a known mapper executable, such as DS4Windows.exe or InputMapper.exe, running at the time. Renaming the executable makes that check fail. Specify a custom exe name here and omit the extension.
 
-Example: whyme_DS4Windows</value>
+Example: whyme_PureDS4</value>
   </data>
   <data name="XInputChecker" xml:space="preserve">
     <value>XInputChecker</value>
@@ -509,7 +509,7 @@ Example: whyme_DS4Windows</value>
     <value>In some situations, it might be useful to limit the maximum value that is output by the output analog stick. Max Output allows throttling the final output value of the analog stick.</value>
   </data>
   <data name="AntiDeadzoneTooltip" xml:space="preserve">
-    <value>An anti-deadzone acts as an offset for use with an axis to denote the minimum output value generated after an axis has left its assigned deadzone. This is mainly meant to help with mapping an axis to the assigned deadzone value used for an axis in a video game. For example, the typical assigned deadzone for XInput LS in a video game is around 8000 (25%). With no anti-deadzone assigned, an axis would have to move past the assigned deadzone in DS4Windows along with the game's assigned axis deadzone.</value>
+    <value>An anti-deadzone acts as an offset for use with an axis to denote the minimum output value generated after an axis has left its assigned deadzone. This is mainly meant to help with mapping an axis to the assigned deadzone value used for an axis in a video game. For example, the typical assigned deadzone for XInput LS in a video game is around 8000 (25%). With no anti-deadzone assigned, an axis would have to move past the deadzone assigned in this profile along with the game's assigned axis deadzone.</value>
   </data>
   <data name="StickInputCurveTooltip" xml:space="preserve">
     <value>OLD OBSOLETE SETTING. Attempt to apply a curve based on raw input coordinates before any dead zone info is applied. Wonky</value>
@@ -668,7 +668,7 @@ Disabled:
     <value>Swipe Touchpad To Switch Profiles</value>
   </data>
   <data name="TurnOffDS4WindowsTemporarily" xml:space="preserve">
-    <value>Turn Off DS4Windows Temporarily</value>
+    <value>Turn Off PureDS4 Temporarily</value>
   </data>
   <data name="Unplug" xml:space="preserve">
     <value>Unplug</value>

@@ -1,6 +1,6 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
-"A Ponte" (The Bridge) - DS4Windows Reworked icon family generator.
+"A Ponte" (The Bridge) - PureDS4 icon family generator.
 
 Everything is axis-aligned and drawn on an integer pixel grid, so every raster
 size is exact: no resampling, no antialiasing, no blur. 16/20/24/32 use

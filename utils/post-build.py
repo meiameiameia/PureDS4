@@ -86,8 +86,11 @@ viiper_hash_path.write_text(
 # steps and still fails loudly when a payload is genuinely missing.
 is_single_file_publish = not (target_dir / "PureDS4.dll").is_file()
 
-langs = ["ar", "cs", "de", "el", "es", "fi", "fr", "he", "hu-HU", "idn", "it", "ja", "ms",
-         "nl", "pl", "pt", "pt-BR", "ru", "se", "tr", "uk-UA", "vi", "zh-Hans", "zh-Hant", "zh-CN"]
+# "idn" and "se" were inherited mistakes: "idn" is not a culture at all, and
+# "se" is Northern Sami while the file it named held Swedish. The translations
+# now use their real identifiers, "id" and "sv".
+langs = ["ar", "cs", "de", "el", "es", "fi", "fr", "he", "hu-HU", "id", "it", "ja", "ms",
+         "nl", "pl", "pt", "pt-BR", "ru", "sv", "tr", "uk-UA", "vi", "zh-Hans", "zh-Hant", "zh-CN"]
 
 if not is_single_file_publish:
     # move l18n assemblies to a separate directory

@@ -6797,7 +6797,7 @@ namespace DS4Windows
                     {
                         AppLogger.LogToGui($"Controller {1 + device} sixaxis steering wheel calibration data missing. It is recommended to run steering wheel calibration process by pressing SASteeringWheelEmulationCalibration special action key. Using estimated values until the controller is calibrated at least once.", false);
 
-                        // Use current controller position as "center point". Assume DS4Windows was started while controller was hold in center position (yes, dangerous assumption but can't do much until controller is calibrated)
+                        // Use current controller position as "center point". Assume PureDS4 was started while controller was hold in center position (yes, dangerous assumption but can't do much until controller is calibrated)
                         controller.wheelCenterPoint.X = gyroAccelX;
                         controller.wheelCenterPoint.Y = gyroAccelZ;
 
@@ -6924,12 +6924,6 @@ namespace DS4Windows
                     outputAxisMax = 255;
                     outputAxisMin = 0;
                     outputAxisZero = 128;
-                }
-                else if (Global.OutContType[device] == OutContType.ViiperSwitch2Pro)
-                {
-                    outputAxisMax = 4095;
-                    outputAxisMin = 0;
-                    outputAxisZero = 2048;
                 }
                 else
                 {

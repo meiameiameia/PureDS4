@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -336,7 +336,7 @@ namespace DS4Windows
             if (!running)
             {
                 return ExposureRequestFailure(controllerIndex,
-                    "Start DS4Windows before changing controller exposure.");
+                    $"Start {ProductIdentity.Name} before changing controller exposure.");
             }
 
             if (!Global.hidHideInstalled)
@@ -464,7 +464,7 @@ namespace DS4Windows
             if (!running)
             {
                 return ExposureRequestFailure(session.PreferredSlot,
-                    "Start DS4Windows before returning this controller to Managed / Virtual.");
+                    $"Start {ProductIdentity.Name} before returning this controller to Managed / Virtual.");
             }
 
             session.IsManagedReacquire = true;
@@ -701,7 +701,7 @@ namespace DS4Windows
                 IsControllerInstanceOpen(session.InstanceId))
             {
                 return ControllerExposureOperationResult.Failure(
-                    "DS4Windows could not prove that its physical HID handle was released.");
+                    $"{ProductIdentity.Name} could not prove that its physical HID handle was released.");
             }
 
             return ControllerExposureOperationResult.Success();
@@ -939,7 +939,7 @@ namespace DS4Windows
                     session.DisplayName, preferPersistent: true)
                 ? ControllerExposureOperationResult.Success()
                 : ControllerExposureOperationResult.Failure(
-                    "DS4Windows could not acquire HidHide containment for the physical controller.");
+                    $"{ProductIdentity.Name} could not acquire HidHide containment for the physical controller.");
         }
 
         private ControllerExposureOperationResult

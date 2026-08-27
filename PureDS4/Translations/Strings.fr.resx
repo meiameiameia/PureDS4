@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -346,11 +346,6 @@ Les modifications apportées à cette option prennent effet au moment de la conn
   <data name="CustomExeName" xml:space="preserve">
     <value>Nom de l'exe personnalisé</value>
   </data>
-  <data name="CustomExeNameInfo" xml:space="preserve">
-    <value>Certains jeux implémentent un script qui ignore les entrée de la manette DS4 si les processus DS4Windows.exe ou InputMapper.exe sont en cours d'exécution. Il est possible de contourner ce blocage en modifiant le nom DS4Windows.exe afin que la détection échoue. Spécifier le nom personnalisé ici permet à DS4Updater de mettre à jour automatiquement une copie personnalisée de DS4Windows avec le nom de fichier souhaité. Assurez-vous d'omettre l'extension.
-
-Exemple : tu_es_tilte_boubou_DS4Windows</value>
-  </data>
   <data name="XInputChecker" xml:space="preserve">
     <value>Détection XInput</value>
   </data>
@@ -496,7 +491,7 @@ Exemple : tu_es_tilte_boubou_DS4Windows</value>
     <value>Dans certaines situations, il peut être utile de limiter la valeur de sortie maximale émise par le stick analogique. Cette fonction permet ainsi de limiter la valeur de sortie du stick analogique.</value>
   </data>
   <data name="AntiDeadzoneTooltip" xml:space="preserve">
-    <value>L'anti-zone morte agit comme un décalage à associer à un axe pour indiquer la valeur de sortie minimale générée après qu'un axe ait quitté sa zone morte assignée. Ceci vise principalement à faciliter le mappage d'une valeur de zone morte attribuée à un axe dans un jeu vidéo. Par exemple, la zone morte typique attribuée pour XInput LS dans un jeu vidéo est d'environ 8000 (25%). Sans anti-zone morte assignée, un axe devrait dépasser la zone morte assignée dans DS4Windows avec la zone morte de l'axe assignée dans le jeu.</value>
+    <value>L'anti-zone morte agit comme un décalage à associer à un axe pour indiquer la valeur de sortie minimale générée après qu'un axe ait quitté sa zone morte assignée. Ceci vise principalement à faciliter le mappage d'une valeur de zone morte attribuée à un axe dans un jeu vidéo. Par exemple, la zone morte typique attribuée pour XInput LS dans un jeu vidéo est d'environ 8000 (25%). Sans anti-zone morte assignée, un axe devrait dépasser la zone morte assignée dans PureDS4 avec la zone morte de l'axe assignée dans le jeu.</value>
   </data>
   <data name="StickInputCurveTooltip" xml:space="preserve">
     <value>ANCIEN PARAMÈTRE OBSOLÈTE. Avant d'appliquer toute information de zone morte, essayez d'utiliser une courbe basée sur les coordonnées d'entrée brutes.</value>
@@ -655,7 +650,7 @@ Désactivé:
     <value>Faites glisser sur le pavé tactile pour changer de profil</value>
   </data>
   <data name="TurnOffDS4WindowsTemporarily" xml:space="preserve">
-    <value>Désactiver temporairement DS4Windows</value>
+    <value>Désactiver temporairement PureDS4</value>
   </data>
   <data name="Unplug" xml:space="preserve">
     <value>Débrancher</value>

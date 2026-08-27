@@ -1,4 +1,4 @@
-using NAudio.CoreAudioApi;
+﻿using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
 using System;
 using System.Diagnostics;
@@ -210,7 +210,8 @@ namespace DS4Windows
             try
             {
                 using Process process = Process.GetProcessById(processId);
-                return process.ProcessName.StartsWith("DS4Windows",
+                return process.ProcessName.StartsWith(
+                    ProductIdentity.Name,
                     StringComparison.OrdinalIgnoreCase);
             }
             catch

@@ -19,8 +19,8 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <StackPanel Margin="0,0,0,14">
-            <TextBlock Text="Choose controller families" Style="{StaticResource FoundationPageTitleStyle}" />
-            <TextBlock Text="Enable only the device families you intend to use. DualShock 4 is the reference path; other families retain inherited compatibility."
+            <TextBlock Text="Controller support" Style="{StaticResource FoundationPageTitleStyle}" />
+            <TextBlock Text="This release supports the DualShock 4. For a DualSense, Switch Pro, Joy-Con or any other controller family, use DS4Windows instead."
                        Margin="0,4,0,0" Style="{StaticResource FoundationSecondaryTextStyle}" />
         </StackPanel>
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -29,16 +29,8 @@
                     <StackPanel>
                         <CheckBox Name="ds4SupportEnableCkb" IsChecked="{Binding EnableDS4}"
                                   Content="{lex:Loc FirstLaunch.DS4EnableCkbLabel}" FontWeight="SemiBold" />
-                        <TextBlock Text="{lex:Loc FirstLaunch.DS4EnableText}" Margin="24,3,0,12"
+                        <TextBlock Text="{lex:Loc FirstLaunch.DS4EnableText}" Margin="24,3,0,4"
                                    Style="{StaticResource FoundationSecondaryTextStyle}" />
-                        <CheckBox Name="ds3SupportEnableCkb" IsChecked="{Binding EnableDS3}"
-                                  Content="{lex:Loc FirstLaunch.DS3EnableCkbLabel}" FontWeight="SemiBold" />
-                        <TextBlock Text="{lex:Loc FirstLaunch.DS3EnableText}" Margin="24,3,0,4"
-                                   Style="{StaticResource FoundationSecondaryTextStyle}" />
-                        <TextBlock Margin="24,0,0,0">
-                            <Hyperlink x:Name="dsHidMiniLink" Click="DsHidMiniLink_Click"
-                                       Foreground="{DynamicResource AccentBrush}">Learn about DsHidMini</Hyperlink>
-                        </TextBlock>
                     </StackPanel>
                 </GroupBox>
             </StackPanel>

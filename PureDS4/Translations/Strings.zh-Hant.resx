@@ -347,11 +347,6 @@
   <data name="CustomExeName" xml:space="preserve">
     <value>自定義 Exe 名稱</value>
   </data>
-  <data name="CustomExeNameInfo" xml:space="preserve">
-    <value>如果遊戲檢測到當時正在運行的 DS4Windows.exe 或 InputMapper.exe ，則某些遊戲執行的攔阻會導致忽略DS4的輸入。 解決該問題的方法是重命名 DS4Windows.exe ，以便讓遊戲中的檢查失效。 在此處指定自定義的 exe 執行檔名稱可以使 DS4Updater 自動將 DS4Windows 的自定義副本更新為想要的檔名。 確保省略副檔名。
-
-例如: whyme_DS4Windows</value>
-  </data>
   <data name="XInputChecker" xml:space="preserve">
     <value>XInputChecker</value>
   </data>
@@ -503,7 +498,7 @@ Maps the controller output to mixed XInput gamepad + RS mouse.</value>
     <value>在某些情況下，限制輸出類比搖桿輸出的最大值可能很有用。 最大輸出允許限制類比搖桿的最終輸出值。</value>
   </data>
   <data name="AntiDeadzoneTooltip" xml:space="preserve">
-    <value>反死區作為一個偏移量用於一個軸，表示一個軸離開其指定死區後產生的最小輸出值。這主要是為了幫助將一個軸對應到視訊遊戲中的軸的指定死區值。例如，視訊遊戲中XInput LS的典型指定死區是8000左右（25%）。在沒有指定反死區的情況下，一個軸將不得不隨著遊戲中指定的軸死區移動到DS4Windows中的指定死區。</value>
+    <value>反死區作為一個偏移量用於一個軸，表示一個軸離開其指定死區後產生的最小輸出值。這主要是為了幫助將一個軸對應到視訊遊戲中的軸的指定死區值。例如，視訊遊戲中XInput LS的典型指定死區是8000左右（25%）。在沒有指定反死區的情況下，一個軸將不得不隨著遊戲中指定的軸死區移動到PureDS4中的指定死區。</value>
   </data>
   <data name="StickInputCurveTooltip" xml:space="preserve">
     <value>舊的過時設置。 在應用任何死區信息之前，嘗試根據原始輸入坐標應用曲線。</value>

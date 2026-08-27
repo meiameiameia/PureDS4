@@ -1,4 +1,4 @@
-/*
+﻿/*
 DS4Windows
 Copyright (C) 2023  Travis Nickles
 
@@ -288,7 +288,7 @@ namespace DS4Windows
                 return;
             }
 
-            const string message = "Xbox Game Bar is not installed or its ms-gamebar protocol handler is not registered. Install or repair Xbox Game Bar from the Microsoft Store, then restart DS4Windows to use Game Bar profile support.";
+            const string message = "Xbox Game Bar is not installed or its ms-gamebar protocol handler is not registered. Install or repair Xbox Game Bar from the Microsoft Store, then restart PureDS4 to use Game Bar profile support.";
             AppLogger.LogToGui(message, true);
             AppLogger.LogToTray(message, true, true);
         }
@@ -454,7 +454,7 @@ namespace DS4Windows
                     });
 
                     worker.IsBackground = true;
-                    worker.Name = "DS4Windows Game Bar API Poll";
+                    worker.Name = $"{ProductIdentity.Name} Game Bar API Poll";
                     worker.Priority = ThreadPriority.BelowNormal;
                     worker.Start();
                 }
@@ -559,7 +559,7 @@ namespace DS4Windows
                     });
 
                     worker.IsBackground = true;
-                    worker.Name = "DS4Windows Game Bar UIA Poll";
+                    worker.Name = $"{ProductIdentity.Name} Game Bar UIA Poll";
                     worker.SetApartmentState(ApartmentState.STA);
                     worker.Start();
                 }
@@ -834,7 +834,9 @@ namespace DS4Windows
                 return false;
             }
 
-            string resultPath = Path.Combine(Path.GetTempPath(), "DS4Windows.GameBarProbe." + Guid.NewGuid().ToString("N") + ".txt");
+            string resultPath = Path.Combine(Path.GetTempPath(),
+                ProductIdentity.Name + ".GameBarProbe." +
+                Guid.NewGuid().ToString("N") + ".txt");
             try
             {
                 if (!TryRunProbeProcess(exePath, resultPath, timeoutMs, out int exitCode, out string launchStatus))
@@ -1119,7 +1121,8 @@ namespace DS4Windows
                 processName.Equals("brave", StringComparison.OrdinalIgnoreCase) ||
                 processName.Equals("Code", StringComparison.OrdinalIgnoreCase) ||
                 processName.Equals("Codex", StringComparison.OrdinalIgnoreCase) ||
-                processName.Equals("DS4Windows", StringComparison.OrdinalIgnoreCase);
+                processName.Equals(ProductIdentity.Name,
+                    StringComparison.OrdinalIgnoreCase);
         }
 
         private static string TruncateDiagnosticText(string text)

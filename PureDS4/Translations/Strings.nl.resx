@@ -156,7 +156,7 @@
     <value>Updates ophalen</value>
   </data>
   <data name="CheckUpdateStartup" xml:space="preserve">
-    <value>Updates ophalen bij opstarten DS4Windows</value>
+    <value>Updates ophalen bij opstarten PureDS4</value>
   </data>
   <data name="Clear" xml:space="preserve">
     <value>Leegmaken</value>
@@ -345,11 +345,6 @@ Wijzigen op deze instellingen hebben effect op de verbindingssnelheid van de con
   </data>
   <data name="CustomExeName" xml:space="preserve">
     <value>Aangepaste exe naam</value>
-  </data>
-  <data name="CustomExeNameInfo" xml:space="preserve">
-    <value>Sommige spellen blokkeren de invoer van DS4 als ze DS4Windows.exe of InputMapper.exe zien. Een oplossing is om DS4Windows.exe te hernoemen zodat de check faalt en de game normaal werkt. Hier een aangepaste exe naam invullen staat DS4Updater toe om automatisch een aangepaste kopie van DS4Windows te maken met de gewenste naam. Zorg ervoor dat je geen bestandextensie toevoegt.
-
-Voorbeeld: waaromik_DS4Windows</value>
   </data>
   <data name="XInputChecker" xml:space="preserve">
     <value>XInputChecker</value>
@@ -576,7 +571,7 @@ Verbind gewoon je DualShock 4 en PC met een micro-USB kabel.
     <value>Beperkt de maximale uitvoerwaarde van de analoge stick door alle hogere invoerwaarden te verlagen tot de maximum waarde.</value>
   </data>
   <data name="AntiDeadzoneTooltip" xml:space="preserve">
-    <value>Een anti-deadzone geeft de minimum uitvoerwaarde die wordt gegenereerd als een as de toegewezen deadzone heeft verlaten. Als er geen anti-deadzone is toegewezen, zou een as voorbij de toegewezen deadzone in DS4Windows moeten bewegen en dan nog eens voorbij de toegewezen deadzone van het spel. De typische toegewezen deadzone voor XInput LS in een videogame is ongeveer 8000 (25%). 
+    <value>Een anti-deadzone geeft de minimum uitvoerwaarde die wordt gegenereerd als een as de toegewezen deadzone heeft verlaten. Als er geen anti-deadzone is toegewezen, zou een as voorbij de toegewezen deadzone in PureDS4 moeten bewegen en dan nog eens voorbij de toegewezen deadzone van het spel. De typische toegewezen deadzone voor XInput LS in een videogame is ongeveer 8000 (25%).
 </value>
   </data>
   <data name="StickInputCurveTooltip" xml:space="preserve">
@@ -1108,7 +1103,7 @@ Uitgeschakeld:
     <value>Swipe touchpad om tussen profielen te wisselen</value>
   </data>
   <data name="TurnOffDS4WindowsTemporarily" xml:space="preserve">
-    <value>Schakel DS4Windows tijdelijk uit</value>
+    <value>Schakel PureDS4 tijdelijk uit</value>
   </data>
   <data name="Plug" xml:space="preserve">
     <value>Aansluiten</value>

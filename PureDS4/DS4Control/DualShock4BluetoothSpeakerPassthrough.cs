@@ -1,4 +1,4 @@
-using NAudio.CoreAudioApi;
+﻿using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using SBC;
@@ -4044,7 +4044,7 @@ namespace DS4Windows
                     string logDirectory = Path.Combine(
                         Environment.GetFolderPath(
                             Environment.SpecialFolder.ApplicationData),
-                        "DS4Windows", "Logs");
+                        ProductIdentity.DataFolderName, "Logs");
                     Directory.CreateDirectory(logDirectory);
                     string stem = Path.Combine(logDirectory,
                         $"ds4-bt-audio-{startedUtc:yyyyMMdd-HHmmss}");

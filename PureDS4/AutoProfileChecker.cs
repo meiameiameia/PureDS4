@@ -183,7 +183,7 @@ namespace DS4WinWPF
                         if (App.rootHub.running)
                         {
                             if (autoProfileDebugLogLevel > 0)
-                                DS4Windows.AppLogger.LogToGui($"DEBUG: Auto-Profile. Turning DS4Windows temporarily off", false, true);
+                                DS4Windows.AppLogger.LogToGui($"DEBUG: Auto-Profile. Turning {DS4Windows.ProductIdentity.Name} temporarily off", false, true);
 
                             SetAndWaitServiceStatus(false);
                         }
@@ -199,7 +199,7 @@ namespace DS4WinWPF
                         if (!App.rootHub.running)
                         {
                             if (autoProfileDebugLogLevel > 0)
-                                DS4Windows.AppLogger.LogToGui($"DEBUG: Auto-Profile. Turning DS4Windows on before reverting to default profile", false, true);
+                                DS4Windows.AppLogger.LogToGui($"DEBUG: Auto-Profile. Turning {DS4Windows.ProductIdentity.Name} on before reverting to default profile", false, true);
 
                             SetAndWaitServiceStatus(true);
                         }

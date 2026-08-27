@@ -172,7 +172,7 @@
     <value>Закрыть DS4Windows?</value>
   </data>
   <data name="CloseMinimize" xml:space="preserve">
-    <value>Закрывать DS4Windows через значок уведомления</value>
+    <value>Закрывать PureDS4 через значок уведомления</value>
   </data>
   <data name="Color" xml:space="preserve">
     <value>Цвет</value>
@@ -239,7 +239,7 @@
     <value>..\Resources\DS4.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="DS4Update" xml:space="preserve">
-    <value>Доступна новая версия DS4Windows!</value>
+    <value>Доступна новая версия PureDS4!</value>
   </data>
   <data name="DS4W" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\DS4W.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -335,7 +335,7 @@
     <value>Запоминать размер окна после закрытия</value>
   </data>
   <data name="LanguagePackApplyRestartRequired" xml:space="preserve">
-    <value>Выбранный языковой пакет будет применен после перезапуска приложения DS4Windows.</value>
+    <value>Выбранный языковой пакет будет применен после перезапуска приложения PureDS4.</value>
   </data>
   <data name="LatencyNotOverTen" xml:space="preserve">
     <value>Задержка *number*-го контроллера сейчас меньше 10 мс</value>
@@ -418,10 +418,6 @@
   <data name="QuickCharge" xml:space="preserve">
     <value>Автоотключение Bluetooth при подключении по USB</value>
   </data>
-  <data name="QuitOtherPrograms" xml:space="preserve">
-    <value>Перед активацией функции "Спрятать DS4" вы должны выйти из игровых клиентов, таких как Steam, Uplay, Origin и пр.
- Подробности на https://github.com/Ryochan7/DS4Windows/wiki/Exclusive-Mode-(Hide-DS4-Controller-config-option)-tips-and-issues</value>
-  </data>
   <data name="RecordText" xml:space="preserve">
     <value>Запись</value>
   </data>
@@ -429,7 +425,7 @@
     <value>Правый клик для выбора пресета</value>
   </data>
   <data name="RunAtStartup" xml:space="preserve">
-    <value>Windows запустит DS4Windows после входа</value>
+    <value>Windows запустит PureDS4 после входа</value>
   </data>
   <data name="SaveRecordedMacro" xml:space="preserve">
     <value>Сохранить записанный макрос?</value>
@@ -495,7 +491,7 @@
     <value>Ост. лёгкий</value>
   </data>
   <data name="StoppedDS4Windows" xml:space="preserve">
-    <value>Остановлена работа DS4Windows</value>
+    <value>Остановлена работа PureDS4</value>
   </data>
   <data name="StoppingDS4" xml:space="preserve">
     <value>Остановка контроллеров DS4</value>
@@ -567,7 +563,7 @@
     <value>введите сюда имя профиля</value>
   </data>
   <data name="UACTask" xml:space="preserve">
-    <value>Вам нужно запустить DS4Windows от имени Администратора, чтобы активировать этот режим.</value>
+    <value>Вам нужно запустить PureDS4 от имени Администратора, чтобы активировать этот режим.</value>
   </data>
   <data name="Unassigned" xml:space="preserve">
     <value>Не назначено</value>

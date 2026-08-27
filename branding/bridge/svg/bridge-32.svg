@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32"
-     fill="none" role="img" aria-label="DS4Windows Reworked">
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32"
+     fill="none" role="img" aria-label="PureDS4">
   <!-- Hand-tuned 32px grid. Full detail: chamfer 3, gaps 1, deck spans 4. -->
   <g fill="currentColor">
     <path d="M5 12 H10 V20 H2 V15 Z"/>

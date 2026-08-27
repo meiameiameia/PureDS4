@@ -1,35 +1,45 @@
-﻿<Window x:Class="DS4WinWPF.DS4Forms.SaveWhere"
+<Window x:Class="DS4WinWPF.DS4Forms.SaveWhere"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:lex="http://wpflocalizeextension.codeplex.com"
         xmlns:local="clr-namespace:DS4WinWPF.DS4Forms"
-        lex:LocalizeDictionary.DesignCulture=""
-        lex:ResxLocalizationProvider.DefaultAssembly="PureDS4"
-        lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="{lex:Loc SaveWhere.WinTitle}" Height="184" Width="453" ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
+        Title="Choose where PureDS4 stores its data"
+        SizeToContent="Height" Width="560" MinWidth="520"
+        ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
         Style="{DynamicResource WindowStyle}">
-    <StackPanel>
-        <DockPanel x:Name="multipleSavesDockP" Margin="4,0">
-            <Label Content="{lex:Loc SaveWhere.MultipleSaves}" />
-            <CheckBox x:Name="dontDeleteCk" Content="{lex:Loc SaveWhere.DontDelete}" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" />
-        </DockPanel>
-        <TextBlock x:Name="pickWhereTxt" Text="{lex:Loc SaveWhere.PickWhere}"
-                   TextWrapping="Wrap" HorizontalAlignment="Center" Margin="4,10,4,0" TextAlignment="Center" />
-        <DockPanel Margin="4,10,4,0">
-            <StackPanel x:Name="progFolderPanel" Width="200">
-                <Button x:Name="progFolderBtn" Content="{lex:Loc ProgramFolder}" Click="ProgFolderBtn_Click" />
-                <TextBlock TextWrapping="Wrap" TextAlignment="Center" Text="{lex:Loc SaveWhere.ProgramFolderDescText}">
-                </TextBlock>
+    <StackPanel Margin="20">
+        <TextBlock x:Name="headingText" Style="{StaticResource FoundationPageTitleStyle}"
+                   TextWrapping="Wrap" />
+        <TextBlock x:Name="summaryText" Margin="0,6,0,0" TextWrapping="Wrap"
+                   Style="{StaticResource FoundationSecondaryTextStyle}" />
+
+        <TextBlock x:Name="existingDataText" Margin="0,10,0,0" TextWrapping="Wrap"
+                   Style="{StaticResource FoundationSecondaryTextStyle}" />
+
+        <Border Style="{StaticResource FoundationPropertyGroupStyle}" Margin="0,16,0,0">
+            <StackPanel>
+                <Button x:Name="accountButton" Click="AccountBtn_Click"
+                        HorizontalAlignment="Stretch" MinHeight="32"
+                        Style="{StaticResource FoundationPrimaryButtonStyle}"
+                        AutomationProperties.HelpText="Store PureDS4 profiles and settings in the AppData folder for this Windows account." />
+                <TextBlock x:Name="accountDescriptionText" Margin="2,8,2,0"
+                           TextWrapping="Wrap"
+                           Style="{StaticResource FoundationSecondaryTextStyle}" />
             </StackPanel>
-            <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right" Width="200">
-                <Button x:Name="appdataBtn" Content="{lex:Loc Appdata}" Click="AppdataBtn_Click" />
-                <TextBlock TextWrapping="Wrap" TextAlignment="Center" 
-                           Text="{lex:Loc SaveWhere.AppDataDescText}">
-                </TextBlock>
+        </Border>
+
+        <Border Style="{StaticResource FoundationPropertyGroupStyle}" Margin="0,12,0,0">
+            <StackPanel x:Name="portablePanel">
+                <Button x:Name="portableButton" Click="PortableBtn_Click"
+                        HorizontalAlignment="Stretch" MinHeight="32"
+                        Style="{StaticResource FoundationButtonStyle}"
+                        AutomationProperties.HelpText="Store PureDS4 profiles and settings in the folder that contains PureDS4.exe." />
+                <TextBlock x:Name="portableDescriptionText" Margin="2,8,2,0"
+                           TextWrapping="Wrap"
+                           Style="{StaticResource FoundationSecondaryTextStyle}" />
             </StackPanel>
-        </DockPanel>
+        </Border>
     </StackPanel>
 </Window>

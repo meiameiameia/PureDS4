@@ -1,10 +1,10 @@
-<Window x:Class="DS4WinWPF.DS4Forms.About"
+﻿<Window x:Class="DS4WinWPF.DS4Forms.About"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="About DS4Windows Reworked" Height="600" Width="760"
+        Title="About PureDS4" Height="600" Width="760"
         MinHeight="480" MinWidth="640" ResizeMode="CanResize"
         WindowStartupLocation="CenterOwner"
         Style="{DynamicResource WindowStyle}">
@@ -23,10 +23,10 @@
             </Grid.ColumnDefinitions>
             <Image Source="/PureDS4;component/Resources/AppIcon.png"
                    Width="48" Height="48" Margin="0,0,12,0"
-                   AutomationProperties.Name="DS4Windows Reworked Mapped Pad icon" />
+                   AutomationProperties.Name="PureDS4 Mapped Pad icon" />
             <StackPanel Grid.Column="1">
-                <TextBlock Text="DS4Windows Reworked" FontSize="22" FontWeight="SemiBold" />
-                <TextBlock Text="A dependable Windows controller workspace"
+                <TextBlock Text="PureDS4" FontSize="22" FontWeight="SemiBold" />
+                <TextBlock Text="A focused Windows tool for the DualShock 4"
                            Margin="0,3,0,0" Style="{StaticResource FoundationSecondaryTextStyle}" />
             </StackPanel>
             <StackPanel Grid.Column="2" HorizontalAlignment="Right">
@@ -42,7 +42,7 @@
                     <StackPanel Margin="16">
                         <TextBlock Text="About this derivative" Style="{StaticResource FoundationGroupTitleStyle}" />
                         <TextBlock Margin="0,6,0,16" TextWrapping="Wrap"
-                                   Text="DS4Windows Reworked continues the DS4Windows lineage with a focused desktop-tool interface, explicit game-output status, and safer controller exposure transitions." />
+                                   Text="PureDS4 continues the DS4Windows lineage as a deliberately narrow tool for the DualShock 4, with a focused desktop-tool interface, explicit game-output status, and safer controller exposure transitions. If you use a DualSense, DualSense Edge, Switch Pro, Joy-Con or any other controller family, use DS4Windows instead. DualShock 3 is a planned future milestone and is not supported by this release." />
                         <Border Style="{StaticResource FoundationPropertyGroupStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -107,7 +107,7 @@
                     <StackPanel Margin="16">
                         <TextBlock Text="Open-source lineage" Style="{StaticResource FoundationGroupTitleStyle}" />
                         <TextBlock Margin="0,5,0,14" TextWrapping="Wrap"
-                                   Text="DS4Windows Reworked is a modified DS4Windows derivative. Original authors and contributors retain their respective copyrights." />
+                                   Text="PureDS4 is a modified DS4Windows derivative. Original authors and contributors retain their respective copyrights." />
                         <TextBlock Text="Bundled components" Style="{StaticResource FoundationGroupTitleStyle}" />
                         <TextBlock Margin="0,5,0,14" TextWrapping="Wrap"
                                    Text="VIIPER, USB/IP, HidHide, FakerInput, H.NotifyIcon, CRC32, SBCSharp, RNNoise.NET, and other bundled or linked components remain governed by their own license terms. Their notices ship with the application and source tree." />

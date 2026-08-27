@@ -157,7 +157,7 @@
     <value>التحقق من وجود تحديث الأن</value>
   </data>
   <data name="CheckUpdateStartup" xml:space="preserve">
-    <value>DS4Windows التحقق من وجود تحديث عند تشغيل</value>
+    <value>PureDS4 التحقق من وجود تحديث عند تشغيل</value>
   </data>
   <data name="Clear" xml:space="preserve">
     <value>مسح</value>
@@ -347,11 +347,6 @@
   </data>
   <data name="CustomExeName" xml:space="preserve">
     <value>مخصص Exe اسم</value>
-  </data>
-  <data name="CustomExeNameInfo" xml:space="preserve">
-    <value>.قيد التشغيل DS4Windows.exe / InputMapper.exe بعض الألعاب تقوم بمنع التحكم إذا اكتشفت
-.الحل البديل إعادة تسميته لشيء أخر ليفشل منع اللعبة
-.تحديد اسم جديد هنا يسمح لبرنامج التحديث لمعرفة اسم الملف</value>
   </data>
   <data name="XInputChecker" xml:space="preserve">
     <value>XInputChecker</value>

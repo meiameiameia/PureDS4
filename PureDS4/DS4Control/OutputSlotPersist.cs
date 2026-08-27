@@ -75,7 +75,7 @@ namespace DS4WinWPF.DS4Control
 
                 // Write header explicitly
                 xmlWriter.WriteStartDocument();
-                xmlWriter.WriteComment(string.Format(" Made with DS4Windows version {0} ", Global.exeversion));
+                xmlWriter.WriteComment(string.Format(" Made with {0} version {1} ", ProductIdentity.Name, Global.exeversion));
                 xmlWriter.WriteWhitespace("\r\n");
                 xmlWriter.WriteWhitespace("\r\n");
 

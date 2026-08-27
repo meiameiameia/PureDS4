@@ -157,7 +157,7 @@
     <value>Sök efter uppdateringar nu</value>
   </data>
   <data name="CheckUpdateStartup" xml:space="preserve">
-    <value>Sök efter uppdateringar när DS4Windows startar</value>
+    <value>Sök efter uppdateringar när PureDS4 startar</value>
   </data>
   <data name="Clear" xml:space="preserve">
     <value>Rensa</value>
@@ -347,11 +347,6 @@
   <data name="CustomExeName" xml:space="preserve">
     <value>Anpassat Exe-namn</value>
   </data>
-  <data name="CustomExeNameInfo" xml:space="preserve">
-    <value>Vissa spel implementerar ett block som gör att DS4-ingång ignoreras om ett spel upptäcker att antingen DS4Windows.exe eller InputMapper.exe körs vid tillfället. En lösning på blocket är att byta namn på DS4Windows.exe så att kontrollen i spelet misslyckas. Genom att ange ett anpassat exe-namn här kan DS4Updater automatiskt uppdatera en anpassad kopia av DS4Windows till önskat filnamn. Se till att utelämna tillägget.
-
-Exempel: whyme_DS4Windows</value>
-  </data>
   <data name="XInputChecker" xml:space="preserve">
     <value>XInputKontrollerare</value>
   </data>
@@ -497,7 +492,7 @@ Exempel: whyme_DS4Windows</value>
     <value>I vissa situationer kan det vara användbart att begränsa det maximala värdet som matas ut av den analoga utgångsspaken. Max Output tillåter strypning av det slutliga utgångsvärdet för den analoga spaken.</value>
   </data>
   <data name="AntiDeadzoneTooltip" xml:space="preserve">
-    <value>En anti-dödzon fungerar som en offset för användning med en axel för att beteckna det lägsta utgångsvärdet som genereras efter att en axel har lämnat sin tilldelade dödzon. Detta är främst tänkt att hjälpa till med att kartlägga en axel till det tilldelade dödzonsvärdet som används för en axel i ett videospel. Till exempel är den typiska tilldelade dödzonen för XInput LS i ett videospel runt 8000 (25%). Utan någon anti-dödzon tilldelad skulle en axel behöva flytta förbi den tilldelade dödzonen i DS4Windows tillsammans med spelets tilldelade dödzon.</value>
+    <value>En anti-dödzon fungerar som en offset för användning med en axel för att beteckna det lägsta utgångsvärdet som genereras efter att en axel har lämnat sin tilldelade dödzon. Detta är främst tänkt att hjälpa till med att kartlägga en axel till det tilldelade dödzonsvärdet som används för en axel i ett videospel. Till exempel är den typiska tilldelade dödzonen för XInput LS i ett videospel runt 8000 (25%). Utan någon anti-dödzon tilldelad skulle en axel behöva flytta förbi den tilldelade dödzonen i PureDS4 tillsammans med spelets tilldelade dödzon.</value>
   </data>
   <data name="StickInputCurveTooltip" xml:space="preserve">
     <value>GAMMAL FÖRALDAD INSTÄLLNING. Försök att tillämpa en kurva baserad på råa indatakoordinater innan någon dödzonsinformation tillämpas. Ostadig</value>

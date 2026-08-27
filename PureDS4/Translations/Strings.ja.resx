@@ -347,11 +347,6 @@
   <data name="CustomExeName" xml:space="preserve">
     <value>カスタム実行ファイル名</value>
   </data>
-  <data name="CustomExeNameInfo" xml:space="preserve">
-    <value>いくつかのゲームは、実行時に DS4Windows.exe や InputMapper.exe を検出すると、そこからの入力を無視するように実装されています。その回避策として、DS4Windows.exe をリネームします。ここにカスタム実行ファイル名を指定すると、DS4Updater が自動的に DS4Windows を指定された名前にコピーして使用します。 拡張子は必ず取り除いてください。
-
-例: whyme_DS4Windows</value>
-  </data>
   <data name="XInputChecker" xml:space="preserve">
     <value>XInputChecker</value>
   </data>

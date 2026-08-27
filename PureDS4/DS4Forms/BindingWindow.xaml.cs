@@ -54,7 +54,6 @@ namespace DS4WinWPF.DS4Forms
         private BindingWindowViewModel bindingVM;
         private Button highlightBtn;
         private ExposeMode expose;
-        private OutContType configuredOutputType = OutContType.ViiperX360;
 
         public enum ExposeMode : uint
         {
@@ -825,9 +824,7 @@ namespace DS4WinWPF.DS4Forms
 
             if (button == aBtn || button == bBtn || button == xBtn ||
                 button == yBtn || button == lsbBtn || button == rsbBtn ||
-                button == guideBtn ||
-                (configuredOutputType == OutContType.ViiperSwitch2Pro &&
-                    (button == backBtn || button == startBtn)))
+                button == guideBtn)
             {
                 double inset = Math.Min(1.0,
                     Math.Min(bounds.Width, bounds.Height) / 8.0);
@@ -944,7 +941,6 @@ namespace DS4WinWPF.DS4Forms
             outputButtonRasterHighlights.Clear();
             outputControllerRasterHighlight.Visibility = Visibility.Collapsed;
             outputType = outputType.Normalize();
-            configuredOutputType = outputType;
             switch (outputType)
             {
                 case OutContType.ViiperDS4:
@@ -955,9 +951,6 @@ namespace DS4WinWPF.DS4Forms
                     break;
                 case OutContType.ViiperDualSenseEdge:
                     ConfigureDualSenseEdgeOutputCanvas();
-                    break;
-                case OutContType.ViiperSwitch2Pro:
-                    ConfigureSwitch2ProOutputCanvas();
                     break;
                 default:
                     ConfigureXbox360OutputCanvas();
@@ -984,10 +977,6 @@ namespace DS4WinWPF.DS4Forms
                 case OutContType.ViiperDualSenseEdge:
                     controllerAtlas = "DualSenseEdge-Config_Highlights.png";
                     stickAtlas = "DualSenseEdge-Stick_Highlights.png";
-                    break;
-                case OutContType.ViiperSwitch2Pro:
-                    controllerAtlas = "Switch2Pro-Config_Highlights.png";
-                    stickAtlas = "Switch2Pro-Stick_Highlights.png";
                     break;
                 default:
                     ConfigureXbox360RasterHighlights();
@@ -1029,11 +1018,7 @@ namespace DS4WinWPF.DS4Forms
                     frameIndex is > 5 and < 10 ? 5 : -1);
             }
 
-            if (outputType == OutContType.ViiperSwitch2Pro)
-            {
-                AssignOutputRasterFrame(touchpadClickBtn, controllerAtlas, 26);
-            }
-            else if (outputType == OutContType.ViiperDS4 ||
+            if (outputType == OutContType.ViiperDS4 ||
                 outputType == OutContType.ViiperDualSenseEdge)
             {
                 AssignOutputCombinedRasterFrames(touchpadClickBtn,
@@ -1338,41 +1323,6 @@ namespace DS4WinWPF.DS4Forms
             SetOutputButtonBounds(dpadDBtn, 199, 99, 24, 25);
             SetOutputButtonBounds(dpadLBtn, 186, 78, 26, 24);
             SetOutputButtonBounds(touchpadClickBtn, 246, 38, 138, 66);
-            touchpadClickBtn.Visibility = Visibility.Visible;
-        }
-
-        private void ConfigureSwitch2ProOutputCanvas()
-        {
-            conImageBrush.ImageSource = LoadControllerImage("Switch 2 Pro Controller.png");
-
-            // The canonical mapping names already translate to Nintendo's
-            // physical B/A/Y/X ordering; place each hit target on that glyph.
-            SetOutputButtonBounds(aBtn, 385, 87, 23, 24);
-            SetOutputButtonBounds(bBtn, 407, 67, 23, 24);
-            SetOutputButtonBounds(xBtn, 362, 67, 23, 24);
-            SetOutputButtonBounds(yBtn, 385, 47, 23, 24);
-            SetOutputButtonBounds(lbBtn, 199, 23, 54, 18);
-            SetOutputButtonBounds(rbBtn, 377, 23, 56, 18);
-            SetOutputButtonBounds(ltBtn, 202, 8, 49, 15);
-            SetOutputButtonBounds(rtBtn, 383, 8, 50, 15);
-            SetOutputButtonBounds(backBtn, 269, 49, 16, 16);
-            SetOutputButtonBounds(startBtn, 342, 49, 17, 16);
-            SetOutputButtonBounds(guideBtn, 325, 69, 18, 18);
-            SetOutputButtonBounds(touchpadClickBtn, 285, 69, 18, 18);
-            SetOutputButtonBounds(lsbBtn, 212, 62, 34, 34);
-            SetOutputButtonBounds(lsuBtn, 220, 56, 18, 14);
-            SetOutputButtonBounds(lsrBtn, 240, 72, 14, 18);
-            SetOutputButtonBounds(lsdBtn, 220, 90, 18, 14);
-            SetOutputButtonBounds(lslBtn, 204, 72, 14, 18);
-            SetOutputButtonBounds(rsbBtn, 340, 108, 34, 34);
-            SetOutputButtonBounds(rsuBtn, 348, 102, 18, 14);
-            SetOutputButtonBounds(rsrBtn, 368, 118, 14, 18);
-            SetOutputButtonBounds(rsdBtn, 348, 136, 18, 14);
-            SetOutputButtonBounds(rslBtn, 332, 118, 14, 18);
-            SetOutputButtonBounds(dpadUBtn, 261, 105, 16, 24);
-            SetOutputButtonBounds(dpadRBtn, 273, 118, 24, 16);
-            SetOutputButtonBounds(dpadDBtn, 261, 131, 16, 24);
-            SetOutputButtonBounds(dpadLBtn, 241, 118, 24, 16);
             touchpadClickBtn.Visibility = Visibility.Visible;
         }
 

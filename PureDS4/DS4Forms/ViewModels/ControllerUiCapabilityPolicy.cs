@@ -163,27 +163,39 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 string.Empty);
         }
 
+        /// <summary>
+        /// Controls that only ever existed on a DualSense or a DualSense Edge.
+        /// Neither supported controller has them, so they are unavailable even
+        /// while editing a profile with nothing attached: offering them would
+        /// promise hardware this tool does not support. Existing saved
+        /// mappings for these controls are still preserved on disk.
+        /// </summary>
+        private static bool IsUnsupportedHardwareControl(DS4Controls control)
+        {
+            return control == DS4Controls.Mute ||
+                control == DS4Controls.Capture ||
+                control == DS4Controls.SideL ||
+                control == DS4Controls.SideR ||
+                control == DS4Controls.FnL ||
+                control == DS4Controls.FnR ||
+                control == DS4Controls.BLP ||
+                control == DS4Controls.BRP;
+        }
+
         internal bool IsMappingControlAvailable(DS4Controls control)
         {
-            if (DeviceType == null)
-            {
-                return true;
-            }
-
-            if (IsDualShock4)
-            {
-                return control != DS4Controls.Mute &&
-                    control != DS4Controls.Capture &&
-                    control != DS4Controls.SideL &&
-                    control != DS4Controls.SideR &&
-                    control != DS4Controls.FnL &&
-                    control != DS4Controls.FnR &&
-                    control != DS4Controls.BLP &&
-                    control != DS4Controls.BRP;
-            }
-
-            return true;
+            return !IsUnsupportedHardwareControl(control);
         }
+
+        /// <summary>
+        /// How to name the hardware an unavailable control is missing from.
+        /// With a controller attached this is that controller; while editing a
+        /// profile offline it has to describe the supported hardware instead
+        /// of the placeholder profile name.
+        /// </summary>
+        internal string MappingAvailabilityScopeName => DeviceType == null
+            ? "a DualShock 4"
+            : ControllerName;
 
         internal static ControllerUiCapabilities ForDevice(DS4Device device)
         {

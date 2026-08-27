@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -32,7 +32,7 @@ namespace DS4WinWPF.DS4Forms
 
         public void ShowPreparing()
         {
-            phaseText.Text = "Verifying the DS4Windows package...";
+            phaseText.Text = "Verifying the PureDS4 package...";
             Show();
             logTimer.Start();
             // Render the window before the protected package snapshot begins.
@@ -93,7 +93,7 @@ namespace DS4WinWPF.DS4Forms
                 ? "Setup completed successfully."
                 : "Setup stopped safely before verification completed.";
             detailText.Text = success
-                ? "DS4Windows will continue automatically."
+                ? "PureDS4 will continue automatically."
                 : "A detailed error and the diagnostic log will appear next.";
             Dispatcher.Invoke(() => { }, DispatcherPriority.Background);
             allowClose = true;

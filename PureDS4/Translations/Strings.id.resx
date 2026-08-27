@@ -157,7 +157,7 @@
     <value>Periksa Pembaruan Sekarang</value>
   </data>
   <data name="CheckUpdateStartup" xml:space="preserve">
-    <value>Periksa pembaruan saat DS4Windows mulai</value>
+    <value>Periksa pembaruan saat PureDS4 mulai</value>
   </data>
   <data name="Clear" xml:space="preserve">
     <value>Bersihkan</value>
@@ -347,9 +347,6 @@ Perubahan pada opsi ini berlaku saat kontroler terhubung</value>
   <data name="CustomExeName" xml:space="preserve">
     <value>Nama Exe Kustom</value>
   </data>
-  <data name="CustomExeNameInfo" xml:space="preserve">
-    <value>Beberapa permainan menerapkan pemblokiran yang menyebabkan input dari DS4 diabaikan jika permainan tersebut mendeteksi DS4Windows.exe atau InputMapper.exe berjalan pada saat yang sama. Solusi alternatif untuk mengatasi pemblokiran ini adalah dengan mengganti nama DS4Windows.exe sehingga pemeriksaan pada game tersebut gagal. Menentukan nama exe kustom di sini memungkinkan DS4Updater untuk secara otomatis memperbarui salinan kustom DS4Windows ke nama file yang diinginkan. Pastikan untuk menghilangkan ekstensinya. Contoh: whyme_DS4Windows</value>
-  </data>
   <data name="XInputChecker" xml:space="preserve">
     <value>Pemeriksa XInput</value>
   </data>
@@ -495,7 +492,7 @@ Perubahan pada opsi ini berlaku saat kontroler terhubung</value>
     <value>Dalam beberapa situasi, mungkin berguna untuk membatasi nilai maksimum yang dihasilkan oleh output analog stick. Output Maksimum memungkinkan pengendalian nilai output akhir dari analog stick.</value>
   </data>
   <data name="AntiDeadzoneTooltip" xml:space="preserve">
-    <value>Anti-deadzone bertindak sebagai offset untuk digunakan dengan aksis dalam menunjukkan nilai output minimum yang dihasilkan setelah aksis meninggalkan deadzone yang ditetapkan. Hal ini terutama dimaksudkan untuk membantu pemetaan sumbu ke nilai deadzone yang ditetapkan yang digunakan untuk aksis dalam permainan. Sebagai contoh, deadzone yang ditetapkan untuk XInput LS dalam permainan video adalah sekitar 8000 (25%). Tanpa anti-deadzone yang ditetapkan, sebuah aksis harus bergerak melewati deadzone yang ditetapkan di DS4Windows bersama dengan deadzone aksis yang ditetapkan dalam permainan.
+    <value>Anti-deadzone bertindak sebagai offset untuk digunakan dengan aksis dalam menunjukkan nilai output minimum yang dihasilkan setelah aksis meninggalkan deadzone yang ditetapkan. Hal ini terutama dimaksudkan untuk membantu pemetaan sumbu ke nilai deadzone yang ditetapkan yang digunakan untuk aksis dalam permainan. Sebagai contoh, deadzone yang ditetapkan untuk XInput LS dalam permainan video adalah sekitar 8000 (25%). Tanpa anti-deadzone yang ditetapkan, sebuah aksis harus bergerak melewati deadzone yang ditetapkan di PureDS4 bersama dengan deadzone aksis yang ditetapkan dalam permainan.
 
 </value>
   </data>
@@ -654,7 +651,7 @@ Contoh (62%): [terendah = 50% /// tertinggi = 74%]</value>
     <value>Geser Touchpad Untuk Mengganti Profil</value>
   </data>
   <data name="TurnOffDS4WindowsTemporarily" xml:space="preserve">
-    <value>Matikan DS4Windows untuk sementara</value>
+    <value>Matikan PureDS4 untuk sementara</value>
   </data>
   <data name="Unplug" xml:space="preserve">
     <value>Unplug</value>

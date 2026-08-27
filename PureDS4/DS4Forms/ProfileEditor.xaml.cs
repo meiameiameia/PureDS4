@@ -459,36 +459,6 @@ namespace DS4WinWPF.DS4Forms
             vectorHoverGeometries[fnrConBtn] = RoundedHighlight(269, 205, 25, 15, 5);
         }
 
-        private void PopulateSwitch2ProHitGeometries()
-        {
-            vectorHoverGeometries[crossConBtn] = EllipseHighlight(301, 104, 24, 26);
-            vectorHoverGeometries[circleConBtn] = EllipseHighlight(328, 78, 25, 26);
-            vectorHoverGeometries[squareConBtn] = EllipseHighlight(273, 78, 25, 26);
-            vectorHoverGeometries[triangleConBtn] = EllipseHighlight(301, 53, 24, 26);
-            vectorHoverGeometries[l1ConBtn] = RoundedHighlight(80, 25, 65, 31, 10);
-            vectorHoverGeometries[r1ConBtn] = RoundedHighlight(295, 25, 65, 31, 10);
-            vectorHoverGeometries[l2ConBtn] = RoundedHighlight(82, 5, 55, 21, 9);
-            vectorHoverGeometries[r2ConBtn] = RoundedHighlight(304, 5, 55, 21, 9);
-            vectorHoverGeometries[shareConBtn] = EllipseHighlight(165, 57, 21, 21);
-            vectorHoverGeometries[optionsConBtn] = EllipseHighlight(251, 57, 21, 21);
-            vectorHoverGeometries[guideConBtn] = EllipseHighlight(231, 82, 21, 22);
-            vectorHoverGeometries[captureConBtn] = RoundedHighlight(185, 82, 21, 21, 4);
-            AddStickHighlights(l3ConBtn, lsuConBtn, lsrConBtn, lsdConBtn, lslConBtn,
-                93, 67, 50, 52);
-            AddStickHighlights(r3ConBtn, rsuConBtn, rsrConBtn, rsdConBtn, rslConBtn,
-                242, 118, 56, 56);
-            vectorHoverGeometries[upConBtn] = DpadHighlight(154, 117, 22, 24, 0);
-            vectorHoverGeometries[rightConBtn] = DpadHighlight(172, 133, 24, 23, 1);
-            vectorHoverGeometries[downConBtn] = DpadHighlight(154, 149, 22, 27, 2);
-            vectorHoverGeometries[leftConBtn] = DpadHighlight(134, 133, 24, 23, 3);
-            vectorHoverGeometries[blpConBtn] = PolygonHighlight(
-                new Point(123, 198), new Point(150, 198), new Point(150, 214),
-                new Point(143, 220), new Point(129, 220), new Point(123, 213));
-            vectorHoverGeometries[brpConBtn] = PolygonHighlight(
-                new Point(286, 198), new Point(313, 198), new Point(313, 213),
-                new Point(307, 220), new Point(293, 220), new Point(286, 214));
-        }
-
         private void PopulateControllerHoverAtlas(string resourceName,
             bool includeMute, bool includeTouch, bool includeEdgeControls,
             bool includeCapture)
@@ -1003,56 +973,68 @@ namespace DS4WinWPF.DS4Forms
 
         private void PopulateHoverIndexes()
         {
-            hoverIndexes[crossConBtn] = 0;
-            hoverIndexes[circleConBtn] = 1;
-            hoverIndexes[squareConBtn] = 2;
-            hoverIndexes[triangleConBtn] = 3;
-            hoverIndexes[optionsConBtn] = 4;
-            hoverIndexes[shareConBtn] = 5;
-            hoverIndexes[upConBtn] = 6;
-            hoverIndexes[downConBtn] = 7;
-            hoverIndexes[leftConBtn] = 8;
-            hoverIndexes[rightConBtn] = 9;
-            hoverIndexes[guideConBtn] = 10;
-            hoverIndexes[muteConBtn] = 11;
-            hoverIndexes[l1ConBtn] = 12;
-            hoverIndexes[r1ConBtn] = 13;
-            hoverIndexes[l2ConBtn] = 14;
-            hoverIndexes[r2ConBtn] = 15;
-            hoverIndexes[l3ConBtn] = 16;
-            hoverIndexes[r3ConBtn] = 17;
-            hoverIndexes[captureConBtn] =
-                mappingListVM.ControlIndexMap[DS4Controls.Capture];
+            // Every entry is resolved through ControlIndexMap rather than a
+            // hard-coded position. The mapping list omits controls that exist
+            // only on hardware PureDS4 does not support, so a literal index
+            // would silently point a diagram button at the wrong row.
+            void MapButton(Button button, DS4Controls control)
+            {
+                if (mappingListVM.ControlIndexMap.TryGetValue(control,
+                    out int index))
+                {
+                    hoverIndexes[button] = index;
+                }
+            }
 
-            hoverIndexes[leftTouchConBtn] = mappingListVM.ControlIndexMap[DS4Controls.TouchLeft]; // 21
-            hoverIndexes[rightTouchConBtn] = mappingListVM.ControlIndexMap[DS4Controls.TouchRight]; // 22
-            hoverIndexes[multiTouchConBtn] = mappingListVM.ControlIndexMap[DS4Controls.TouchMulti]; // 23
-            hoverIndexes[topTouchConBtn] = mappingListVM.ControlIndexMap[DS4Controls.TouchUpper]; // 24
+            MapButton(crossConBtn, DS4Controls.Cross);
+            MapButton(circleConBtn, DS4Controls.Circle);
+            MapButton(squareConBtn, DS4Controls.Square);
+            MapButton(triangleConBtn, DS4Controls.Triangle);
+            MapButton(optionsConBtn, DS4Controls.Options);
+            MapButton(shareConBtn, DS4Controls.Share);
+            MapButton(upConBtn, DS4Controls.DpadUp);
+            MapButton(downConBtn, DS4Controls.DpadDown);
+            MapButton(leftConBtn, DS4Controls.DpadLeft);
+            MapButton(rightConBtn, DS4Controls.DpadRight);
+            MapButton(guideConBtn, DS4Controls.PS);
+            MapButton(muteConBtn, DS4Controls.Mute);
+            MapButton(l1ConBtn, DS4Controls.L1);
+            MapButton(r1ConBtn, DS4Controls.R1);
+            MapButton(l2ConBtn, DS4Controls.L2);
+            MapButton(r2ConBtn, DS4Controls.R2);
+            MapButton(l3ConBtn, DS4Controls.L3);
+            MapButton(r3ConBtn, DS4Controls.R3);
+            MapButton(captureConBtn, DS4Controls.Capture);
 
-            hoverIndexes[lsuConBtn] = 25;
-            hoverIndexes[lsdConBtn] = 26;
-            hoverIndexes[lslConBtn] = 27;
-            hoverIndexes[lsrConBtn] = 28;
+            MapButton(leftTouchConBtn, DS4Controls.TouchLeft);
+            MapButton(rightTouchConBtn, DS4Controls.TouchRight);
+            MapButton(multiTouchConBtn, DS4Controls.TouchMulti);
+            MapButton(topTouchConBtn, DS4Controls.TouchUpper);
 
-            hoverIndexes[rsuConBtn] = 29;
-            hoverIndexes[rsdConBtn] = 30;
-            hoverIndexes[rslConBtn] = 31;
-            hoverIndexes[rsrConBtn] = 32;
+            MapButton(lsuConBtn, DS4Controls.LYNeg);
+            MapButton(lsdConBtn, DS4Controls.LYPos);
+            MapButton(lslConBtn, DS4Controls.LXNeg);
+            MapButton(lsrConBtn, DS4Controls.LXPos);
 
-            hoverIndexes[gyroZNBtn] = 33;
-            hoverIndexes[gyroZPBtn] = 34;
-            hoverIndexes[gyroXNBtn] = 35;
-            hoverIndexes[gyroXPBtn] = 36;
+            MapButton(rsuConBtn, DS4Controls.RYNeg);
+            MapButton(rsdConBtn, DS4Controls.RYPos);
+            MapButton(rslConBtn, DS4Controls.RXNeg);
+            MapButton(rsrConBtn, DS4Controls.RXPos);
 
-            hoverIndexes[swipeUpBtn] = 37;
-            hoverIndexes[swipeDownBtn] = 38;
-            hoverIndexes[swipeLeftBtn] = 39;
-            hoverIndexes[swipeRightBtn] = 40;
+            MapButton(gyroZNBtn, DS4Controls.GyroZNeg);
+            MapButton(gyroZPBtn, DS4Controls.GyroZPos);
+            MapButton(gyroXNBtn, DS4Controls.GyroXNeg);
+            MapButton(gyroXPBtn, DS4Controls.GyroXPos);
 
-            hoverIndexes[fnlConBtn] = 41;
-            hoverIndexes[fnrConBtn] = 42;
-            hoverIndexes[brpConBtn] = 43;
-            hoverIndexes[blpConBtn] = 44;
+            MapButton(swipeUpBtn, DS4Controls.SwipeUp);
+            MapButton(swipeDownBtn, DS4Controls.SwipeDown);
+            MapButton(swipeLeftBtn, DS4Controls.SwipeLeft);
+            MapButton(swipeRightBtn, DS4Controls.SwipeRight);
+
+            MapButton(fnlConBtn, DS4Controls.FnL);
+            MapButton(fnrConBtn, DS4Controls.FnR);
+            MapButton(blpConBtn, DS4Controls.BLP);
+            MapButton(brpConBtn, DS4Controls.BRP);
         }
 
         private void PopulateHoverLocations()
@@ -1808,7 +1790,7 @@ namespace DS4WinWPF.DS4Forms
                 else
                 {
                     MessageBox.Show("The app has to be restarted for DS3 gyro simulation to work.",
-                        "DS4Windows", MessageBoxButton.OK, MessageBoxImage.Information);
+                        ProductIdentity.Name, MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
 
@@ -2226,8 +2208,6 @@ namespace DS4WinWPF.DS4Forms
 
             outputControllerHintText.Text = type switch
             {
-                OutContType.ViiperSwitch2Pro =>
-                    "Switch 2 layout: Cross -> B, Circle -> A, Square -> Y, Triangle -> X, Share -> Minus, Options -> Plus, PS -> Home, Capture -> Capture.",
                 OutContType.ViiperDualSense =>
                     "DualSense output exposes native DualSense identity with mute, touch, gyro, rumble, lightbar, and player LEDs. Adaptive triggers require the raw-output follow-up.",
                 OutContType.ViiperDualSenseEdge =>
@@ -2238,13 +2218,6 @@ namespace DS4WinWPF.DS4Forms
                     "Xbox 360 output provides standard XInput-style buttons, sticks, triggers, and rumble.",
                 _ => string.Empty,
             };
-
-            if (switch2ViiperLegendPanel != null)
-            {
-                switch2ViiperLegendPanel.Visibility = type == OutContType.ViiperSwitch2Pro
-                    ? Visibility.Visible
-                    : Visibility.Collapsed;
-            }
         }
 
         private void NewActionBtn_Click(object sender, RoutedEventArgs e)
@@ -2666,7 +2639,7 @@ namespace DS4WinWPF.DS4Forms
                 MessageBox.Show("Stick recalibration is only available if the profile editor is opened " +
                                 "with the Edit button next to the controller you want to recalibrate in the main " +
                                 "window.",
-                    "DS4Windows", MessageBoxButton.OK, MessageBoxImage.Information);
+                    ProductIdentity.Name, MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -2692,7 +2665,7 @@ namespace DS4WinWPF.DS4Forms
             dialog.AddExtension = true;
             dialog.DefaultExt = ".xml";
             dialog.FileName = "Actions";
-            dialog.Filter = "DS4Windows Special Actions (*.xml)|*.xml";
+            dialog.Filter = $"{ProductIdentity.Name} Special Actions (*.xml)|*.xml";
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 var profileStream = new StreamReader(@$"{Global.appdatapath}\Actions.xml").BaseStream;

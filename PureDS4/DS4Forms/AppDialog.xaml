@@ -1,7 +1,7 @@
 ﻿<Window x:Class="DS4WinWPF.DS4Forms.AppDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="DS4Windows Reworked" SizeToContent="Height" Width="520"
+        Title="PureDS4" SizeToContent="Height" Width="520"
         MinWidth="420" MaxHeight="{x:Static SystemParameters.MaximizedPrimaryScreenHeight}" ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         Style="{DynamicResource WindowStyle}">

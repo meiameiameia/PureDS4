@@ -156,7 +156,7 @@
     <value>Buscar actualizaciones</value>
   </data>
   <data name="CheckUpdateStartup" xml:space="preserve">
-    <value>Buscar actualizaciones de DS4Windows al iniciar</value>
+    <value>Buscar actualizaciones de PureDS4 al iniciar</value>
   </data>
   <data name="Clear" xml:space="preserve">
     <value>Vaciar</value>
@@ -345,11 +345,6 @@
   </data>
   <data name="CustomExeName" xml:space="preserve">
     <value>Nombre del exe personalizado</value>
-  </data>
-  <data name="CustomExeNameInfo" xml:space="preserve">
-    <value>Algunos juegos implementan un bloqueo que hace que la entrada de DS4 sea ignorada si un juego detecta que DS4Windows.exe o InputMapper.exe se está ejecutando en ese momento. Una solución alternativa al bloqueo es cambiar el nombre de DS4Windows.exe para que la comprobación del juego falle. Si especifica un nombre de exe personalizado aquí, DS4Updater podrá actualizar automáticamente una copia personalizada de DS4Windows con el nombre de archivo deseado. Asegúrese de omitir la extensión.
-    
-    Ejemplo: oculto_DS4Windows</value>
   </data>
   <data name="XInputChecker" xml:space="preserve">
     <value>XInputChecker</value>

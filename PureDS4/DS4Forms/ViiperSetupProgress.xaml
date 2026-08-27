@@ -1,4 +1,4 @@
-<Window x:Class="DS4WinWPF.DS4Forms.ViiperSetupProgress"
+﻿<Window x:Class="DS4WinWPF.DS4Forms.ViiperSetupProgress"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Game output setup"
@@ -56,7 +56,7 @@
                                    Text="Setting up game output"
                                    Style="{StaticResource BridgeSectionTitleStyle}"
                                    FontSize="20" />
-                        <TextBlock Text="DS4Windows Reworked is verifying the components that present a controller to games."
+                        <TextBlock Text="PureDS4 is verifying the components that present a controller to games."
                                    Foreground="{DynamicResource MutedForegroundColor}"
                                    TextWrapping="Wrap" />
                     </StackPanel>

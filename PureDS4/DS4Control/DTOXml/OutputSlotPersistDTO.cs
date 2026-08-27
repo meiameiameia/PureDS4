@@ -118,6 +118,9 @@ namespace DS4WinWPF.DS4Control.DTOXml
                 case "DualSenseEdge":
                 case "ViiperDualSenseEdge":
                     return OutContType.ViiperDualSenseEdge;
+                // Retired. Recognised so an existing output-slot file still
+                // loads; FormatOutputDeviceType writes back the normalized
+                // Xbox 360 output.
                 case "Switch 2 Pro (VIIPER)":
                 case "Switch2Pro":
                 case "ViiperSwitch2Pro":
@@ -144,7 +147,6 @@ namespace DS4WinWPF.DS4Control.DTOXml
                 OutContType.ViiperDS4 => "ViiperDS4",
                 OutContType.ViiperDualSense => "ViiperDualSense",
                 OutContType.ViiperDualSenseEdge => "ViiperDualSenseEdge",
-                OutContType.ViiperSwitch2Pro => "ViiperSwitch2Pro",
                 _ => "ViiperX360",
             };
         }

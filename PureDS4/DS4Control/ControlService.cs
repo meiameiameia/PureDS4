@@ -605,7 +605,7 @@ namespace DS4Windows
                 else if (!switched && !stickMouseFakerInputMissingNoticeShown)
                 {
                     stickMouseFakerInputMissingNoticeShown = true;
-                    LogDebug("Stick mouse profile detected, but DS4Windows could not connect to FakerInput. SendInput will remain active.");
+                    LogDebug($"Stick mouse profile detected, but {ProductIdentity.Name} could not connect to FakerInput. SendInput will remain active.");
                 }
 
                 return;
@@ -680,7 +680,13 @@ namespace DS4Windows
                     result = deviceOptions.DS4DeviceOpts.Enabled;
                     break;
                 case InputDevices.InputDeviceType.DS3:
-                    result = deviceOptions.DS3DeviceOpts.Enabled;
+                    // DualShock 3 is a planned milestone, not a supported one.
+                    // The implementation and its stored option survive for
+                    // that future gate, but this release must not act on a
+                    // stored or imported setting that would silently turn on a
+                    // path no genuine hardware has validated.
+                    result = ProductScope.DualShock3Offered &&
+                        deviceOptions.DS3DeviceOpts.Enabled;
                     break;
                 default:
                     break;
@@ -776,10 +782,10 @@ namespace DS4Windows
                     }
                     // Catch Blank Values and initialize for Startup. Also catches empty Values.
                     // Also Catches Empty values in auto-profiler, and defaults to trying to re-add D4W. Will fail harmlessly later.
-                    if (ExePath == "") { ExePath = Global.exelocation; ExeName = "DS4Windows"; AddExe = true; }
+                    if (ExePath == "") { ExePath = Global.exelocation; ExeName = ProductIdentity.Name; AddExe = true; }
 
                     // Check for inverse application cloak. If setting is being used in HidHide,
-                    // skip checking HidHide whitelist for DS4Windows.
+                    // skip checking HidHide whitelist for this application.
                     bool inverseAppCloak = hidHideDevice.GetWhiteListInverseState();
                     if (inverseAppCloak)
                     {
@@ -845,7 +851,7 @@ namespace DS4Windows
                     {
                         if (!ownershipJournal.OwnsWhitelistEntry(realPath))
                         {
-                            StartupDiag($"HidHide preserved the pre-existing {ExeName} whitelist entry because DS4Windows did not create it");
+                            StartupDiag($"HidHide preserved the pre-existing {ExeName} whitelist entry because {ProductIdentity.Name} did not create it");
                             return;
                         }
 
@@ -954,7 +960,7 @@ namespace DS4Windows
                 {
                     appDataRoot = Path.Combine(Environment.GetFolderPath(
                         Environment.SpecialFolder.ApplicationData),
-                        "DS4Windows");
+                        ProductIdentity.DataFolderName);
                 }
 
                 hidHideOwnershipJournal = new HidHideOwnershipJournal(
@@ -982,7 +988,7 @@ namespace DS4Windows
                                     suspension => suspension.InstanceId)))
                     : "the ownership journal could not be read";
                 string message =
-                    "HidHide recovery is required. DS4Windows preserved " +
+                    $"HidHide recovery is required. {ProductIdentity.Name} preserved " +
                     "uncertain global configuration instead of removing it. " +
                     $"Review HidHide Configuration Client and {hidHideOwnershipJournal.Path}. " +
                     $"Details: {detail}.";
@@ -1203,7 +1209,7 @@ namespace DS4Windows
                 {
                     if (!Global.IsAdministrator())
                     {
-                        LogDebug("Steam Input reclaim requires DS4Windows to " +
+                        LogDebug($"Steam Input reclaim requires {ProductIdentity.Name} to " +
                             "run as administrator.", true);
                         return;
                     }
@@ -1342,7 +1348,7 @@ namespace DS4Windows
                     {
                         sessionReleased = hidHideDevice.ClearSessionBlacklist();
                         StartupDiag(sessionReleased
-                            ? $"Released {sessionIds.Count} DS4Windows-managed HidHide session entries"
+                            ? $"Released {sessionIds.Count} {ProductIdentity.Name}-managed HidHide session entries"
                             : "HidHide session release failed; cleanup will be retried");
                     }
 
@@ -1369,7 +1375,7 @@ namespace DS4Windows
                         if (releasedPersistentIds.Count > 0 &&
                             persistentReleased)
                         {
-                            StartupDiag($"Released {releasedPersistentIds.Count} DS4Windows-created HidHide blacklist entries");
+                            StartupDiag($"Released {releasedPersistentIds.Count} {ProductIdentity.Name}-created HidHide blacklist entries");
                         }
                         else if (!persistentReleased)
                         {
@@ -2753,7 +2759,7 @@ namespace DS4Windows
 
             device.ModifyFeatureSetFlag(VidPidFeatureSet.NoOutputData, !getEnableOutputDataToDS4(ind));
             if (!getEnableOutputDataToDS4(ind))
-                LogDebug("Output data to DS4 disabled. Lightbar and rumble events are not written to DS4 gamepad. If the gamepad is connected over BT then IdleDisconnect option is recommended to let DS4Windows to close the connection after long period of idling.");
+                LogDebug("Output data to DS4 disabled. Lightbar and rumble events are not written to DS4 gamepad. If the gamepad is connected over BT then IdleDisconnect option is recommended to let PureDS4 close the connection after long period of idling.");
 
             device.setIdleTimeout(getIdleDisconnectTimeout(ind));
             device.setBTPollRate(getBTPollRate(ind));

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -346,11 +346,6 @@ Zmiany zostaną zastosowane przy łączeniu się z kontrolerem.</value>
   </data>
   <data name="CustomExeName" xml:space="preserve">
     <value>Własna nazwa EXE</value>
-  </data>
-  <data name="CustomExeNameInfo" xml:space="preserve">
-    <value>Niektóre gry blokują użycie kontrolera, gdy wykryją one działający program DS4Windows.exe lub InputMapper.exe. Obejść to można zmieniając nazwę programu DS4Windows.exe. Podanie tutaj własnej nazwy tego programu pozwala programowi aktualizującemu na automatyczną aktualizację DS4Windows pod zmienioną nazwą. Pamiętaj, aby nie dodawać rozszerzenia.
-
-Przykład: 1_DS4Windows</value>
   </data>
   <data name="XInputChecker" xml:space="preserve">
     <value>XInputChecker</value>

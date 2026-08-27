@@ -38,7 +38,7 @@ public partial class StickCalibrationWindow : Window
             _profileSettingsVM.LeftStickDriftYAxis = Convert.ToSByte(yAxisDrift);
 
             MessageBox.Show($"Detected drift:\nX axis: {xAxisDrift}, Y axis: {yAxisDrift}",
-                "DS4Windows", MessageBoxButton.OK, MessageBoxImage.Information);
+                ProductIdentity.Name, MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         if (_stick == Stick.Right)
@@ -50,7 +50,7 @@ public partial class StickCalibrationWindow : Window
             _profileSettingsVM.RightStickDriftYAxis = Convert.ToSByte(yAxisDrift);
 
             MessageBox.Show($"Detected drift:\nX axis: {xAxisDrift}, Y axis: {yAxisDrift}",
-                "DS4Windows", MessageBoxButton.OK, MessageBoxImage.Information);
+                ProductIdentity.Name, MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         Close();

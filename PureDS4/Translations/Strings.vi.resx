@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -347,11 +347,6 @@ Changes to this option takes effect at the gamepad connection time.</value>
   <data name="CustomExeName" xml:space="preserve">
     <value>Custom Exe Name</value>
   </data>
-  <data name="CustomExeNameInfo" xml:space="preserve">
-    <value>Some games implement a block that causes DS4 input to be ignored if a game detects either DS4Windows.exe or InputMapper.exe running at the time. A workaround to the block is to rename DS4Windows.exe so the check in the game fails. Specifying a custom exe name here allows DS4Updater to automatically update a custom copy of DS4Windows to the desired file name. Make sure to omit the extension.
-
-Example: whyme_DS4Windows</value>
-  </data>
   <data name="XInputChecker" xml:space="preserve">
     <value>XInputChecker</value>
   </data>
@@ -497,7 +492,7 @@ Example: whyme_DS4Windows</value>
     <value>Trong một số trường hợp, có thể hữu ích khi giới hạn giá trị tối đa được xuất ra bởi thanh analog đầu ra. Đầu ra tối đa cho phép điều chỉnh giá trị đầu ra cuối cùng của thanh analog.</value>
   </data>
   <data name="AntiDeadzoneTooltip" xml:space="preserve">
-    <value>Một anti-deadzone hoạt động như một phần bù để sử dụng với một trục để biểu thị giá trị đầu ra tối thiểu được tạo sau khi một trục rời khỏi vùng chết được chỉ định của nó. Điều này chủ yếu nhằm giúp ánh xạ một trục tới giá trị vùng chết được chỉ định được sử dụng cho một trục trong trò chơi điện tử. Ví dụ: vùng chết điển hình được chỉ định cho XInput LS trong trò chơi điện tử là khoảng 8000 (25%). Không có vùng chết được chỉ định, một trục sẽ phải di chuyển qua vùng chết được chỉ định trong DS4Windows cùng với vùng chết trục được chỉ định của trò chơi.</value>
+    <value>Một anti-deadzone hoạt động như một phần bù để sử dụng với một trục để biểu thị giá trị đầu ra tối thiểu được tạo sau khi một trục rời khỏi vùng chết được chỉ định của nó. Điều này chủ yếu nhằm giúp ánh xạ một trục tới giá trị vùng chết được chỉ định được sử dụng cho một trục trong trò chơi điện tử. Ví dụ: vùng chết điển hình được chỉ định cho XInput LS trong trò chơi điện tử là khoảng 8000 (25%). Không có vùng chết được chỉ định, một trục sẽ phải di chuyển qua vùng chết được chỉ định trong PureDS4 cùng với vùng chết trục được chỉ định của trò chơi.</value>
   </data>
   <data name="StickInputCurveTooltip" xml:space="preserve">
     <value>CÀI ĐẶT CŨ LỖI THỜI. Cố gắng áp dụng một đường cong dựa trên tọa độ đầu vào thô trước khi áp dụng bất kỳ thông tin vùng chết nào. Rung rinh</value>
@@ -656,7 +651,7 @@ Disabled:
     <value>Vuốt Touchpad để đổi thiếp lập</value>
   </data>
   <data name="TurnOffDS4WindowsTemporarily" xml:space="preserve">
-    <value>Tắt tạm thời DS4Windows</value>
+    <value>Tắt tạm thời PureDS4</value>
   </data>
   <data name="Unplug" xml:space="preserve">
     <value>Rút cắm</value>

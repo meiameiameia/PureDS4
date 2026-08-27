@@ -5,7 +5,7 @@
 //
 // This module is a feeder for VJoy virtual joystick driver. DS4Windows can optionally re-map and feed buttons and analog axis values from DS4 Controller to VJoy device.
 // At first this may seem silly because DS4Windows can already do re-mapping by using a virtual X360 Controller driver, so why feed VJoy virtual driver also? 
-// Sometimes X360 driver may run out of analog axis options, so for example "SA motion sensor steering wheel emulation" in DS4Windows would reserve a thumbstick X or Y 
+// Sometimes X360 driver may run out of analog axis options, so for example "SA motion sensor steering wheel emulation" would reserve a thumbstick X or Y
 // axis for SA steering wheel emulation usage. That thumbstick axis would be unavailable for "normal" thumbstick usage after this re-mapping. 
 // The problem can be solved by configuring DS4Windows to re-map SA steering wheel emulation axis to VJoy axis, so all analog axies in DS4 controller are still available for normal usage.
 //
@@ -695,7 +695,7 @@ namespace DS4Windows.VJoyFeeder
                 catch
                 {
                     vJoyAvailable[vJoyID - 1] = false;
-                    AppLogger.LogToGui("ERROR. vJoy initialization failed. Make sure that DS4Windows application can find vJoyInterface.dll library file", false);
+                    AppLogger.LogToGui($"ERROR. vJoy initialization failed. Make sure that the {ProductIdentity.Name} application can find vJoyInterface.dll library file", false);
                 }
             }
         }

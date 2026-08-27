@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace DS4Windows
@@ -300,7 +300,7 @@ namespace DS4Windows
             }
 
             result = Run(ControllerExposureStage.ReleasingPhysicalHandle,
-                "Releasing the physical controller from DS4Windows.",
+                $"Releasing the physical controller from {ProductIdentity.Name}.",
                 operations.ReleasePhysicalHandle);
             if (!result.Succeeded)
             {
@@ -340,7 +340,7 @@ namespace DS4Windows
             }
 
             result = Run(ControllerExposureStage.AcquiringPhysicalHandle,
-                "Opening the contained physical controller for DS4Windows.",
+                $"Opening the contained physical controller for {ProductIdentity.Name}.",
                 operations.AcquirePhysicalHandle);
             if (!result.Succeeded)
             {

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -77,7 +77,7 @@ namespace DS4Windows
                         if (!mutexHeld)
                         {
                             return Failure(
-                                "Another DS4Windows process is changing HidHide configuration.");
+                                $"Another {ProductIdentity.Name} process is changing HidHide configuration.");
                         }
                     }
 

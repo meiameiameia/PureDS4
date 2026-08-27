@@ -69,6 +69,9 @@ namespace DS4Windows
         ViiperDS4,
         ViiperDualSense,
         ViiperDualSenseEdge,
+        // Retired with the DualSense members. Kept so an existing profile or
+        // output-slot file that selected it still deserializes; Normalize
+        // turns it into the Xbox 360 output.
         ViiperSwitch2Pro,
     }
 
@@ -81,11 +84,15 @@ namespace DS4Windows
                 OutContType.X360 => OutContType.ViiperX360,
                 OutContType.DS4 => OutContType.ViiperDS4,
                 // Retired output types. The members remain so existing
-                // profiles and output-slot files still deserialize; a
-                // controller that had one selected now presents as a
-                // DualShock 4.
+                // profiles and output-slot files still deserialize.
+                //
+                // The two PlayStation personas become a DualShock 4. Switch 2
+                // Pro has no PlayStation equivalent, so it becomes the Xbox
+                // 360 output: that is the application default and the most
+                // broadly compatible gamepad persona a game will accept.
                 OutContType.ViiperDualSense => OutContType.ViiperDS4,
                 OutContType.ViiperDualSenseEdge => OutContType.ViiperDS4,
+                OutContType.ViiperSwitch2Pro => OutContType.ViiperX360,
                 _ => type,
             };
         }
@@ -96,7 +103,6 @@ namespace DS4Windows
             {
                 OutContType.ViiperX360 => "Xbox 360",
                 OutContType.ViiperDS4 => "DualShock 4",
-                OutContType.ViiperSwitch2Pro => "Switch 2 Pro",
                 _ => "None",
             };
         }
@@ -686,7 +692,8 @@ namespace DS4Windows
         public const string RESOURCES_PREFIX = "/PureDS4;component/Resources";
         // Need to add additional probing path in code starting with .NET 6.
         public const string PROBING_PATH = "Lang";
-        public const string LANGUAGE_ASSEMBLY_NAME = "DS4Windows.resources.dll";
+        public const string LANGUAGE_ASSEMBLY_NAME =
+            ProductIdentity.LanguageAssemblyName;
         public const string CUSTOM_EXE_CONFIG_FILENAME = "custom_exe_name.txt";
         public const string XML_EXTENSION = ".xml";
 
@@ -858,53 +865,6 @@ namespace DS4Windows
             [X360Controls.Unbound] = "Unbound",
         };
 
-        public static Dictionary<X360Controls, string> switchDefaultNames = new Dictionary<X360Controls, string>()
-        {
-            [X360Controls.LXNeg] = "Left Stick Left",
-            [X360Controls.LXPos] = "Left Stick Right",
-            [X360Controls.LYNeg] = "Left Stick Up",
-            [X360Controls.LYPos] = "Left Stick Down",
-            [X360Controls.RXNeg] = "Right Stick Left",
-            [X360Controls.RXPos] = "Right Stick Right",
-            [X360Controls.RYNeg] = "Right Stick Up",
-            [X360Controls.RYPos] = "Right Stick Down",
-            [X360Controls.LB] = "L Button",
-            [X360Controls.LT] = "ZL Button",
-            [X360Controls.LS] = "Left Stick Button",
-            [X360Controls.RB] = "R Button",
-            [X360Controls.RT] = "ZR Button",
-            [X360Controls.RS] = "Right Stick Button",
-            [X360Controls.X] = "Y Button",
-            [X360Controls.Y] = "X Button",
-            [X360Controls.B] = "A Button",
-            [X360Controls.A] = "B Button",
-            [X360Controls.DpadUp] = "Dpad Up",
-            [X360Controls.DpadRight] = "Dpad Right",
-            [X360Controls.DpadDown] = "Dpad Down",
-            [X360Controls.DpadLeft] = "Dpad Left",
-            [X360Controls.Guide] = "Home",
-            [X360Controls.Back] = "Minus",
-            [X360Controls.Start] = "Plus",
-            [X360Controls.TouchpadClick] = "Capture",
-            [X360Controls.LeftMouse] = "Left Mouse Button",
-            [X360Controls.RightMouse] = "Right Mouse Button",
-            [X360Controls.MiddleMouse] = "Middle Mouse Button",
-            [X360Controls.FourthMouse] = "4th Mouse Button",
-            [X360Controls.FifthMouse] = "5th Mouse Button",
-            [X360Controls.WUP] = "Mouse Wheel Up",
-            [X360Controls.WDOWN] = "Mouse Wheel Down",
-            [X360Controls.MouseUp] = "Mouse Up",
-            [X360Controls.MouseDown] = "Mouse Down",
-            [X360Controls.MouseLeft] = "Mouse Left",
-            [X360Controls.MouseRight] = "Mouse Right",
-            [X360Controls.AbsMouseUp] = "Abs Mouse Up",
-            [X360Controls.AbsMouseDown] = "Abs Mouse Down",
-            [X360Controls.AbsMouseLeft] = "Abs Mouse Left",
-            [X360Controls.AbsMouseRight] = "Abs Mouse Right",
-            [X360Controls.Unbound] = "Unbound",
-            [X360Controls.None] = "Unassigned",
-        };
-
         public static string getX360ControlString(X360Controls key, OutContType conType)
         {
             conType = conType.Normalize();
@@ -913,10 +873,6 @@ namespace DS4Windows
                 conType == DS4Windows.OutContType.ViiperX360)
             {
                 xboxDefaultNames.TryGetValue(key, out result);
-            }
-            else if (conType == DS4Windows.OutContType.ViiperSwitch2Pro)
-            {
-                switchDefaultNames.TryGetValue(key, out result);
             }
             else if (conType == DS4Windows.OutContType.ViiperDS4 ||
                 conType == DS4Windows.OutContType.ViiperDualSense ||
@@ -4582,7 +4538,6 @@ namespace DS4Windows
                 case OutContType.ViiperDS4: result = "ViiperDS4"; break;
                 case OutContType.ViiperDualSense: result = "ViiperDualSense"; break;
                 case OutContType.ViiperDualSenseEdge: result = "ViiperDualSenseEdge"; break;
-                case OutContType.ViiperSwitch2Pro: result = "ViiperSwitch2Pro"; break;
                 default: break;
             }
 
@@ -4733,8 +4688,8 @@ namespace DS4Windows
 
                 // Write header explicitly
                 //xmlWriter.WriteStartDocument();
-                xmlWriter.WriteComment(string.Format(" DS4Windows Configuration Data. {0} ", DateTime.Now));
-                xmlWriter.WriteComment(string.Format(" Made with DS4Windows version {0} ", Global.exeversion));
+                xmlWriter.WriteComment(string.Format(" {0} Configuration Data. {1} ", ProductIdentity.Name, DateTime.Now));
+                xmlWriter.WriteComment(string.Format(" Made with {0} version {1} ", ProductIdentity.Name, Global.exeversion));
                 xmlWriter.WriteWhitespace("\r\n");
                 xmlWriter.WriteWhitespace("\r\n");
 
@@ -4789,10 +4744,10 @@ namespace DS4Windows
                 tmpNode = m_Xdoc.CreateXmlDeclaration("1.0", "utf-8", string.Empty);
                 m_Xdoc.AppendChild(tmpNode);
 
-                tmpNode = m_Xdoc.CreateComment(string.Format(" DS4Windows Configuration Data. {0} ", DateTime.Now));
+                tmpNode = m_Xdoc.CreateComment(string.Format(" {0} Configuration Data. {1} ", ProductIdentity.Name, DateTime.Now));
                 m_Xdoc.AppendChild(tmpNode);
 
-                tmpNode = m_Xdoc.CreateComment(string.Format(" Made with DS4Windows version {0} ", Global.exeversion));
+                tmpNode = m_Xdoc.CreateComment(string.Format(" Made with {0} version {1} ", ProductIdentity.Name, Global.exeversion));
                 m_Xdoc.AppendChild(tmpNode);
 
                 tmpNode = m_Xdoc.CreateWhitespace("\r\n");
@@ -8762,7 +8717,7 @@ namespace DS4Windows
                 // Write header explicitly
                 xmlWriter.WriteStartDocument();
                 xmlWriter.WriteComment(string.Format(" Profile Configuration Data. {0} ", DateTime.Now));
-                xmlWriter.WriteComment(string.Format(" Made with DS4Windows version {0} ", Global.exeversion));
+                xmlWriter.WriteComment(string.Format(" Made with {0} version {1} ", ProductIdentity.Name, Global.exeversion));
                 xmlWriter.WriteWhitespace("\r\n");
                 xmlWriter.WriteWhitespace("\r\n");
 
@@ -8822,7 +8777,7 @@ namespace DS4Windows
             Node = m_Xdoc.CreateComment(String.Format(" Profile Configuration Data. {0} ", DateTime.Now));
             m_Xdoc.AppendChild(Node);
 
-            Node = m_Xdoc.CreateComment(string.Format(" Made with DS4Windows version {0} ", Global.exeversion));
+            Node = m_Xdoc.CreateComment(string.Format(" Made with {0} version {1} ", ProductIdentity.Name, Global.exeversion));
             m_Xdoc.AppendChild(Node);
 
             Node = m_Xdoc.CreateWhitespace("\r\n");

@@ -29,27 +29,26 @@ namespace DS4WinWPF
     [System.Security.SuppressUnmanagedCodeSecurity]
     public static class StartupMethods
     {
-        private const string StartupShortcutName = "DS4Windows Reworked.lnk";
-        private const string LegacyStartupShortcutName = "DS4Windows.lnk";
-
+        // PureDS4 owns exactly one Startup shortcut. The shortcuts written by
+        // DS4Windows and by an earlier DS4Windows Reworked install belong to
+        // those products: an ordinary startup preference must not report them
+        // as its own state, adopt them, or delete them. Removing them belongs
+        // to an explicit, owner-visible replacement flow.
         public static string lnkpath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.Startup),
-            StartupShortcutName);
-
-        private static readonly string legacyLnkPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.Startup),
-            LegacyStartupShortcutName);
+            DS4Windows.ProductIdentity.StartupShortcutFileName);
 
         public static bool HasStartProgEntry()
         {
             // Exception handling should not be needed here. Method handles most cases
-            return File.Exists(lnkpath) || File.Exists(legacyLnkPath);
+            return File.Exists(lnkpath);
         }
 
         public static bool HasTaskEntry()
         {
             using TaskService ts = new TaskService();
-            using Task tasker = ts.GetTask(@"\RunPureDS4");
+            using Task tasker = ts.GetTask(
+                @"\" + DS4Windows.ProductIdentity.StartupTaskName);
             return tasker != null && TaskTargetsCurrentExecutable(tasker);
         }
 
@@ -84,7 +83,7 @@ namespace DS4WinWPF
                     string app = DS4Windows.Global.exelocation;
                     lnk.TargetPath = DS4Windows.Global.exelocation;
                     lnk.Arguments = "-m";
-                    // Need to add the DS4Windows directory as cwd or
+                    // Need to add the install directory as cwd or
                     // language assemblies cannot be discovered
                     lnk.WorkingDirectory = DS4Windows.Global.exedirpath;
 
@@ -92,8 +91,6 @@ namespace DS4WinWPF
                     //lnk.Arguments = "-m";
                     lnk.IconLocation = app.Replace('\\', '/');
                     lnk.Save();
-
-                    DeleteShortcutIfWritable(legacyLnkPath);
                 }
                 finally
                 {
@@ -109,31 +106,17 @@ namespace DS4WinWPF
         public static void DeleteStartProgEntry()
         {
             DeleteShortcutIfWritable(lnkpath);
-            DeleteShortcutIfWritable(legacyLnkPath);
         }
 
         public static bool CanWriteStartEntry()
         {
-            return !IsExistingShortcutReadOnly(lnkpath) &&
-                !IsExistingShortcutReadOnly(legacyLnkPath);
+            return !IsExistingShortcutReadOnly(lnkpath);
         }
 
         public static bool CheckStartupExeLocation()
         {
-            string shortcutPath = File.Exists(lnkpath) ? lnkpath : legacyLnkPath;
-            string lnkprogpath = ResolveShortcut(shortcutPath);
+            string lnkprogpath = ResolveShortcut(lnkpath);
             return lnkprogpath != DS4Windows.Global.exelocation;
-        }
-
-        public static void MigrateLegacyStartProgEntry()
-        {
-            if (File.Exists(lnkpath) || !File.Exists(legacyLnkPath) ||
-                IsExistingShortcutReadOnly(legacyLnkPath))
-            {
-                return;
-            }
-
-            WriteStartProgEntry();
         }
 
         private static bool IsExistingShortcutReadOnly(string path)
@@ -152,7 +135,8 @@ namespace DS4WinWPF
         public static void LaunchOldTask()
         {
             TaskService ts = new TaskService();
-            Task tasker = ts.GetTask(@"\RunPureDS4");
+            Task tasker = ts.GetTask(
+                @"\" + DS4Windows.ProductIdentity.StartupTaskName);
             if (tasker != null)
             {
                 tasker.Run("");

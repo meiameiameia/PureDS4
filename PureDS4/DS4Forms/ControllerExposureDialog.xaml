@@ -26,7 +26,7 @@
                        Style="{StaticResource FoundationBodyTextStyle}"
                        TextWrapping="Wrap" />
             <TextBlock Margin="0,6,0,0"
-                       Text="Return to Managed/Virtual to restore protected game output. DS4Windows also restores protection when it exits."
+                       Text="Return to Managed/Virtual to restore protected game output. PureDS4 also restores protection when it exits."
                        Style="{StaticResource FoundationSecondaryTextStyle}" />
         </StackPanel>
         <Border Grid.Row="1"

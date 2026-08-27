@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
@@ -12,7 +12,8 @@ public partial class AppDialog : Window
         MessageBoxImage image, MessageBoxResult defaultResult)
     {
         InitializeComponent();
-        Title = string.IsNullOrWhiteSpace(caption) ? "DS4Windows Reworked" : caption;
+        Title = string.IsNullOrWhiteSpace(caption)
+            ? DS4Windows.ProductIdentity.Name : caption;
         headingText.Text = Title;
         messageText.Text = message ?? string.Empty;
         ConfigureState(image);
@@ -20,7 +21,7 @@ public partial class AppDialog : Window
     }
 
     public static MessageBoxResult Show(string message) =>
-        Show(null, message, "DS4Windows Reworked", MessageBoxButton.OK,
+        Show(null, message, DS4Windows.ProductIdentity.Name, MessageBoxButton.OK,
             MessageBoxImage.None, MessageBoxResult.OK);
 
     public static MessageBoxResult Show(string message, string caption) =>

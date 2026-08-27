@@ -157,7 +157,7 @@
     <value>Tarkista Päivitys Nyt</value>
   </data>
   <data name="CheckUpdateStartup" xml:space="preserve">
-    <value>Tarkista päivitykset DS4Windowsin käynnistyksen yhteydessä</value>
+    <value>Tarkista päivitykset PureDS4in käynnistyksen yhteydessä</value>
   </data>
   <data name="Clear" xml:space="preserve">
     <value>Asia selvä</value>
@@ -347,11 +347,6 @@ Muutokset tähän asetukseen tulevat voimaan peliohjaimen yhteyden aikana.</valu
   <data name="CustomExeName" xml:space="preserve">
     <value>Mukautettu Exe-nimi</value>
   </data>
-  <data name="CustomExeNameInfo" xml:space="preserve">
-    <value>Jotkut pelit toteuttavat lohkon, joka ohittaa DS4-syötteen, jos peli havaitsee joko DS4Windows.exe- tai InputMapper.exe-tiedoston sillä hetkellä käynnissä. Kiertokeino estoon on nimetä DS4Windows.exe uudelleen, jotta pelin tarkistus epäonnistuu. Kun määrität mukautetun exe-nimen tässä, DS4Updater voi päivittää mukautetun DS4Windows-kopion automaattisesti haluttuun tiedostonimeen. Muista jättää laajennus pois.
-
-Esimerkki: Whyme_DS4Windows</value>
-  </data>
   <data name="XInputChecker" xml:space="preserve">
     <value>XInputChecker</value>
   </data>
@@ -497,7 +492,7 @@ Esimerkki: Whyme_DS4Windows</value>
     <value>Joissakin tilanteissa saattaa olla hyödyllistä rajoittaa analogisen lähtötikun antamaa maksimiarvoa. Max Output mahdollistaa analogisen tikun lopullisen lähtöarvon kuristamisen.</value>
   </data>
   <data name="AntiDeadzoneTooltip" xml:space="preserve">
-    <value>Anti-kuollut alue toimii siirtymänä käytettäväksi akselin kanssa osoittamaan minimilähtöarvoa, joka syntyy sen jälkeen, kun akseli on poistunut sille määrätystä kuollut alueesta. Tämä on tarkoitettu lähinnä auttamaan akselin kartoittamisessa määritettyyn kuollut aluearvoon, jota käytetään akselille videopelissä. Esimerkiksi tyypillinen määritetty kuollut alue XInput LS:lle videopelissä on noin 8000 (25 %). Jos anti-deadzone-aluetta ei ole määritetty, akselin on siirrettävä määrätyn kuollut alueen ohi DS4Windowsissa yhdessä pelille määritetyn akselin kuollutalueen kanssa.</value>
+    <value>Anti-kuollut alue toimii siirtymänä käytettäväksi akselin kanssa osoittamaan minimilähtöarvoa, joka syntyy sen jälkeen, kun akseli on poistunut sille määrätystä kuollut alueesta. Tämä on tarkoitettu lähinnä auttamaan akselin kartoittamisessa määritettyyn kuollut aluearvoon, jota käytetään akselille videopelissä. Esimerkiksi tyypillinen määritetty kuollut alue XInput LS:lle videopelissä on noin 8000 (25 %). Jos anti-deadzone-aluetta ei ole määritetty, akselin on siirrettävä määrätyn kuollut alueen ohi PureDS4issa yhdessä pelille määritetyn akselin kuollutalueen kanssa.</value>
   </data>
   <data name="StickInputCurveTooltip" xml:space="preserve">
     <value>VANHA VANNETTU ASETUS. Yritä käyttää käyrää, joka perustuu raakatulokoordinaatteihin, ennen kuin kuolleiden vyöhykkeiden tietoja käytetään. Hutera</value>
@@ -656,7 +651,7 @@ Liikuntarajoitteinen:
     <value>Vaihda Profiileja Pyyhkäisemällä Kosketuslevyä</value>
   </data>
   <data name="TurnOffDS4WindowsTemporarily" xml:space="preserve">
-    <value>Sammuta DS4Windows Väliaikaisesti</value>
+    <value>Sammuta PureDS4 Väliaikaisesti</value>
   </data>
   <data name="Unplug" xml:space="preserve">
     <value>Irrota Pistoke</value>

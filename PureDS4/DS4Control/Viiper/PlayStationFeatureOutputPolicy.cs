@@ -1,13 +1,12 @@
-using DS4Windows.InputDevices;
+﻿using DS4Windows.InputDevices;
 
 namespace DS4Windows
 {
     /// <summary>
     /// Keeps PlayStation hardware features independent from the controller
     /// persona presented to games. PlayStation profiles use one composite USB
-    /// device so games can associate its HID and audio interfaces; Xbox and
-    /// Switch profiles retain the controller's audio through a HID-free
-    /// companion.
+    /// device so games can associate its HID and audio interfaces; an Xbox
+    /// profile retains the controller's audio through a HID-free companion.
     /// </summary>
     internal static class PlayStationFeatureOutputPolicy
     {
@@ -23,8 +22,7 @@ namespace DS4Windows
         internal static bool NeedsAudioOnlySidecar(OutContType outputType)
         {
             outputType = outputType.Normalize();
-            return outputType == OutContType.ViiperX360 ||
-                outputType == OutContType.ViiperSwitch2Pro;
+            return outputType == OutContType.ViiperX360;
         }
 
         internal static OutContType GetAudioOnlySidecarType(

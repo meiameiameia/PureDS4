@@ -128,9 +128,6 @@ namespace DS4Windows
                     outputDevice = new ViiperOutDevice(contType,
                         ViiperVirtualDeviceType.DualShock4);
                     break;
-                case OutContType.ViiperSwitch2Pro:
-                    outputDevice = new ViiperOutDevice(contType, ViiperVirtualDeviceType.Switch2Pro);
-                    break;
                 case OutContType.None:
                 default:
                     break;

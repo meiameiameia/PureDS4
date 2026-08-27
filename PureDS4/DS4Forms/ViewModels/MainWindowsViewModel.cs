@@ -102,7 +102,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             {
                 new("Xbox 360", OutContType.ViiperX360),
                 new("DualShock 4", OutContType.ViiperDS4),
-                new("Switch 2 Pro", OutContType.ViiperSwitch2Pro),
             };
 
         private CompositeDeviceModel selectedController;

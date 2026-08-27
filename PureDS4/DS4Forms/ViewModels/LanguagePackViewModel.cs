@@ -96,31 +96,78 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
         private void CreateLanguageAssembliesBindingSource()
         {
-            // Find the location where application installed.
-            // Assembly.Location is empty under a single-file publish; the
-            // application directory is what this actually wants.
-            string exeLocation = AppContext.BaseDirectory.TrimEnd(
-                Path.DirectorySeparatorChar);
-            List<string> lookupPaths = Global.PROBING_PATH.Split(';')
-                .Select(path => Path.Combine(exeLocation, path))
-                .Where(path => path != exeLocation)
-                .ToList();
-            lookupPaths.Insert(0, exeLocation);
-
-            // Get all culture for which satellite folder found with culture code, then insert invariant culture at the beginning.
-            langPackList = CultureInfo.GetCultures(CultureTypes.AllCultures)
-                .Where(c => IsLanguageAssemblyAvailable(lookupPaths, c))
-                .Select(c => new LangPackItem(c.Name, c.NativeName))
-                .ToList();
-            langPackList.Insert(0, new LangPackItem("", invariantCultureTextValue));
+            langPackList = EnumerateAvailableLanguages(
+                typeof(Global).Assembly).ToList();
         }
 
-        private bool IsLanguageAssemblyAvailable(List<string> lookupPaths, CultureInfo culture)
+        /// <summary>
+        /// Every language the running application can actually render. The
+        /// first entry is always the invariant English resources built into
+        /// the main assembly.
+        ///
+        /// This asks the runtime to load each candidate satellite assembly
+        /// rather than looking for a satellite file on disk. The two answers
+        /// differ: a self-contained single-file publish bundles the satellite
+        /// assemblies inside the executable, so no per-culture directory
+        /// exists and a filesystem probe finds nothing even though every
+        /// translation shipped. Satellite resolution is the same mechanism
+        /// that already renders localized strings at runtime, so it reports
+        /// the truth in a loose build and in a bundled one without unpacking
+        /// anything or bypassing assembly integrity checks.
+        /// </summary>
+        internal static IReadOnlyList<LangPackItem> EnumerateAvailableLanguages(
+            Assembly resourceAssembly)
         {
-            return lookupPaths.Select(path => Path.Combine(path, culture.Name,
-                Global.LANGUAGE_ASSEMBLY_NAME))
-                .Where(path => File.Exists(path))
-                .Count() > 0;
+            ArgumentNullException.ThrowIfNull(resourceAssembly);
+
+            List<LangPackItem> languages = new List<LangPackItem>
+            {
+                new LangPackItem(string.Empty, invariantCultureTextValue),
+            };
+
+            foreach (CultureInfo culture in CultureInfo.GetCultures(
+                CultureTypes.AllCultures))
+            {
+                if (string.IsNullOrEmpty(culture.Name) ||
+                    !HasSatelliteResources(resourceAssembly, culture))
+                {
+                    continue;
+                }
+
+                languages.Add(new LangPackItem(culture.Name,
+                    culture.NativeName));
+            }
+
+            return languages;
+        }
+
+        private static bool HasSatelliteResources(Assembly resourceAssembly,
+            CultureInfo culture)
+        {
+            try
+            {
+                return resourceAssembly.GetSatelliteAssembly(culture) != null;
+            }
+            catch (FileNotFoundException)
+            {
+                // No translation shipped for this culture.
+                return false;
+            }
+            catch (FileLoadException)
+            {
+                // Present but unloadable. Offering it would switch the user to
+                // a language the application cannot actually render.
+                return false;
+            }
+            catch (BadImageFormatException)
+            {
+                return false;
+            }
+            catch (ArgumentException)
+            {
+                // Culture the runtime will not accept as a satellite target.
+                return false;
+            }
         }
     }
 

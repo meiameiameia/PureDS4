@@ -693,7 +693,7 @@
                         <CheckBox Content="{lex:Loc ProfileSwitchNotification}" IsChecked="{Binding ProfileChangedNotification}"
                                   Visibility="{Binding IsProfileChangedCheckVisible}" Margin="16 0 0 10"/>
                         <CheckBox Content="{lex:Loc StartMinimized}" Margin="{StaticResource spaceMargin}"
-                              IsChecked="{Binding StartMinimize}" ToolTip="Open DS4Windows quietly without showing the main window."
+                              IsChecked="{Binding StartMinimize}" ToolTip="Open PureDS4 quietly without showing the main window."
                               Style="{StaticResource ClassicCompactCheckBoxStyle}" />
                         <CheckBox Content="{lex:Loc MinimizeToTaskbar}"
                                   ToolTip="{lex:Loc MinimizeToTaskbarTip}"
@@ -770,7 +770,7 @@
                         </StackPanel>
                         <CheckBox Content="{lex:Loc DisconnectFromBtWhenStopping}" Margin="{StaticResource spaceMargin}"
                                   IsChecked="{Binding DisconnectBTStop}"
-                                  ToolTip="Disconnect Bluetooth controllers when the DS4Windows service is stopped."
+                                  ToolTip="Disconnect Bluetooth controllers when the PureDS4 service is stopped."
                                   Style="{StaticResource ClassicCompactCheckBoxStyle}" />
                         <CheckBox Content="{lex:Loc QuickCharge}" Margin="{StaticResource spaceMargin}"
                                   IsChecked="{Binding QuickCharge}"
@@ -833,7 +833,7 @@
                                         <TextBlock x:Name="viiperStatusText"
                                                    Text="VIIPER status unknown"
                                                    TextWrapping="Wrap" MaxWidth="520" />
-                                        <TextBlock Text="Required for VIIPER outputs: DualShock 4, Switch 2 Pro, and Xbox 360 over USB/IP."
+                                        <TextBlock Text="Required for VIIPER outputs: DualShock 4 and Xbox 360 over USB/IP."
                                                    TextWrapping="Wrap" MaxWidth="520" Opacity="0.75" Margin="0,6,0,0" />
                                     </StackPanel>
                                 </Expander>
@@ -1160,7 +1160,7 @@
             <local:BusyOverlay x:Name="exposureBusyOverlay"
                                Panel.ZIndex="100"
                                Title="Changing controller exposure"
-                               Message="DS4Windows is safely updating physical input and game output. Do not disconnect the controller." />
+                               Message="PureDS4 is safely updating physical input and game output. Do not disconnect the controller." />
     </Grid>
 </DockPanel>
 </Window>

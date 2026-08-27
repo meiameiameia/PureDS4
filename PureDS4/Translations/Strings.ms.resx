@@ -157,7 +157,7 @@
     <value>Periksa Kemaskini Sekarang</value>
   </data>
   <data name="CheckUpdateStartup" xml:space="preserve">
-    <value>Semak Kemas Kini Pada Permulaan DS4Windows</value>
+    <value>Semak Kemas Kini Pada Permulaan PureDS4</value>
   </data>
   <data name="Clear" xml:space="preserve">
     <value>Bersihkan</value>
@@ -347,11 +347,6 @@ Perubahan pada pilihan ini berkuat kuasa pada masa sambungan pad permainan.</val
   <data name="CustomExeName" xml:space="preserve">
     <value>Nama boleh laku tersuai</value>
   </data>
-  <data name="CustomExeNameInfo" xml:space="preserve">
-    <value>Sesetengah permainan melaksanakan sekatan yang menyebabkan input DS4 diabaikan jika permainan mengesan sama ada 'DS4Windows.exe' atau 'InputMapper.exe' berjalan pada masa itu. Penyelesaian kepada sekatan itu ialah menamakan semula 'DS4Windows.exe' supaya semakan dalam permainan gagal. Menentukan nama exe tersuai di sini membolehkan DS4Updater mengemas kini salinan tersuai DS4Windows secara automatik kepada nama fail yang dikehendaki. Pastikan anda meninggalkan sambungan.
-
-Contoh: whyme_DS4Windows</value>
-  </data>
   <data name="XInputChecker" xml:space="preserve">
     <value>XInputChecker</value>
   </data>
@@ -497,7 +492,7 @@ Contoh: whyme_DS4Windows</value>
     <value>Dalam sesetengah situasi, ia mungkin berguna untuk mengehadkan nilai maksimum yang dikeluarkan oleh output kayu analog. Output Maks membolehkan pendikitan nilai output akhir kayu analog.</value>
   </data>
   <data name="AntiDeadzoneTooltip" xml:space="preserve">
-    <value>Anti-deadzone bertindak sebagai offset untuk digunakan dengan paksi untuk menandakan nilai output minimum yang dijana selepas paksi meninggalkan zon mati yang ditetapkan. Ini terutamanya bertujuan untuk membantu memetakan paksi kepada nilai zon mati yang ditetapkan yang digunakan untuk paksi dalam permainan video. Sebagai contoh, zon mati biasa yang ditetapkan untuk XInput LS dalam permainan video ialah sekitar 8000 (25%). Dengan tiada anti-deadzone ditetapkan, paksi perlu bergerak melepasi zon mati yang ditetapkan dalam DS4Windows bersama-sama dengan zon mati paksi yang ditetapkan permainan.</value>
+    <value>Anti-deadzone bertindak sebagai offset untuk digunakan dengan paksi untuk menandakan nilai output minimum yang dijana selepas paksi meninggalkan zon mati yang ditetapkan. Ini terutamanya bertujuan untuk membantu memetakan paksi kepada nilai zon mati yang ditetapkan yang digunakan untuk paksi dalam permainan video. Sebagai contoh, zon mati biasa yang ditetapkan untuk XInput LS dalam permainan video ialah sekitar 8000 (25%). Dengan tiada anti-deadzone ditetapkan, paksi perlu bergerak melepasi zon mati yang ditetapkan dalam PureDS4 bersama-sama dengan zon mati paksi yang ditetapkan permainan.</value>
   </data>
   <data name="StickInputCurveTooltip" xml:space="preserve">
     <value>TETAPAN USANG/LAMA. Cuba gunakan lengkung berdasarkan koordinat input mentah sebelum sebarang maklumat zon mati digunakan. Wonky</value>
@@ -656,7 +651,7 @@ Dilumpuhkan:
     <value>Leret Pad Sentuh Untuk Menukar Profil</value>
   </data>
   <data name="TurnOffDS4WindowsTemporarily" xml:space="preserve">
-    <value>Matikan DS4Windows Buat Sementara</value>
+    <value>Matikan PureDS4 Buat Sementara</value>
   </data>
   <data name="Unplug" xml:space="preserve">
     <value>Cabut Plag</value>

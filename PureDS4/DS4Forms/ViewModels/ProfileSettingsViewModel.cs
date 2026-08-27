@@ -971,10 +971,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                         type = 1;
                         break;
 
-                    case OutContType.ViiperSwitch2Pro:
-                        type = 2;
-                        break;
-
                     default: break;
                 }
 
@@ -1017,7 +1013,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             {
                 0 => OutContType.ViiperDS4,
                 1 => OutContType.ViiperX360,
-                2 => OutContType.ViiperSwitch2Pro,
                 _ => OutContType.ViiperX360,
             };
         }
@@ -4137,7 +4132,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             }
             catch (Exception ex)
             {
-                AppLogger.LogToGui($"ERROR. Failed to open {Global.exedirpath}\\BezierCurveEditor\\index.html web app. Check that the web file exits or launch it outside of DS4Windows application. {ex.Message}", true);
+                AppLogger.LogToGui($"ERROR. Failed to open {Global.exedirpath}\\BezierCurveEditor\\index.html web app. Check that the web file exits or launch it outside of the PureDS4 application. {ex.Message}", true);
             }
         }
 

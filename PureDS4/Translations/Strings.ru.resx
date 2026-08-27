@@ -157,7 +157,7 @@
     <value>Проверка обновлений</value>
   </data>
   <data name="CheckUpdateStartup" xml:space="preserve">
-    <value>Проверка обновлений DS4Windows при запуске</value>
+    <value>Проверка обновлений PureDS4 при запуске</value>
   </data>
   <data name="Clear" xml:space="preserve">
     <value>Очистить</value>
@@ -340,13 +340,6 @@
     <value>Настраиваемое имя Exe</value>
     <comment>Settings tab
 (string)</comment>
-  </data>
-  <data name="CustomExeNameInfo" xml:space="preserve">
-    <value>Некоторые игры встроили блок, который приводит к игнорированию ввода DS4, если игра обнаруживает, что в это время запущен DS4Windows.exe или InputMapper.exe. Обходной путь к блокировке - переименовать DS4Windows.exe, чтобы проверка в игре не прошла. Указание настраиваемого имени exe-файла позволяет DS4Updater автоматически обновлять настраиваемую копию DS4Windows до желаемого имени файла. Обязательно уберите расширение.
-
-Пример: whyme_DS4Windows</value>
-    <comment>Settings tab
-(help button)</comment>
   </data>
   <data name="Controller5Text" xml:space="preserve">
     <value>Контроллер 5</value>
@@ -561,7 +554,7 @@
     <value>Проведите по тачпаду, чтобы переключить профиль</value>
   </data>
   <data name="TurnOffDS4WindowsTemporarily" xml:space="preserve">
-    <value>Временно выключить DS4Windows</value>
+    <value>Временно выключить PureDS4</value>
   </data>
   <data name="Unplug" xml:space="preserve">
     <value>Отключить</value>

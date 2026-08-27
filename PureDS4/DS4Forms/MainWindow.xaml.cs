@@ -291,7 +291,8 @@ namespace DS4WinWPF.DS4Forms
                     }
                     catch
                     {
-                        Dispatcher.Invoke(() => MessageBox.Show(Strings.FailedToRetrieveLatestVersion, "DS4Windows Updater"));
+                        Dispatcher.Invoke(() => MessageBox.Show(Strings.FailedToRetrieveLatestVersion,
+                            $"{ProductIdentity.Name} updates"));
                         // bubble the exception up to allow to see what's wrong in the log
                         throw;
                     }
@@ -314,7 +315,7 @@ namespace DS4WinWPF.DS4Forms
         {
             Dispatcher.Invoke(() => MessageBox.Show(
                 UpdateAuthorityPolicy.DisabledMessage,
-                "DS4Windows Reworked updates",
+                $"{ProductIdentity.Name} updates",
                 MessageBoxButton.OK, MessageBoxImage.Information));
         }
 
@@ -2094,8 +2095,6 @@ Suspend support not enabled.", true);
                                             Program.rootHub.AttachUnboundOutDev(slotDevice, OutContType.ViiperX360);
                                         else if (strData[2] == "plugviiperds4")
                                             Program.rootHub.AttachUnboundOutDev(slotDevice, OutContType.ViiperDS4);
-                                        else if (strData[2] == "plugviiperswitch2pro")
-                                            Program.rootHub.AttachUnboundOutDev(slotDevice, OutContType.ViiperSwitch2Pro);
                                     }
                                 }
                                 else if (strData[0] == "query" && strData.Length >= 3)
@@ -2566,7 +2565,7 @@ Suspend support not enabled.", true);
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.AddExtension = true;
             dialog.DefaultExt = ".xml";
-            dialog.Filter = "DS4Windows Profile (*.xml)|*.xml";
+            dialog.Filter = $"{ProductIdentity.Name} Profile (*.xml)|*.xml";
             dialog.Title = "Select Profile to Import File";
             if (Global.appdatapath != Global.exedirpath)
                 dialog.InitialDirectory = Path.Combine(Global.appDataPpath, "Profiles");
@@ -2593,7 +2592,7 @@ Suspend support not enabled.", true);
                 SaveFileDialog dialog = new SaveFileDialog();
                 dialog.AddExtension = true;
                 dialog.DefaultExt = ".xml";
-                dialog.Filter = "DS4Windows Profile (*.xml)|*.xml";
+                dialog.Filter = $"{ProductIdentity.Name} Profile (*.xml)|*.xml";
                 dialog.Title = "Select Profile to Export File";
                 Stream stream;
                 Stream profile = new StreamReader(Global.appdatapath + "\\Profiles\\" + entity.Name + ".xml").BaseStream;

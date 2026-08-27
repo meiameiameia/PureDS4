@@ -157,7 +157,7 @@
     <value>בדוק עדכונים כעת</value>
   </data>
   <data name="CheckUpdateStartup" xml:space="preserve">
-    <value>בדוק עדכונים עם פתיחת DS4WINDOWS</value>
+    <value>בדוק עדכונים עם פתיחת PureDS4</value>
   </data>
   <data name="Clear" xml:space="preserve">
     <value>נקה</value>
@@ -346,11 +346,6 @@
   </data>
   <data name="CustomExeName" xml:space="preserve">
     <value>שם מותאם אישית לקובץ EXE</value>
-  </data>
-  <data name="CustomExeNameInfo" xml:space="preserve">
-    <value>חלק מהמשחקים מבצעים התעלמות מבקר DS4 אם התהליכים DS4WINDOWS.exe או InputMapper.exe פועלים. ניתן לעקוף בעיה זו בעזרת שינוי שם הקובץ DS4Windows.exe כך שהבדיקה של המשחק תיכשל. שינוי שם קובץ ה-EXE בהגדרה זו מאפשר לעדכונים בעתיד ליצור עותק של התוכנה לתוך קובץ ה-EXE עם השם החדש. שים לב - יש להזין שם ללא הסיומת.
-
-לדוגמא: whyme_DS4Windows</value>
   </data>
   <data name="XInputChecker" xml:space="preserve">
     <value>XInputChecker</value>

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """Validate content-addressed, licensed inputs used by a release build."""
 
 from __future__ import annotations
@@ -79,7 +79,7 @@ def normalize_project_path(repo_root: Path, project_dir: Path, value: str) -> st
     path = (project_dir / value).resolve()
     if not path.exists() and value.replace("/", "\\").startswith("..\\libs\\"):
         # The inherited HintPath says ../libs while the tracked compatibility
-        # binaries live below DS4Windows/libs. MSBuild still resolves the
+        # binaries live below PureDS4/libs. MSBuild still resolves the
         # references through its candidate search; inventory the tracked input.
         path = (project_dir / value.replace("..\\libs\\", "libs\\", 1)).resolve()
     try:

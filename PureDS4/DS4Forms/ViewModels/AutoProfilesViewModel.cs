@@ -93,14 +93,35 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         public List<EnumChoiceSelection<AutoProfileDisplayProfileSwitchChoices>> DisplayProfileSwitchList => displayProfileSwitchList;
 
         private List<EnumChoiceSelection<AutoProfileDeviceOption>> deviceOptionList =
-            new List<EnumChoiceSelection<AutoProfileDeviceOption>>()
+            BuildDeviceOptionList();
+
+        public List<EnumChoiceSelection<AutoProfileDeviceOption>> DeviceOptionList => deviceOptionList;
+
+        /// <summary>
+        /// The device choices an auto-profile rule may be given in this
+        /// release.
+        ///
+        /// The DualShock 3 entry is declared here so the future DS3 milestone
+        /// restores it by flipping one flag, but it is filtered out while
+        /// <see cref="ProductScope.DualShock3Offered"/> is false: a release
+        /// that cannot detect a DS3 must not invite the user to write a rule
+        /// that could never match. <see cref="AutoProfileDeviceOption.DS3"/>
+        /// itself stays defined, so a stored or imported rule keeps its value
+        /// and continues to round-trip.
+        /// </summary>
+        private static List<EnumChoiceSelection<AutoProfileDeviceOption>>
+            BuildDeviceOptionList()
+        {
+            return new List<EnumChoiceSelection<AutoProfileDeviceOption>>()
             {
                 new EnumChoiceSelection<AutoProfileDeviceOption>("Any", AutoProfileDeviceOption.Any),
                 new EnumChoiceSelection<AutoProfileDeviceOption>("DS4", AutoProfileDeviceOption.DS4),
                 new EnumChoiceSelection<AutoProfileDeviceOption>("DS3", AutoProfileDeviceOption.DS3),
-            };
-
-        public List<EnumChoiceSelection<AutoProfileDeviceOption>> DeviceOptionList => deviceOptionList;
+            }
+            .Where(option => ProductScope.DualShock3Offered ||
+                option.ChoiceValue != AutoProfileDeviceOption.DS3)
+            .ToList();
+        }
 
         public AutoProfileDisplayProfileSwitchChoices ProfileSwitchChoice
         {

@@ -373,9 +373,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 case OutContType.ViiperDualSenseEdge:
                     result = 4;
                     break;
-                case OutContType.ViiperSwitch2Pro:
-                    result = 5;
-                    break;
                 default:
                     break;
             }
@@ -419,9 +416,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     break;
                 case 4:
                     result = OutContType.ViiperDualSenseEdge;
-                    break;
-                case 5:
-                    result = OutContType.ViiperSwitch2Pro;
                     break;
                 default:
                     break;

@@ -1,4 +1,4 @@
-/*
+﻿/*
 DS4Windows
 Copyright (C) 2026 hbashton
 
@@ -102,7 +102,7 @@ namespace DS4WinWPF.DS4Forms
                 if (!File.Exists(target))
                 {
                     throw new FileNotFoundException(
-                        $"The offline DS4Windows package is incomplete: " +
+                        $"The offline PureDS4 package is incomplete: " +
                         $"{bundledFileName} is missing.", target);
                 }
 

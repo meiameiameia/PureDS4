@@ -157,7 +157,7 @@
     <value>バージョン *number* を今すぐダウンロードしますか?</value>
   </data>
   <data name="DS4Update" xml:space="preserve">
-    <value>DS4Windows の更新を利用可能です!</value>
+    <value>PureDS4 の更新を利用可能です!</value>
   </data>
   <data name="FallBack" xml:space="preserve">
     <value>フォールバック</value>
@@ -181,7 +181,7 @@
     <value>インストール中...</value>
   </data>
   <data name="LanguagePackApplyRestartRequired" xml:space="preserve">
-    <value>言語パックの変更は、DS4Windows の再起動後に反映されます。</value>
+    <value>言語パックの変更は、PureDS4 の再起動後に反映されます。</value>
   </data>
   <data name="LatencyNotOverTen" xml:space="preserve">
     <value>コントローラー *number* の遅延は 10ms 以下です</value>
@@ -225,9 +225,6 @@
   <data name="ProfileCannotRestore" xml:space="preserve">
     <value>*Profile name* を復元することはできません。</value>
   </data>
-  <data name="QuitOtherPrograms" xml:space="preserve">
-    <value>'DS4コントローラーを隠す'オプションを有効にする前に、UWPアプリ(Netflix)、Steam、Uplay、Edge、NVIDIA IN-GAMEなどの他のアプリケーションを終了する必要があります。詳しくは https://github.com/Ryochan7/DS4Windows/wiki/Exclusive-Mode-(Hide-DS4-Controller-config-option)-tips-and-issues をご覧ください。</value>
-  </data>
   <data name="SASteeringWheelEmulationCalibrate" xml:space="preserve">
     <value>6軸ホイールエミュレーションの調整</value>
   </data>
@@ -265,7 +262,7 @@
     <value>弱振動を停止</value>
   </data>
   <data name="StoppedDS4Windows" xml:space="preserve">
-    <value>DS4Windows を停止しました</value>
+    <value>PureDS4 を停止しました</value>
   </data>
   <data name="StoppingDS4" xml:space="preserve">
     <value>DS4 入力コントローラーを停止中</value>

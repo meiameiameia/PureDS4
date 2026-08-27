@@ -40,7 +40,7 @@ namespace DS4WinWPF
             {
                 dataPath = Path.Combine(Environment.GetFolderPath(
                     Environment.SpecialFolder.LocalApplicationData),
-                    "DS4Windows");
+                    DS4Windows.ProductIdentity.DataFolderName);
             }
 
             string logDirectory = Path.Combine(

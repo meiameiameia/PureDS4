@@ -1,4 +1,4 @@
-/*
+﻿/*
 DS4Windows
 Copyright (C) 2026 hbashton
 
@@ -68,7 +68,6 @@ namespace DS4Windows
             {
                 case ViiperVirtualDeviceType.Xbox360:
                 case ViiperVirtualDeviceType.DualShock4:
-                case ViiperVirtualDeviceType.Switch2Pro:
                     // Every virtual controller exposes a one-millisecond
                     // maximum input opportunity. This remains adaptive rather
                     // than becoming a polling loop: the writer wakes only for
@@ -113,7 +112,6 @@ namespace DS4Windows
     {
         Xbox360,
         DualShock4,
-        Switch2Pro,
     }
 
     public sealed class ViiperOutDevice : OutputDevice
@@ -2884,15 +2882,6 @@ namespace DS4Windows
                         }
                     }
                     break;
-
-                case ViiperVirtualDeviceType.Switch2Pro:
-                    if (feedbackLength >= 34)
-                    {
-                        byte left = MaxByte(feedback, 0, 16);
-                        byte right = MaxByte(feedback, 16, 16);
-                        Program.rootHub.SetDevRumble(device, left, right, deviceIndex);
-                    }
-                    break;
             }
         }
 
@@ -3731,6 +3720,10 @@ namespace DS4Windows
                     StringComparison.OrdinalIgnoreCase) ||
                 processName.Equals("viiper",
                     StringComparison.OrdinalIgnoreCase) ||
+                processName.Equals(ProductIdentity.Name,
+                    StringComparison.OrdinalIgnoreCase) ||
+                // A DS4Windows or DS4Windows Reworked install that has not
+                // been replaced yet is still infrastructure, never a game.
                 processName.Equals("DS4Windows",
                     StringComparison.OrdinalIgnoreCase);
         }
@@ -4700,7 +4693,7 @@ namespace DS4Windows
             if (!IsDs4WindowsOwnedLocalPort(ownedPort, remoteBusId))
             {
                 AppLogger.LogToGui(
-                    $"VIIPER refused to detach usbip port {port} ({reason}) because its DS4Windows ownership token or device identity no longer matches.",
+                    $"VIIPER refused to detach usbip port {port} ({reason}) because its {ProductIdentity.Name} ownership token or device identity no longer matches.",
                     true);
                 return;
             }
@@ -5111,7 +5104,7 @@ namespace DS4Windows
             try
             {
                 detachPort?.Invoke(usbipPort,
-                    "DS4Windows VIIPER device stopped");
+                    $"{ProductIdentity.Name} VIIPER device stopped");
             }
             catch
             {
@@ -5474,7 +5467,6 @@ namespace DS4Windows
             {
                 ViiperVirtualDeviceType.Xbox360 => "xbox360",
                 ViiperVirtualDeviceType.DualShock4 => "dualshock4",
-                ViiperVirtualDeviceType.Switch2Pro => "ns2pro",
                 _ => "xbox360",
             };
         }
@@ -5485,7 +5477,6 @@ namespace DS4Windows
             {
                 ViiperVirtualDeviceType.Xbox360 => 2,
                 ViiperVirtualDeviceType.DualShock4 => 7,
-                ViiperVirtualDeviceType.Switch2Pro => 34,
                 _ => 0,
             };
         }
@@ -5496,7 +5487,6 @@ namespace DS4Windows
             {
                 ViiperVirtualDeviceType.Xbox360 => BuildXbox360(state, device),
                 ViiperVirtualDeviceType.DualShock4 => BuildDualShock4(state, device),
-                ViiperVirtualDeviceType.Switch2Pro => BuildSwitch2Pro(state, device),
                 _ => BuildXbox360(state, device),
             };
         }
@@ -5603,29 +5593,6 @@ namespace DS4Windows
             WriteDualSenseTouch(packet, 11, state.TrackPadTouch0, 1920, 1080);
             WriteDualSenseTouch(packet, 16, state.TrackPadTouch1, 1920, 1080);
             WriteSonyMotion(packet, 21, state, DualSenseGyroRestDeadband, DualSenseAccelRestZ);
-            return packet;
-        }
-
-        private static byte[] BuildSwitch2Pro(DS4State state, int device)
-        {
-            byte[] packet = new byte[Switch2PacketSize];
-            ushort lx = ScaleSwitchAxis(state.LX);
-            ushort ly = ScaleSwitchAxis(state.LY);
-            ushort rx = ScaleSwitchAxis(state.RX);
-            ushort ry = ScaleSwitchAxis(state.RY);
-            ApplySteeringWheelSwitchAxes(state, device, ref lx, ref ly, ref rx, ref ry);
-
-            WriteUInt32(packet, 0, BuildSwitch2Buttons(state));
-            WriteUInt16(packet, 4, lx);
-            WriteUInt16(packet, 6, ly);
-            WriteUInt16(packet, 8, rx);
-            WriteUInt16(packet, 10, ry);
-            WriteInt16(packet, 12, ClampShort(state.Motion?.accelXFull ?? 0));
-            WriteInt16(packet, 14, ClampShort(state.Motion?.accelYFull ?? 0));
-            WriteInt16(packet, 16, ClampShort(state.Motion?.accelZFull ?? 0));
-            WriteInt16(packet, 18, ClampShort(state.Motion?.gyroYawFull ?? 0));
-            WriteInt16(packet, 20, ClampShort(state.Motion?.gyroPitchFull ?? 0));
-            WriteInt16(packet, 22, ClampShort(state.Motion?.gyroRollFull ?? 0));
             return packet;
         }
 

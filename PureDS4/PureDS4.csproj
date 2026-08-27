@@ -42,15 +42,15 @@
 		<Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
 		<Platform Condition=" '$(Platform)' == '' ">x64</Platform>
 		<Product>PureDS4</Product>
-		<Title>DS4Windows Reworked</Title>
+		<Title>PureDS4</Title>
 		<AssemblyTitle>PureDS4</AssemblyTitle>
 		<Copyright>Copyright © Scarlet.Crush Productions 2012, 2013; InhexSTER, HecticSeptic, electrobrains 2013, 2014; Jays2Kings 2013, 2014, 2015, 2016; Ryochan7 2017-2023; schmaldeo 2024; hbashton 2026; meiameiameia 2026</Copyright>
-		<Description>Dependable Windows controller mapping and virtual game output</Description>
+		<Description>A focused Windows tool for DualShock 4 and DualShock 3 controller mapping and virtual game output</Description>
 		<Authors>meiameiameia</Authors>
 		<Company>meiameiameia</Company>
-		<PackageProjectUrl>https://github.com/meiameiameia/ds4windows-reworked</PackageProjectUrl>
+		<PackageProjectUrl>https://github.com/meiameiameia/pureds4</PackageProjectUrl>
 		<PackageLicenseUrl>https://www.gnu.org/licenses/gpl-3.0.txt</PackageLicenseUrl>
-		<RepositoryUrl>https://github.com/meiameiameia/ds4windows-reworked</RepositoryUrl>
+		<RepositoryUrl>https://github.com/meiameiameia/pureds4</RepositoryUrl>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -296,7 +296,6 @@
 		<None Include="Resources\USB.png" />
 		<None Include="Resources\DualSense Controller.png" />
 		<None Include="Resources\DualSense Edge Controller.png" />
-		<None Include="Resources\Switch 2 Pro Controller.png" />
 		<None Include="Resources\DualShock 4 Controller.png" />
 		<None Include="Resources\DualSense Config.png" />
 		<None Include="Resources\DualSense lightbar.png" />
@@ -308,19 +307,15 @@
 		<None Include="Resources\DualSense-Config_TouchUpper.png" />
 		<None Include="Resources\DualShock4-Config_Highlights.png" />
 		<None Include="Resources\DualSenseEdge-Config_Highlights.png" />
-		<None Include="Resources\Switch2Pro-Config_Highlights.png" />
 		<None Include="Resources\DualSense-Stick_Highlights.png" />
 		<None Include="Resources\DualShock4-Stick_Highlights.png" />
 		<None Include="Resources\DualSenseEdge-Stick_Highlights.png" />
-		<None Include="Resources\Switch2Pro-Stick_Highlights.png" />
 		<None Include="Resources\DualShock4-Mapping_Highlights.png" />
 		<None Include="Resources\DualShock4-Mapping-Stick_Highlights.png" />
 		<None Include="Resources\DualShock4-Mapping-Lightbar.png" />
 		<None Include="Resources\DualSenseEdge-Mapping_Highlights.png" />
 		<None Include="Resources\DualSenseEdge-Mapping-Stick_Highlights.png" />
 		<None Include="Resources\DualSenseEdge-Mapping-Lightbar.png" />
-		<None Include="Resources\Switch2Pro-Mapping_Highlights.png" />
-		<None Include="Resources\Switch2Pro-Mapping-Stick_Highlights.png" />
 		<None Include="Resources\Xbox360-Action_Highlights.png" />
 
 		<None Include="Resources\0.ico" />
@@ -407,7 +402,6 @@
 		<Resource Include="Resources\USB.png" />
 		<Resource Include="Resources\DualSense Controller.png" />
 		<Resource Include="Resources\DualSense Edge Controller.png" />
-		<Resource Include="Resources\Switch 2 Pro Controller.png" />
 		<Resource Include="Resources\DualShock 4 Controller.png" />
 		<Resource Include="Resources\DualSense Config.png" />
 		<Resource Include="Resources\DualSense lightbar.png" />
@@ -419,19 +413,15 @@
 		<Resource Include="Resources\DualSense-Config_TouchUpper.png" />
 		<Resource Include="Resources\DualShock4-Config_Highlights.png" />
 		<Resource Include="Resources\DualSenseEdge-Config_Highlights.png" />
-		<Resource Include="Resources\Switch2Pro-Config_Highlights.png" />
 		<Resource Include="Resources\DualSense-Stick_Highlights.png" />
 		<Resource Include="Resources\DualShock4-Stick_Highlights.png" />
 		<Resource Include="Resources\DualSenseEdge-Stick_Highlights.png" />
-		<Resource Include="Resources\Switch2Pro-Stick_Highlights.png" />
 		<Resource Include="Resources\DualShock4-Mapping_Highlights.png" />
 		<Resource Include="Resources\DualShock4-Mapping-Stick_Highlights.png" />
 		<Resource Include="Resources\DualShock4-Mapping-Lightbar.png" />
 		<Resource Include="Resources\DualSenseEdge-Mapping_Highlights.png" />
 		<Resource Include="Resources\DualSenseEdge-Mapping-Stick_Highlights.png" />
 		<Resource Include="Resources\DualSenseEdge-Mapping-Lightbar.png" />
-		<Resource Include="Resources\Switch2Pro-Mapping_Highlights.png" />
-		<Resource Include="Resources\Switch2Pro-Mapping-Stick_Highlights.png" />
 		<Resource Include="Resources\Xbox360-Action_Highlights.png" />
 
 		<Resource Include="Resources\0.ico" />
@@ -529,7 +519,7 @@
 		<EmbeddedResource Update="Translations\Strings.hu-HU.resx">
 			<DependentUpon>Strings.resx</DependentUpon>
 		</EmbeddedResource>
-		<EmbeddedResource Update="Translations\Strings.idn.resx">
+		<EmbeddedResource Update="Translations\Strings.id.resx">
 			<DependentUpon>Strings.resx</DependentUpon>
 		</EmbeddedResource>
 		<EmbeddedResource Update="Translations\Strings.it.resx">
@@ -556,7 +546,7 @@
 		<EmbeddedResource Update="Translations\Strings.ru.resx">
 			<DependentUpon>Strings.resx</DependentUpon>
 		</EmbeddedResource>
-		<EmbeddedResource Update="Translations\Strings.se.resx">
+		<EmbeddedResource Update="Translations\Strings.sv.resx">
 			<DependentUpon>Strings.resx</DependentUpon>
 		</EmbeddedResource>
 		<EmbeddedResource Update="Translations\Strings.tr.resx">

@@ -157,7 +157,7 @@
     <value>Verificar Atualizações Agora</value>
   </data>
   <data name="CheckUpdateStartup" xml:space="preserve">
-    <value>Verificar Atualizações para DS4Windows na inicialização</value>
+    <value>Verificar Atualizações para PureDS4 na inicialização</value>
   </data>
   <data name="Clear" xml:space="preserve">
     <value>Limpar</value>
@@ -346,11 +346,6 @@
   </data>
   <data name="CustomExeName" xml:space="preserve">
     <value>Nome Exe customizado.</value>
-  </data>
-  <data name="CustomExeNameInfo" xml:space="preserve">
-    <value>Alguns jogos implementam um bloco que faz com que a entrada DS4 seja ignorada se um jogo detectar DS4Windows.exe ou InputMapper.exe rodando no momento. Uma alternativa para o bloco é renomear DS4Windows.exe para que a verificação no jogo falhe. Especificar um nome de exe personalizado aqui permite que DS4Updater atualize automaticamente uma cópia personalizada de DS4Windows para o nome de arquivo desejado. Certifique-se de omitir a extensão.
-
-    Exemplo: whyme_DS4Windows</value>
   </data>
   <data name="XInputChecker" xml:space="preserve">
     <value>XInputChecker</value>

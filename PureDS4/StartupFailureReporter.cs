@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -43,12 +43,13 @@ namespace DS4WinWPF
 
         internal static string BuildUserMessage(string logPath)
         {
-            const string introduction =
-                "DS4Windows could not finish starting. Your profiles and settings were not removed.";
+            string introduction = DS4Windows.ProductIdentity.Name +
+                " could not finish starting. Your profiles and settings were not removed.";
             if (string.IsNullOrWhiteSpace(logPath))
             {
-                return introduction +
-                    "\n\nWindows prevented DS4Windows from writing a diagnostic log.";
+                return introduction + "\n\nWindows prevented " +
+                    DS4Windows.ProductIdentity.Name +
+                    " from writing a diagnostic log.";
             }
 
             return introduction +

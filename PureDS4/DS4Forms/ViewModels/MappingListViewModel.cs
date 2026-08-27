@@ -77,70 +77,92 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         public MappingListViewModel(int devIndex, OutContType devType,
             InputDeviceType? physicalControllerType = null)
         {
-            mappings.Add(new MappedControl(devIndex, DS4Controls.Cross, "Cross", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.Circle, "Circle", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.Square, "Square", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.Triangle, "Triangle", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.Options, "Options", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.Share, "Share", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.DpadUp, "Up", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.DpadDown, "Down", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.DpadLeft, "Left", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.DpadRight, "Right", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.PS, "PS", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.Mute, "Mute", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.L1, "L1", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.R1, "R1", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.L2, "L2", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.R2, "R2", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.L3, "L3", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.R3, "R3", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.Capture, "Capture", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.SideL, "Side L", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.SideR, "Side R", devType));
+            // Ordered exactly as the mapping list renders. Controls that
+            // only ever existed on a DualSense or a DualSense Edge stay in the
+            // ordered set so their saved backend mapping is still reachable
+            // and still round-trips, but they are never added to the visible
+            // list: PureDS4 supports neither pad, and a disabled row still
+            // advertises hardware this tool does not work with.
+            (DS4Controls Control, string Name)[] orderedControls =
+            {
+                (DS4Controls.Cross, "Cross"),
+                (DS4Controls.Circle, "Circle"),
+                (DS4Controls.Square, "Square"),
+                (DS4Controls.Triangle, "Triangle"),
+                (DS4Controls.Options, "Options"),
+                (DS4Controls.Share, "Share"),
+                (DS4Controls.DpadUp, "Up"),
+                (DS4Controls.DpadDown, "Down"),
+                (DS4Controls.DpadLeft, "Left"),
+                (DS4Controls.DpadRight, "Right"),
+                (DS4Controls.PS, "PS"),
+                (DS4Controls.Mute, "Mute"),
+                (DS4Controls.L1, "L1"),
+                (DS4Controls.R1, "R1"),
+                (DS4Controls.L2, "L2"),
+                (DS4Controls.R2, "R2"),
+                (DS4Controls.L3, "L3"),
+                (DS4Controls.R3, "R3"),
+                (DS4Controls.Capture, "Capture"),
+                (DS4Controls.SideL, "Side L"),
+                (DS4Controls.SideR, "Side R"),
 
-            mappings.Add(new MappedControl(devIndex, DS4Controls.TouchLeft, "Left Touch", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.TouchRight, "Right Touch", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.TouchMulti, "Multitouch", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.TouchUpper, "Upper Touch", devType));
+                (DS4Controls.TouchLeft, "Left Touch"),
+                (DS4Controls.TouchRight, "Right Touch"),
+                (DS4Controls.TouchMulti, "Multitouch"),
+                (DS4Controls.TouchUpper, "Upper Touch"),
 
-            mappings.Add(new MappedControl(devIndex, DS4Controls.LYNeg, "LS Up", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.LYPos, "LS Down", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.LXNeg, "LS Left", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.LXPos, "LS Right", devType));
+                (DS4Controls.LYNeg, "LS Up"),
+                (DS4Controls.LYPos, "LS Down"),
+                (DS4Controls.LXNeg, "LS Left"),
+                (DS4Controls.LXPos, "LS Right"),
 
-            mappings.Add(new MappedControl(devIndex, DS4Controls.RYNeg, "RS Up", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.RYPos, "RS Down", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.RXNeg, "RS Left", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.RXPos, "RS Right", devType));
+                (DS4Controls.RYNeg, "RS Up"),
+                (DS4Controls.RYPos, "RS Down"),
+                (DS4Controls.RXNeg, "RS Left"),
+                (DS4Controls.RXPos, "RS Right"),
 
-            mappings.Add(new MappedControl(devIndex, DS4Controls.GyroZNeg, "Tilt Up", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.GyroZPos, "Tilt Down", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.GyroXPos, "Tilt Left", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.GyroXNeg, "Tilt Right", devType));
+                (DS4Controls.GyroZNeg, "Tilt Up"),
+                (DS4Controls.GyroZPos, "Tilt Down"),
+                (DS4Controls.GyroXPos, "Tilt Left"),
+                (DS4Controls.GyroXNeg, "Tilt Right"),
 
-            mappings.Add(new MappedControl(devIndex, DS4Controls.SwipeUp, "Swipe Up", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.SwipeDown, "Swipe Down", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.SwipeLeft, "Swipe Left", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.SwipeRight, "Swipe Right", devType));
+                (DS4Controls.SwipeUp, "Swipe Up"),
+                (DS4Controls.SwipeDown, "Swipe Down"),
+                (DS4Controls.SwipeLeft, "Swipe Left"),
+                (DS4Controls.SwipeRight, "Swipe Right"),
 
-            mappings.Add(new MappedControl(devIndex, DS4Controls.FnL, "Function Left", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.FnR, "Function Right", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.BLP, "Bottom Left Paddle", devType));
-            mappings.Add(new MappedControl(devIndex, DS4Controls.BRP, "Bottom Right Paddle", devType));
+                (DS4Controls.FnL, "Function Left"),
+                (DS4Controls.FnR, "Function Right"),
+                (DS4Controls.BLP, "Bottom Left Paddle"),
+                (DS4Controls.BRP, "Bottom Right Paddle"),
+            };
 
             ControllerUiCapabilities uiCapabilities =
                 ControllerUiCapabilities.For(physicalControllerType);
-            int controlIndex = 0;
-            foreach (MappedControl mapped in mappings)
+            foreach ((DS4Controls control, string name) in orderedControls)
             {
+                MappedControl mapped = new MappedControl(devIndex, control,
+                    name, devType);
                 bool available = uiCapabilities.IsMappingControlAvailable(
-                    mapped.Control);
+                    control);
                 mapped.SetPhysicalControllerAvailability(
-                    available, uiCapabilities.ControllerName);
-                controlMap.Add(mapped.Control, mapped);
-                controlIndexMap.Add(mapped.Control, controlIndex);
-                controlIndex++;
+                    available, uiCapabilities.MappingAvailabilityScopeName);
+                controlMap.Add(control, mapped);
+
+                if (available)
+                {
+                    // ControlIndexMap indexes the visible list, so it is built
+                    // from the list itself rather than the ordered set above.
+                    controlIndexMap.Add(control, mappings.Count);
+                    mappings.Add(mapped);
+                }
+                else
+                {
+                    // Still needs device-type and mapping-name refreshes so
+                    // the preserved binding stays coherent when it is saved.
+                    extraControls.Add(mapped);
+                }
             }
 
             /*
@@ -266,7 +288,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             PhysicalControllerAvailabilityHint = !available
                 ? $"{ControlName} is not available on {physicalControllerName}. The saved backend mapping is preserved."
                 : IsControllerMapListOnly
-                    ? $"{ControlName} is fully remappable from this list. The current controller diagram has no accurate target for this Edge-only control."
+                    ? $"{ControlName} is fully remappable from this list. The current controller diagram has no accurate target for it."
                     : null;
         }
 

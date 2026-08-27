@@ -1,4 +1,4 @@
-<root>
+﻿<root>
     <resheader name="resmimetype">
         <value>text/microsoft-resx</value>
     </resheader>
@@ -132,7 +132,7 @@
         <value>下</value>
     </data>
     <data name="DS4Update" xml:space="preserve">
-        <value>DS4Windows更新已可用！</value>
+        <value>PureDS4更新已可用！</value>
     </data>
     <data name="DS4WindowsCannotEditHere" xml:space="preserve">
         <value>DS4Windows无法编辑这里的设置，将关闭窗口</value>
@@ -225,7 +225,7 @@
         <value>在关闭后保持这个窗口尺寸</value>
     </data>
     <data name="LanguagePackApplyRestartRequired" xml:space="preserve">
-        <value>语言包仅会在DS4Windows重启后生效</value>
+        <value>语言包仅会在PureDS4重启后生效</value>
     </data>
     <data name="LatencyNotOverTen" xml:space="preserve">
         <value>控制器 *number* 的延迟现在已在10ms以内</value>
@@ -332,9 +332,6 @@
     <data name="QuickCharge" xml:space="preserve">
         <value>当通过USB连接时自动禁用蓝牙</value>
     </data>
-    <data name="QuitOtherPrograms" xml:space="preserve">
-        <value>在启用隐藏DS4控制器之前，你必须退出其他 UWP 应用 (Netflix), Steam, Uplay, Edge, NVIDIA IN-GAME。详见：https://github.com/Ryochan7/DS4Windows/wiki/Exclusive-Mode-(Hide-DS4-Controller-config-option)-tips-and-issues</value>
-    </data>
     <data name="RecordText" xml:space="preserve">
         <value>录制</value>
     </data>
@@ -342,7 +339,7 @@
         <value>右键单击以设置一组控制的预设</value>
     </data>
     <data name="RunAtStartup" xml:space="preserve">
-        <value>让Windows在登录后启动DS4Windows</value>
+        <value>让Windows在登录后启动PureDS4</value>
     </data>
     <data name="SASteeringWheelEmulationCalibrate" xml:space="preserve">
         <value>六轴方向盘模拟的校准</value>
@@ -396,7 +393,7 @@
         <value>停止轻震动</value>
     </data>
     <data name="StoppedDS4Windows" xml:space="preserve">
-        <value>停止DS4Windows</value>
+        <value>停止PureDS4</value>
     </data>
     <data name="StoppingDS4" xml:space="preserve">
         <value>停止DS4 控制器输入</value>
@@ -468,7 +465,7 @@
         <value>在此处输入新配置名字</value>
     </data>
     <data name="UACTask" xml:space="preserve">
-        <value>你需要以管理员模式运行DS4Windows来激活这个模式</value>
+        <value>你需要以管理员模式运行PureDS4来激活这个模式</value>
     </data>
     <data name="UdpServer" xml:space="preserve">
         <value>启用UDP服务器。服务器会监听端口和地址。地址选项：127.0.0.1 仅本地 | 0.0.0.0 全部地址 | 指定主机名或IP地址</value>

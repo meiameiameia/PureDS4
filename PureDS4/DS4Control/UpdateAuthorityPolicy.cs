@@ -1,4 +1,4 @@
-namespace DS4Windows
+﻿namespace DS4Windows
 {
     /// <summary>
     /// The inherited hbashton release channel is not an update authority for
@@ -16,7 +16,7 @@ namespace DS4Windows
 
         public const string ReleaseNotesDisabledMarkdown =
             "## Release notes unavailable\n\n" +
-            "DS4Windows Reworked release notes will become available when " +
+            ProductIdentity.Name + " release notes will become available when " +
             "the independent release channel is established. No upstream " +
             "release feed is queried by this build.";
     }

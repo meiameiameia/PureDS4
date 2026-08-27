@@ -413,10 +413,6 @@
     <value>自定义可执行文件名称</value>
     <comment/>
   </data>
-  <data name="CustomExeNameInfo" xml:space="preserve">
-    <value>一些游戏如果测到DS4Windows.exe 或 InputMapper.exe 正在运行，则会忽略 DS4 的输入。对于这些游戏，解决方法是将 DS4Windows.exe 重命名，以规避检测。在这样自定义可执行文件的名称，以允许 DS4Updater 自动更新已被重命名的DS4Windows。请不要输入扩展名（即 .exe)。名称示例: whyme_DS4Windows</value>
-    <comment/>
-  </data>
   <data name="XInputChecker" xml:space="preserve">
     <value>XInput 检查器</value>
     <comment/>
@@ -764,7 +760,7 @@
     <comment/>
   </data>
   <data name="TurnOffDS4WindowsTemporarily" xml:space="preserve">
-    <value>临时关闭 DS4Windows</value>
+    <value>临时关闭 PureDS4</value>
     <comment/>
   </data>
   <data name="Unplug" xml:space="preserve">
@@ -868,7 +864,7 @@
     <value>DS3 手柄支持</value>
   </data>
   <data name="AntiDeadzoneTooltip" xml:space="preserve">
-    <value>反死区作为一个与轴关联的偏移量，用于表示摇杆在某轴在离开其指定的死区后生成的最小输出值。这主要是为了应对游戏中某轴的死区。例如在游戏中，一般的XInput LS死区约为8000（25%）。如果没有分配反死区，摇杆就必须移动超过DS4Windows和游戏设定的死区才有输出。</value>
+    <value>反死区作为一个与轴关联的偏移量，用于表示摇杆在某轴在离开其指定的死区后生成的最小输出值。这主要是为了应对游戏中某轴的死区。例如在游戏中，一般的XInput LS死区约为8000（25%）。如果没有分配反死区，摇杆就必须移动超过PureDS4和游戏设定的死区才有输出。</value>
   </data>
   <data name="AutoProfiles.DisplaySwitchVia" xml:space="preserve">
     <value>通过以下选项显示配置切换</value>

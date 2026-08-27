@@ -157,7 +157,7 @@
     <value>Güncellemeleri Kontrol Et</value>
   </data>
   <data name="CheckUpdateStartup" xml:space="preserve">
-    <value>DS4Windows Açıldığında Güncellemeleri Kontrol Et</value>
+    <value>PureDS4 Açıldığında Güncellemeleri Kontrol Et</value>
   </data>
   <data name="Clear" xml:space="preserve">
     <value>Temizle</value>
@@ -347,11 +347,6 @@ Bu seçenekteki değişiklikler denetleyici bağlandığında geçerli olur.</va
   <data name="CustomExeName" xml:space="preserve">
     <value>Özel Exe Adı</value>
   </data>
-  <data name="CustomExeNameInfo" xml:space="preserve">
-    <value>Bazı oyunlar, DS4Windows.exe veya InputMapper.exe'nin çalıştığını algıladıklarında DS4 girdisini yok sayar. DS4Windows.exe'yi yeniden adlandırarak oyunun yaptığı engelleme aşılabilir. Özel bir exe adı belirlemek DS4Updater'ın DS4Windows'un istenen isimli özel bir kopyasını güncellemesini sağlar. Uzantıyı atladığınızdan emin olun.
-
-Örnek: whyme_DS4Windows</value>
-  </data>
   <data name="XInputChecker" xml:space="preserve">
     <value>XInput Testi</value>
   </data>
@@ -497,7 +492,7 @@ Bu seçenekteki değişiklikler denetleyici bağlandığında geçerli olur.</va
     <value>Bazı durumlarda, analog çubuk çıktısının maksimum çıktı değerini limitlemek kullanışlı olabilir. Maksimum Çıktı analog çubuğun final çıktı değerini kısıtlayabilmeyi sağlar.</value>
   </data>
   <data name="AntiDeadzoneTooltip" xml:space="preserve">
-    <value>Anti-ölü bölge, bir ekseni kullanırken, o eksinin atanmış ölü bölgesini aştıktan sonra üretilen minimum çıkış değerini ayarlamak için kullanılır. Bu özellik, bir ekseni bir video oyunundaki atanmış ölü bölge değeri ile daha iyi eşleştirmeye yardımcı olmak amacıyla tasarlanmıştır. Örneğin, bir video oyununda XInput LS (Sol Joystick) için tipik atanmış ölü bölge değeri yaklaşık 8000 (yüzde 25) olabilir. Bir anti-ölü bölge atanmamışsa, bir eksinin DS4Windows ile atanmış ölü bölgenin yanı sıra oyunun atanmış eksil ölü bölgesini geçmesi gerekir.</value>
+    <value>Anti-ölü bölge, bir ekseni kullanırken, o eksinin atanmış ölü bölgesini aştıktan sonra üretilen minimum çıkış değerini ayarlamak için kullanılır. Bu özellik, bir ekseni bir video oyunundaki atanmış ölü bölge değeri ile daha iyi eşleştirmeye yardımcı olmak amacıyla tasarlanmıştır. Örneğin, bir video oyununda XInput LS (Sol Joystick) için tipik atanmış ölü bölge değeri yaklaşık 8000 (yüzde 25) olabilir. Bir anti-ölü bölge atanmamışsa, bir eksinin PureDS4 ile atanmış ölü bölgenin yanı sıra oyunun atanmış eksil ölü bölgesini geçmesi gerekir.</value>
   </data>
   <data name="StickInputCurveTooltip" xml:space="preserve">
     <value>ESKİ VE KULLANILMAYAN AYAR. Ölü bölge bilgisi uygulanmadan önce ham giriş koordinatlarına dayalı bir eğri uygulama girişimidir. Karmaşıktır.</value>
@@ -656,7 +651,7 @@ Devre Dışı:
     <value>Profil Değiştirmek için Dokunmatik Pedi Kaydır</value>
   </data>
   <data name="TurnOffDS4WindowsTemporarily" xml:space="preserve">
-    <value>DS4Windows'u Geçici Olarak Kapat</value>
+    <value>PureDS4'u Geçici Olarak Kapat</value>
   </data>
   <data name="Unplug" xml:space="preserve">
     <value>Sök</value>

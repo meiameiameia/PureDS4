@@ -1,4 +1,4 @@
-/*
+﻿/*
 DS4Windows
 Copyright (C) 2026 hbashton
 
@@ -58,7 +58,7 @@ namespace DS4Windows
 
         // Runtime readiness is deliberately independent of startup-task
         // maintenance. A healthy compatible VIIPER server must remain usable
-        // when DS4Windows or VIIPER is run portably; a stale/missing task can
+        // when PureDS4 or VIIPER is run portably; a stale/missing task can
         // be repaired without preventing virtual devices from being created.
         public bool Ready => ViiperInstalled && ViiperPackageCurrent &&
             !ViiperProcessConflict && ServerRunning && UsbipInstalled &&
@@ -208,7 +208,8 @@ namespace DS4Windows
             "FakerInput_0.1.0_x64.msi";
         private const string TerminateForeignViiperArgument =
             "--terminate-foreign-viiper";
-        private const string ViiperStartupTaskName = "RunPureDS4VIIPER";
+        private const string ViiperStartupTaskName =
+            ProductIdentity.ViiperStartupTaskName;
         private const int ForeignViiperHelperTimeoutMilliseconds = 15000;
         private const string UsbipRelativePath = @"USBip\usbip.exe";
         private const int UsbipProbeTimeoutMilliseconds = 3000;
@@ -455,7 +456,7 @@ namespace DS4Windows
                     LaunchInstaller(status, owner);
                     // Do not terminate a running settings UI merely because
                     // the user selected an installation mode. The elevated
-                    // transaction closes DS4Windows only when it actually
+                    // transaction closes PureDS4 only when it actually
                     // reaches the verified mutation boundary; startup callers
                     // still fail closed through their existing return path.
                     return false;
@@ -507,9 +508,9 @@ namespace DS4Windows
             if (!status.SetupScriptFound)
             {
                 string message =
-                    "This DS4Windows package is incomplete: the bundled " +
+                    "This PureDS4 package is incomplete: the bundled " +
                     "game-output setup script is missing.\n\nDownload or extract " +
-                    "the complete DS4Windows package, then try again. " +
+                    "the complete PureDS4 package, then try again. " +
                     "Setup does not download missing components.";
                 if (owner != null)
                 {
@@ -546,7 +547,7 @@ namespace DS4Windows
                     string.IsNullOrWhiteSpace(Global.exelocation))
                 {
                     throw new InvalidOperationException(
-                        "DS4Windows could not determine the current Windows " +
+                        "PureDS4 could not determine the current Windows " +
                         "account required for elevated startup-task setup.");
                 }
 
@@ -738,7 +739,7 @@ namespace DS4Windows
                 {
                     throw new InvalidOperationException(
                         "The elevated installer host does not match the " +
-                        "DS4Windows executable that requested setup.");
+                        "PureDS4 executable that requested setup.");
                 }
                 string expectedExtras = Path.Combine(
                     Path.GetDirectoryName(Path.GetFullPath(hostPath))!,
@@ -748,12 +749,12 @@ namespace DS4Windows
                 {
                     throw new InvalidOperationException(
                         "The setup payload is not the package adjacent to " +
-                        "the running DS4Windows executable.");
+                        "the running PureDS4 executable.");
                 }
 
                 string setupRoot = Path.Combine(
                     GetNativeProgramFilesPath(),
-                    "DS4Windows.Setup");
+                    ProductIdentity.SetupStagingFolderName);
                 EnsurePathDoesNotTraverseReparsePoints(setupRoot,
                     requireExisting: false);
                 string setupDirectory = Path.Combine(setupRoot,
@@ -804,7 +805,7 @@ namespace DS4Windows
                     // so another unelevated process cannot swap a DLL or
                     // rewrite the package manifest across the UAC boundary.
                     progress.SetPhase(
-                        "Verifying every packaged DS4Windows file...");
+                        "Verifying every packaged PureDS4 file...");
                     string stagedPackageRoot = StageInstallerPackage(
                         packageExtras, setupDirectory);
                     string stagedExtras = Path.Combine(stagedPackageRoot,
@@ -972,7 +973,7 @@ namespace DS4Windows
             if (relativePaths.Count == 0)
             {
                 throw new InvalidOperationException(
-                    "The DS4Windows managed-file manifest is empty.");
+                    "The PureDS4 managed-file manifest is empty.");
             }
 
             string sourcePrefix = Path.GetFullPath(sourceRoot)
@@ -1071,7 +1072,7 @@ namespace DS4Windows
             if (missingOfflineFile != null)
             {
                 throw new InvalidOperationException(
-                    "The staged offline DS4Windows package is incomplete: " +
+                    "The staged offline PureDS4 package is incomplete: " +
                     Path.GetFileName(missingOfflineFile) + " is missing.");
             }
 
@@ -1085,7 +1086,7 @@ namespace DS4Windows
             {
                 throw new InvalidOperationException(
                     "The staged game-output payload does not match this " +
-                    "DS4Windows build.");
+                    "PureDS4 build.");
             }
 
             return stagedRoot;
@@ -1244,14 +1245,16 @@ namespace DS4Windows
         {
             return Path.Combine(Environment.GetFolderPath(
                     Environment.SpecialFolder.CommonApplicationData),
-                "DS4Windows", "Installer", "viiper-setup-host.log");
+                ProductIdentity.DataFolderName, "Installer",
+                "viiper-setup-host.log");
         }
 
         internal static string GetInfrastructureActionsLogPath()
         {
             return Path.Combine(Environment.GetFolderPath(
                     Environment.SpecialFolder.CommonApplicationData),
-                "DS4Windows", "Installer", "infrastructure-actions.log");
+                ProductIdentity.DataFolderName, "Installer",
+                "infrastructure-actions.log");
         }
 
         private static void WriteInstallerHostLog(string message)
@@ -1833,7 +1836,7 @@ namespace DS4Windows
             if (string.IsNullOrWhiteSpace(helperPath) ||
                 !File.Exists(helperPath))
             {
-                failureMessage = "DS4Windows could not locate its elevated " +
+                failureMessage = "PureDS4 could not locate its elevated " +
                     "termination helper. No fallback executable was used.";
                 return false;
             }
@@ -2279,7 +2282,7 @@ namespace DS4Windows
             {
                 return (true,
                     "A ctxusbm kernel service with an unexpected driver " +
-                    "image is installed. DS4Windows cannot validate this " +
+                    "image is installed. PureDS4 cannot validate this " +
                     "USB filter safely, so VIIPER remains stopped.");
             }
 
@@ -2292,7 +2295,7 @@ namespace DS4Windows
             string conflictMessage =
                 "Citrix USB Monitor (ctxusbmon.sys) is enabled. " +
                 "It can crash Windows while USB/IP virtual controllers " +
-                "connect or disconnect. DS4Windows has paused VIIPER for " +
+                "connect or disconnect. PureDS4 has paused VIIPER for " +
                 "system safety. Install / Repair can disable only Citrix " +
                 "generic USB redirection; restart Windows afterward.";
             return (true, conflictMessage);

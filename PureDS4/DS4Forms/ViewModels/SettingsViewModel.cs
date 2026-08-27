@@ -518,8 +518,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
             if (runAtStartup && runStartProg)
             {
-                StartupMethods.MigrateLegacyStartProgEntry();
-
                 bool locChange = StartupMethods.CheckStartupExeLocation();
                 if (locChange)
                 {

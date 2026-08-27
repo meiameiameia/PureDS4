@@ -71,16 +71,19 @@
                     <ListViewItem>
                         <CheckBox x:Name="psTrigCk" Content="PS" Tag="PS" Click="ControlTriggerCheckBox_Click" />
                     </ListViewItem>
-                    <ListViewItem>
+                    <!-- Mute, Capture and the side buttons exist only on a DualSense.
+                         Collapsed rather than deleted so an imported special
+                         action keeps its saved trigger names. -->
+                    <ListViewItem Visibility="Collapsed">
                         <CheckBox x:Name="muteTrigCk" Content="Mute" Tag="Mute" Click="ControlTriggerCheckBox_Click" />
                     </ListViewItem>
-                    <ListViewItem>
+                    <ListViewItem Visibility="Collapsed">
                         <CheckBox x:Name="captureTrigCk" Content="Capture" Tag="Capture" Click="ControlTriggerCheckBox_Click" />
                     </ListViewItem>
-                    <ListViewItem>
+                    <ListViewItem Visibility="Collapsed">
                         <CheckBox x:Name="sideLTrigCk" Content="Side L" Tag="SideL" Click="ControlTriggerCheckBox_Click" />
                     </ListViewItem>
-                    <ListViewItem>
+                    <ListViewItem Visibility="Collapsed">
                         <CheckBox x:Name="sideRTrigCk" Content="Side R" Tag="SideR" Click="ControlTriggerCheckBox_Click" />
                     </ListViewItem>
                     <ListViewItem>
@@ -108,23 +111,25 @@
                         <CheckBox x:Name="r3TrigCk" Content="R3" Tag="R3" Click="ControlTriggerCheckBox_Click" />
                     </ListViewItem>
 
-                    <!-- START Extra buttons for DualSense Edge controller -->
-                    <ListViewItem>
+                    <!-- Controls that exist only on a DualSense or DualSense Edge. Kept
+                         collapsed rather than deleted so a special action imported
+                         from another product keeps its saved trigger names. -->
+                    <ListViewItem Visibility="Collapsed">
                         <CheckBox x:Name="fnLTrigCk" Content="Function L" Tag="Function Left" Click="ControlTriggerCheckBox_Click" />
                     </ListViewItem>
 
-                    <ListViewItem>
+                    <ListViewItem Visibility="Collapsed">
                         <CheckBox x:Name="fnRTrigCk" Content="Function R" Tag="Function Right" Click="ControlTriggerCheckBox_Click" />
                     </ListViewItem>
 
-                    <ListViewItem>
+                    <ListViewItem Visibility="Collapsed">
                         <CheckBox x:Name="bLPTrigCk" Content="Paddle L" Tag="Bottom Left Paddle" Click="ControlTriggerCheckBox_Click" />
                     </ListViewItem>
 
-                    <ListViewItem>
+                    <ListViewItem Visibility="Collapsed">
                         <CheckBox x:Name="bRPTrigCk" Content="Paddle R" Tag="Bottom Right Paddle" Click="ControlTriggerCheckBox_Click" />
                     </ListViewItem>
-                    <!-- END Extra buttons for DualSense Edge controller -->
+
 
                     <ListViewItem>
                         <CheckBox x:Name="leftTouchTrigCk" Content="Left Touch" Tag="Left Touch" Click="ControlTriggerCheckBox_Click" />
@@ -243,16 +248,19 @@
                     <ListViewItem>
                         <CheckBox x:Name="unloadPsTrigCk" Content="PS" Tag="PS" Click="ControlUnloadTriggerCheckBox_Click" />
                     </ListViewItem>
-                    <ListViewItem>
+                    <!-- Mute, Capture and the side buttons exist only on a DualSense.
+                         Collapsed rather than deleted so an imported special
+                         action keeps its saved trigger names. -->
+                    <ListViewItem Visibility="Collapsed">
                         <CheckBox x:Name="unloadMuteTrigCk" Content="Mute" Tag="Mute" Click="ControlUnloadTriggerCheckBox_Click" />
                     </ListViewItem>
-                    <ListViewItem>
+                    <ListViewItem Visibility="Collapsed">
                         <CheckBox x:Name="unloadCaptureTrigCk" Content="Capture" Tag="Capture" Click="ControlUnloadTriggerCheckBox_Click" />
                     </ListViewItem>
-                    <ListViewItem>
+                    <ListViewItem Visibility="Collapsed">
                         <CheckBox x:Name="unloadSideLTrigCk" Content="Side L" Tag="SideL" Click="ControlUnloadTriggerCheckBox_Click" />
                     </ListViewItem>
-                    <ListViewItem>
+                    <ListViewItem Visibility="Collapsed">
                         <CheckBox x:Name="unloadSideRTrigCk" Content="Side R" Tag="SideR" Click="ControlUnloadTriggerCheckBox_Click" />
                     </ListViewItem>
                     <ListViewItem>
@@ -280,20 +288,22 @@
                         <CheckBox x:Name="unloadR3TrigCk" Content="R3" Tag="R3" Click="ControlUnloadTriggerCheckBox_Click" />
                     </ListViewItem>
 
-                    <!-- START Extra buttons for DualSense Edge controller -->
-                    <ListViewItem>
+                    <!-- Controls that exist only on a DualSense or DualSense Edge. Kept
+                         collapsed rather than deleted so a special action imported
+                         from another product keeps its saved trigger names. -->
+                    <ListViewItem Visibility="Collapsed">
                         <CheckBox x:Name="unloadfnLTrigCk" Content="Function L" Tag="Function Left" Click="ControlUnloadTriggerCheckBox_Click" />
                     </ListViewItem>
-                    <ListViewItem>
+                    <ListViewItem Visibility="Collapsed">
                         <CheckBox x:Name="unloadfnRTrigCk" Content="Function R" Tag="Function Right" Click="ControlUnloadTriggerCheckBox_Click" />
                     </ListViewItem>
-                    <ListViewItem>
+                    <ListViewItem Visibility="Collapsed">
                         <CheckBox x:Name="unloadbLPTrigCk" Content="Paddle L" Tag="Bottom Left Paddle" Click="ControlUnloadTriggerCheckBox_Click" />
                     </ListViewItem>
-                    <ListViewItem>
+                    <ListViewItem Visibility="Collapsed">
                         <CheckBox x:Name="unloadbRPTrigCk" Content="Paddle R" Tag="Bottom Right Paddle" Click="ControlUnloadTriggerCheckBox_Click" />
                     </ListViewItem>
-                    <!-- END Extra buttons for DualSense Edge controller -->
+
 
                     <ListViewItem>
                         <CheckBox x:Name="unloadLeftTouchTrigCk" Content="Left Touch" Tag="Left Touch" Click="ControlUnloadTriggerCheckBox_Click" />

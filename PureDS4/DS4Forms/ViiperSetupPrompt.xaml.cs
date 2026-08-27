@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 
 namespace DS4WinWPF.DS4Forms
@@ -106,7 +106,7 @@ namespace DS4WinWPF.DS4Forms
                     Heading = "Game output needs repair",
                     Summary = usbipReplacementRequired
                         ? "A required Windows component must be safely replaced before game output can start."
-                        : "The installed game-output components do not match this DS4Windows package.",
+                        : "The installed game-output components do not match this PureDS4 package.",
                     RequirementsHeading = "What setup will do",
                     Requirements = usbipReplacementRequired
                         ? "• Safely replace the unsupported Windows component\n" +

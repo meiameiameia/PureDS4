@@ -109,7 +109,7 @@ namespace DS4WinWPF
         private static LoggerHolder logHolder;
 
         private MemoryMappedFile ipcClassNameMMF = null; // MemoryMappedFile for inter-process communication used to hold className of DS4Form window
-        private MemoryMappedFile ipcResultDataMMF = null; // MemoryMappedFile for inter-process communication used to exchange string result data between cmdline client process and the background running DS4Windows app
+        private MemoryMappedFile ipcResultDataMMF = null; // MemoryMappedFile for inter-process communication used to exchange string result data between cmdline client process and the background running PureDS4 app
 
         private static Dictionary<DS4Windows.AppThemeChoice, string> themeLocs = new
             Dictionary<DS4Windows.AppThemeChoice, string>()
@@ -185,7 +185,7 @@ namespace DS4WinWPF
             }
             catch
             {
-                // Keep startup going. A bad working directory should not block DS4Windows.
+                // Keep startup going. A bad working directory should not block PureDS4.
             }
 
             if (exitApp)
@@ -267,7 +267,7 @@ namespace DS4WinWPF
             bool firstRun = DS4Windows.Global.firstRun;
 
             // Could not find unique profile location; does not exist or multiple places.
-            // Advise user to specify where DS4Windows should save its configuation files
+            // Advise user to specify where PureDS4 should save its configuation files
             // and profiles
             if (firstRun)
             {
@@ -294,9 +294,9 @@ namespace DS4WinWPF
             logHolder = new LoggerHolder(rootHub);
             Logger logger = logHolder.Logger;
             string version = DS4Windows.Global.exeDisplayVersion;
-            logger.Info($"DS4Windows version {version}");
-            logger.Info($"DS4Windows exe file: {DS4Windows.Global.exeFileName}");
-            logger.Info($"DS4Windows Assembly Architecture: {(Environment.Is64BitProcess ? "x64" : "x86")}");
+            logger.Info($"{DS4Windows.ProductIdentity.Name} version {version}");
+            logger.Info($"{DS4Windows.ProductIdentity.Name} exe file: {DS4Windows.Global.exeFileName}");
+            logger.Info($"{DS4Windows.ProductIdentity.Name} Assembly Architecture: {(Environment.Is64BitProcess ? "x64" : "x86")}");
             logger.Info($"OS Version: {Environment.OSVersion}");
             logger.Info($"OS Product Name: {DS4Windows.Util.GetOSProductName()}");
             logger.Info($"OS Release ID: {DS4Windows.Util.GetOSReleaseId()}");
@@ -354,8 +354,8 @@ namespace DS4WinWPF
             else
             {
                 MessageBox.Show(
-                    "This build cannot create VIIPER virtual controllers. Install the x64 DS4Windows build on 64-bit Windows.",
-                    "DS4Windows virtual controller setup",
+                    "This build cannot create VIIPER virtual controllers. Install the x64 PureDS4 build on 64-bit Windows.",
+                    "PureDS4 virtual controller setup",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
             }
 
@@ -431,9 +431,9 @@ namespace DS4WinWPF
             try
             {
                 MessageBox.Show(
-                    "Another DS4Windows instance is already running under a different permission level. " +
+                    "Another PureDS4 instance is already running under a different permission level. " +
                     "Open it from the notification area, or close the existing PureDS4.exe in Task Manager and try again.",
-                    "DS4Windows is already running", MessageBoxButton.OK,
+                    "PureDS4 is already running", MessageBoxButton.OK,
                     MessageBoxImage.Information);
             }
             catch { }
@@ -520,7 +520,7 @@ namespace DS4WinWPF
             try
             {
                 logHolder?.Logger?.Fatal(exception,
-                    $"DS4Windows failed during {phase}");
+                    $"{DS4Windows.ProductIdentity.Name} failed during {phase}");
                 LogManager.Flush(TimeSpan.FromSeconds(1));
             }
             catch { }
@@ -536,7 +536,7 @@ namespace DS4WinWPF
             {
                 MessageBox.Show(
                     StartupFailureReporter.BuildUserMessage(logPath),
-                    "DS4Windows startup failed", MessageBoxButton.OK,
+                    "PureDS4 startup failed", MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
             catch
@@ -586,12 +586,12 @@ namespace DS4WinWPF
                         }
                     }
                     catch { }
-                    MessageBox.Show("Copy complete, please relaunch DS4Windows and remove settings from Program Directory",
+                    MessageBox.Show("Copy complete, please relaunch PureDS4 and remove settings from Program Directory",
                         DS4Windows.ProductIdentity.Name);
                 }
                 else
                 {
-                    MessageBox.Show("DS4Windows cannot edit settings here, This will now close",
+                    MessageBox.Show("PureDS4 cannot edit settings here, This will now close",
                         DS4Windows.ProductIdentity.Name);
                 }
 
@@ -667,7 +667,8 @@ namespace DS4WinWPF
                             // Query.device# (1..4) command returns a string result via memory mapped file. The cmd is sent to the background DS4Windows 
                             // process (via WM_COPYDATA wnd msg), then this client process waits for the availability of the result and prints it to console output pipe.
                             // Use mutex obj to make sure that concurrent client calls won't try to write and read the same MMF result file at the same time.
-                            ipcSingleTaskMutex = new Mutex(false, "DS4Windows_IPCResultData_SingleTaskMtx");
+                            ipcSingleTaskMutex = new Mutex(false,
+                                DS4Windows.ProductIdentity.IpcResultDataSingleTaskMutexName);
                             try
                             {
                                 bOwnsMutex = ipcSingleTaskMutex.WaitOne(10000);
@@ -823,7 +824,7 @@ namespace DS4WinWPF
                 // a null MainWindow dereference and killing the hidden process.
                 StartupFailureReporter.Write(
                     new InvalidOperationException(
-                        "A second launch signaled DS4Windows before any startup window existed."),
+                        "A second launch signaled PureDS4 before any startup window existed."),
                     "single-instance activation",
                     DS4Windows.Global.appdatapath);
                 return;
@@ -941,7 +942,7 @@ namespace DS4WinWPF
 
         public void WriteIPCResultDataMMF(string dataStr)
         {
-            // The background DS4Windows process calls this method to write out the result of "-command QueryProfile.device#" command.
+            // The background PureDS4 process calls this method to write out the result of "-command QueryProfile.device#" command.
             // The cmdline client process reads the result from the DS4Windows_IPCResultData.dat MMF file and sends the result to console output pipe.
             MemoryMappedFile mmf = null;
             MemoryMappedViewAccessor mma = null;
