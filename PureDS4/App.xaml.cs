@@ -271,6 +271,14 @@ namespace DS4WinWPF
             // and profiles
             if (firstRun)
             {
+                // No configuration exists yet to read a saved theme choice
+                // from, and the general ChangeTheme call below does not run
+                // until after Global.Load(). Without this, the very first
+                // window PureDS4 ever shows renders in the plain WPF default
+                // instead of following the OS light/dark setting like every
+                // window after it.
+                ChangeTheme(DS4Windows.AppThemeChoice.Default, false);
+
                 DS4Forms.SaveWhere savewh =
                     new DS4Forms.SaveWhere(DS4Windows.Global.multisavespots);
                 ShowStartupDialog(savewh);
