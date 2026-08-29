@@ -279,6 +279,20 @@ namespace DS4WinWPF
                 // window after it.
                 ChangeTheme(DS4Windows.AppThemeChoice.Default, false);
 
+                // PureDS4 replaces DS4Windows and DS4Windows Reworked
+                // rather than running beside either one (see AGENTS.md's
+                // replacement flow, step 2). If the old application is
+                // still running, require it closed through this explicit,
+                // owner-visible step before asking where PureDS4 should
+                // store its own data. This never closes the other
+                // application automatically.
+                if (!RequireLegacyApplicationClosed())
+                {
+                    runShutdown = false;
+                    Current.Shutdown();
+                    return;
+                }
+
                 DS4Forms.SaveWhere savewh =
                     new DS4Forms.SaveWhere(DS4Windows.Global.multisavespots);
                 ShowStartupDialog(savewh);
@@ -418,6 +432,45 @@ namespace DS4WinWPF
             StartupDiag(logger, "MainWindow.LateChecks begin");
             window.LateChecks(parser);
             StartupDiag(logger, "MainWindow.LateChecks returned");
+        }
+
+        /// <summary>
+        /// Step 2 of the replacement flow: block on an explicit,
+        /// owner-visible window while the old DS4Windows or DS4Windows
+        /// Reworked process is running, giving the user the chance to
+        /// close it and check again. Returns true once the process is no
+        /// longer running (including when it never was); returns false if
+        /// the user chose to exit PureDS4 instead.
+        /// </summary>
+        private bool RequireLegacyApplicationClosed()
+        {
+            DS4Windows.LegacyInstallationSurvey survey = ScanLegacyInstallation();
+            bool previousCheckStillFoundItRunning = false;
+            while (survey.RequiresApplicationClosed)
+            {
+                string detectedProductName =
+                    DS4Windows.LegacyApplicationGate.DescribeDetectedProduct(
+                        survey);
+                DS4Forms.LegacyApplicationRunningWindow dialog =
+                    new DS4Forms.LegacyApplicationRunningWindow(
+                        detectedProductName, previousCheckStillFoundItRunning);
+                ShowStartupDialog(dialog);
+                if (dialog.ExitRequested)
+                {
+                    return false;
+                }
+
+                survey = ScanLegacyInstallation();
+                previousCheckStillFoundItRunning = true;
+            }
+
+            return true;
+        }
+
+        private static DS4Windows.LegacyInstallationSurvey ScanLegacyInstallation()
+        {
+            return DS4Windows.LegacyInstallationDetector.Scan(
+                new DS4Windows.Win32LegacyInstallationEnvironment());
         }
 
         private static void ShowStartupDialog(Window dialog)

@@ -1,0 +1,34 @@
+<Window x:Class="DS4WinWPF.DS4Forms.LegacyApplicationRunningWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DS4WinWPF.DS4Forms"
+        mc:Ignorable="d"
+        Title="PureDS4 found another controller application running"
+        SizeToContent="Height" Width="560" MinWidth="520"
+        ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
+        Style="{DynamicResource WindowStyle}">
+    <StackPanel Margin="20">
+        <TextBlock x:Name="headingText" Style="{StaticResource FoundationPageTitleStyle}"
+                   TextWrapping="Wrap" />
+        <TextBlock x:Name="explanationText" Margin="0,6,0,0" TextWrapping="Wrap"
+                   Style="{StaticResource FoundationSecondaryTextStyle}" />
+        <TextBlock x:Name="statusText" Margin="0,10,0,0" TextWrapping="Wrap"
+                   Style="{StaticResource FoundationSecondaryTextStyle}"
+                   Visibility="Collapsed" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                    Margin="0,20,0,0">
+            <Button x:Name="exitButton" Content="Exit PureDS4"
+                    Click="ExitBtn_Click" MinWidth="120" MinHeight="32"
+                    Style="{StaticResource FoundationButtonStyle}"
+                    AutomationProperties.HelpText="Close PureDS4 without checking again." />
+            <Button x:Name="checkAgainButton" Content="Check Again"
+                    Click="CheckAgainBtn_Click" MinWidth="120" MinHeight="32"
+                    Margin="10,0,0,0"
+                    Style="{StaticResource FoundationPrimaryButtonStyle}"
+                    AutomationProperties.HelpText="Check again after closing the other application." />
+        </StackPanel>
+    </StackPanel>
+</Window>
