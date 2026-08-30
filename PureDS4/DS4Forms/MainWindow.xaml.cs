@@ -1180,6 +1180,16 @@ Suspend support not enabled.", true);
             aboutWin.ShowDialog();
         }
 
+        private void ImportLegacyProfilesBtn_Click(object sender,
+            RoutedEventArgs e)
+        {
+            LegacyProfileImportWindow importWin = new LegacyProfileImportWindow
+            {
+                Owner = this,
+            };
+            importWin.ShowDialog();
+        }
+
         private void StartStopBtn_Click(object sender, RoutedEventArgs e)
         {
             ChangeService();

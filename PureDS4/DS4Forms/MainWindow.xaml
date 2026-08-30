@@ -1040,6 +1040,13 @@
                                     <Button Grid.Column="1" Content="Open" Margin="12,0,0,0" Click="AboutBtn_Click" Style="{StaticResource FoundationButtonStyle}" />
                                 </Grid>
                             </Border>
+                            <Border Style="{StaticResource FoundationPropertyGroupStyle}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel><TextBlock Text="Import from DS4Windows" Style="{StaticResource FoundationGroupTitleStyle}" /><TextBlock Text="Copy game profiles from an existing DS4Windows or DS4Windows Reworked installation into PureDS4. DS4Windows' own files are never changed or removed." Style="{StaticResource FoundationSecondaryTextStyle}" /></StackPanel>
+                                    <Button Grid.Column="1" Content="Open" Margin="12,0,0,0" Click="ImportLegacyProfilesBtn_Click" Style="{StaticResource FoundationButtonStyle}" />
+                                </Grid>
+                            </Border>
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
