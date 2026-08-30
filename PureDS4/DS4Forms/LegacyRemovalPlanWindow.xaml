@@ -35,10 +35,24 @@
                    Style="{StaticResource FoundationSecondaryTextStyle}"
                    Visibility="Collapsed" />
 
+        <TextBlock x:Name="blockedText" Margin="0,14,0,0" TextWrapping="Wrap"
+                   Style="{StaticResource FoundationSecondaryTextStyle}"
+                   Visibility="Collapsed" />
+
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
                     Margin="0,20,0,0">
+            <Button x:Name="uninstallButton" Content="Uninstall DS4Windows..."
+                    Click="UninstallBtn_Click" MinWidth="180" MinHeight="32"
+                    Visibility="Collapsed"
+                    Style="{StaticResource FoundationButtonStyle}"
+                    AutomationProperties.HelpText="Starts Windows' own uninstaller for the detected installation. PureDS4 does not remove anything itself." />
+            <Button x:Name="recheckButton" Content="Re-check"
+                    Click="RecheckBtn_Click" MinWidth="100" MinHeight="32"
+                    Margin="10,0,0,0" Visibility="Collapsed"
+                    Style="{StaticResource FoundationButtonStyle}" />
             <Button x:Name="closeButton" Content="Close"
                     Click="CloseBtn_Click" MinWidth="100" MinHeight="32"
+                    Margin="10,0,0,0"
                     Style="{StaticResource FoundationPrimaryButtonStyle}" />
         </StackPanel>
     </StackPanel>

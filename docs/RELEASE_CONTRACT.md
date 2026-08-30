@@ -79,13 +79,15 @@ from the Tools tab. Separately, `ViiperSetupManager` already refuses to
 start PureDS4's own VIIPER against a foreign viiper.exe running from a
 different path (including an old installation's own copy) on every launch —
 this predates the replacement flow's naming but satisfies the same
-ownership requirement for virtual-output activation. A read-only removal
-plan — listing exactly what a full removal would involve, built from the
-same detection survey — is also available from the Tools tab; it describes
-and never executes, so actually uninstalling the old product, and the
-rollback, reboot, and recovery behavior around doing so, remain owner
-decisions and are not implemented yet. Auto Profiles/Actions/Controller
-Configs import is not implemented yet either.
+ownership requirement for virtual-output activation. A removal plan — listing
+exactly what a full removal would involve, built from the same detection
+survey — is available from the Tools tab, and can start the predecessor's own
+registered uninstaller after an explicit confirmation. PureDS4 never removes
+another product's files, registry keys, or tasks itself: Windows Installer
+owns the elevation, transaction, and rollback, and PureDS4 declines to start
+any command it cannot read as an uninstall rather than guessing. Auto
+Profiles/Actions/Controller Configs import is not implemented yet, and the
+uninstall hand-off has not yet been exercised against a real installation.
 
 ## Version contract
 

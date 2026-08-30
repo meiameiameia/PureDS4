@@ -1,19 +1,28 @@
-# Installing PureDS4, and getting back out
+# Migrating to PureDS4 from DS4Windows
 
-PureDS4 is intended to replace DS4Windows or an earlier DS4Windows Reworked
-installation rather than run beside one. That is the destination, not a
-precondition: the two products own entirely separate files, registry keys,
-configuration, and scheduled tasks, so both can be *installed* at once
-while you decide. What they cannot do is *run* at once.
+PureDS4 replaces DS4Windows or an earlier DS4Windows Reworked
+installation. It is not a companion to one, and running both is not a
+supported configuration: DS4Windows supports everything PureDS4 supports
+and more, so keeping both installed gains nothing and leaves two products
+competing for the same controller.
 
-This document covers installing PureDS4 while a predecessor is still
-present, and exactly how to get back to it if you decide not to keep
-PureDS4.
+PureDS4 exists for people who want the narrower tool — DualShock hardware,
+without DualSense features or the complexity that comes with them. If you
+need DualSense, DualSense Edge, Switch Pro, or Joy-Con support, use
+[DS4Windows](https://github.com/hbashton/DS4Windows) instead; PureDS4 will
+not serve you.
 
-## What PureDS4 owns
+This document covers migrating from a predecessor, and how to get back if
+you change your mind.
 
-Nothing in this column overlaps a DS4Windows or DS4Windows Reworked
-installation, which is what makes installing alongside one safe.
+> During a migration both products are briefly present on the machine. That
+> is a transitional state on the way to removing the old one, not a
+> destination.
+
+## Why the two can be installed at once, briefly
+
+Nothing PureDS4 owns overlaps a predecessor, which is what makes the
+transition survivable rather than a leap:
 
 | Resource | PureDS4 | Predecessor |
 | --- | --- | --- |
@@ -23,169 +32,153 @@ installation, which is what makes installing alongside one safe.
 | Scheduled tasks | `RunPureDS4`, `RunPureDS4VIIPER` | `RunDS4Windows`, `RunVIIPER` |
 | Installer upgrade code | its own | its own |
 
-Because the Windows Installer upgrade codes differ, installing PureDS4
-cannot upgrade over, modify, or remove the other product's package. It is
-registered in *Apps and Features* as its own entry.
+Because the upgrade codes differ, installing PureDS4 cannot upgrade over or
+silently modify the other product's package. That separation exists so a
+migration can be *finished* deliberately, and so a failed one can be backed
+out — not so the two can live together indefinitely.
 
-## What PureDS4 shares and will not remove
+They cannot both *run*. PureDS4 refuses to start while a `DS4Windows`
+process is running, and checks this on every launch.
+
+## Shared components
 
 Three pieces are machine-wide infrastructure that any DS4Windows-derived
-mapper uses. PureDS4 installs them only when they are missing, and its own
-uninstall deliberately leaves them behind, because a predecessor may still
-depend on them:
+mapper uses. PureDS4 installs them only when missing, and its own uninstall
+deliberately leaves them behind:
 
-- **HidHide** — hides the physical controller from games so they see only
-  the virtual pad.
+- **HidHide** — hides the physical controller so games see only the virtual
+  pad.
 - **USB-IP** — the transport VIIPER uses to publish a virtual controller.
-- **FakerInput** — optional, and **not** installed by default.
+- **FakerInput** — optional, and not installed by default.
 
-If your machine already has these at the versions PureDS4 expects, the
-installer detects them and skips them. Nothing is downgraded or replaced.
+**VIIPER** is shared too, and only one copy can own the backend at a time.
+See the handover section below.
 
-**VIIPER** is the one shared component that needs care, and it has its own
-section below.
+## Migrating
 
-## Before installing
-
-1. **Clear any pending reboot.** Driver-level infrastructure can leave a
-   machine mid-transaction. Check:
-
-   ```powershell
-   Get-ItemProperty 'HKLM:\SOFTWARE\DS4Windows' -ErrorAction SilentlyContinue |
-       Select-Object InfrastructureState, InfrastructureStateUtc
-   ```
-
-   If `InfrastructureState` is `RebootPending`, reboot before continuing.
-   Installing or validating on top of a pending reboot produces results
-   that cannot be trusted.
-
-2. **Close the predecessor completely**, including its notification-area
-   icon. PureDS4 checks for this at every launch and will refuse to start
-   while a `DS4Windows` process is running — it will not close it for you.
-
-3. **Decide about its scheduled tasks.** If `RunDS4Windows` is enabled, the
-   old application starts itself at logon and will collide with PureDS4
-   every day. Check with:
-
-   ```powershell
-   Get-ScheduledTask -TaskName RunDS4Windows, RunVIIPER -ErrorAction SilentlyContinue |
-       Select-Object TaskName, State
-   ```
-
-   Disabling a predecessor's task is a change to *its* installation, so
-   PureDS4 never does it for you. Disable it yourself from Task Scheduler
-   if you want PureDS4 to be the one that starts at logon, and re-enable it
-   if you roll back.
-
-4. **Keep a note of your fallback.** Write down where the working
-   predecessor lives before you change anything.
-
-## Installing
-
-Run `PureDS4_<version>_Setup_x64.exe`. It is currently unsigned, so Windows
-SmartScreen will warn; that is expected for a build that has not been
-through a signing decision.
-
-The installer will:
-
-1. Quiesce any running PureDS4 and VIIPER (preflight).
-2. Install PureDS4's own files, registry entry, and scheduled tasks.
-3. Install VIIPER and USB-IP **only if** the expected versions are absent.
-4. Install HidHide **only if** absent.
-5. Optionally create a desktop shortcut.
-
-## The VIIPER handover
-
-VIIPER is the backend that publishes the virtual controller, and only one
-copy can own that role at a time. PureDS4 ships its own pinned copy and
-verifies it by SHA-256.
-
-If a `viiper.exe` from a different path — typically a predecessor's copy —
-is running when PureDS4 starts, PureDS4 stops and tells you. It will offer
-an elevated prompt to close that process so it can start its own. This is a
-runtime handover, not a removal: the other product's VIIPER files are left
-untouched, and going back to that product simply reverses the handover.
-
-To see which copy is running:
+### 1. Clear any pending reboot
 
 ```powershell
-Get-Process viiper -ErrorAction SilentlyContinue |
-    Select-Object Id, Path, StartTime
+Get-ItemProperty 'HKLM:\SOFTWARE\DS4Windows' -ErrorAction SilentlyContinue |
+    Select-Object InfrastructureState, InfrastructureStateUtc
 ```
 
-Note that a predecessor's VIIPER may offer to update itself. PureDS4 pins a
-specific VIIPER version by hash, so letting a shared copy self-update can
-cause PureDS4 to stop trusting it and install its own instead.
+If `InfrastructureState` is `RebootPending`, reboot before going further.
+Installing or validating on top of a pending driver transaction produces
+results that cannot be trusted.
 
-## Confirming which build is running
+### 2. Close the predecessor completely
 
-This matters more than it sounds. With two products installed, it is easy
-to validate the wrong one:
+Including its notification-area icon. PureDS4 will not close it for you,
+and will refuse to start while it runs.
+
+### 3. Install PureDS4
+
+Run the setup executable. Unsigned builds will raise a SmartScreen warning.
+The installer adds PureDS4's own files, registry entry, and shortcuts, and
+installs VIIPER, USB-IP, or HidHide only if they are absent.
+
+The installer does **not** touch the predecessor. It has no knowledge of it
+at all.
+
+### 4. Bring your profiles across
+
+**Tools → Import from DS4Windows.** This copies game profiles into PureDS4.
+It never moves, edits, or deletes the originals, and never overwrites a
+PureDS4 profile of the same name.
+
+Do this before removing the predecessor if you like, but you do not have to:
+uninstalling it leaves `%AppData%\DS4Windows` in place, so the profiles
+remain importable afterwards.
+
+### 5. Remove the predecessor
+
+**Tools → DS4Windows removal plan.** This lists exactly what removal
+involves — the installed program files, registry key, scheduled tasks, and
+each Add/Remove Programs entry with its own registered command — and can
+start the uninstaller for you.
+
+PureDS4 does not perform the removal. It starts the uninstall command the
+other product registered for itself, so Windows Installer owns the
+elevation prompt, the progress UI, the transaction, and the rollback. That
+is the same code path as removing it from Windows' Apps list by hand.
+
+Where a product registers several entries — a bundle plus the MSI beneath
+it — PureDS4 selects the one that genuinely uninstalls, and declines to
+start anything it cannot read as an uninstall command rather than guessing.
+
+Your profiles and settings in `%AppData%\DS4Windows` are not deleted by
+this. Removing that folder, if you ever want to, stays a separate manual
+decision.
+
+### 6. Finish the handover
+
+- **VIIPER**: if a `viiper.exe` from the old path is still running, PureDS4
+  stops and offers an elevated prompt to close it so its own pinned copy can
+  take over. Note that a predecessor's VIIPER may offer to update itself;
+  PureDS4 pins a specific version by hash, so a self-updated shared copy can
+  stop being trusted.
+- **Startup**: enable *Run at startup* in PureDS4's settings if you want it
+  to launch at logon. This is what creates the `RunPureDS4` task — the
+  installer does not create it.
+
+### 7. Verify
+
+Confirm which build is actually running before trusting any result:
 
 ```powershell
 Get-Process PureDS4, DS4Windows -ErrorAction SilentlyContinue |
     Select-Object ProcessName, Id, Path
 ```
 
-The path must be the build you intend to test. See
-`docs/HARDWARE_VALIDATION.md` for the full controller checklist to run once
-you are certain.
+Then work through `docs/HARDWARE_VALIDATION.md` with the controller.
 
 ## Rolling back
 
-Three levels, smallest first. Try them in order.
+Three levels, smallest first.
 
-### 1. Just go back, keep both installed
+### 1. Before you have removed the predecessor
 
-Nothing to uninstall. Close PureDS4, reopen the predecessor, and approve
-its own VIIPER prompt if it asks. Re-enable `RunDS4Windows` in Task
-Scheduler if you disabled it. Your predecessor's profiles were never
-touched — PureDS4 reads them at most to import copies, and refuses by
-design to use its configuration directory as its own.
-
-This is the fastest path and the one to reach for first.
+Close PureDS4 and reopen the other product, approving its own VIIPER prompt
+if it asks. Re-enable `RunDS4Windows` if you disabled it. Its profiles were
+never touched. This is the fastest route, and the reason the migration is
+ordered with removal last.
 
 ### 2. Uninstall PureDS4
 
-*Apps and Features* → **PureDS4** → Uninstall, or re-run the setup
-executable and choose Uninstall. This removes PureDS4's program files,
-registry key, scheduled tasks, and shortcut.
+*Apps and Features* → **PureDS4** → Uninstall. This removes PureDS4's
+program files, registry key, scheduled tasks, and shortcut.
 
-It deliberately **does not** remove:
+It deliberately does **not** remove:
 
 - HidHide, USB-IP, or FakerInput — a predecessor may still need them;
-- `%AppData%\PureDS4`, your PureDS4 profiles and settings, so a later
-  reinstall finds them again. Delete that folder yourself if you want it
-  gone.
+- `%AppData%\PureDS4`, so a later reinstall finds your settings again.
 
-A reboot may be requested if shared infrastructure was mid-transition.
+If you have already removed the predecessor, reinstall it from its own
+installer; PureDS4 cannot restore it.
 
 ### 3. Full recovery
 
-If the machine ends up in a state where neither product works — usually a
-half-finished driver transaction rather than an application fault:
+If neither product works — usually a half-finished driver transaction
+rather than an application fault:
 
-1. Reboot first. A pending driver transaction resolves on reboot, and many
-   apparent failures disappear here.
-2. Check the drivers are still present:
+1. Reboot first. Many apparent failures resolve here.
+2. Confirm the drivers survive:
 
    ```powershell
    pnputil /enum-drivers | Select-String usbip
    ```
 
-3. Repair the predecessor through its own installer, not PureDS4's. Each
-   product only repairs what it owns.
-4. Collect evidence before changing more: `%AppData%\PureDS4\Logs`
-   (including `startup_failure.log` if present) and the equivalent folder
-   for the predecessor.
+3. Repair each product through its own installer. Each repairs only what it
+   owns.
+4. Collect evidence before changing more: `%AppData%\PureDS4\Logs`,
+   including `startup_failure.log` if present.
 
-## Preserving your data
+## What PureDS4 will never do to another product
 
-PureDS4 never deletes another product's configuration, and never uses that
-configuration directory as its own — this is enforced in code, not just by
-convention. Importing profiles from a predecessor copies them; it never
-moves, edits, or removes the originals, and never overwrites a PureDS4
-profile that already exists under the same name.
-
-The reverse is also worth knowing: uninstalling a predecessor through its
-own uninstaller will not remove `%AppData%\PureDS4`.
+- Delete its files, registry keys, or scheduled tasks directly. Removal
+  always runs the other product's own uninstaller.
+- Write to its configuration directory, or adopt that directory as PureDS4's
+  own. This is enforced in code.
+- Modify or delete its profiles. Import copies; it never writes back.
+- Close it automatically. PureDS4 asks you to close it and re-checks.
