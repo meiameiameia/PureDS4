@@ -992,6 +992,14 @@ namespace DS4Windows
 
         public static void SaveWhere(string path)
         {
+            // Step 3 of the replacement flow in AGENTS.md: this is the one
+            // place PureDS4 decides where its own configuration lives.
+            // Refuse to point it at DS4Windows' configuration directory
+            // instead of silently risking that data the next time PureDS4
+            // saves. See LegacyConfigurationGuard for why this should never
+            // trip in practice.
+            LegacyConfigurationGuard.EnsureNotLegacyConfigurationPath(path);
+
             appdatapath = path;
             m_Config.m_Profile = appdatapath + "\\Profiles.xml";
             m_Config.m_Actions = appdatapath + "\\Actions.xml";

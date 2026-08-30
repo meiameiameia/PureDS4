@@ -70,7 +70,12 @@ Ordinary preference changes must never adopt, rename, retarget, or delete
 another product's shortcuts, tasks, configuration, or backend. Detecting the
 old product, requiring it to close, preserving or archiving its configuration,
 importing profiles read-only, and removing it belong to an explicit,
-owner-visible replacement flow. That flow is not implemented yet.
+owner-visible replacement flow. Read-only detection and a first-run gate that
+blocks while the old application is still running are implemented and
+test-covered; PureDS4's own configuration path is also enforced never to
+resolve to the old product's configuration directory. Read-only profile
+import, activation ordering, and uninstall/rollback/recovery are not
+implemented yet.
 
 ## Version contract
 
