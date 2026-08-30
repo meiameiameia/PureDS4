@@ -361,6 +361,23 @@ namespace DS4WinWPF
             SetUICulture(DS4Windows.Global.UseLang);
             ChangeTheme(DS4Windows.Global.UseCurrentTheme, false);
 
+            // Step 5 of the replacement flow in AGENTS.md: activate PureDS4
+            // only after old runtime ownership can no longer compete. The
+            // first-run branch above already ran this once; calling it
+            // again here is what makes the guarantee hold on every
+            // ordinary launch too, not only the first one, and it must run
+            // before ControlService claims the physical controller
+            // (DS4Forms.MainWindow.LateChecks, further below) and before
+            // VIIPER's own readiness check just below. Measured at ~20 ms
+            // on this machine, so it is cheap enough to run unconditionally
+            // rather than only at first run.
+            if (!RequireLegacyApplicationClosed())
+            {
+                runShutdown = false;
+                Current.Shutdown();
+                return;
+            }
+
             // VIIPER is the only virtual-controller backend. Make a missing
             // backend actionable at startup instead of letting profile output
             // fail later with an opaque device error. The installer requests

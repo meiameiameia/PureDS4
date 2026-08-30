@@ -70,11 +70,17 @@ Ordinary preference changes must never adopt, rename, retarget, or delete
 another product's shortcuts, tasks, configuration, or backend. Detecting the
 old product, requiring it to close, preserving or archiving its configuration,
 importing profiles read-only, and removing it belong to an explicit,
-owner-visible replacement flow. Read-only detection and a first-run gate that
-blocks while the old application is still running are implemented and
-test-covered; PureDS4's own configuration path is also enforced never to
-resolve to the old product's configuration directory. Read-only profile
-import, activation ordering, and uninstall/rollback/recovery are not
+owner-visible replacement flow. Read-only detection and a gate that blocks
+while the old application's process is running are implemented,
+test-covered, and run on every launch, not only the first one; PureDS4's own
+configuration path is enforced never to resolve to the old product's
+configuration directory; and read-only import of game profiles is available
+from the Tools tab. Separately, `ViiperSetupManager` already refuses to
+start PureDS4's own VIIPER against a foreign viiper.exe running from a
+different path (including an old installation's own copy) on every launch —
+this predates the replacement flow's naming but satisfies the same
+ownership requirement for virtual-output activation. Auto Profiles/Actions/
+Controller Configs import and uninstall/rollback/recovery are not
 implemented yet.
 
 ## Version contract
