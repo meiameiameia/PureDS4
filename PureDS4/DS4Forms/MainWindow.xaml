@@ -1047,6 +1047,13 @@
                                     <Button Grid.Column="1" Content="Open" Margin="12,0,0,0" Click="ImportLegacyProfilesBtn_Click" Style="{StaticResource FoundationButtonStyle}" />
                                 </Grid>
                             </Border>
+                            <Border Style="{StaticResource FoundationPropertyGroupStyle}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel><TextBlock Text="DS4Windows removal plan" Style="{StaticResource FoundationGroupTitleStyle}" /><TextBlock Text="See exactly what removing a detected DS4Windows or DS4Windows Reworked installation would involve. This only describes; it does not remove anything." Style="{StaticResource FoundationSecondaryTextStyle}" /></StackPanel>
+                                    <Button Grid.Column="1" Content="Open" Margin="12,0,0,0" Click="ShowLegacyRemovalPlanBtn_Click" Style="{StaticResource FoundationButtonStyle}" />
+                                </Grid>
+                            </Border>
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>

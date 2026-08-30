@@ -79,9 +79,13 @@ from the Tools tab. Separately, `ViiperSetupManager` already refuses to
 start PureDS4's own VIIPER against a foreign viiper.exe running from a
 different path (including an old installation's own copy) on every launch —
 this predates the replacement flow's naming but satisfies the same
-ownership requirement for virtual-output activation. Auto Profiles/Actions/
-Controller Configs import and uninstall/rollback/recovery are not
-implemented yet.
+ownership requirement for virtual-output activation. A read-only removal
+plan — listing exactly what a full removal would involve, built from the
+same detection survey — is also available from the Tools tab; it describes
+and never executes, so actually uninstalling the old product, and the
+rollback, reboot, and recovery behavior around doing so, remain owner
+decisions and are not implemented yet. Auto Profiles/Actions/Controller
+Configs import is not implemented yet either.
 
 ## Version contract
 

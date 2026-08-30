@@ -1190,6 +1190,16 @@ Suspend support not enabled.", true);
             importWin.ShowDialog();
         }
 
+        private void ShowLegacyRemovalPlanBtn_Click(object sender,
+            RoutedEventArgs e)
+        {
+            LegacyRemovalPlanWindow planWin = new LegacyRemovalPlanWindow
+            {
+                Owner = this,
+            };
+            planWin.ShowDialog();
+        }
+
         private void StartStopBtn_Click(object sender, RoutedEventArgs e)
         {
             ChangeService();
