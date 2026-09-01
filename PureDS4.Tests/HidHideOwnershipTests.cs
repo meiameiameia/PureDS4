@@ -171,6 +171,172 @@ namespace DS4WindowsTests
         }
 
         [TestMethod]
+        public void WhitelistReconciliationRemovesOnlyProvenMissingOwnedPaths()
+        {
+            const string missingOwned =
+                @"\Device\HarddiskVolume1\PureDS4\old.exe";
+            const string presentOwned =
+                @"\Device\HarddiskVolume1\PureDS4\current.exe";
+            const string unowned =
+                @"\Device\HarddiskVolume1\Other\missing.exe";
+
+            HidHideWhitelistReconciliationPlan plan =
+                HidHideWhitelistReconciliationPolicy.Create(
+                    new[] { missingOwned, presentOwned, unowned },
+                    new[] { missingOwned, presentOwned },
+                    path => path == missingOwned
+                        ? HidHideOwnedApplicationPathState.Missing
+                        : HidHideOwnedApplicationPathState.Present);
+
+            CollectionAssert.AreEqual(new[] { missingOwned },
+                plan.EntriesToRemove.ToArray());
+            CollectionAssert.AreEqual(new[] { missingOwned },
+                plan.JournalEntriesToForget.ToArray());
+            CollectionAssert.DoesNotContain(plan.EntriesToRemove.ToList(),
+                unowned);
+        }
+
+        [TestMethod]
+        public void ForgettingWhitelistEntriesPersistsRemainingOwnership()
+        {
+            string root = CreateTemporaryRoot();
+            string path = Path.Combine(root, HidHideOwnershipJournal.FileName);
+            try
+            {
+                HidHideOwnershipJournal journal = new(path);
+                Assert.IsTrue(journal.RecordWhitelistEntry(
+                    @"\Device\HarddiskVolume1\old.exe"));
+                Assert.IsTrue(journal.RecordWhitelistEntry(
+                    @"\Device\HarddiskVolume1\current.exe"));
+                Assert.IsTrue(journal.ForgetWhitelistEntries(new[]
+                {
+                    @"\device\harddiskvolume1\OLD.exe",
+                }));
+
+                HidHideOwnershipJournal reloaded = new(path);
+                Assert.IsTrue(reloaded.Load());
+                Assert.IsFalse(reloaded.OwnsWhitelistEntry(
+                    @"\Device\HarddiskVolume1\old.exe"));
+                Assert.IsTrue(reloaded.OwnsWhitelistEntry(
+                    @"\Device\HarddiskVolume1\current.exe"));
+            }
+            finally
+            {
+                Directory.Delete(root, true);
+            }
+        }
+
+        [TestMethod]
+        public void UnknownOwnedPathIsPreservedFailClosed()
+        {
+            const string owned = @"\Device\UnmountedVolume\PureDS4.exe";
+
+            HidHideWhitelistReconciliationPlan plan =
+                HidHideWhitelistReconciliationPolicy.Create(
+                    new[] { owned }, new[] { owned }, _ =>
+                        HidHideOwnedApplicationPathState.Unknown);
+
+            Assert.AreEqual(0, plan.EntriesToRemove.Count);
+            Assert.AreEqual(0, plan.JournalEntriesToForget.Count);
+        }
+
+        [TestMethod]
+        public void JournalEntryAbsentFromWhitelistIsForgottenWithoutMutation()
+        {
+            const string owned = @"\Device\HarddiskVolume1\old.exe";
+
+            HidHideWhitelistReconciliationPlan plan =
+                HidHideWhitelistReconciliationPolicy.Create(
+                    new[] { @"\Device\HarddiskVolume1\unrelated.exe" },
+                    new[] { owned }, _ =>
+                        HidHideOwnedApplicationPathState.Missing);
+
+            Assert.AreEqual(0, plan.EntriesToRemove.Count);
+            CollectionAssert.AreEqual(new[] { owned },
+                plan.JournalEntriesToForget.ToArray());
+        }
+
+        [TestMethod]
+        public void WhitelistMutationRemovesExactOwnedEntryOnly()
+        {
+            const string owned = @"\Device\HarddiskVolume1\old.exe";
+            const string unrelated =
+                @"\Device\HarddiskVolume1\unrelated.exe";
+            FakeWhitelistDevice device = new(new[] { owned, unrelated });
+
+            HidHideWhitelistMutationResult result =
+                HidHideWhitelistMutationGateway.RemoveExact(device,
+                    new[] { owned }, useMachineMutex: false);
+
+            Assert.IsTrue(result.Succeeded, result.Error);
+            Assert.IsTrue(result.Changed);
+            CollectionAssert.AreEqual(new[] { unrelated },
+                result.After.ToArray());
+            Assert.AreEqual(1, device.WriteCount);
+        }
+
+        [TestMethod]
+        public void UnexpectedPostWriteWhitelistDeltaIsReportedAsFailure()
+        {
+            const string owned = @"\Device\HarddiskVolume1\old.exe";
+            FakeWhitelistDevice device = new(new[] { owned })
+            {
+                AddUnexpectedEntryAfterWrite = true,
+            };
+
+            HidHideWhitelistMutationResult result =
+                HidHideWhitelistMutationGateway.RemoveExact(device,
+                    new[] { owned }, useMachineMutex: false);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Changed);
+            StringAssert.Contains(result.Error, "exact");
+            CollectionAssert.Contains(result.After.ToList(),
+                @"\Device\HarddiskVolume1\foreign.exe");
+        }
+
+        [TestMethod]
+        public void ConcurrentWhitelistChangeFailsBeforeCleanupWrite()
+        {
+            const string owned = @"\Device\HarddiskVolume1\old.exe";
+            FakeWhitelistDevice device = new(new[] { owned })
+            {
+                ChangeBeforeSecondRead = true,
+            };
+
+            HidHideWhitelistMutationResult result =
+                HidHideWhitelistMutationGateway.RemoveExact(device,
+                    new[] { owned }, useMachineMutex: false);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(0, device.WriteCount);
+            StringAssert.Contains(result.Error, "concurrently");
+            CollectionAssert.Contains(result.After.ToList(),
+                @"\Device\HarddiskVolume1\foreign.exe");
+        }
+
+        [TestMethod]
+        public void DosPathInspectorDistinguishesPresentAndMissingFiles()
+        {
+            string root = CreateTemporaryRoot();
+            string present = Path.Combine(root, "PureDS4.exe");
+            string missing = Path.Combine(root, "missing.exe");
+            try
+            {
+                File.WriteAllText(present, "test");
+
+                Assert.AreEqual(HidHideOwnedApplicationPathState.Present,
+                    HidHideOwnedApplicationPathInspector.Inspect(present));
+                Assert.AreEqual(HidHideOwnedApplicationPathState.Missing,
+                    HidHideOwnedApplicationPathInspector.Inspect(missing));
+            }
+            finally
+            {
+                Directory.Delete(root, true);
+            }
+        }
+
+        [TestMethod]
         public void CorruptJournalFailsClosed()
         {
             string root = CreateTemporaryRoot();
@@ -424,6 +590,44 @@ namespace DS4WindowsTests
                 if (AddUnexpectedEntryAfterWrite)
                 {
                     entries.Add(@"HID\FOREIGN");
+                }
+                return true;
+            }
+        }
+
+        private sealed class FakeWhitelistDevice : IHidHideWhitelistDevice
+        {
+            private List<string> entries;
+            private int readCount;
+
+            internal FakeWhitelistDevice(IEnumerable<string> entries)
+            {
+                this.entries = entries.ToList();
+            }
+
+            internal bool ChangeBeforeSecondRead { get; init; }
+            internal bool AddUnexpectedEntryAfterWrite { get; init; }
+            internal int WriteCount { get; private set; }
+
+            public List<string> GetWhitelist()
+            {
+                readCount++;
+                if (ChangeBeforeSecondRead && readCount == 2)
+                {
+                    entries.Add(
+                        @"\Device\HarddiskVolume1\foreign.exe");
+                }
+                return entries.ToList();
+            }
+
+            public bool SetWhitelist(List<string> instances)
+            {
+                WriteCount++;
+                entries = instances.ToList();
+                if (AddUnexpectedEntryAfterWrite)
+                {
+                    entries.Add(
+                        @"\Device\HarddiskVolume1\foreign.exe");
                 }
                 return true;
             }

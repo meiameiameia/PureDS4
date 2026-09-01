@@ -63,6 +63,14 @@ namespace DS4Windows
         internal bool IsTransientRunInProgress => state.RunInProgress;
         internal IReadOnlyCollection<string> UnresolvedPersistentBlacklistEntries =>
             state.UnresolvedPersistentBlacklistEntries;
+        internal IReadOnlyCollection<string> PersistentWhitelistEntries
+        {
+            get
+            {
+                Load();
+                return state.PersistentWhitelistEntries.ToArray();
+            }
+        }
         internal IReadOnlyCollection<HidHideExternalSuspensionInfo>
             ExternalContainmentSuspensions => state.ExternalContainmentSuspensions
                 .Select(record => new HidHideExternalSuspensionInfo(
@@ -280,6 +288,18 @@ namespace DS4Windows
             }
 
             state.PersistentWhitelistEntries.Remove(pathValue);
+            return Save();
+        }
+
+        internal bool ForgetWhitelistEntries(IEnumerable<string> pathValues)
+        {
+            if (!Load())
+            {
+                return false;
+            }
+
+            state.PersistentWhitelistEntries.ExceptWith(
+                pathValues ?? Array.Empty<string>());
             return Save();
         }
 

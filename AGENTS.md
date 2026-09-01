@@ -62,6 +62,7 @@ Do not adopt, rename, delete, or retarget another product's shortcuts, tasks, co
 - Never turn build success, protocol tests, a component health check, CI status, or test count into a hardware/runtime claim. Record the exact commit/artifact, executable path, transport, controller, and steps exercised.
 - Validation from an older build does not transfer to the current HEAD or release artifact. DS4 and DS3 require separate claims; Bluetooth and USB require separate claims.
 - When virtual output could be affected, automated checks are insufficient. The manual gate is: launch the exact local build; verify its running process path; connect the target controller and transport; verify detection and physical readings; create the intended VIIPER output; verify the virtual controller; play in the target game; disconnect/reconnect; and restart/reconnect. Claim only completed steps.
+- Use a short, direct local path for disposable hardware-validation publishes. HidHide can list a long executable path as allowed while still denying that process access to a hidden controller. Restart the exact executable after its path is first registered, then prove exemption through successful physical-controller enumeration rather than trusting the allow-list entry alone.
 - Inspect test intent. A test that asserts inherited or wrong product behavior is evidence of the defect, not validation.
 - For observable changes, provide numbered owner-verification steps and expected results. For high-risk work, the builder's reread is not independent review.
 

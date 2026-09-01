@@ -61,14 +61,21 @@ namespace DS4Windows
     internal sealed class LegacyRemovalPlan
     {
         internal LegacyRemovalPlan(IReadOnlyList<LegacyRemovalItem> items,
-            bool configurationWouldSurvive)
+            bool configurationWouldSurvive,
+            bool hasCompetingRuntimeOwnership = false)
         {
             Items = items ?? Array.Empty<LegacyRemovalItem>();
             ConfigurationWouldSurvive = configurationWouldSurvive;
+            HasCompetingRuntimeOwnership = hasCompetingRuntimeOwnership;
         }
 
         internal IReadOnlyList<LegacyRemovalItem> Items { get; }
-        internal bool HasAnythingToRemove => Items.Count > 0;
+        internal bool HasDetectedState => Items.Count > 0;
+        internal bool HasAnythingToRemove =>
+            HasDetectedState && HasCompetingRuntimeOwnership;
+        internal bool HasCompetingRuntimeOwnership { get; }
+        internal bool HasResidualState =>
+            HasDetectedState && !HasCompetingRuntimeOwnership;
 
         /// <summary>
         /// True when the survey found a configuration directory, meaning
@@ -107,7 +114,7 @@ namespace DS4Windows
             {
                 items.Add(new LegacyRemovalItem(
                     LegacyRemovalItemCategory.InstallDirectory,
-                    "Installed program files", directory));
+                    "Legacy install directory", directory));
             }
 
             if (survey.RegistryRootPresent)
@@ -144,7 +151,8 @@ namespace DS4Windows
             }
 
             return new LegacyRemovalPlan(items,
-                survey.ConfigurationDirectoryPresent);
+                survey.ConfigurationDirectoryPresent,
+                survey.HasCompetingRuntimeOwnership);
         }
     }
 }

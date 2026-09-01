@@ -22,6 +22,8 @@ namespace DS4WindowsTests
 
             Assert.IsFalse(survey.IsPresent);
             Assert.IsFalse(survey.RequiresApplicationClosed);
+            Assert.IsFalse(survey.HasCompetingRuntimeOwnership);
+            Assert.IsFalse(survey.HasResidualState);
             Assert.AreEqual(0, survey.InstallDirectories.Count);
             Assert.AreEqual(0, survey.UninstallEntries.Count);
         }
@@ -42,6 +44,8 @@ namespace DS4WindowsTests
             Assert.IsTrue(survey.RegistryRootPresent);
             Assert.IsFalse(survey.RequiresApplicationClosed,
                 "The registry key alone does not mean the process is running.");
+            Assert.IsFalse(survey.HasCompetingRuntimeOwnership);
+            Assert.IsTrue(survey.HasResidualState);
         }
 
         [TestMethod]
@@ -94,6 +98,11 @@ namespace DS4WindowsTests
                         @"C:\Program Files\DS4Windows",
                         @"C:\Program Files\DS4Windows Reworked",
                     },
+                    Files =
+                    {
+                        @"C:\Program Files\DS4Windows\DS4Windows.exe",
+                        @"C:\Program Files\DS4Windows Reworked\DS4Windows.exe",
+                    },
                 };
 
             LegacyInstallationSurvey survey =
@@ -107,6 +116,13 @@ namespace DS4WindowsTests
                     @"C:\Program Files\DS4Windows Reworked",
                 },
                 survey.InstallDirectories.ToList());
+            CollectionAssert.AreEquivalent(
+                new[]
+                {
+                    @"C:\Program Files\DS4Windows\DS4Windows.exe",
+                    @"C:\Program Files\DS4Windows Reworked\DS4Windows.exe",
+                },
+                survey.RuntimeExecutablePaths.ToList());
         }
 
         [TestMethod]
@@ -220,6 +236,58 @@ namespace DS4WindowsTests
                     string.Empty, string.Empty))).IsPresent);
         }
 
+        [TestMethod]
+        public void PreservedConfigurationDoesNotBlockActivation()
+        {
+            LegacyInstallationSurvey survey = Scan(env =>
+            {
+                env.RoamingAppDataPath = @"C:\Users\owner\AppData\Roaming";
+                env.Directories.Add(
+                    @"C:\Users\owner\AppData\Roaming\DS4Windows");
+            });
+
+            Assert.IsTrue(survey.IsPresent);
+            Assert.IsTrue(survey.HasResidualState);
+            Assert.IsFalse(survey.HasCompetingRuntimeOwnership);
+        }
+
+        [TestMethod]
+        public void EveryExecutableOwnershipSignalBlocksActivation()
+        {
+            Assert.IsTrue(Scan(env => env.ProcessNames.Add("DS4Windows"))
+                .HasCompetingRuntimeOwnership);
+            Assert.IsTrue(Scan(env =>
+            {
+                env.ProgramFilesRoots.Add(@"C:\Program Files");
+                env.Directories.Add(@"C:\Program Files\DS4Windows");
+                env.Files.Add(
+                    @"C:\Program Files\DS4Windows\DS4Windows.exe");
+            }).HasCompetingRuntimeOwnership);
+            Assert.IsTrue(Scan(env => env.ScheduledTasks.Add(
+                "RunDS4Windows")).HasCompetingRuntimeOwnership);
+            Assert.IsTrue(Scan(env => env.ScheduledTasks.Add(
+                "RunVIIPER")).HasCompetingRuntimeOwnership);
+            Assert.IsTrue(Scan(env => env.Uninstall.Add(
+                new UninstallRegistryEntry("DS4Windows", "5.1.0",
+                    string.Empty, "MsiExec.exe /X{ABC}")))
+                .HasCompetingRuntimeOwnership);
+        }
+
+        [TestMethod]
+        public void EmptyInstallDirectoryIsResidualAndDoesNotBlockActivation()
+        {
+            LegacyInstallationSurvey survey = Scan(env =>
+            {
+                env.ProgramFilesRoots.Add(@"C:\Program Files");
+                env.Directories.Add(@"C:\Program Files\DS4Windows");
+            });
+
+            Assert.IsTrue(survey.IsPresent);
+            Assert.IsTrue(survey.HasResidualState);
+            Assert.IsFalse(survey.HasCompetingRuntimeOwnership);
+            Assert.AreEqual(0, survey.RuntimeExecutablePaths.Count);
+        }
+
         private static LegacyInstallationSurvey Scan(
             System.Action<FakeLegacyInstallationEnvironment> configure)
         {
@@ -240,6 +308,7 @@ namespace DS4WindowsTests
         internal List<string> ProgramFilesRootsList { get; } =
             new List<string>();
         internal List<string> Directories { get; } = new List<string>();
+        internal List<string> Files { get; } = new List<string>();
         internal HashSet<string> LocalMachineKeys { get; } =
             new HashSet<string>();
         internal List<string> ProcessNames { get; } = new List<string>();
@@ -258,6 +327,8 @@ namespace DS4WindowsTests
             RoamingAppDataPath;
 
         public bool DirectoryExists(string path) => Directories.Contains(path);
+
+        public bool FileExists(string path) => Files.Contains(path);
 
         public bool LocalMachineKeyExists(string subKeyPath) =>
             LocalMachineKeys.Contains(subKeyPath);

@@ -14,6 +14,41 @@ namespace DS4WindowsTests
     public class LegacyApplicationGateTests
     {
         [TestMethod]
+        public void ActiveOwnershipRequiresReleaseBeforeRuntimeActivation()
+        {
+            LegacyInstallationSurvey survey = new LegacyInstallationSurvey(
+                registryRootPresent: false,
+                installDirectories: new[] { @"C:\Program Files\DS4Windows" },
+                configurationDirectoryPresent: false,
+                configurationDirectoryPath: null,
+                processRunning: false,
+                startupTaskPresent: true,
+                viiperTaskPresent: false,
+                uninstallEntries: null);
+
+            Assert.IsTrue(LegacyApplicationGate.
+                RequiresRuntimeOwnershipRelease(survey));
+        }
+
+        [TestMethod]
+        public void PreservedDataAndRegistryResidueDoNotBlockActivation()
+        {
+            LegacyInstallationSurvey survey = new LegacyInstallationSurvey(
+                registryRootPresent: true,
+                installDirectories: null,
+                configurationDirectoryPresent: true,
+                configurationDirectoryPath:
+                    @"C:\Users\owner\AppData\Roaming\DS4Windows",
+                processRunning: false,
+                startupTaskPresent: false,
+                viiperTaskPresent: false,
+                uninstallEntries: null);
+
+            Assert.IsFalse(LegacyApplicationGate.
+                RequiresRuntimeOwnershipRelease(survey));
+        }
+
+        [TestMethod]
         public void FallsBackToTheGenericNameWithNoUninstallEntry()
         {
             LegacyInstallationSurvey survey = new LegacyInstallationSurvey(

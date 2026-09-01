@@ -17,6 +17,7 @@ using DS4Windows;
 using System;
 using System.Linq;
 using System.Windows;
+using System.Windows.Automation;
 
 namespace DS4WinWPF.DS4Forms
 {
@@ -37,17 +38,33 @@ namespace DS4WinWPF.DS4Forms
     {
         private UninstallRegistryEntry primaryEntry;
         private LegacyUninstallCommand uninstallCommand;
+        private readonly bool requireRuntimeOwnershipRelease;
+
+        internal bool ExitRequested { get; private set; }
+        internal bool RuntimeOwnershipReleased { get; private set; }
 
         public LegacyRemovalPlanWindow()
-            : this(null)
+            : this(null, false)
         {
         }
 
-        internal LegacyRemovalPlanWindow(LegacyInstallationSurvey survey)
+        internal LegacyRemovalPlanWindow(LegacyInstallationSurvey survey,
+            bool requireRuntimeOwnershipRelease = false)
         {
+            this.requireRuntimeOwnershipRelease =
+                requireRuntimeOwnershipRelease;
+            ExitRequested = requireRuntimeOwnershipRelease;
             InitializeComponent();
 
-            headingText.Text = "DS4Windows removal plan";
+            headingText.Text = requireRuntimeOwnershipRelease
+                ? "Finish replacing DS4Windows"
+                : "DS4Windows removal plan";
+            if (requireRuntimeOwnershipRelease)
+            {
+                closeButton.Content = "Exit PureDS4";
+                AutomationProperties.SetHelpText(closeButton,
+                    "Close PureDS4 without activating controller services.");
+            }
             Render(survey ?? ScanNow());
         }
 
@@ -61,7 +78,7 @@ namespace DS4WinWPF.DS4Forms
         {
             LegacyRemovalPlan plan = LegacyRemovalPlanner.Build(survey);
             summaryText.Text = BuildSummary(plan);
-            itemListBorder.Visibility = plan.HasAnythingToRemove
+            itemListBorder.Visibility = plan.HasDetectedState
                 ? Visibility.Visible : Visibility.Collapsed;
             itemList.ItemsSource = plan.Items
                 .Select(item => $"{item.Description}: {item.Detail}")
@@ -119,11 +136,20 @@ namespace DS4WinWPF.DS4Forms
 
         internal static string BuildSummary(LegacyRemovalPlan plan)
         {
-            if (!plan.HasAnythingToRemove)
+            if (!plan.HasDetectedState)
             {
                 return "No DS4Windows or DS4Windows Reworked installation " +
                     "was detected on this machine. There is nothing to " +
                     "remove.";
+            }
+
+            if (plan.HasResidualState)
+            {
+                return "No active DS4Windows or DS4Windows Reworked " +
+                    "runtime was detected. Preserved profiles, settings, " +
+                    "or a historical registry record remain, but they " +
+                    "cannot start the old application and do not block " +
+                    "PureDS4.";
             }
 
             return "PureDS4 replaces DS4Windows rather than running " +
@@ -187,11 +213,22 @@ namespace DS4WinWPF.DS4Forms
 
         private void RecheckBtn_Click(object sender, RoutedEventArgs e)
         {
-            Render(ScanNow());
+            LegacyInstallationSurvey survey = ScanNow();
+            if (requireRuntimeOwnershipRelease &&
+                !survey.HasCompetingRuntimeOwnership)
+            {
+                RuntimeOwnershipReleased = true;
+                ExitRequested = false;
+                Close();
+                return;
+            }
+
+            Render(survey);
         }
 
         private void CloseBtn_Click(object sender, RoutedEventArgs e)
         {
+            ExitRequested = requireRuntimeOwnershipRelease;
             Close();
         }
     }

@@ -84,7 +84,7 @@ namespace DS4WindowsTests
             LegacyInstallationSurvey survey = SurveyWith(processRunning: false);
             UninstallRegistryEntry entry = new UninstallRegistryEntry(
                 "DS4Windows Reworked", "5.1.0", string.Empty,
-                "MsiExec.exe /X{ABC}");
+                "MsiExec.exe /X{FE00C21E-C0E6-4509-81EA-2D4B34D377A1}");
 
             Assert.AreEqual(LegacyUninstallReadiness.Ready,
                 LegacyUninstallPolicy.Evaluate(survey, entry,
@@ -98,7 +98,7 @@ namespace DS4WindowsTests
             LegacyInstallationSurvey survey = SurveyWith(processRunning: true);
             UninstallRegistryEntry entry = new UninstallRegistryEntry(
                 "DS4Windows Reworked", "5.1.0", string.Empty,
-                "MsiExec.exe /X{ABC}");
+                "MsiExec.exe /X{FE00C21E-C0E6-4509-81EA-2D4B34D377A1}");
 
             Assert.AreEqual(LegacyUninstallReadiness.ApplicationRunning,
                 LegacyUninstallPolicy.Evaluate(survey, entry,
@@ -153,8 +153,15 @@ namespace DS4WindowsTests
 
         [DataTestMethod]
         [DataRow("MsiExec.exe /I{ABC}", false, "modify is not uninstall")]
-        [DataRow("MsiExec.exe /X{ABC}", true, "msiexec uninstall verb")]
-        [DataRow("MsiExec.exe /x{ABC}", true, "verb is case-insensitive")]
+        [DataRow("MsiExec.exe /X{FE00C21E-C0E6-4509-81EA-2D4B34D377A1}", true, "msiexec uninstall verb")]
+        [DataRow("MsiExec.exe /x{fe00c21e-c0e6-4509-81ea-2d4b34d377a1}", true, "verb is case-insensitive")]
+        [DataRow("MsiExec.exe /x {FE00C21E-C0E6-4509-81EA-2D4B34D377A1}", true, "separate product code")]
+        [DataRow("MsiExec.exe /x \"C:\\Old App\\Thing.msi\"", true, "quoted MSI path")]
+        [DataRow("MsiExec.exe /xml", false, "prefix is not the x verb")]
+        [DataRow("MsiExec.exe /x86", false, "architecture switch is not x verb")]
+        [DataRow("MsiExec.exe /xyz", false, "arbitrary x prefix is refused")]
+        [DataRow("MsiExec.exe /x", false, "x requires a target")]
+        [DataRow("\"C:\\a\\Setup.exe\" /x{FE00C21E-C0E6-4509-81EA-2D4B34D377A1}", false, "x is only trusted for msiexec")]
         [DataRow("\"C:\\a\\Setup.exe\" /uninstall", true, "burn bundle")]
         [DataRow("\"C:\\a\\Setup.exe\" /repair", false, "repair is not uninstall")]
         [DataRow("\"C:\\a\\Setup.exe\"", false, "no verb at all")]

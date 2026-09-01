@@ -27,6 +27,8 @@ namespace DS4WindowsTests
             LegacyRemovalPlan plan = LegacyRemovalPlanner.Build(survey);
 
             Assert.IsFalse(plan.HasAnythingToRemove);
+            Assert.IsFalse(plan.HasDetectedState);
+            Assert.IsFalse(plan.HasCompetingRuntimeOwnership);
             Assert.IsFalse(plan.ConfigurationWouldSurvive);
             Assert.AreEqual(0, plan.Items.Count);
         }
@@ -115,11 +117,37 @@ namespace DS4WindowsTests
             LegacyRemovalPlan plan = LegacyRemovalPlanner.Build(survey);
 
             Assert.IsTrue(plan.ConfigurationWouldSurvive);
+            Assert.IsTrue(plan.HasDetectedState);
+            Assert.IsFalse(plan.HasAnythingToRemove);
+            Assert.IsTrue(plan.HasResidualState);
             LegacyRemovalItem configItem = plan.Items.Single(i =>
                 i.Category == LegacyRemovalItemCategory.Configuration);
             StringAssert.Contains(configItem.Description, "left behind");
             Assert.AreEqual(@"C:\Users\owner\AppData\Roaming\DS4Windows",
                 configItem.Detail);
+        }
+
+        [TestMethod]
+        public void ActiveOwnershipIsDistinguishedFromPreservedResidue()
+        {
+            LegacyInstallationSurvey survey = new LegacyInstallationSurvey(
+                registryRootPresent: true,
+                installDirectories: new[] { @"C:\Program Files\DS4Windows" },
+                configurationDirectoryPresent: true,
+                configurationDirectoryPath:
+                    @"C:\Users\owner\AppData\Roaming\DS4Windows",
+                processRunning: false, startupTaskPresent: false,
+                viiperTaskPresent: false, uninstallEntries: null,
+                runtimeExecutablePaths: new[]
+                {
+                    @"C:\Program Files\DS4Windows\DS4Windows.exe",
+                });
+
+            LegacyRemovalPlan plan = LegacyRemovalPlanner.Build(survey);
+
+            Assert.IsTrue(plan.HasCompetingRuntimeOwnership);
+            Assert.IsTrue(plan.HasAnythingToRemove);
+            Assert.IsFalse(plan.HasResidualState);
         }
     }
 }

@@ -71,11 +71,16 @@ another product's shortcuts, tasks, configuration, or backend. Detecting the
 old product, requiring it to close, preserving or archiving its configuration,
 importing profiles read-only, and removing it belong to an explicit,
 owner-visible replacement flow. Read-only detection and a gate that blocks
-while the old application's process is running are implemented,
-test-covered, and run on every launch, not only the first one; PureDS4's own
-configuration path is enforced never to resolve to the old product's
-configuration directory; and read-only import of game profiles is available
-from the Tools tab. Separately, `ViiperSetupManager` already refuses to
+runtime activation while the old application's process, executable,
+uninstall registration, or scheduled tasks can still compete are implemented,
+test-covered, and run on every launch, not only the first one. Preserved
+configuration, empty install directories, and historical registry residue
+remain visible without being misclassified as an active runtime. PureDS4's
+own configuration path is enforced never to resolve to the old product's
+configuration directory or a descendant; read-only import of game profiles
+is available from the Tools tab, and name conflicts receive deterministic
+DS4Windows-suffixed copies rather than losing the predecessor's profile.
+Separately, `ViiperSetupManager` already refuses to
 start PureDS4's own VIIPER against a foreign viiper.exe running from a
 different path (including an old installation's own copy) on every launch —
 this predates the replacement flow's naming but satisfies the same
@@ -85,9 +90,13 @@ survey — is available from the Tools tab, and can start the predecessor's own
 registered uninstaller after an explicit confirmation. PureDS4 never removes
 another product's files, registry keys, or tasks itself: Windows Installer
 owns the elevation, transaction, and rollback, and PureDS4 declines to start
-any command it cannot read as an uninstall rather than guessing. Auto
-Profiles/Actions/Controller Configs import is not implemented yet, and the
-uninstall hand-off has not yet been exercised against a real installation.
+any command it cannot read as an uninstall rather than guessing. Recognized
+MSI removal commands require the exact `/x` verb and a product code or MSI
+path; arbitrary `/x...` prefixes are rejected. Auto
+Profiles/Actions/Controller Configs import is not implemented yet. The owner
+observed the uninstall hand-off complete against the local beta.2 dogfood
+installation on 2026-08-30; that one-machine observation does not replace the
+clean-install, rollback, failure, and recovery matrix required for release.
 
 ## Version contract
 

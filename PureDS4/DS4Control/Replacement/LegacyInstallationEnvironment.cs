@@ -66,6 +66,8 @@ namespace DS4Windows
 
         bool DirectoryExists(string path);
 
+        bool FileExists(string path);
+
         /// <summary>True when the given HKLM subkey path exists at all,
         /// regardless of its values.</summary>
         bool LocalMachineKeyExists(string subKeyPath);
@@ -125,6 +127,11 @@ namespace DS4Windows
         public bool DirectoryExists(string path)
         {
             return !string.IsNullOrWhiteSpace(path) && Directory.Exists(path);
+        }
+
+        public bool FileExists(string path)
+        {
+            return !string.IsNullOrWhiteSpace(path) && File.Exists(path);
         }
 
         public bool LocalMachineKeyExists(string subKeyPath)

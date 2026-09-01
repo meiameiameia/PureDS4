@@ -114,14 +114,20 @@ namespace DS4Windows
     internal sealed class LegacyProfileImportResult
     {
         internal LegacyProfileImportResult(string fileName,
-            LegacyProfileImportOutcome outcome, string failureReason = null)
+            LegacyProfileImportOutcome outcome, string failureReason = null,
+            string destinationFileName = null)
         {
             FileName = fileName;
             Outcome = outcome;
             FailureReason = failureReason ?? string.Empty;
+            DestinationFileName = string.IsNullOrWhiteSpace(
+                destinationFileName) ? fileName : destinationFileName;
         }
 
         internal string FileName { get; }
+        internal string DestinationFileName { get; }
+        internal bool WasRenamed => !string.Equals(FileName,
+            DestinationFileName, StringComparison.OrdinalIgnoreCase);
         internal LegacyProfileImportOutcome Outcome { get; }
         internal string FailureReason { get; }
     }
@@ -131,9 +137,9 @@ namespace DS4Windows
     /// PureDS4's own Profiles folder. Strictly read-only against the
     /// source: every candidate is opened for read and copied, never moved,
     /// never deleted, never opened for write. A destination file with the
-    /// same name is never overwritten — importing again after an earlier
-    /// import, or after the user has since edited a same-named PureDS4
-    /// profile, changes nothing for that file and is reported as skipped.
+    /// same name is never overwritten. A name conflict is copied under a
+    /// deterministic "(DS4Windows)" suffix instead, and repeated imports
+    /// recognise an identical earlier copy rather than producing duplicates.
     /// </summary>
     internal static class LegacyProfileImporter
     {
@@ -171,23 +177,40 @@ namespace DS4Windows
             foreach (LegacyProfileImportCandidate candidate in
                 survey.Candidates)
             {
-                string destinationPath = Path.Combine(
-                    destinationProfilesDirectory, candidate.FileName);
-                if (File.Exists(destinationPath))
+                if (string.IsNullOrWhiteSpace(candidate.FileName) ||
+                    !string.Equals(Path.GetFileName(candidate.FileName),
+                        candidate.FileName, StringComparison.Ordinal) ||
+                    !string.Equals(Path.GetExtension(candidate.FileName),
+                        ".xml", StringComparison.OrdinalIgnoreCase))
                 {
                     results.Add(new LegacyProfileImportResult(
                         candidate.FileName,
-                        LegacyProfileImportOutcome.SkippedAlreadyExists));
+                        LegacyProfileImportOutcome.Failed,
+                        "The profile name is not a safe XML file name."));
                     continue;
                 }
 
                 try
                 {
+                    string destinationPath = SelectDestinationPath(
+                        candidate, destinationProfilesDirectory,
+                        out bool identicalCopyAlreadyExists);
+                    string destinationFileName =
+                        Path.GetFileName(destinationPath);
+                    if (identicalCopyAlreadyExists)
+                    {
+                        results.Add(new LegacyProfileImportResult(
+                            candidate.FileName,
+                            LegacyProfileImportOutcome.SkippedAlreadyExists,
+                            destinationFileName: destinationFileName));
+                        continue;
+                    }
+
                     File.Copy(candidate.SourcePath, destinationPath,
                         overwrite: false);
                     results.Add(new LegacyProfileImportResult(
-                        candidate.FileName,
-                        LegacyProfileImportOutcome.Imported));
+                        candidate.FileName, LegacyProfileImportOutcome.Imported,
+                        destinationFileName: destinationFileName));
                 }
                 catch (IOException ex)
                 {
@@ -204,6 +227,83 @@ namespace DS4Windows
             }
 
             return results;
+        }
+
+        private static string SelectDestinationPath(
+            LegacyProfileImportCandidate candidate,
+            string destinationProfilesDirectory,
+            out bool identicalCopyAlreadyExists)
+        {
+            string originalPath = Path.Combine(destinationProfilesDirectory,
+                candidate.FileName);
+            if (!File.Exists(originalPath))
+            {
+                identicalCopyAlreadyExists = false;
+                return originalPath;
+            }
+            if (FilesAreEqual(candidate.SourcePath, originalPath))
+            {
+                identicalCopyAlreadyExists = true;
+                return originalPath;
+            }
+
+            string stem = Path.GetFileNameWithoutExtension(candidate.FileName);
+            string extension = Path.GetExtension(candidate.FileName);
+            for (int copyNumber = 1; ; copyNumber++)
+            {
+                string suffix = copyNumber == 1
+                    ? " (DS4Windows)"
+                    : $" (DS4Windows {copyNumber})";
+                string candidateName = stem + suffix + extension;
+                string candidatePath = Path.Combine(
+                    destinationProfilesDirectory, candidateName);
+                if (!File.Exists(candidatePath))
+                {
+                    identicalCopyAlreadyExists = false;
+                    return candidatePath;
+                }
+                if (FilesAreEqual(candidate.SourcePath, candidatePath))
+                {
+                    identicalCopyAlreadyExists = true;
+                    return candidatePath;
+                }
+            }
+        }
+
+        private static bool FilesAreEqual(string leftPath, string rightPath)
+        {
+            FileInfo left = new FileInfo(leftPath);
+            FileInfo right = new FileInfo(rightPath);
+            if (left.Length != right.Length)
+            {
+                return false;
+            }
+
+            const int bufferSize = 81920;
+            byte[] leftBuffer = new byte[bufferSize];
+            byte[] rightBuffer = new byte[bufferSize];
+            using FileStream leftStream = File.OpenRead(leftPath);
+            using FileStream rightStream = File.OpenRead(rightPath);
+            while (true)
+            {
+                int leftRead = leftStream.Read(leftBuffer, 0,
+                    leftBuffer.Length);
+                int rightRead = rightStream.Read(rightBuffer, 0,
+                    rightBuffer.Length);
+                if (leftRead != rightRead)
+                {
+                    return false;
+                }
+                if (leftRead == 0)
+                {
+                    return true;
+                }
+                if (!leftBuffer.AsSpan(0, leftRead).SequenceEqual(
+                        rightBuffer.AsSpan(0, rightRead)))
+                {
+                    return false;
+                }
+            }
         }
     }
 }

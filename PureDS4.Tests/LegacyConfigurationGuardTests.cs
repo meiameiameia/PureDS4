@@ -39,13 +39,21 @@ namespace DS4WindowsTests
         }
 
         [TestMethod]
-        public void DoesNotMatchAParentOrChildDirectory()
+        public void MatchesDescendantsButNotTheParentDirectory()
         {
-            Assert.IsFalse(LegacyConfigurationGuard.IsLegacyConfigurationPath(
+            Assert.IsTrue(LegacyConfigurationGuard.IsLegacyConfigurationPath(
                 @"C:\Users\owner\AppData\Roaming\DS4Windows\Profiles",
                 @"C:\Users\owner\AppData\Roaming\DS4Windows"));
             Assert.IsFalse(LegacyConfigurationGuard.IsLegacyConfigurationPath(
                 @"C:\Users\owner\AppData\Roaming",
+                @"C:\Users\owner\AppData\Roaming\DS4Windows"));
+        }
+
+        [TestMethod]
+        public void SimilarPrefixIsNotTreatedAsADescendant()
+        {
+            Assert.IsFalse(LegacyConfigurationGuard.IsLegacyConfigurationPath(
+                @"C:\Users\owner\AppData\Roaming\DS4Windows-Archive",
                 @"C:\Users\owner\AppData\Roaming\DS4Windows"));
         }
 

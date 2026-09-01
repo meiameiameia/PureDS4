@@ -35,12 +35,32 @@ namespace DS4WindowsTests
                         LegacyRemovalItemCategory.ApplicationUninstaller,
                         "Uninstall DS4Windows Reworked", "MsiExec.exe /X{ABC}"),
                 },
-                configurationWouldSurvive: false);
+                configurationWouldSurvive: false,
+                hasCompetingRuntimeOwnership: true);
 
             string summary = LegacyRemovalPlanWindow.BuildSummary(plan);
 
             StringAssert.Contains(summary, "does not remove any of it itself");
             StringAssert.Contains(summary, "Windows' own uninstaller");
+        }
+
+        [TestMethod]
+        public void ResidualStateIsNotPresentedAsAnInstalledRuntime()
+        {
+            LegacyRemovalPlan plan = new LegacyRemovalPlan(
+                new List<LegacyRemovalItem>
+                {
+                    new LegacyRemovalItem(
+                        LegacyRemovalItemCategory.Configuration,
+                        "Profiles and settings", @"C:\Users\owner\DS4Windows"),
+                },
+                configurationWouldSurvive: true,
+                hasCompetingRuntimeOwnership: false);
+
+            string summary = LegacyRemovalPlanWindow.BuildSummary(plan);
+
+            StringAssert.Contains(summary, "No active DS4Windows");
+            StringAssert.Contains(summary, "do not block PureDS4");
         }
 
         [TestMethod]

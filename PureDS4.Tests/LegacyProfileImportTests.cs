@@ -101,7 +101,7 @@ namespace DS4WindowsTests
         }
 
         [TestMethod]
-        public void ImportNeverOverwritesAnExistingDestinationFile()
+        public void ImportPreservesBothProfilesWhenTheNameAlreadyExists()
         {
             WithTempDirectory(legacyRoot => WithTempDirectory(destination =>
             {
@@ -121,10 +121,71 @@ namespace DS4WindowsTests
                 var results = LegacyProfileImporter.Import(survey, destination);
 
                 Assert.AreEqual(1, results.Count);
-                Assert.AreEqual(
-                    LegacyProfileImportOutcome.SkippedAlreadyExists,
+                Assert.AreEqual(LegacyProfileImportOutcome.Imported,
                     results[0].Outcome);
                 Assert.AreEqual("already here", File.ReadAllText(existingPath));
+                Assert.AreEqual("Default (DS4Windows).xml",
+                    results[0].DestinationFileName);
+                Assert.AreEqual("legacy", File.ReadAllText(Path.Combine(
+                    destinationProfiles, "Default (DS4Windows).xml")));
+            }));
+        }
+
+        [TestMethod]
+        public void RepeatedImportRecognisesTheEarlierRenamedCopy()
+        {
+            WithTempDirectory(legacyRoot => WithTempDirectory(destination =>
+            {
+                string legacyProfiles = Directory.CreateDirectory(
+                    Path.Combine(legacyRoot, "Profiles")).FullName;
+                File.WriteAllText(
+                    Path.Combine(legacyProfiles, "Default.xml"), "legacy");
+                string destinationProfiles = Directory.CreateDirectory(
+                    Path.Combine(destination, "Profiles")).FullName;
+                File.WriteAllText(Path.Combine(destinationProfiles,
+                    "Default.xml"), "PureDS4 default");
+
+                LegacyProfileImportSurvey survey =
+                    LegacyProfileImportScanner.Scan(legacyRoot);
+                var first = LegacyProfileImporter.Import(survey, destination);
+                var repeated = LegacyProfileImporter.Import(survey, destination);
+
+                Assert.AreEqual(LegacyProfileImportOutcome.Imported,
+                    first.Single().Outcome);
+                Assert.AreEqual(
+                    LegacyProfileImportOutcome.SkippedAlreadyExists,
+                    repeated.Single().Outcome);
+                Assert.AreEqual("Default (DS4Windows).xml",
+                    repeated.Single().DestinationFileName);
+                Assert.AreEqual(2,
+                    Directory.GetFiles(destinationProfiles, "*.xml").Length);
+            }));
+        }
+
+        [TestMethod]
+        public void ImportUsesANumberedNameWhenTheFirstAliasIsDifferent()
+        {
+            WithTempDirectory(legacyRoot => WithTempDirectory(destination =>
+            {
+                string legacyProfiles = Directory.CreateDirectory(
+                    Path.Combine(legacyRoot, "Profiles")).FullName;
+                File.WriteAllText(Path.Combine(legacyProfiles, "Racing.xml"),
+                    "legacy racing");
+                string destinationProfiles = Directory.CreateDirectory(
+                    Path.Combine(destination, "Profiles")).FullName;
+                File.WriteAllText(Path.Combine(destinationProfiles,
+                    "Racing.xml"), "PureDS4 racing");
+                File.WriteAllText(Path.Combine(destinationProfiles,
+                    "Racing (DS4Windows).xml"), "unrelated alias");
+
+                LegacyProfileImportResult result = LegacyProfileImporter.
+                    Import(LegacyProfileImportScanner.Scan(legacyRoot),
+                        destination).Single();
+
+                Assert.AreEqual("Racing (DS4Windows 2).xml",
+                    result.DestinationFileName);
+                Assert.AreEqual("legacy racing", File.ReadAllText(Path.Combine(
+                    destinationProfiles, result.DestinationFileName)));
             }));
         }
 

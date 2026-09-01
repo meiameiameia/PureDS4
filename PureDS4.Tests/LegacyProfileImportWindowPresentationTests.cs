@@ -41,6 +41,21 @@ namespace DS4WindowsTests
 
             StringAssert.Contains(summary, "Found 2 profiles");
             StringAssert.Contains(summary, "never changes or removes");
+            StringAssert.Contains(summary, "DS4Windows suffix");
+        }
+
+        [TestMethod]
+        public void RenamedImportShowsItsActualDestinationName()
+        {
+            LegacyProfileImportResult result = new LegacyProfileImportResult(
+                "Default.xml", LegacyProfileImportOutcome.Imported,
+                destinationFileName: "Default (DS4Windows).xml");
+
+            string description = LegacyProfileImportWindow.DescribeResult(
+                result);
+
+            StringAssert.Contains(description,
+                "Imported as Default (DS4Windows).xml");
         }
 
         [TestMethod]

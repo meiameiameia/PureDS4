@@ -796,6 +796,8 @@ namespace DS4Windows
                     HidHideOwnershipJournal ownershipJournal =
                         GetHidHideOwnershipJournal();
                     List<string> dosPaths = hidHideDevice.GetWhitelist();
+                    dosPaths = ReconcileOwnedHidHideWhitelistEntries(
+                        hidHideDevice, ownershipJournal, dosPaths);
 
                     int maxPathCheckLength = 512;
                     StringBuilder sb = new StringBuilder(maxPathCheckLength);
@@ -865,6 +867,67 @@ namespace DS4Windows
                     }
                 }
             }
+        }
+
+        private List<string> ReconcileOwnedHidHideWhitelistEntries(
+            IHidHideWhitelistDevice hidHideDevice,
+            HidHideOwnershipJournal ownershipJournal,
+            IReadOnlyCollection<string> currentWhitelist)
+        {
+            List<string> current = (currentWhitelist ?? Array.Empty<string>())
+                .ToList();
+            if (ownershipJournal == null || !ownershipJournal.IsReliable)
+            {
+                return current;
+            }
+
+            HidHideWhitelistReconciliationPlan plan =
+                HidHideWhitelistReconciliationPolicy.Create(current,
+                    ownershipJournal.PersistentWhitelistEntries,
+                    HidHideOwnedApplicationPathInspector.Inspect);
+            string[] journalOnly = plan.JournalEntriesToForget
+                .Except(plan.EntriesToRemove,
+                    StringComparer.OrdinalIgnoreCase).ToArray();
+            if (journalOnly.Length > 0 &&
+                !ownershipJournal.ForgetWhitelistEntries(journalOnly))
+            {
+                StartupDiag("HidHide preserved stale whitelist ownership " +
+                    "records because the ownership journal could not be " +
+                    "updated safely");
+                return current;
+            }
+
+            if (plan.EntriesToRemove.Count == 0)
+            {
+                return current;
+            }
+
+            HidHideWhitelistMutationResult result =
+                HidHideWhitelistMutationGateway.RemoveExact(hidHideDevice,
+                    plan.EntriesToRemove);
+            if (!result.Succeeded)
+            {
+                StartupDiag("HidHide preserved owned whitelist entries: " +
+                    result.Error);
+                return result.After.Count > 0
+                    ? result.After.ToList()
+                    : hidHideDevice.GetWhitelist();
+            }
+
+            if (!ownershipJournal.ForgetWhitelistEntries(
+                    plan.EntriesToRemove))
+            {
+                StartupDiag("HidHide removed obsolete PureDS4 whitelist " +
+                    "entries, but their ownership records could not be " +
+                    "cleared; recovery remains fail-closed");
+            }
+            else
+            {
+                StartupDiag("HidHide removed obsolete PureDS4 whitelist " +
+                    $"entries: {string.Join(", ", plan.EntriesToRemove)}");
+            }
+
+            return result.After.ToList();
         }
 
         public void LoadPermanentSlotsConfig()

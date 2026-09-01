@@ -25,6 +25,20 @@ namespace DS4Windows
     internal static class LegacyApplicationGate
     {
         /// <summary>
+        /// PureDS4 may activate only when no predecessor runtime owner can
+        /// still compete. This is intentionally broader than checking the
+        /// currently running process: a startup task can launch it after the
+        /// check, and an installed executable or uninstall registration
+        /// mean the explicit replacement step is not yet complete.
+        /// </summary>
+        internal static bool RequiresRuntimeOwnershipRelease(
+            LegacyInstallationSurvey survey)
+        {
+            System.ArgumentNullException.ThrowIfNull(survey);
+            return survey.HasCompetingRuntimeOwnership;
+        }
+
+        /// <summary>
         /// The name to show the user for the installation
         /// <paramref name="survey"/> found running. Prefers the exact
         /// Add/Remove Programs display name when one was found, since that

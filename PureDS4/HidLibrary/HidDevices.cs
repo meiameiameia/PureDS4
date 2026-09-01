@@ -48,6 +48,8 @@ namespace DS4Windows
             int iEnumeratedDevCount = 0;
             List<HidDevice> foundDevs = new List<HidDevice>();
             int devInfoLen = devInfo.Length;
+            bool logEnumeration = Global.DeviceOptions.VerboseLogMessages ||
+                Global.VerboseStartupLogging;
             IEnumerable<DeviceInfo> temp = EnumerateDevices();
             for (var devEnum = temp.GetEnumerator(); devEnum.MoveNext();)
             //for (int i = 0, len = temp.Count(); i < len; i++)
@@ -71,7 +73,7 @@ namespace DS4Windows
                     }
                 }
 
-                if (Global.DeviceOptions.VerboseLogMessages)
+                if (logEnumeration)
                 {
                     if (found)
                     {
@@ -84,8 +86,15 @@ namespace DS4Windows
                 }
             }
 
-            if (Global.DeviceOptions.VerboseLogMessages && iEnumeratedDevCount > 0)
+            if (logEnumeration)
             {
+                AppLogger.LogToGui($"HID enumeration completed: enumerated={iEnumeratedDevCount} supported={foundDevs.Count}", false);
+
+                if (iEnumeratedDevCount == 0)
+                {
+                    return foundDevs;
+                }
+
                 // This EnumerateDS4 method is called 3-4 times when a gamepad is connected. Print out "separator" log msg line between different enumeration loops to make the logfile easier to read
                 AppLogger.LogToGui($"-------------------------", false);
             }

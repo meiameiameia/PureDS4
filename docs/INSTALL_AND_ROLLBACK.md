@@ -37,8 +37,12 @@ silently modify the other product's package. That separation exists so a
 migration can be *finished* deliberately, and so a failed one can be backed
 out — not so the two can live together indefinitely.
 
-They cannot both *run*. PureDS4 refuses to start while a `DS4Windows`
-process is running, and checks this on every launch.
+They cannot both remain active owners. On every launch PureDS4 requires a
+running `DS4Windows` process to close, then blocks controller, HidHide, and
+VIIPER activation while a predecessor executable, uninstall registration,
+or the `RunDS4Windows`/`RunVIIPER` tasks remain. Preserved profiles and an
+uninstalled registry tombstone or empty install directory do not block
+activation because none can start the old runtime.
 
 ## Shared components
 
@@ -85,11 +89,13 @@ at all.
 
 **Tools → Import from DS4Windows.** This copies game profiles into PureDS4.
 It never moves, edits, or deletes the originals, and never overwrites a
-PureDS4 profile of the same name.
+PureDS4 profile of the same name. A conflicting profile is imported under a
+`(DS4Windows)` suffix; reopening the importer recognizes that copy rather
+than duplicating it.
 
-Do this before removing the predecessor if you like, but you do not have to:
-uninstalling it leaves `%AppData%\DS4Windows` in place, so the profiles
-remain importable afterwards.
+The replacement gate completes before the main Tools page opens. The old
+uninstaller leaves `%AppData%\DS4Windows` in place, so the preserved profiles
+remain importable after removal.
 
 ### 5. Remove the predecessor
 

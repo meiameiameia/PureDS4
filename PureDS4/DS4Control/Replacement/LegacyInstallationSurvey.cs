@@ -33,7 +33,8 @@ namespace DS4Windows
             bool processRunning,
             bool startupTaskPresent,
             bool viiperTaskPresent,
-            IReadOnlyList<UninstallRegistryEntry> uninstallEntries)
+            IReadOnlyList<UninstallRegistryEntry> uninstallEntries,
+            IReadOnlyList<string> runtimeExecutablePaths = null)
         {
             RegistryRootPresent = registryRootPresent;
             InstallDirectories = installDirectories ??
@@ -46,6 +47,8 @@ namespace DS4Windows
             ViiperTaskPresent = viiperTaskPresent;
             UninstallEntries = uninstallEntries ??
                 System.Array.Empty<UninstallRegistryEntry>();
+            RuntimeExecutablePaths = runtimeExecutablePaths ??
+                System.Array.Empty<string>();
         }
 
         /// <summary>HKLM\SOFTWARE\DS4Windows exists.</summary>
@@ -54,6 +57,11 @@ namespace DS4Windows
         /// <summary>Install directories found under any Program Files root,
         /// named "DS4Windows" or "DS4Windows Reworked".</summary>
         internal IReadOnlyList<string> InstallDirectories { get; }
+
+        /// <summary>Legacy DS4Windows.exe files found inside the reported
+        /// install directories. A leftover empty directory remains visible
+        /// as residue, but is not itself an executable owner.</summary>
+        internal IReadOnlyList<string> RuntimeExecutablePaths { get; }
 
         /// <summary>%AppData%\DS4Windows exists.</summary>
         internal bool ConfigurationDirectoryPresent { get; }
@@ -97,6 +105,33 @@ namespace DS4Windows
             StartupTaskPresent ||
             ViiperTaskPresent ||
             UninstallEntries.Count > 0;
+
+        /// <summary>
+        /// True when the survey found ownership that can still start or run
+        /// the predecessor, or keep its runtime infrastructure under that
+        /// product's control. PureDS4 must not claim controllers, HidHide, or
+        /// VIIPER while any of these signals remain.
+        ///
+        /// A preserved configuration directory and the historical registry
+        /// root are deliberately excluded. They are data/residue, not an
+        /// executable owner, and keeping either one must not strand PureDS4
+        /// in a permanent replacement loop after a successful uninstall.
+        /// </summary>
+        internal bool HasCompetingRuntimeOwnership =>
+            ProcessRunning ||
+            RuntimeExecutablePaths.Count > 0 ||
+            StartupTaskPresent ||
+            ViiperTaskPresent ||
+            UninstallEntries.Count > 0;
+
+        /// <summary>
+        /// True when the detector found only preserved user data, an empty
+        /// install directory, or a historical registry record. This state
+        /// remains visible in the removal inventory, but it does not
+        /// represent an installed runtime and does not block activation.
+        /// </summary>
+        internal bool HasResidualState =>
+            IsPresent && !HasCompetingRuntimeOwnership;
 
         /// <summary>
         /// True when the old application's process is known to be running.

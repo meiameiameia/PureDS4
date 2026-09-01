@@ -14,6 +14,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
@@ -193,21 +194,119 @@ namespace DS4Windows
                 return false;
             }
 
-            string arguments = command.Arguments ?? string.Empty;
-            foreach (string token in arguments.Split(' ',
-                StringSplitOptions.RemoveEmptyEntries))
+            IReadOnlyList<string> tokens = TokenizeArguments(
+                command.Arguments ?? string.Empty);
+            for (int index = 0; index < tokens.Count; index++)
             {
+                string token = tokens[index];
                 if (token.Equals("/uninstall",
                         StringComparison.OrdinalIgnoreCase) ||
                     token.Equals("-uninstall",
-                        StringComparison.OrdinalIgnoreCase) ||
-                    token.StartsWith("/x", StringComparison.OrdinalIgnoreCase))
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                if (IsMsiExec(command.ExecutablePath) &&
+                    IsMsiUninstallToken(tokens, index))
                 {
                     return true;
                 }
             }
 
             return false;
+        }
+
+        private static bool IsMsiExec(string executablePath)
+        {
+            string fileName = Path.GetFileName(executablePath ?? string.Empty);
+            return fileName.Equals("msiexec", StringComparison.OrdinalIgnoreCase) ||
+                fileName.Equals("msiexec.exe",
+                    StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsMsiUninstallToken(
+            IReadOnlyList<string> tokens, int index)
+        {
+            string token = tokens[index];
+            if (token.Equals("/x", StringComparison.OrdinalIgnoreCase))
+            {
+                return index + 1 < tokens.Count &&
+                    IsMsiUninstallTarget(tokens[index + 1]);
+            }
+
+            if (token.Length <= 2 || token[0] != '/' ||
+                (token[1] != 'x' && token[1] != 'X'))
+            {
+                return false;
+            }
+
+            return IsMsiUninstallTarget(token.Substring(2));
+        }
+
+        private static bool IsMsiUninstallTarget(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value) || value[0] == '/' ||
+                value[0] == '-')
+            {
+                return false;
+            }
+
+            return Guid.TryParse(value, out _) ||
+                value.EndsWith(".msi", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Reads the small subset of Windows command-line quoting needed by
+        /// registered uninstall arguments. Classification only; the exact
+        /// original command is still what the launcher passes to Windows.
+        /// </summary>
+        private static IReadOnlyList<string> TokenizeArguments(string value)
+        {
+            List<string> tokens = new List<string>();
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return tokens;
+            }
+
+            int index = 0;
+            while (index < value.Length)
+            {
+                while (index < value.Length && char.IsWhiteSpace(value[index]))
+                {
+                    index++;
+                }
+                if (index >= value.Length)
+                {
+                    break;
+                }
+
+                System.Text.StringBuilder token =
+                    new System.Text.StringBuilder();
+                bool quoted = false;
+                while (index < value.Length)
+                {
+                    char current = value[index];
+                    if (current == '"')
+                    {
+                        quoted = !quoted;
+                        index++;
+                        continue;
+                    }
+                    if (!quoted && char.IsWhiteSpace(current))
+                    {
+                        break;
+                    }
+                    token.Append(current);
+                    index++;
+                }
+                if (token.Length > 0)
+                {
+                    tokens.Add(token.ToString());
+                }
+            }
+
+            return tokens;
         }
 
         /// <summary>

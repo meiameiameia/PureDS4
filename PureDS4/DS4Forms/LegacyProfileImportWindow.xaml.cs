@@ -77,9 +77,10 @@ namespace DS4WinWPF.DS4Forms
                 ? "profile" : "profiles";
             return $"Found {survey.Candidates.Count} {profileWord} in " +
                 "DS4Windows. Importing copies them into PureDS4; it never " +
-                "changes or removes DS4Windows' own files. A profile " +
-                "already present in PureDS4 under the same name is left " +
-                "as it is.";
+                "changes or removes DS4Windows' own files. If PureDS4 " +
+                "already has a different profile under the same name, the " +
+                "imported copy receives a DS4Windows suffix instead of " +
+                "overwriting either profile.";
         }
 
         internal static string BuildResultSummary(
@@ -132,13 +133,15 @@ namespace DS4WinWPF.DS4Forms
             importButton.IsEnabled = false;
         }
 
-        private static string DescribeResult(LegacyProfileImportResult result)
+        internal static string DescribeResult(LegacyProfileImportResult result)
         {
             string status = result.Outcome switch
             {
+                LegacyProfileImportOutcome.Imported when result.WasRenamed =>
+                    "Imported as " + result.DestinationFileName,
                 LegacyProfileImportOutcome.Imported => "Imported",
                 LegacyProfileImportOutcome.SkippedAlreadyExists =>
-                    "Already in PureDS4",
+                    "Already imported as " + result.DestinationFileName,
                 LegacyProfileImportOutcome.Failed => "Could not be copied",
                 _ => result.Outcome.ToString(),
             };

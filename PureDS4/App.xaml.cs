@@ -286,7 +286,7 @@ namespace DS4WinWPF
                 // owner-visible step before asking where PureDS4 should
                 // store its own data. This never closes the other
                 // application automatically.
-                if (!RequireLegacyApplicationClosed())
+                if (!RequireLegacyRuntimeOwnershipReleased())
                 {
                     runShutdown = false;
                     Current.Shutdown();
@@ -371,7 +371,7 @@ namespace DS4WinWPF
             // VIIPER's own readiness check just below. Measured at ~20 ms
             // on this machine, so it is cheap enough to run unconditionally
             // rather than only at first run.
-            if (!RequireLegacyApplicationClosed())
+            if (!RequireLegacyRuntimeOwnershipReleased())
             {
                 runShutdown = false;
                 Current.Shutdown();
@@ -452,33 +452,49 @@ namespace DS4WinWPF
         }
 
         /// <summary>
-        /// Step 2 of the replacement flow: block on an explicit,
-        /// owner-visible window while the old DS4Windows or DS4Windows
-        /// Reworked process is running, giving the user the chance to
-        /// close it and check again. Returns true once the process is no
-        /// longer running (including when it never was); returns false if
-        /// the user chose to exit PureDS4 instead.
+        /// Steps 2 and 5 of the replacement flow: require the old process to
+        /// close, then require every executable/runtime ownership signal to
+        /// disappear before PureDS4 activates controller services. This is
+        /// owner-visible and never closes the predecessor, edits its tasks,
+        /// or removes its files directly.
         /// </summary>
-        private bool RequireLegacyApplicationClosed()
+        private bool RequireLegacyRuntimeOwnershipReleased()
         {
             DS4Windows.LegacyInstallationSurvey survey = ScanLegacyInstallation();
             bool previousCheckStillFoundItRunning = false;
-            while (survey.RequiresApplicationClosed)
+            while (DS4Windows.LegacyApplicationGate.
+                RequiresRuntimeOwnershipRelease(survey))
             {
-                string detectedProductName =
-                    DS4Windows.LegacyApplicationGate.DescribeDetectedProduct(
-                        survey);
-                DS4Forms.LegacyApplicationRunningWindow dialog =
-                    new DS4Forms.LegacyApplicationRunningWindow(
-                        detectedProductName, previousCheckStillFoundItRunning);
-                ShowStartupDialog(dialog);
-                if (dialog.ExitRequested)
+                if (survey.RequiresApplicationClosed)
+                {
+                    string detectedProductName = DS4Windows.
+                        LegacyApplicationGate.DescribeDetectedProduct(survey);
+                    DS4Forms.LegacyApplicationRunningWindow runningDialog =
+                        new DS4Forms.LegacyApplicationRunningWindow(
+                            detectedProductName,
+                            previousCheckStillFoundItRunning);
+                    ShowStartupDialog(runningDialog);
+                    if (runningDialog.ExitRequested)
+                    {
+                        return false;
+                    }
+
+                    survey = ScanLegacyInstallation();
+                    previousCheckStillFoundItRunning = true;
+                    continue;
+                }
+
+                DS4Forms.LegacyRemovalPlanWindow replacementDialog =
+                    new DS4Forms.LegacyRemovalPlanWindow(survey,
+                        requireRuntimeOwnershipRelease: true);
+                ShowStartupDialog(replacementDialog);
+                if (replacementDialog.ExitRequested ||
+                    !replacementDialog.RuntimeOwnershipReleased)
                 {
                     return false;
                 }
-
                 survey = ScanLegacyInstallation();
-                previousCheckStillFoundItRunning = true;
+                previousCheckStillFoundItRunning = false;
             }
 
             return true;

@@ -33,7 +33,14 @@ namespace DS4WinWPF.DS4Control
         bool SetBlacklist(List<string> instances);
     }
 
-    class HidHideAPIDevice : IDisposable, IHidHideBlacklistDevice
+    internal interface IHidHideWhitelistDevice
+    {
+        List<string> GetWhitelist();
+        bool SetWhitelist(List<string> instances);
+    }
+
+    class HidHideAPIDevice : IDisposable, IHidHideBlacklistDevice,
+        IHidHideWhitelistDevice
     {
         private const uint IOCTL_GET_WHITELIST = 0x80016000;
         private const uint IOCTL_SET_WHITELIST = 0x80016004;

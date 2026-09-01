@@ -50,6 +50,7 @@ namespace DS4Windows
             new[] { "DS4Windows", "DS4Windows Reworked" };
 
         internal const string ConfigurationDirectoryName = "DS4Windows";
+        internal const string ExecutableFileName = "DS4Windows.exe";
         internal const string ProcessName = "DS4Windows";
         internal const string StartupTaskName = "RunDS4Windows";
         internal const string ViiperTaskName = "RunVIIPER";
@@ -63,6 +64,7 @@ namespace DS4Windows
                 @"SOFTWARE\" + RegistrySubKeyName);
 
             List<string> installDirectories = new List<string>();
+            List<string> runtimeExecutablePaths = new List<string>();
             foreach (string root in environment.ProgramFilesRoots)
             {
                 foreach (string name in InstallDirectoryNames)
@@ -71,6 +73,12 @@ namespace DS4Windows
                     if (environment.DirectoryExists(candidate))
                     {
                         installDirectories.Add(candidate);
+                        string executablePath = Path.Combine(candidate,
+                            ExecutableFileName);
+                        if (environment.FileExists(executablePath))
+                        {
+                            runtimeExecutablePaths.Add(executablePath);
+                        }
                     }
                 }
             }
@@ -116,7 +124,8 @@ namespace DS4Windows
                 processRunning,
                 startupTaskPresent,
                 viiperTaskPresent,
-                uninstallEntries);
+                uninstallEntries,
+                runtimeExecutablePaths);
         }
     }
 }

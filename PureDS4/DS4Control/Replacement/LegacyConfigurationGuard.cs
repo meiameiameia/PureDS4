@@ -44,7 +44,8 @@ namespace DS4Windows
         /// <summary>
         /// True when <paramref name="candidatePath"/> refers to the same
         /// directory as <paramref name="legacyConfigurationDirectory"/>,
-        /// independent of trailing separators, relative segments, or case.
+        /// or to any directory beneath it, independent of trailing
+        /// separators, relative segments, or case.
         /// Pure string/path comparison — takes the legacy directory as a
         /// parameter instead of reading the real environment, so it can be
         /// exercised with arbitrary paths in a test.
@@ -58,9 +59,17 @@ namespace DS4Windows
                 return false;
             }
 
-            return string.Equals(
-                NormalizeForComparison(candidatePath),
-                NormalizeForComparison(legacyConfigurationDirectory),
+            string candidate = NormalizeForComparison(candidatePath);
+            string legacy = NormalizeForComparison(
+                legacyConfigurationDirectory);
+            if (string.Equals(candidate, legacy,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            string legacyPrefix = legacy + Path.DirectorySeparatorChar;
+            return candidate.StartsWith(legacyPrefix,
                 StringComparison.OrdinalIgnoreCase);
         }
 
@@ -86,7 +95,7 @@ namespace DS4Windows
 
         /// <summary>
         /// Throws if <paramref name="candidatePath"/> is DS4Windows' own
-        /// configuration directory. Called from <see
+        /// configuration directory or a descendant of it. Called from <see
         /// cref="Global.SaveWhere"/>, the single place PureDS4 decides
         /// where its own configuration lives, before that path is accepted.
         /// </summary>
