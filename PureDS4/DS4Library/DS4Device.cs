@@ -225,6 +225,8 @@ namespace DS4Windows
         private readonly object bluetoothOutputWriteLock = new object();
         private readonly object bluetoothAudioControlLaneLock = new object();
         private readonly object outputReportStateLock = new object();
+        private BluetoothEffectWriteDiagnostics bluetoothEffectWriteDiagnostics =
+            new BluetoothEffectWriteDiagnostics();
         private readonly DualShock4BluetoothAudioState bluetoothAudioState =
             new DualShock4BluetoothAudioState();
         private readonly DualShock4ControllerClockDiscipline
@@ -1218,7 +1220,7 @@ namespace DS4Windows
             }
         }
 
-        protected bool writeOutput()
+        protected virtual bool writeOutput()
         {
             lock (bluetoothOutputWriteLock)
             {
@@ -2279,6 +2281,40 @@ namespace DS4Windows
             }
         }
 
+        private bool WriteBluetoothEffectWithDiagnostics(
+            DualShock4BluetoothAudioState.Snapshot bluetoothAudio, out int winError)
+        {
+            long started = Stopwatch.GetTimestamp();
+            bool completed = false, written = false;
+            int nativeError = 0;
+            try
+            {
+                written = bluetoothAudio.SpeakerEnabled ?
+                    WriteDualShock4BluetoothEffectThroughAudioLane(bluetoothAudio) :
+                    writeOutput();
+                // Capture before diagnostics/logging can replace the native error.
+                nativeError = written ? 0 : Marshal.GetLastWin32Error();
+                completed = true;
+                winError = nativeError;
+                return written;
+            }
+            finally
+            {
+                double elapsedMs = Stopwatch.GetElapsedTime(started).TotalMilliseconds;
+                var summary = (bluetoothEffectWriteDiagnostics ??=
+                    new BluetoothEffectWriteDiagnostics()).Record(
+                        Environment.TickCount64, elapsedMs, written,
+                        nativeError, !completed);
+                if (summary.HasValue)
+                {
+                    // File-only, aggregated telemetry. Never dispatch a UI
+                    // notification or log one line per feedback frame.
+                    NLog.LogManager.GetLogger("BluetoothEffects").Info(
+                        $"DS4 BT effects slot={deviceSlotNumber}: {summary.Value}");
+                }
+            }
+        }
+
         private void sendOutputReport(bool synchronous, bool force = false, bool quitOutputThreadOnError = true)
         {
             lock (outputReportStateLock)
@@ -2291,6 +2327,7 @@ namespace DS4Windows
 
             bool quitOutputThread = false;
             bool usingBT = conType == ConnectionType.BT;
+            bool retryBluetoothEffect = false;
 
             // Some gamepads don't support lightbar and rumble, so no need to write out anything (writeOut always fails, so DS4Windows would accidentally force quit the gamepad connection).
             // If noOutputData featureSet flag is set then don't try to write out anything to the gamepad device.
@@ -2338,6 +2375,7 @@ namespace DS4Windows
                     // the normal byte comparison keeps this update pending for
                     // the next input tick instead of dropping it.
                     haptime = false;
+                    retryBluetoothEffect = true;
                     Interlocked.Increment(
                         ref bluetoothEffectReportsDeferredDuringAudio);
                 }
@@ -2354,13 +2392,13 @@ namespace DS4Windows
             {
                 if (haptime)
                 {
-                    if (change)
+                    if (!usingBT)
                     {
-                        standbySw.Reset();
+                        if (change)
+                            standbySw.Reset();
+                        else
+                            standbySw.Restart();
                     }
-                    else
-                        standbySw.Restart();
-                    //standbySw.Restart();
 
                     if (usingBT)
                     {
@@ -2384,11 +2422,25 @@ namespace DS4Windows
 
                     try
                     {
-                        bool outputWritten = usingBT &&
-                            bluetoothAudio.SpeakerEnabled ?
-                            WriteDualShock4BluetoothEffectThroughAudioLane(
-                                bluetoothAudio) :
-                            writeOutput();
+                        int winError;
+                        bool outputWritten;
+                        if (usingBT)
+                            outputWritten = WriteBluetoothEffectWithDiagnostics(
+                                bluetoothAudio, out winError);
+                        else
+                        {
+                            outputWritten = writeOutput();
+                            winError = outputWritten ? 0 : Marshal.GetLastWin32Error();
+                        }
+                        if (outputWritten && usingBT)
+                        {
+                            // Reset() stops the clock. A changed rumble/light
+                            // report (including the final neutral game report)
+                            // must not disable keepalives when feedback goes
+                            // quiet. Count from the last successful write, not
+                            // from a failed or deferred attempt.
+                            standbySw.Restart();
+                        }
                         if (outputWritten && usingBT &&
                             (bluetoothAudio.SpeakerEnabled ||
                                 bluetoothAudio.MicrophoneEnabled))
@@ -2401,10 +2453,9 @@ namespace DS4Windows
                         }
                         if (!outputWritten)
                         {
+                            retryBluetoothEffect = usingBT;
                             if (quitOutputThreadOnError)
                             {
-                                int winError = Marshal.GetLastWin32Error();
-
                                 // Logfile notification that the gamepad is force disconnected because of writeOutput failed
                                 if (quitOutputThread == false && !isDisconnecting)
                                     AppLogger.LogToGui($"Gamepad data write connection is lost. Disconnecting the gamepad. LastErrorCode={winError}", false);
@@ -2413,7 +2464,13 @@ namespace DS4Windows
                             }
                         }
                     }
-                    catch { } // If it's dead already, don't worry about it.
+                    catch
+                    {
+                        // Preserve a pending effect if the caller keeps this
+                        // connection alive. outputReport is a staging buffer,
+                        // not evidence that the controller accepted the write.
+                        retryBluetoothEffect = usingBT;
+                    }
 
                     if (!usingBT)
                     {
@@ -2446,7 +2503,7 @@ namespace DS4Windows
                 exitOutputThread = true;
             }
 
-            currentHap.dirty = false;
+            currentHap.dirty = retryBluetoothEffect;
             });
             }
         }
@@ -2623,10 +2680,18 @@ namespace DS4Windows
         {
             lock (rumbleStateLock)
             {
+                // Repeated BT feedback still publishes its ordered mailbox
+                // state (including explicit zero), but does not force another
+                // identical effect. Keep another producer's pending dirty bit
+                // and the USB/DS3 paths unchanged. Serialized report comparison
+                // still catches changes to the composed motors/lightbar.
+                testRumble.dirty |= conType != ConnectionType.BT ||
+                    deviceType != InputDevices.InputDeviceType.DS4 ||
+                    testRumble.rumbleState.RumbleMotorStrengthRightLightFast != rightLightFastMotor ||
+                    testRumble.rumbleState.RumbleMotorStrengthLeftHeavySlow != leftHeavySlowMotor;
                 testRumble.rumbleState.RumbleMotorStrengthRightLightFast = rightLightFastMotor;
                 testRumble.rumbleState.RumbleMotorStrengthLeftHeavySlow = leftHeavySlowMotor;
                 testRumble.rumbleState.RumbleMotorsExplicitlyOff = rightLightFastMotor == 0 && leftHeavySlowMotor == 0;
-                testRumble.dirty = true;
                 Interlocked.Increment(ref rumbleCommandGeneration);
 
                 // If rumble autostop timer (msecs) is enabled for this device then restart autostop timer everytime rumble is modified (or stop the timer if rumble is set to zero)
