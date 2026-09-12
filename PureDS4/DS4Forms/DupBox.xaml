@@ -8,32 +8,24 @@
              lex:LocalizeDictionary.DesignCulture=""
              lex:ResxLocalizationProvider.DefaultAssembly="PureDS4"
              lex:ResxLocalizationProvider.DefaultDictionary="Strings"
-             mc:Ignorable="d" Height="30" Width="436">
-    <DockPanel Margin="4">
-        <Canvas DockPanel.Dock="Left" Margin="20,0,0,0">
-            <TextBox x:Name="profileTxt" TextWrapping="Wrap" Text="" Width="160" HorizontalAlignment="Left"
-                 VerticalAlignment="Center" MaxLines="1"/>
-
-            <TextBlock Margin="5,2" MinWidth="50" Text="{Binding Source={lex:Loc Resources:TypeNewName}, StringFormat='&lt;{0}&gt;'}" Foreground="{DynamicResource ForegroundColor}" Opacity="0.7" IsHitTestVisible="False">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ElementName=profileTxt, Path=Text.IsEmpty, Mode=OneWay}" Value="False">
-                                <Setter Property="Visibility" Value="Hidden" />
-                            </DataTrigger>
-
-                            <DataTrigger Binding="{Binding ElementName=profileTxt, Path=Text.IsEmpty, Mode=OneWay}" Value="True">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
-        </Canvas>
-
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="0,0,30,0">
-            <Button x:Name="saveBtn" Content="{lex:Loc Save}" Width="80" Click="SaveBtn_Click" />
-            <Button x:Name="cancelBtn" Content="{lex:Loc Cancel}" Width="80" Click="CancelBtn_Click" Margin="20,0,0,0" />
+             mc:Ignorable="d">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Margin="0,0,16,0">
+            <Label Content="{lex:Loc Resources:TypeNewName}" Target="{Binding ElementName=profileTxt}"
+                   Style="{StaticResource FoundationPropertyLabelStyle}" />
+            <TextBox x:Name="profileTxt" TextWrapping="Wrap" Text="" MaxLines="1"
+                     AutomationProperties.Name="New profile name"
+                     Style="{StaticResource FoundationTextBoxStyle}" />
         </StackPanel>
-    </DockPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom">
+            <Button x:Name="saveBtn" Content="{lex:Loc Save}" MinWidth="72" Click="SaveBtn_Click"
+                    Style="{StaticResource FoundationPrimaryButtonStyle}" />
+            <Button x:Name="cancelBtn" Content="{lex:Loc Cancel}" MinWidth="72" Click="CancelBtn_Click"
+                    Style="{StaticResource FoundationButtonStyle}" Margin="8,0,0,0" />
+        </StackPanel>
+    </Grid>
 </UserControl>

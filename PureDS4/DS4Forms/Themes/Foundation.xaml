@@ -38,6 +38,13 @@
     <FontFamily x:Key="TypeUiFontFamily">Segoe UI Variable Text, Segoe UI</FontFamily>
     <FontFamily x:Key="TypeMonoFontFamily">Cascadia Mono, Consolas</FontFamily>
 
+    <!-- Home columns are shared by header and rows, never inferred from content. -->
+    <GridLength x:Key="HomeIdentityColumn">1.3*</GridLength>
+    <GridLength x:Key="HomeProtectionColumn">84</GridLength>
+    <GridLength x:Key="HomeProfileColumn">*</GridLength>
+    <GridLength x:Key="HomeBatteryColumn">82</GridLength>
+    <GridLength x:Key="HomeLightbarColumn">116</GridLength>
+
     <Style x:Key="FoundationFocusVisualStyle" TargetType="Control">
         <Setter Property="Template">
             <Setter.Value>
@@ -109,6 +116,12 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style x:Key="FoundationKeyButtonStyle" TargetType="Button" BasedOn="{StaticResource FoundationButtonStyle}">
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeightDense}" />
+        <Setter Property="Padding" Value="2,2" />
+        <Setter Property="FontSize" Value="{StaticResource TypeColumnHeaderSize}" />
     </Style>
 
     <Style x:Key="FoundationPrimaryButtonStyle"
@@ -413,6 +426,16 @@
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
                         </Trigger>
+                        <!-- A box embedded in a larger field (a search bar with its
+                             own icon and clear button) must not draw a second focus
+                             ring inside that field's border. The host draws it. -->
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsKeyboardFocused" Value="True" />
+                                <Condition Property="Tag" Value="Embedded" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="KeyboardFocusRing" Property="Visibility" Value="Collapsed" />
+                        </MultiTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -626,6 +649,213 @@
 
     <!-- Controls without a local style receive the same geometry, focus,
          and interaction behavior in both themes. -->
+    <Style x:Key="FoundationControllerRowStyle" TargetType="ListViewItem"
+           BasedOn="{StaticResource FoundationTableListItemStyle}">
+        <Setter Property="MinHeight" Value="48" />
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="FontFamily" Value="{StaticResource TypeUiFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource TypeBodySize}" />
+    </Style>
+
+    <!-- Opt-in for flat, checked choice menus; not a replacement for submenu templates. -->
+    <!-- Opt-in horizontal property slider. Native Track commands/keyboard and
+         value semantics are retained; interaction states never change geometry. -->
+    <Style x:Key="FoundationHorizontalSliderStyle" TargetType="Slider">
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeightDefault}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FoundationFocusVisualStyle}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Slider">
+                    <Grid MinHeight="{StaticResource ControlHeightDefault}">
+                        <Track x:Name="PART_Track" VerticalAlignment="Center" IsDirectionReversed="{TemplateBinding IsDirectionReversed}">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="Slider.DecreaseLarge" IsTabStop="False">
+                                    <RepeatButton.Template><ControlTemplate TargetType="RepeatButton">
+                                        <Border Height="4" Background="{DynamicResource AccentBrush}" CornerRadius="{StaticResource RadiusSmall}" />
+                                    </ControlTemplate></RepeatButton.Template>
+                                </RepeatButton>
+                            </Track.DecreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb Width="14" Height="18" Focusable="False">
+                                    <Thumb.Template><ControlTemplate TargetType="Thumb">
+                                        <Border x:Name="ThumbChrome" Background="{DynamicResource TextPrimaryBrush}"
+                                                BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1" CornerRadius="{StaticResource RadiusSmall}" />
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ThumbChrome" Property="Background" Value="{DynamicResource AccentHoverBrush}" /></Trigger>
+                                            <Trigger Property="IsDragging" Value="True"><Setter TargetName="ThumbChrome" Property="Background" Value="{DynamicResource AccentPressedBrush}" /></Trigger>
+                                            <Trigger Property="IsEnabled" Value="False"><Setter TargetName="ThumbChrome" Property="Background" Value="{DynamicResource TextDisabledBrush}" /></Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate></Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="Slider.IncreaseLarge" IsTabStop="False">
+                                    <RepeatButton.Template><ControlTemplate TargetType="RepeatButton">
+                                        <Border Height="4" Background="{DynamicResource BorderDefaultBrush}" CornerRadius="{StaticResource RadiusSmall}" />
+                                    </ControlTemplate></RepeatButton.Template>
+                                </RepeatButton>
+                            </Track.IncreaseRepeatButton>
+                        </Track>
+                        <TickBar x:Name="Ticks" Visibility="Collapsed" IsHitTestVisible="False"
+                                 Margin="7,0,7,0" Height="4" VerticalAlignment="Bottom" Placement="Bottom"
+                                 Fill="{DynamicResource TextSecondaryBrush}" Minimum="{TemplateBinding Minimum}"
+                                 Maximum="{TemplateBinding Maximum}" TickFrequency="{TemplateBinding TickFrequency}" Ticks="{TemplateBinding Ticks}" />
+                        <Border x:Name="FocusRing" Visibility="Collapsed" IsHitTestVisible="False"
+                                BorderBrush="{DynamicResource FocusBrush}" BorderThickness="1" CornerRadius="{StaticResource RadiusSmall}" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="TickPlacement" Value="BottomRight"><Setter TargetName="Ticks" Property="Visibility" Value="Visible" /></Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="FocusRing" Property="Visibility" Value="Visible" /></Trigger>
+                        <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.55" /></Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="FoundationChoiceMenuItemStyle" TargetType="MenuItem">
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeightDefault}" />
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="FontFamily" Value="{StaticResource TypeUiFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource TypeBodySize}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="MenuItem">
+                    <Border x:Name="ChoiceChrome" Padding="{TemplateBinding Padding}"
+                            Background="Transparent" BorderThickness="1"
+                            BorderBrush="Transparent" CornerRadius="{StaticResource RadiusSmall}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="CheckGlyph" Text="✓" Visibility="Hidden"
+                                       VerticalAlignment="Center" />
+                            <ContentPresenter Grid.Column="1" ContentSource="Header"
+                                              RecognizesAccessKey="True" VerticalAlignment="Center" />
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="ChoiceChrome" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="ChoiceChrome" Property="BorderBrush" Value="{DynamicResource FocusBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="CheckGlyph" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="FoundationChoiceMenuStyle" TargetType="ContextMenu">
+        <Setter Property="ItemContainerStyle" Value="{StaticResource FoundationChoiceMenuItemStyle}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContextMenu">
+                    <Border Background="{DynamicResource SurfaceRaisedBrush}"
+                            BorderBrush="{DynamicResource BorderDefaultBrush}" BorderThickness="1"
+                            CornerRadius="{StaticResource RadiusSmall}" Padding="4"
+                            SnapsToDevicePixels="True">
+                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Opt-in property editors retain native numeric parsing/spin/validation.
+         No replacement template or value-update policy belongs in this style. -->
+    <Style x:Key="FoundationNumericInputStyle" TargetType="Control">
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeightDefault}" />
+        <Setter Property="MinWidth" Value="72" />
+        <!-- A numeric field is as wide as its number. Left-aligning keeps the
+             value beside its label instead of stretching to the far side of a
+             star-sized property column. -->
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="Padding" Value="4,2" />
+        <Setter Property="FontFamily" Value="{StaticResource TypeUiFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource TypeBodySize}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceInsetBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FoundationFocusVisualStyle}" />
+        <Style.Triggers>
+            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                <Setter Property="BorderBrush" Value="{DynamicResource FocusBrush}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="FoundationPropertyLabelStyle" TargetType="Label">
+        <Setter Property="Padding" Value="0,4,8,4" />
+        <Setter Property="FontFamily" Value="{StaticResource TypeUiFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource TypeBodySize}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <!-- One label column for every property row in the profile editor, so the
+         value column starts at the same place whether the row is a Grid, a
+         WrapPanel, or led by a check box instead of a label. Rows used to size
+         to their own label, which left the fields scattered across a 90px
+         spread within a single section. -->
+    <system:Double x:Key="FormLabelColumnWidth">160</system:Double>
+
+    <Style x:Key="FoundationFormLabelStyle" TargetType="Label"
+           BasedOn="{StaticResource FoundationPropertyLabelStyle}">
+        <Setter Property="MinWidth" Value="{StaticResource FormLabelColumnWidth}" />
+    </Style>
+
+    <Style x:Key="FoundationFormCheckBoxStyle" TargetType="CheckBox"
+           BasedOn="{StaticResource FoundationCheckBoxStyle}">
+        <Setter Property="MinWidth" Value="{StaticResource FormLabelColumnWidth}" />
+    </Style>
+
+    <!-- Content-only tabs are driven by an existing section or mode selector.
+         Keep the TabControl and its index/content association, not a second nav. -->
+    <Style x:Key="FoundationContentTabsStyle" TargetType="TabControl">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBaseBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabControl">
+                    <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <!-- The section list, not a tab strip, drives this control. The
+                                     items host still has to exist: without it WPF generates no
+                                     TabItem containers, and with no TabItem the selected content
+                                     never reaches the automation tree at all. Zero height and
+                                     clipping keep it invisible. -->
+                                <RowDefinition Height="0" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <TabPanel IsItemsHost="True" ClipToBounds="True" />
+                            <ContentPresenter Grid.Row="1" x:Name="PART_SelectedContentHost" ContentSource="SelectedContent" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="Button" BasedOn="{StaticResource FoundationButtonStyle}">
         <Setter Property="MinHeight" Value="0" />
     </Style>

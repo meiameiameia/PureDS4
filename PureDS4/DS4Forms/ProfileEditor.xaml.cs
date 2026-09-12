@@ -1883,7 +1883,10 @@ namespace DS4WinWPF.DS4Forms
             else
             {
                 colorGB.Header = Translations.Strings.Color;
-                emptyColorGB.Visibility = Visibility.Hidden;
+                // Collapsed, not Hidden: a hidden group still reserves its whole
+                // band, which left a large empty gap in the middle of the section
+                // whenever battery colouring was off.
+                emptyColorGB.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -2425,6 +2428,19 @@ namespace DS4WinWPF.DS4Forms
             mpControl.UpdateMappingName();
             UpdateHighlightLabel(mpControl);
             Global.CacheProfileCustomsFlags(profileSettingsVM.Device);
+        }
+
+        private void EditSelectedMappingBtn_Click(object sender, RoutedEventArgs e)
+        {
+            int index = mappingListBox.SelectedIndex;
+            if (index < 0 || index >= mappingListVM.Mappings.Count ||
+                !mappingListVM.Mappings[index].IsAvailableOnPhysicalController)
+            {
+                return;
+            }
+
+            mappingListVM.SelectedIndex = index;
+            ShowControlBindingWindow();
         }
 
         private void MappingListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)

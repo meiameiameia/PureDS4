@@ -300,6 +300,14 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
         public event EventHandler LightColorChanged;
 
+        // Reuse the existing color notification without changing LED persistence.
+        public string LightbarModeText => useCustomColor ? "Custom" : "From profile";
+        public event EventHandler LightbarModeTextChanged
+        {
+            add => LightColorChanged += value;
+            remove => LightColorChanged -= value;
+        }
+
         public Color CustomLightColor
         {
             get

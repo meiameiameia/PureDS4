@@ -73,7 +73,7 @@
     <system:String x:Key="GitHubImg">GitHub-Mark-64px.png</system:String>
 
     <Style TargetType="FlowDocument" x:Key="DocumentStyleGithubLike">
-        <Setter Property="FontFamily"    Value="Calibri" />
+        <Setter Property="FontFamily"    Value="Segoe UI Variable Text, Segoe UI" />
         <Setter Property="TextAlignment" Value="Left" />
         <Setter Property="PagePadding"   Value="0"/>
         <Setter Property="FontSize"      Value="14"/>

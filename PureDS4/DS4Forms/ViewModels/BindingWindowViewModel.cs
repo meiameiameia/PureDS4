@@ -443,11 +443,11 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 string color = string.Empty;
                 if (outputType == OutType.Default)
                 {
-                    color =  Colors.LimeGreen.ToString();
+                    color = Application.Current.FindResource("AccentColor").ToString();
                 }
                 else
                 {
-                    color = Application.Current.FindResource("SecondaryColor").ToString();
+                    color = Application.Current.FindResource("BorderDefaultBrush").ToString();
                     //color = SystemColors.ControlBrush.Color.ToString();
                 }
 
@@ -462,11 +462,11 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 string color = string.Empty;
                 if (outputType == OutType.Button && control == X360Controls.Unbound)
                 {
-                    color = Colors.LimeGreen.ToString();
+                    color = Application.Current.FindResource("AccentColor").ToString();
                 }
                 else
                 {
-                    color = Application.Current.FindResource("SecondaryColor").ToString();
+                    color = Application.Current.FindResource("BorderDefaultBrush").ToString();
                     //color = SystemColors.ControlBrush.Color.ToString();
                 }
 

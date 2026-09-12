@@ -116,6 +116,8 @@ namespace DS4WinWPF.DS4Forms
         public event EventHandler LightbarRequested;
         public event EventHandler DisconnectRequested;
 
+        internal FrameworkElement LightbarMenuAnchor => lightbarButton;
+
         private void EditProfileBtn_Click(object sender, RoutedEventArgs e) =>
             EditProfileRequested?.Invoke(this, EventArgs.Empty);
 

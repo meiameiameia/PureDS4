@@ -49,5 +49,7 @@ namespace DS4WinWPF.DS4Forms
         {
             ColorChanged?.Invoke(this, e.NewValue.GetValueOrDefault());
         }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
     }
 }

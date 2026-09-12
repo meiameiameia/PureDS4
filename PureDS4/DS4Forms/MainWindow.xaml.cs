@@ -155,6 +155,7 @@ namespace DS4WinWPF.DS4Forms
 
             StartStopBtn.Content = App.rootHub.running ? Translations.Strings.StopText :
                 Translations.Strings.StartText;
+            serviceStatusText.Text = App.rootHub.running ? "Service running" : "Service stopped";
 
             conLvViewModel = new ControllerListViewModel(App.rootHub, profileListHolder);
             mainWinVM.ControllerCol = conLvViewModel.ControllerCol;
@@ -1110,6 +1111,7 @@ Suspend support not enabled.", true);
         private void PrepareControllerItem(CompositeDeviceModel item)
         {
             item.LightContext = new ContextMenu();
+            item.LightContext.SetResourceReference(FrameworkElement.StyleProperty, "FoundationChoiceMenuStyle");
             item.AddLightContextItems();
             item.Device.SyncChange += DS4Device_SyncChange;
             item.RequestColorPicker += Item_RequestColorPicker;
@@ -1169,6 +1171,7 @@ Suspend support not enabled.", true);
                 }
 
                 StartStopBtn.IsEnabled = true;
+                serviceStatusText.Text = service.running ? "Service running" : "Service stopped";
                 slotManControl.IsEnabled = service.running;
             }));
         }
@@ -1249,6 +1252,20 @@ Suspend support not enabled.", true);
             {
                 controller.RequestDisconnect();
             }
+        }
+
+        private void HomeProfileMenu_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button { ContextMenu: { } menu } button) return;
+            menu.PlacementTarget = button;
+            menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            menu.IsOpen = true;
+        }
+
+        private void HomeNewProfileBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement { DataContext: CompositeDeviceModel controller })
+                ShowProfileEditor(controller.DevIndex, null);
         }
 
         private async void HomeUseNativeBtn_Click(object sender,
@@ -1746,7 +1763,8 @@ Suspend support not enabled.", true);
         {
             mainTabCon.SelectedItem = controllersTab;
             controllerLV.SelectedItem = mainWinVM.SelectedController;
-            controllerLV.ScrollIntoView(mainWinVM.SelectedController);
+            if (mainWinVM.SelectedController != null)
+                controllerLV.ScrollIntoView(mainWinVM.SelectedController);
         }
 
         private void ControllerOverview_LightbarRequested(object sender, EventArgs e)
@@ -1757,8 +1775,8 @@ Suspend support not enabled.", true);
                 return;
             }
 
-            controller.LightContext.PlacementTarget = controllerOverviewControl;
-            controller.LightContext.Placement = PlacementMode.MousePoint;
+            controller.LightContext.PlacementTarget = controllerOverviewControl.LightbarMenuAnchor;
+            controller.LightContext.Placement = PlacementMode.Bottom;
             controller.LightContext.IsOpen = true;
         }
 
@@ -1861,13 +1879,13 @@ Suspend support not enabled.", true);
 
         private void LightColorBtn_Click(object sender, RoutedEventArgs e)
         {
-            Button button = sender as Button;
-            int idx = Convert.ToInt32(button.Tag);
-            CompositeDeviceModel item = conLvViewModel.ControllerDict[idx];
-            //(button.ContextMenu.Items[0] as MenuItem).IsChecked = conLvViewModel.ControllerCol[idx].UseCustomColor;
-            //(button.ContextMenu.Items[1] as MenuItem).IsChecked = !conLvViewModel.ControllerCol[idx].UseCustomColor;
-            button.ContextMenu = item.LightContext;
-            button.ContextMenu.IsOpen = true;
+            if (sender is not Button { DataContext: CompositeDeviceModel item } button ||
+                item.LightContext == null) return;
+
+            controllerLV.SelectedItem = item;
+            item.LightContext.PlacementTarget = button;
+            item.LightContext.Placement = PlacementMode.Bottom;
+            item.LightContext.IsOpen = true;
         }
 
         private void MainDS4Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

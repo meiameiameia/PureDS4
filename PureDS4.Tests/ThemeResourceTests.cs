@@ -141,6 +141,7 @@ namespace DS4WindowsTests
                 "FoundationGroupBoxStyle",
                 "FoundationTableListItemStyle",
                 "FoundationToolbarButtonStyle",
+                "FoundationControllerRowStyle",
             };
 
             foreach (string key in styleKeys)
@@ -148,6 +149,19 @@ namespace DS4WindowsTests
                 Assert.IsNotNull(application.TryFindResource(key),
                     $"{themeName} theme is missing {key}.");
             }
+
+            Assert.AreEqual(32.0, new Button
+            {
+                Style = (Style)application.FindResource("BridgePrimaryButtonStyle")
+            }.MinHeight, "Compatibility buttons must use the shared prominent metric.");
+            Assert.AreEqual(28.0, new Button
+            {
+                Style = (Style)application.FindResource("BridgeSecondaryButtonStyle")
+            }.MinHeight, "Compatibility buttons must use the shared default metric.");
+            Assert.AreEqual(48.0, new ListViewItem
+            {
+                Style = (Style)application.FindResource("FoundationControllerRowStyle")
+            }.MinHeight);
 
             AssertContrast(application, themeName,
                 "SurfaceBaseBrush", "SurfaceRaisedBrush", 1.25);

@@ -15,7 +15,8 @@
         <Grid.Resources>
             <Thickness x:Key="spaceMargin" Left="10" Bottom="6" />
             <Style x:Key="gridRowHeight" TargetType="{x:Type RowDefinition}">
-                <Setter Property="Height" Value="30" />
+                <Setter Property="Height" Value="Auto" />
+                <Setter Property="MinHeight" Value="36" />
             </Style>
         </Grid.Resources>
         <Grid.ColumnDefinitions>
@@ -35,28 +36,28 @@
         <TextBlock Text="X" Grid.Column="1" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,8" />
         <TextBlock Text="Y" Grid.Column="2"  FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,8" />
 
-        <Label Content="{lex:Loc DeadZone}" ContentStringFormat="{}{0}:" Grid.Row="1" Grid.Column="0" />
-        <xctk:DoubleUpDown d:IsHidden="True" Value="{Binding DeadZoneX,UpdateSourceTrigger=LostFocus}" FormatString="F2" MinWidth="50" Grid.Row="1" Grid.Column="1" Maximum="1.0" Minimum="0.0" Increment="0.1"
+        <Label Style="{StaticResource FoundationPropertyLabelStyle}" Content="{lex:Loc DeadZone}" ContentStringFormat="{}{0}:" Grid.Row="1" Grid.Column="0" />
+        <xctk:DoubleUpDown Style="{StaticResource FoundationNumericInputStyle}" d:IsHidden="True" Value="{Binding DeadZoneX,UpdateSourceTrigger=LostFocus}" FormatString="F2" MinWidth="72" Grid.Row="1" Grid.Column="1" Maximum="1.0" Minimum="0.0" Increment="0.1"
                                                    Margin="{StaticResource spaceMargin}" />
-        <xctk:DoubleUpDown d:IsHidden="True" Value="{Binding DeadZoneY,UpdateSourceTrigger=LostFocus}" FormatString="F2" MinWidth="50" Grid.Row="1" Grid.Column="2" Maximum="1.0" Minimum="0.0" Increment="0.1"
-                                                   Margin="{StaticResource spaceMargin}" />
-
-        <Label Content="{lex:Loc MaxZone}" ContentStringFormat="{}{0}:" Grid.Row="2" Grid.Column="0" />
-        <xctk:DoubleUpDown d:IsHidden="True" Value="{Binding MaxZoneX}" FormatString="F2" MinWidth="50" Grid.Row="2" Grid.Column="1" Maximum="1.0" Minimum="0.0" Increment="0.1"
-                                                   Margin="{StaticResource spaceMargin}" />
-        <xctk:DoubleUpDown d:IsHidden="True" Value="{Binding MaxZoneY}" FormatString="F2" MinWidth="50" Grid.Row="2" Grid.Column="2" Maximum="1.0" Minimum="0.0" Increment="0.1"
+        <xctk:DoubleUpDown Style="{StaticResource FoundationNumericInputStyle}" d:IsHidden="True" Value="{Binding DeadZoneY,UpdateSourceTrigger=LostFocus}" FormatString="F2" MinWidth="72" Grid.Row="1" Grid.Column="2" Maximum="1.0" Minimum="0.0" Increment="0.1"
                                                    Margin="{StaticResource spaceMargin}" />
 
-        <Label Content="{lex:Loc AntiDeadZone}" ContentStringFormat="{}{0}:" Grid.Row="3" Grid.Column="0" />
-        <xctk:DoubleUpDown d:IsHidden="True" Value="{Binding AntiDeadZoneX}" FormatString="F2" MinWidth="50" Grid.Row="3" Grid.Column="1" Maximum="1.0" Minimum="0.0" Increment="0.1"
+        <Label Style="{StaticResource FoundationPropertyLabelStyle}" Content="{lex:Loc MaxZone}" ContentStringFormat="{}{0}:" Grid.Row="2" Grid.Column="0" />
+        <xctk:DoubleUpDown Style="{StaticResource FoundationNumericInputStyle}" d:IsHidden="True" Value="{Binding MaxZoneX}" FormatString="F2" MinWidth="72" Grid.Row="2" Grid.Column="1" Maximum="1.0" Minimum="0.0" Increment="0.1"
                                                    Margin="{StaticResource spaceMargin}" />
-        <xctk:DoubleUpDown d:IsHidden="True" Value="{Binding AntiDeadZoneY}" FormatString="F2" MinWidth="50" Grid.Row="3" Grid.Column="2" Maximum="1.0" Minimum="0.0" Increment="0.1"
+        <xctk:DoubleUpDown Style="{StaticResource FoundationNumericInputStyle}" d:IsHidden="True" Value="{Binding MaxZoneY}" FormatString="F2" MinWidth="72" Grid.Row="2" Grid.Column="2" Maximum="1.0" Minimum="0.0" Increment="0.1"
                                                    Margin="{StaticResource spaceMargin}" />
 
-        <Label Content="{lex:Loc MaxOutput}" ContentStringFormat="{}{0}:" Grid.Row="4" Grid.Column="0" />
-        <xctk:DoubleUpDown d:IsHidden="True" Value="{Binding MaxOutputX}" FormatString="F2" MinWidth="50" Grid.Row="4" Grid.Column="1" Maximum="1.0" Minimum="0.0" Increment="0.1"
+        <Label Style="{StaticResource FoundationPropertyLabelStyle}" Content="{lex:Loc AntiDeadZone}" ContentStringFormat="{}{0}:" Grid.Row="3" Grid.Column="0" />
+        <xctk:DoubleUpDown Style="{StaticResource FoundationNumericInputStyle}" d:IsHidden="True" Value="{Binding AntiDeadZoneX}" FormatString="F2" MinWidth="72" Grid.Row="3" Grid.Column="1" Maximum="1.0" Minimum="0.0" Increment="0.1"
                                                    Margin="{StaticResource spaceMargin}" />
-        <xctk:DoubleUpDown d:IsHidden="True" Value="{Binding MaxOutputY}" FormatString="F2" MinWidth="50" Grid.Row="4" Grid.Column="2" Maximum="1.0" Minimum="0.0" Increment="0.1"
+        <xctk:DoubleUpDown Style="{StaticResource FoundationNumericInputStyle}" d:IsHidden="True" Value="{Binding AntiDeadZoneY}" FormatString="F2" MinWidth="72" Grid.Row="3" Grid.Column="2" Maximum="1.0" Minimum="0.0" Increment="0.1"
+                                                   Margin="{StaticResource spaceMargin}" />
+
+        <Label Style="{StaticResource FoundationPropertyLabelStyle}" Content="{lex:Loc MaxOutput}" ContentStringFormat="{}{0}:" Grid.Row="4" Grid.Column="0" />
+        <xctk:DoubleUpDown Style="{StaticResource FoundationNumericInputStyle}" d:IsHidden="True" Value="{Binding MaxOutputX}" FormatString="F2" MinWidth="72" Grid.Row="4" Grid.Column="1" Maximum="1.0" Minimum="0.0" Increment="0.1"
+                                                   Margin="{StaticResource spaceMargin}" />
+        <xctk:DoubleUpDown Style="{StaticResource FoundationNumericInputStyle}" d:IsHidden="True" Value="{Binding MaxOutputY}" FormatString="F2" MinWidth="72" Grid.Row="4" Grid.Column="2" Maximum="1.0" Minimum="0.0" Increment="0.1"
                                                    Margin="{StaticResource spaceMargin}" />
     </Grid>
 </UserControl>

@@ -1382,7 +1382,7 @@ To setup Bluetooth (optional): Hold the PS Button and Share for 3 seconds. The l
     <value>Set Unload Trigger</value>
   </data>
   <data name="SpecialActionEdit.SixAxisWheelCalib" xml:space="preserve">
-    <value>Calibration of sixaxis wheel calibration</value>
+    <value>Sixaxis wheel calibration</value>
   </data>
   <data name="SpecialActionEdit.SyncRun" xml:space="preserve">
     <value>Synchronized Run</value>

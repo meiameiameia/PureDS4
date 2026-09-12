@@ -183,7 +183,7 @@
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Slider x:Name="r2Slider" Orientation="Vertical" Minimum="0" Maximum="255" Value="0" Height="80" Focusable="False" />
-                        <Label x:Name="r2ValLb" Content="R2" Height="16" VerticalAlignment="Top" HorizontalAlignment="Left" RenderTransformOrigin="0.5,1" Padding="0" Margin="0,0,4,0" >
+                        <Label x:Name="r2ValLb" Content="R2" Height="16" VerticalAlignment="Top" HorizontalAlignment="Left" RenderTransformOrigin="0.5,1" Padding="0" Margin="4,0,0,0" >
                             <Label.RenderTransform>
                                 <TransformGroup>
                                     <TranslateTransform x:Name="r2ValLbTrans" Y="66"/>

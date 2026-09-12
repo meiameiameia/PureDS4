@@ -10,18 +10,19 @@
         lex:ResxLocalizationProvider.DefaultAssembly="PureDS4"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="Select Preset" Height="250" Width="600" Padding="0"
+        Title="Select Preset" Height="360" Width="600" MinHeight="300" MinWidth="480"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False" Padding="0"
         Style="{DynamicResource WindowStyle}" Closed="Window_Closed">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>
-    <DockPanel>
+    <DockPanel Margin="16">
         <TabControl x:Name="screensTabControl" BorderBrush="{x:Null}">
             <TabItem x:Name="IntroTab" Header="{lex:Loc Intro}">
                 <DockPanel Margin="4,0,4,8">
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Right">
-                        <Button x:Name="noPresetBtn" Content="No" MinWidth="60" Margin="0,0,20,0" TabIndex="0" Click="NoPresetBtn_Click" />
-                        <Button x:Name="yesPresetBtn" Content="Yes" MinWidth="60" TabIndex="1" Click="YesPresetBtn_Click" />
+                        <Button Style="{StaticResource FoundationButtonStyle}" x:Name="noPresetBtn" Content="No" MinWidth="80" Margin="0,0,8,0" TabIndex="0" Click="NoPresetBtn_Click" />
+                        <Button Style="{StaticResource FoundationButtonStyle}" x:Name="yesPresetBtn" Content="Yes" MinWidth="80" TabIndex="1" Click="YesPresetBtn_Click" />
                     </StackPanel>
                     <StackPanel>
                         <TextBlock Text="{lex:Loc PresetIntrotext}" TextWrapping="Wrap" />
@@ -31,8 +32,8 @@
             <TabItem x:Name="PresetListTab" Header="{lex:Loc PresetOptWin.PresetMenu}">
                 <DockPanel Margin="4,0,4,8">
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-                        <Label Content="{lex:Loc Presets}" />
-                        <ComboBox x:Name="presetComboBox" ItemsSource="{Binding PresetsList, Mode=OneTime}" SelectedIndex="{Binding PresetIndex, FallbackValue=0}" MinWidth="200" Margin="20,0,0,0">
+                        <Label Style="{StaticResource FoundationPropertyLabelStyle}" Content="{lex:Loc Presets}" />
+                        <ComboBox Style="{StaticResource FoundationComboBoxStyle}" x:Name="presetComboBox" ItemsSource="{Binding PresetsList, Mode=OneTime}" SelectedIndex="{Binding PresetIndex, FallbackValue=0}" MinWidth="200" Margin="20,0,0,0">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Name}" />
@@ -41,15 +42,15 @@
                         </ComboBox>
                     </StackPanel>
                     <StackPanel x:Name="outputContStackPanel" Orientation="Horizontal" DockPanel.Dock="Top" Visibility="{Binding PresetDisplayOutputCont, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}" Margin="0,10,0,10">
-                        <Label Content="{lex:Loc PresetOptWin.OutputController}" ContentStringFormat="{}{0}:" />
-                        <ComboBox ItemsSource="{Binding OutputChoices}" DisplayMemberPath="DisplayName" SelectedValuePath="ChoiceValue" SelectedValue="{Binding ControllerChoice}" Margin="8,0,0,0" />
+                        <Label Style="{StaticResource FoundationPropertyLabelStyle}" Content="{lex:Loc PresetOptWin.OutputController}" ContentStringFormat="{}{0}:" />
+                        <ComboBox Style="{StaticResource FoundationComboBoxStyle}" ItemsSource="{Binding OutputChoices}" DisplayMemberPath="DisplayName" SelectedValuePath="ChoiceValue" SelectedValue="{Binding ControllerChoice}" Margin="8,0,0,0" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Right">
-                        <Button x:Name="presetCancelBtn" Content="{lex:Loc Cancel}" MinWidth="60" Margin="0,0,20,0" Click="PresetCancelBtn_Click" />
-                        <Button x:Name="presetApplyBtn" Content="{lex:Loc Apply}" MinWidth="60" Click="PresetApplyBtn_Click" />
+                        <Button Style="{StaticResource FoundationButtonStyle}" x:Name="presetCancelBtn" Content="{lex:Loc Cancel}" MinWidth="80" Margin="0,0,8,0" Click="PresetCancelBtn_Click" />
+                        <Button Style="{StaticResource FoundationButtonStyle}" x:Name="presetApplyBtn" Content="{lex:Loc Apply}" MinWidth="80" Click="PresetApplyBtn_Click" />
                     </StackPanel>
-                    <Label Content="{lex:Loc Description}" FontSize="10" FontWeight="Bold" DockPanel.Dock="Top" />
-                    <TextBlock Text="{Binding PresetDescription, Mode=OneWay}" DockPanel.Dock="Bottom" TextWrapping="Wrap" />
+                    <Label Style="{StaticResource FoundationPropertyLabelStyle}" Content="{lex:Loc Description}" FontSize="12" FontWeight="SemiBold" DockPanel.Dock="Top" />
+                    <TextBlock Text="{Binding PresetDescription, Mode=OneWay}" DockPanel.Dock="Bottom" TextWrapping="Wrap" Margin="0,4,0,8" />
                 </DockPanel>
 
             </TabItem>

@@ -207,7 +207,7 @@
     <!-- based on https://github.com/whistyun/MdXaml/blob/787605545ace5b7cd7d02ff19e80b1c7a019b0d3/MdXaml/Markdown.Style.xaml#L338
     need to use it here because I had to modify it to accomodate for dark theme too -->
     <Style TargetType="FlowDocument" x:Key="DocumentStyleGithubLike">
-        <Setter Property="FontFamily"    Value="Calibri" />
+        <Setter Property="FontFamily"    Value="Segoe UI Variable Text, Segoe UI" />
         <Setter Property="TextAlignment" Value="Left" />
         <Setter Property="PagePadding"   Value="0"/>
         <Setter Property="FontSize"      Value="14"/>
@@ -508,7 +508,7 @@
                         <Border BorderThickness="0,2,0,0" BorderBrush="{StaticResource AccentColor}" Grid.Row="1">
                             <Border BorderThickness="0,0,0,2" BorderBrush="{StaticResource BorderColor}">
                                 <Grid Margin="0,5,0,0">
-                                    <ContentPresenter x:Name="PART_Presenter" ContentSource="SelectedContent" HorizontalAlignment="Stretch"/>
+                                    <ContentPresenter x:Name="PART_SelectedContentHost" ContentSource="SelectedContent" HorizontalAlignment="Stretch"/>
                                     <Rectangle x:Name="PART_TempArea"/>
                                 </Grid>
                             </Border>

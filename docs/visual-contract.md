@@ -46,6 +46,50 @@ Theme colors are semantic resources, not control-local literals:
 Status is never communicated by color alone. Use the shared status chip or
 banner with a glyph and plain-language label.
 
+### WPF component contract
+
+`DS4Forms/Themes/Foundation.xaml` owns shared metrics, templates, and interaction
+states. Theme dictionaries supply semantic colors; changing theme must not
+change geometry. Existing Bridge resources are compatibility names for
+unmigrated views, not a second design system. New work uses Foundation styles.
+Do not introduce a UI framework, dependency, or duplicate per-screen templates.
+
+- Keep native window chrome and WPF controls, keyboard navigation, access keys,
+  selection, and automation peers. Icon-only actions need an accessible name.
+- Define normal, hover, pressed, selected, keyboard-focus, and disabled states;
+  add validation and busy states where applicable. Focus is not selection.
+  State changes must not change padding, borders' thickness, or control size.
+- Use the shared control heights as minima, not clipping boxes. Use Grid
+  auto/star sizing and constrained scrolling; translated text may grow.
+  Trimming is allowed for names with a full-text tooltip, never the only
+  presentation of an error or essential action.
+- Use dynamic resources for theme brushes. Layout rounding and pixel snapping
+  apply at the window boundary. Real per-monitor DPI behavior requires testing,
+  including popups and dialogs; an HTML mock is not WPF evidence.
+- Menus/popups anchor to their invoking control, remain on-screen, support
+  Escape and keyboard use, and return focus predictably. Do not replace
+  existing live-preview, cancellation, or persistence semantics during styling.
+
+### Home composition
+
+Use compact selectable controller rows (48 DIP minimum at ordinary text size),
+with identity/slot, protection, profile, battery, and lightbar. Header and rows
+share column metrics and the same scroll viewport. A child-control interaction
+selects its owning row before acting; never derive a hardware slot from a
+visual list index. Preserve profile creation and controller details.
+
+Keep selected-controller runtime output/readiness and actions outside the
+scrolling rows, with the target identity visible. USB does not offer Disconnect.
+Lightbar exposes From profile / Custom using the existing color behavior.
+Physical exposure and virtual output type are separate concepts. Do not copy
+selected-controller readiness onto other rows or infer it from protection.
+Native sessions and recovery remain reachable, with bounded scrolling.
+
+Controller details separates observed runtime state from automatically saved
+profile properties. Use aligned label/control rows and shared horizontal sliders,
+not summary-card galleries. Keep output/audio selector commit timing intact,
+explain unavailable capabilities, and hide connection actions that do not apply.
+
 ## Navigation and information architecture
 
 The permanent primary navigation is **Home / Profiles / Settings / Tools**.
@@ -56,6 +100,12 @@ game output, exposure actions, and the path to controller details.
 Settings keeps a stable 180 DIP textual category list in this order: General,
 Controller, Game output, Integrations, Compatibility, Advanced. Profile Editor
 uses a stable textual section list and does not resize the main window.
+
+Profile editing keeps name/actions reachable while properties scroll. Mapping
+rows offer a keyboard-accessible Edit action; diagram hit targets stay unchanged.
+Numeric editors retain native parsing, spin and validation. Macro actions remain
+outside scrolling options. The local curve page keeps explicit copy-back semantics
+and upstream credits; it does not save a profile automatically.
 
 ## User-facing language and state
 
@@ -74,3 +124,10 @@ Build and automated tests validate resource construction, theme contrast,
 state mapping, and preserved behavior. Final visual validation is manual from
 the exact disposable executable. A virtual-output change also requires the
 controller and in-game manual gate described in `AGENTS.md`.
+
+For each migrated surface check light/dark themes, 720×480 and 1024×660 windows,
+0/1/2/4 controllers, long names/localized labels, missing output, and service
+stopped. Exercise keyboard-only use, selection/focus, popups, and reconnection.
+Manual acceptance also covers Windows scaling at 100/125/150/200%, movement
+between monitors, and high contrast. Automated layout checks with synthetic
+data do not establish hardware, actual DPI, or owner visual acceptance.

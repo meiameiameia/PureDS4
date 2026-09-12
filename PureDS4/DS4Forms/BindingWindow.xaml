@@ -10,77 +10,86 @@
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         xmlns:local="clr-namespace:DS4WinWPF.DS4Forms"
         mc:Ignorable="d"
-        Title="Select action" Height="540" Width="1020" Closing="Window_Closing"
+        Title="Select action" Height="680" Width="1040" MinHeight="400" MinWidth="640"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False" Closing="Window_Closing"
         Style="{DynamicResource WindowStyle}">
     <Window.Resources>
         <local:BindingWinResourcePaths x:Key="resourcePaths" />
         <local:IntToBoolConverter x:Key="IntToBoolConverter" />
     </Window.Resources>
-    <DockPanel x:Name="fullPanel" Margin="4">
-        <StackPanel x:Name="extrasSidePanel" Width="160" Orientation="Vertical" DockPanel.Dock="Right">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+    <DockPanel x:Name="fullPanel" Margin="12" MinWidth="800" MinHeight="560">
+        <StackPanel x:Name="extrasSidePanel" Width="176" Orientation="Vertical" DockPanel.Dock="Right">
             <StackPanel.Resources>
                 <Thickness x:Key="spaceMargin" Bottom="8" />
             </StackPanel.Resources>
 
-            <GroupBox Header="{lex:Loc Extra}" x:Name="extrasGB" Margin="0,16,0,0">
+            <GroupBox Style="{StaticResource FoundationGroupBoxStyle}" Header="{lex:Loc Extra}" x:Name="extrasGB" Margin="0,16,0,0">
                 <StackPanel Orientation="Vertical" Margin="2,0">
                     <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                        <Label Content="{lex:Loc Rumble}" />
-                        <Button x:Name="testRumbleBtn" Width="60" Content="{lex:Loc Test}" Click="TestRumbleBtn_Click" />
+                        <Label Style="{StaticResource FoundationPropertyLabelStyle}" Content="{lex:Loc Rumble}" />
+                        <Button Style="{StaticResource FoundationButtonStyle}" x:Name="testRumbleBtn" Width="60" Content="{lex:Loc Test}" Click="TestRumbleBtn_Click" />
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                        <Label Content="{lex:Loc Heavy}" Width="50" />
-                        <xctk:IntegerUpDown Value="{Binding HeavyRumble}" MinWidth="60" Margin="20,0,0,0"
+                        <Label Style="{StaticResource FoundationPropertyLabelStyle}" Content="{lex:Loc Heavy}" Width="50" />
+                        <xctk:IntegerUpDown Style="{StaticResource FoundationNumericInputStyle}" Value="{Binding HeavyRumble}" MinWidth="72" Margin="20,0,0,0"
                                             Minimum="0" Maximum="255" />
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                        <Label Content="{lex:Loc Light}" Width="50" />
-                        <xctk:IntegerUpDown Value="{Binding LightRumble}" MinWidth="60" Margin="20,0,0,0"
+                        <Label Style="{StaticResource FoundationPropertyLabelStyle}" Content="{lex:Loc Light}" Width="50" />
+                        <xctk:IntegerUpDown Style="{StaticResource FoundationNumericInputStyle}" Value="{Binding LightRumble}" MinWidth="72" Margin="20,0,0,0"
                                             Minimum="0" Maximum="255" />
                     </StackPanel>
 
                     <StackPanel Orientation="Vertical">
                         <StackPanel Margin="{StaticResource spaceMargin}">
-                            <Label Content="{lex:Loc LightbarMode}" />
-                            <ComboBox x:Name="LightbarModeCombo" MinWidth="160" SelectedIndex="{Binding Path=LightbarMacro.Active, Converter={StaticResource IntToBoolConverter}}">
+                            <Label Style="{StaticResource FoundationPropertyLabelStyle}" Content="{lex:Loc LightbarMode}" />
+                            <ComboBox Style="{StaticResource FoundationComboBoxStyle}" x:Name="LightbarModeCombo" MinWidth="160" SelectedIndex="{Binding Path=LightbarMacro.Active, Converter={StaticResource IntToBoolConverter}}">
                                 <ComboBoxItem Content="{lex:Loc SolidColor}" />
                                 <ComboBoxItem Content="{lex:Loc Macro}" />
                             </ComboBox>
                             <TabControl SelectedIndex="{Binding ElementName=LightbarModeCombo, Path=SelectedIndex}">
                                 <TabItem Header="{lex:Loc SolidColor}" Visibility="Collapsed">
                                     <StackPanel>
-                                        <CheckBox Content="{lex:Loc BindingWin.ChangeLight}" IsChecked="{Binding UseExtrasColor}" Margin="{StaticResource spaceMargin}" />
+                                        <CheckBox Style="{StaticResource FoundationCheckBoxStyle}" Content="{lex:Loc BindingWin.ChangeLight}" IsChecked="{Binding UseExtrasColor}" Margin="{StaticResource spaceMargin}" />
                                         <StackPanel Orientation="Horizontal">
-                                            <Label Content="R" />
-                                            <Slider Value="{Binding ExtrasColorR}" Minimum="0" Maximum="255" ToolTip="{Binding ExtrasColorR}" MinWidth="100" Background="{Binding ExtrasColorRString, FallbackValue=Red}"/>
+                                            <Label Style="{StaticResource FoundationPropertyLabelStyle}" Content="R" />
+                                            <Slider Style="{StaticResource FoundationHorizontalSliderStyle}" Value="{Binding ExtrasColorR}" Minimum="0" Maximum="255" ToolTip="{Binding ExtrasColorR}" MinWidth="100" Background="{Binding ExtrasColorRString, FallbackValue=Red}"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal">
-                                            <Label Content="G" />
-                                            <Slider Value="{Binding ExtrasColorG}" MinWidth="100" Minimum="0" Maximum="255" ToolTip="{Binding ExtrasColorG}" Background="{Binding ExtrasColorGString, FallbackValue=Lime}"/>
+                                            <Label Style="{StaticResource FoundationPropertyLabelStyle}" Content="G" />
+                                            <Slider Style="{StaticResource FoundationHorizontalSliderStyle}" Value="{Binding ExtrasColorG}" MinWidth="100" Minimum="0" Maximum="255" ToolTip="{Binding ExtrasColorG}" Background="{Binding ExtrasColorGString, FallbackValue=Lime}"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal">
-                                            <Label Content="B" />
-                                            <Slider Value="{Binding ExtrasColorB}" MinWidth="100" Minimum="0" Maximum="255" ToolTip="{Binding ExtrasColorB}" Background="{Binding ExtrasColorBString, FallbackValue=Blue}"/>
+                                            <Label Style="{StaticResource FoundationPropertyLabelStyle}" Content="B" />
+                                            <Slider Style="{StaticResource FoundationHorizontalSliderStyle}" Value="{Binding ExtrasColorB}" MinWidth="100" Minimum="0" Maximum="255" ToolTip="{Binding ExtrasColorB}" Background="{Binding ExtrasColorBString, FallbackValue=Blue}"/>
                                         </StackPanel>
-                                        <Button x:Name="extrasColorChoosebtn" Width="20" Height="20" Background="{Binding ExtrasColorString}" HorizontalAlignment="Right" Margin="0,10,10,0" Click="ExtrasColorChoosebtn_Click" />
+                                        <Button x:Name="extrasColorChoosebtn" Width="24" Height="24" Background="{Binding ExtrasColorString}"
+                                                BorderBrush="{DynamicResource BorderDefaultBrush}" BorderThickness="1"
+                                                AutomationProperties.Name="Lightbar colour for this binding"
+                                                ToolTip="Choose the lightbar colour used while this binding is held"
+                                                HorizontalAlignment="Left" Margin="0,10,0,0" Click="ExtrasColorChoosebtn_Click" />
                                     </StackPanel>
                                 </TabItem>
                                 <TabItem Header="{lex:Loc Macro}" Visibility="Collapsed">
-                                    <Button HorizontalAlignment="Stretch" Height="20" Content="{lex:Loc CreateLightbarMacro}" Click="CreateLightbarMacro_Click" />
+                                    <Button Style="{StaticResource FoundationButtonStyle}" HorizontalAlignment="Stretch" Content="{lex:Loc CreateLightbarMacro}" Click="CreateLightbarMacro_Click" />
                                 </TabItem>
                             </TabControl>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                            <Label Content="{lex:Loc FlashRate}"/>
-                            <xctk:IntegerUpDown MinWidth="50" Value="{Binding FlashRate}"
+                            <Label Style="{StaticResource FoundationPropertyLabelStyle}" Content="{lex:Loc FlashRate}"/>
+                            <xctk:IntegerUpDown Style="{StaticResource FoundationNumericInputStyle}" MinWidth="72" Value="{Binding FlashRate}"
                                                 Minimum="0" Maximum="20" />
                         </StackPanel>
                         <StackPanel Orientation="Vertical">
-                            <CheckBox Content="{lex:Loc BindingWin.ChangeMouseSensitivity}" IsChecked="{Binding UseMouseSens}"
-                                      Margin="{StaticResource spaceMargin}" />
-                            <xctk:IntegerUpDown Value="{Binding MouseSens}" MinWidth="50" Height="20"
+                            <CheckBox Style="{StaticResource FoundationCheckBoxStyle}" IsChecked="{Binding UseMouseSens}"
+                                      AutomationProperties.Name="Change mouse sensitivity"
+                                      Margin="{StaticResource spaceMargin}">
+                                <TextBlock Text="{lex:Loc BindingWin.ChangeMouseSensitivity}" TextWrapping="Wrap" />
+                            </CheckBox>
+                            <xctk:IntegerUpDown Style="{StaticResource FoundationNumericInputStyle}" Value="{Binding MouseSens}" MinWidth="72"
                                                 Minimum="0" Maximum="255" />
                         </StackPanel>
                     </StackPanel>
@@ -95,7 +104,7 @@
                         <RadioButton x:Name="shiftBindRadio" Content="{lex:Loc ShiftModifier}" GroupName="bindModeGroup" Margin="10,0,0,0" Click="ShiftBindRadio_Click" />
                     </StackPanel>
 
-                    <ComboBox x:Name="shiftTriggerCombo" Margin="0,8,0,0" SelectedIndex="{Binding ShiftTrigger,FallbackValue=0}">
+                    <ComboBox Style="{StaticResource FoundationComboBoxStyle}" x:Name="shiftTriggerCombo" Margin="0,8,0,0" SelectedIndex="{Binding ShiftTrigger,FallbackValue=0}">
                         <ComboBoxItem Content="{lex:Loc BindingWin.SelectShiftTrigger}"/>
                         <ComboBoxItem Content="Cross"/>
                         <ComboBoxItem Content="Circle"/>
@@ -133,8 +142,12 @@
                         <ComboBoxItem Content="Side R" />
                     </ComboBox>
 
-                    <Button x:Name="defaultBtn" Content="{Binding DefaultBtnString,FallbackValue={lex:Loc Default}}" Background="{Binding DefaultColor,FallbackValue={StaticResource SecondaryColor}}" Margin="0,50,0,0" Click="DefaultBtn_Click" />
-                    <Button x:Name="unboundBtn" Content="{lex:Loc Unbound}" Background="{Binding UnboundColor,FallbackValue={StaticResource SecondaryColor}}" Margin="0,10,0,0" Click="UnboundBtn_Click" />
+                    <Button Style="{StaticResource FoundationButtonStyle}" x:Name="defaultBtn" Content="{Binding DefaultBtnString,FallbackValue={lex:Loc Default}}"
+                            BorderBrush="{Binding DefaultColor,FallbackValue={StaticResource BorderDefaultBrush}}" BorderThickness="2"
+                            Margin="0,16,0,0" Click="DefaultBtn_Click" />
+                    <Button Style="{StaticResource FoundationButtonStyle}" x:Name="unboundBtn" Content="{lex:Loc Unbound}"
+                            BorderBrush="{Binding UnboundColor,FallbackValue={StaticResource BorderDefaultBrush}}" BorderThickness="2"
+                            Margin="0,8,0,0" Click="UnboundBtn_Click" />
                 </StackPanel>
 
                 <StackPanel x:Name="outConPanel" Width="630" Orientation="Vertical" DockPanel.Dock="Right" HorizontalAlignment="Center" Margin="0">
@@ -214,18 +227,18 @@
                                 <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left">
-                                <Label x:Name="macroOnLb" Content="{lex:Loc BindingWin.MacroOn}" Visibility="{Binding MacroLbVisible}" />
+                                <Label Style="{StaticResource FoundationPropertyLabelStyle}" x:Name="macroOnLb" Content="{lex:Loc BindingWin.MacroOn}" Visibility="{Binding MacroLbVisible}" />
                             </StackPanel>
                             <StackPanel Grid.Column="1" HorizontalAlignment="Center">
                                 <TextBlock x:Name="keyMouseTopTxt" Text="{lex:Loc BindingWin.KeyboardAndMouse}" TextWrapping="Wrap" TextAlignment="Center"  />
                             </StackPanel>
                             <StackPanel x:Name="topOptsPanel" Orientation="Horizontal" Grid.Column="2"
                             HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <CheckBox Content="{lex:Loc Toggle}" IsChecked="{Binding Toggle}" />
-                                <CheckBox Content="{lex:Loc ScanCode}" IsChecked="{Binding HasScanCode}" Margin="6,0,0,0" />
+                                <CheckBox Style="{StaticResource FoundationCheckBoxStyle}" Content="{lex:Loc Toggle}" IsChecked="{Binding Toggle}" />
+                                <CheckBox Style="{StaticResource FoundationCheckBoxStyle}" Content="{lex:Loc ScanCode}" IsChecked="{Binding HasScanCode}" Margin="6,0,0,0" />
                             </StackPanel>
                             <StackPanel Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <Button x:Name="recordMacroBtn" Content="{lex:Loc BindingWin.RecordAMacro}" Click="RecordMacroBtn_Click" />
+                                <Button Style="{StaticResource FoundationButtonStyle}" x:Name="recordMacroBtn" Content="{lex:Loc BindingWin.RecordAMacro}" Click="RecordMacroBtn_Click" />
                             </StackPanel>
                         </Grid>
                         <Grid DockPanel.Dock="Top">
@@ -259,12 +272,12 @@
                                     </Grid.ColumnDefinitions>
 
                                     <Grid.Resources>
-                                        <Style x:Key="midMar" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+                                        <Style x:Key="midMar" TargetType="{x:Type Button}" BasedOn="{StaticResource FoundationKeyButtonStyle}">
                                             <Setter Property="Margin" Value="6,0,0,0" />
                                         </Style>
                                     </Grid.Resources>
 
-                                    <Button x:Name="escBtn" Content="Esc" Grid.Column="0"/>
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="escBtn" Content="Esc" Grid.Column="0"/>
                                     <Button x:Name="f1Btn" Content="F1" Grid.Column="1" Style="{StaticResource midMar}"/>
                                     <Button x:Name="f2Btn" Content="F2" Grid.Column="2" Style="{StaticResource midMar}"/>
                                     <Button x:Name="f3Btn" Content="F3" Grid.Column="3" Style="{StaticResource midMar}"/>
@@ -301,12 +314,12 @@
                                     </Grid.ColumnDefinitions>
 
                                     <Grid.Resources>
-                                        <Style x:Key="midMargin" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+                                        <Style x:Key="midMargin" TargetType="{x:Type Button}" BasedOn="{StaticResource FoundationKeyButtonStyle}">
                                             <Setter Property="Margin" Value="6,0,0,0" />
                                         </Style>
                                     </Grid.Resources>
 
-                                    <Button x:Name="oem3Btn" Content="`" Grid.Column="0"/>
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="oem3Btn" Content="`" Grid.Column="0"/>
                                     <Button x:Name="oneBtn" Content="1" Grid.Column="1" Style="{StaticResource midMargin}"/>
                                     <Button x:Name="twoBtn" Content="2" Grid.Column="2" Style="{StaticResource midMargin}"/>
                                     <Button x:Name="threeBtn" Content="3" Grid.Column="3" Style="{StaticResource midMargin}"/>
@@ -343,12 +356,12 @@
                                         <ColumnDefinition Width="1.5*"/>
                                     </Grid.ColumnDefinitions>
                                     <Grid.Resources>
-                                        <Style x:Key="midMargin" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+                                        <Style x:Key="midMargin" TargetType="{x:Type Button}" BasedOn="{StaticResource FoundationKeyButtonStyle}">
                                             <Setter Property="Margin" Value="6,0,0,0" />
                                         </Style>
                                     </Grid.Resources>
 
-                                    <Button x:Name="tabBtn" Content="Tab" Grid.Column="0"/>
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="tabBtn" Content="Tab" Grid.Column="0"/>
                                     <Button x:Name="qKey" Content="Q" Grid.Column="1" Style="{StaticResource midMargin}"/>
                                     <Button x:Name="wKey" Content="W" Grid.Column="2" Style="{StaticResource midMargin}"/>
                                     <Button x:Name="eKey" Content="E" Grid.Column="3" Style="{StaticResource midMargin}"/>
@@ -385,12 +398,12 @@
                                     </Grid.ColumnDefinitions>
 
                                     <Grid.Resources>
-                                        <Style x:Key="midMargin" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+                                        <Style x:Key="midMargin" TargetType="{x:Type Button}" BasedOn="{StaticResource FoundationKeyButtonStyle}">
                                             <Setter Property="Margin" Value="6,0,0,0" />
                                         </Style>
                                     </Grid.Resources>
 
-                                    <Button x:Name="capsLBtn" Content="Caps" Grid.Column="0"/>
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="capsLBtn" Content="Caps" Grid.Column="0"/>
                                     <Button x:Name="aKeyBtn" Content="A" Grid.Column="1" Style="{StaticResource midMargin}"/>
                                     <Button x:Name="sBtn" Content="S" Grid.Column="2" Style="{StaticResource midMargin}"/>
                                     <Button x:Name="dBtn" Content="D" Grid.Column="3" Style="{StaticResource midMargin}"/>
@@ -425,12 +438,12 @@
                                     </Grid.ColumnDefinitions>
 
                                     <Grid.Resources>
-                                        <Style x:Key="midMargin" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+                                        <Style x:Key="midMargin" TargetType="{x:Type Button}" BasedOn="{StaticResource FoundationKeyButtonStyle}">
                                             <Setter Property="Margin" Value="6,0,0,0" />
                                         </Style>
                                     </Grid.Resources>
 
-                                    <Button x:Name="lshiftBtn" Content="LShift" Grid.Column="0"/>
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="lshiftBtn" Content="LShift" Grid.Column="0"/>
                                     <Button x:Name="zBtn" Content="Z" Grid.Column="1" Style="{StaticResource midMargin}"/>
                                     <Button x:Name="xKeyBtn" Content="X" Grid.Column="2" Style="{StaticResource midMargin}"/>
                                     <Button x:Name="cBtn" Content="C" Grid.Column="3" Style="{StaticResource midMargin}"/>
@@ -459,12 +472,12 @@
                                     </Grid.ColumnDefinitions>
 
                                     <Grid.Resources>
-                                        <Style x:Key="midMargin" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+                                        <Style x:Key="midMargin" TargetType="{x:Type Button}" BasedOn="{StaticResource FoundationKeyButtonStyle}">
                                             <Setter Property="Margin" Value="6,0,0,0" />
                                         </Style>
                                     </Grid.Resources>
 
-                                    <Button x:Name="lctrlBtn" Content="LCtrl" Grid.Column="0"/>
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="lctrlBtn" Content="LCtrl" Grid.Column="0"/>
                                     <Button x:Name="lWinBtn" Content="LWin" Grid.Column="1" Style="{StaticResource midMargin}"/>
                                     <Button x:Name="laltBtn" Content="LAlt" Grid.Column="2" Style="{StaticResource midMargin}"/>
                                     <Button x:Name="spaceBtn" Content="Space" Grid.Column="3" Style="{StaticResource midMargin}"/>
@@ -482,7 +495,7 @@
                                 <DockPanel LastChildFill="False" Grid.Column="0" Margin="6,0">
                                     <UniformGrid Rows="3" Columns="3" Margin="2,0" MinHeight="104" DockPanel.Dock="Top">
                                         <UniformGrid.Resources>
-                                            <Style x:Key="btnMargin" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+                                            <Style x:Key="btnMargin" TargetType="{x:Type Button}" BasedOn="{StaticResource FoundationKeyButtonStyle}">
                                                 <Setter Property="Margin" Value="3,0,3,6"/>
                                             </Style>
                                         </UniformGrid.Resources>
@@ -510,10 +523,10 @@
                                             <ColumnDefinition/>
                                         </Grid.ColumnDefinitions>
 
-                                        <Button x:Name="uarrowBtn" Content="↑ U" Grid.Row="0" Grid.Column="1" Margin="6,0,0,6" />
-                                        <Button x:Name="larrowBtn" Content="← L" Grid.Row="1" Grid.Column="0" Margin="6,0,0,6" />
-                                        <Button x:Name="darrowBtn" Content="↓ D" Grid.Row="1" Grid.Column="1" Margin="6,0,0,6" />
-                                        <Button x:Name="rarrowBtn" Content="R →" Grid.Row="1" Grid.Column="2" Margin="6,0,0,6" />
+                                        <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="uarrowBtn" Content="↑ U" Grid.Row="0" Grid.Column="1" Margin="6,0,0,6" />
+                                        <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="larrowBtn" Content="← L" Grid.Row="1" Grid.Column="0" Margin="6,0,0,6" />
+                                        <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="darrowBtn" Content="↓ D" Grid.Row="1" Grid.Column="1" Margin="6,0,0,6" />
+                                        <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="rarrowBtn" Content="R →" Grid.Row="1" Grid.Column="2" Margin="6,0,0,6" />
                                     </Grid>
                                 </DockPanel>
 
@@ -534,44 +547,44 @@
                                         <ColumnDefinition Width="1.25*"/>
                                     </Grid.ColumnDefinitions>
                                     <Grid.Resources>
-                                        <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+                                        <Style TargetType="{x:Type Button}" BasedOn="{StaticResource FoundationKeyButtonStyle}">
                                             <Setter Property="Margin" Value="2" />
                                         </Style>
                                     </Grid.Resources>
 
-                                    <Button x:Name="prevTrackBtn" Content="⏮" FontFamily="Segoe UI Symbol" AutomationProperties.Name="Previous track" />
-                                    <Button x:Name="stopBtn" Content="■" FontFamily="Segoe UI Symbol" Grid.Column="1" AutomationProperties.Name="Stop media" />
-                                    <Button x:Name="playBtn" Content="▶" FontFamily="Segoe UI Symbol" Grid.Column="2" AutomationProperties.Name="Play or pause media" />
-                                    <Button x:Name="nextTrackBtn" Content="⏭" FontFamily="Segoe UI Symbol" Grid.Column="3" AutomationProperties.Name="Next track" />
-                                    <Button x:Name="volupBtn" Content="↑ Vol" Grid.Column="4" FontSize="10" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="prevTrackBtn" Content="⏮" FontFamily="Segoe UI Symbol" AutomationProperties.Name="Previous track" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="stopBtn" Content="■" FontFamily="Segoe UI Symbol" Grid.Column="1" AutomationProperties.Name="Stop media" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="playBtn" Content="▶" FontFamily="Segoe UI Symbol" Grid.Column="2" AutomationProperties.Name="Play or pause media" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="nextTrackBtn" Content="⏭" FontFamily="Segoe UI Symbol" Grid.Column="3" AutomationProperties.Name="Next track" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="volupBtn" Content="↑ Vol" Grid.Column="4" FontSize="10" />
 
-                                    <Button x:Name="numlockBtn" Content="NumLk" Grid.Row="1" Grid.Column="0" />
-                                    <Button x:Name="numdivideBtn" Content="/" Grid.Row="1" Grid.Column="1" />
-                                    <Button x:Name="nummultiBtn" Content="*" Grid.Row="1" Grid.Column="2" />
-                                    <Button x:Name="numminusBtn" Content="-" Grid.Row="1" Grid.Column="3" />
-                                    <Button x:Name="voldownBtn" Content="↓ Vol" Grid.Row="1" Grid.Column="4" FontSize="10" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="numlockBtn" Content="NumLk" Grid.Row="1" Grid.Column="0" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="numdivideBtn" Content="/" Grid.Row="1" Grid.Column="1" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="nummultiBtn" Content="*" Grid.Row="1" Grid.Column="2" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="numminusBtn" Content="-" Grid.Row="1" Grid.Column="3" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="voldownBtn" Content="↓ Vol" Grid.Row="1" Grid.Column="4" FontSize="10" />
 
-                                    <Button x:Name="num7Btn" Content="7" Grid.Row="2" Grid.Column="0" />
-                                    <Button x:Name="num8Btn" Content="8" Grid.Row="2" Grid.Column="1" />
-                                    <Button x:Name="num9Btn" Content="9" Grid.Row="2" Grid.Column="2" />
-                                    <Button x:Name="numplusBtn" Content="+" Grid.Row="2" Grid.Column="3" Grid.RowSpan="2" />
-                                    <Button x:Name="volmuteBtn" Content="Mute" Grid.Row="2" Grid.Column="4" FontSize="10" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="num7Btn" Content="7" Grid.Row="2" Grid.Column="0" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="num8Btn" Content="8" Grid.Row="2" Grid.Column="1" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="num9Btn" Content="9" Grid.Row="2" Grid.Column="2" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="numplusBtn" Content="+" Grid.Row="2" Grid.Column="3" Grid.RowSpan="2" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="volmuteBtn" Content="Mute" Grid.Row="2" Grid.Column="4" FontSize="10" />
 
-                                    <Button x:Name="num4Btn" Content="4" Grid.Row="3" Grid.Column="0" />
-                                    <Button x:Name="num5Btn" Content="5" Grid.Row="3" Grid.Column="1" />
-                                    <Button x:Name="num6Btn" Content="6" Grid.Row="3" Grid.Column="2" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="num4Btn" Content="4" Grid.Row="3" Grid.Column="0" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="num5Btn" Content="5" Grid.Row="3" Grid.Column="1" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="num6Btn" Content="6" Grid.Row="3" Grid.Column="2" />
 
-                                    <Button x:Name="num1Btn" Content="1" Grid.Row="4" Grid.Column="0" />
-                                    <Button x:Name="num2Btn" Content="2" Grid.Row="4" Grid.Column="1" />
-                                    <Button x:Name="num3Btn" Content="3" Grid.Row="4" Grid.Column="2" />
-                                    <Button x:Name="numEnterBtn" Grid.Row="4" Grid.Column="3" Grid.RowSpan="2">
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="num1Btn" Content="1" Grid.Row="4" Grid.Column="0" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="num2Btn" Content="2" Grid.Row="4" Grid.Column="1" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="num3Btn" Content="3" Grid.Row="4" Grid.Column="2" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="numEnterBtn" Grid.Row="4" Grid.Column="3" Grid.RowSpan="2">
                                         <Button.Content>
                                             <TextBlock Text="Enter" TextWrapping="Wrap"/>
                                         </Button.Content>
                                     </Button>
 
-                                    <Button x:Name="num0Btn" Content="0" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" />
-                                    <Button x:Name="numPeriodBtn" Content="." Grid.Row="5" Grid.Column="2" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="num0Btn" Content="0" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" />
+                                    <Button Style="{StaticResource FoundationKeyButtonStyle}" x:Name="numPeriodBtn" Content="." Grid.Row="5" Grid.Column="2" />
                                 </Grid>
                                 <Canvas x:Name="mouseCanvas" Width="120" Height="170" Grid.Column="2">
                                     <StackPanel Width="120">
@@ -600,14 +613,15 @@
                 </TabItem>
                 <TabItem Header="{lex:Loc BindingWin.AbsMouse}">
                     <StackPanel Orientation="Vertical" Margin="8" HorizontalAlignment="Left" MinWidth="200">
-                        <Button x:Name="absMouseUpBindBtn" Content="{lex:Loc BindingWin.AbsMouseUp}" />
-                        <Button x:Name="absMouseDownBindBtn" Content="{lex:Loc BindingWin.AbsMouseDown}" Margin="0,8,0,0" />
-                        <Button x:Name="absMouseLeftBindBtn" Content="{lex:Loc BindingWin.AbsMouseLeft}" Margin="0,8,0,0" />
-                        <Button x:Name="absMouseRightBindBtn" Content="{lex:Loc BindingWin.AbsMouseRight}" Margin="0,8,0,0" />
+                        <Button Style="{StaticResource FoundationButtonStyle}" x:Name="absMouseUpBindBtn" Content="{lex:Loc BindingWin.AbsMouseUp}" />
+                        <Button Style="{StaticResource FoundationButtonStyle}" x:Name="absMouseDownBindBtn" Content="{lex:Loc BindingWin.AbsMouseDown}" Margin="0,8,0,0" />
+                        <Button Style="{StaticResource FoundationButtonStyle}" x:Name="absMouseLeftBindBtn" Content="{lex:Loc BindingWin.AbsMouseLeft}" Margin="0,8,0,0" />
+                        <Button Style="{StaticResource FoundationButtonStyle}" x:Name="absMouseRightBindBtn" Content="{lex:Loc BindingWin.AbsMouseRight}" Margin="0,8,0,0" />
                     </StackPanel>
                 </TabItem>
             </TabControl>
 
         </DockPanel>
     </DockPanel>
+    </ScrollViewer>
 </Window>

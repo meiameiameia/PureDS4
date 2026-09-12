@@ -7,8 +7,13 @@
              mc:Ignorable="d" 
              d:DesignHeight="40" d:DesignWidth="400">
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-        <Label Content="Button Activation Mode" ContentStringFormat="{}{0}:" Padding="0" />
-        <ComboBox ItemsSource="{Binding TouchButtonModes}" DisplayMemberPath="DisplayName" SelectedValuePath="ChoiceValue" SelectedValue="{Binding CurrentMode}" MinWidth="120" Margin="8,0,0,0">
-        </ComboBox>
+        <Label Content="Button Activation Mode" ContentStringFormat="{}{0}:"
+               Target="{Binding ElementName=touchButtonModeCombo}"
+               Style="{StaticResource FoundationFormLabelStyle}" />
+        <ComboBox x:Name="touchButtonModeCombo" ItemsSource="{Binding TouchButtonModes}"
+                  DisplayMemberPath="DisplayName" SelectedValuePath="ChoiceValue"
+                  SelectedValue="{Binding CurrentMode}" MinWidth="160" Margin="8,0,0,0"
+                  AutomationProperties.Name="Button activation mode"
+                  Style="{StaticResource FoundationComboBoxStyle}" />
     </StackPanel>
 </UserControl>

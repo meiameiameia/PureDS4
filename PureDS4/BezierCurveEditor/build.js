@@ -134,19 +134,20 @@
                             return i.createElement("div", null, i.createElement("h1", null, i.createElement("a", {
                                 href: "https://github.com/Ryochan7/DS4Windows/wiki/Settings",
                                 style: l
-                            }, u.name)), 
-                            i.createElement("p", {style:{"whiteSpace": "pre-wrap"}}, "(1) Grab and move around red handles in a graph to customize the bezier curve or enter specific curve values in the textbox.\n(2) When you are happy with the curve, copy-paste the EASING CURVE DEFINITION values (comma separated list of 4 numbers) to a custom LS/RS/R2/L3/SA curve output options in DS4Windows application."),
+                            }, "PureDS4 Â· Curve editor")),
+                            i.createElement("p", {style:{"whiteSpace": "pre-wrap"}}, "Drag the red handles, enter four values, or choose an example.\nCopy the resulting curve definition into the custom curve field in PureDS4. Changes on this page do not save your profile."),
                             i.createElement("blockquote", null, ""),
                             i.createElement("input", {
                                id: "inputCurveDefinition",
+                               "aria-label": "Custom curve definition, four comma-separated values",
                                defaultValue: qryVariableValue("curve"),
                                onBlur: this.onChangeInputCurveDefinition,
                                style: { width: "250px"},
                             }, ""), 
-                            i.createElement("h3", null, "easing curve definition: ", 
+                            i.createElement("h3", null, "Curve definition: ",
                             i.createElement("code", null, this.state.value.map(function(e) {
                                 return e.toFixed(2)
-                            }).join(", ")), i.createElement("br", null), "progress: ", i.createElement("code", null, this.state.progress.toFixed(2).substring(2, 4), "%")), 
+                            }).join(", ")), i.createElement("br", null), "Progress: ", i.createElement("code", null, this.state.progress.toFixed(2).substring(2, 4), "%")),
 
                            i.createElement("table", null, i.createElement("tr", null, 
                            i.createElement("td", null,
@@ -168,13 +169,13 @@
                              }, "Bezier Editor"))),
                             i.createElement("td", null,
                              i.createElement("text", {style: {fontWeight: "bold"}}, "Example curves (click to choose):"), i.createElement("br", null),
-                             i.createElement("text", {style: {cursor: "pointer"}, onClick: this.onClickExampleCurve}, "Linear = 0.00, 0.00, 1.00, 1.00"), i.createElement("br", null),
-                             i.createElement("text", {style: {cursor: "pointer"}, onClick: this.onClickExampleCurve}, "Enhanced Precision = 0.70, 0.28, 1.00, 1.00"), i.createElement("br", null),
-                             i.createElement("text", {style: {cursor: "pointer"}, onClick: this.onClickExampleCurve}, "Easein Quadratic = 0.55, 0.09, 0.68, 0.53"), i.createElement("br", null),
-                             i.createElement("text", {style: {cursor: "pointer"}, onClick: this.onClickExampleCurve}, "Easein Cubic = 0.74, 0.12, 0.64, 0.29"), i.createElement("br", null),
-                             i.createElement("text", {style: {cursor: "pointer"}, onClick: this.onClickExampleCurve}, "Easeout Quad = 0.00, 0.00, 0.41, 0.96"), i.createElement("br", null),
-                             i.createElement("text", {style: {cursor: "pointer"}, onClick: this.onClickExampleCurve}, "Easeout Cubic = 0.08, 0.22, 0.22, 0.91"), i.createElement("br", null),
-                             i.createElement("text", {style: {cursor: "pointer"}, onClick: this.onClickExampleCurve}, "Ease-inout = 0.42, 0.00, 0.58, 1.00"), i.createElement("br", null)
+                             i.createElement("button", {type: "button", onClick: this.onClickExampleCurve}, "Linear = 0.00, 0.00, 1.00, 1.00"), i.createElement("br", null),
+                             i.createElement("button", {type: "button", onClick: this.onClickExampleCurve}, "Enhanced Precision = 0.70, 0.28, 1.00, 1.00"), i.createElement("br", null),
+                             i.createElement("button", {type: "button", onClick: this.onClickExampleCurve}, "Easein Quadratic = 0.55, 0.09, 0.68, 0.53"), i.createElement("br", null),
+                             i.createElement("button", {type: "button", onClick: this.onClickExampleCurve}, "Easein Cubic = 0.74, 0.12, 0.64, 0.29"), i.createElement("br", null),
+                             i.createElement("button", {type: "button", onClick: this.onClickExampleCurve}, "Easeout Quad = 0.00, 0.00, 0.41, 0.96"), i.createElement("br", null),
+                             i.createElement("button", {type: "button", onClick: this.onClickExampleCurve}, "Easeout Cubic = 0.08, 0.22, 0.22, 0.91"), i.createElement("br", null),
+                             i.createElement("button", {type: "button", onClick: this.onClickExampleCurve}, "Ease-inout = 0.42, 0.00, 0.58, 1.00"), i.createElement("br", null)
                             ))),  
 
                             i.createElement("br", null), 
@@ -183,7 +184,7 @@
                                  type: "checkbox", 
                                  defaultChecked: false, 
                                  value: true
-                            }, "Show input and output movement of axis"),
+                            }), i.createElement("label", {htmlFor: "showProgressMovement"}, "Animate input and output movement"),
                             i.createElement("br", null), 
                             i.createElement("p", null, i.createElement("a", {
                                 style: l,
@@ -9223,7 +9224,7 @@
                 url: "git@github.com:gre/bezier-easing-editor.git"
             },
             keywords: ["react-component", "bezier-easing", "cubic-bezier", "easing", "editor"],
-            author: "Author of the original beizer-curve-editor, Gaëtan Renaudeau",
+            author: "Author of the original beizer-curve-editor, GaÃ«tan Renaudeau",
             license: "ISC",
             bugs: {
                 url: "https://github.com/gre/bezier-easing-editor/issues"

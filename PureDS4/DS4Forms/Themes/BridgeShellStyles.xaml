@@ -37,28 +37,28 @@
         <Setter Property="Background" Value="{DynamicResource CardBackgroundColor}" />
         <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSmall}" />
         <Setter Property="Padding" Value="18" />
         <Setter Property="Margin" Value="0,0,0,2" />
     </Style>
 
     <Style x:Key="BridgeSectionTitleStyle" TargetType="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource ForegroundColor}" />
-        <Setter Property="FontSize" Value="17" />
+        <Setter Property="FontSize" Value="{StaticResource TypePageTitleSize}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Margin" Value="0,0,0,4" />
     </Style>
 
     <Style x:Key="BridgePrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource FoundationPrimaryButtonStyle}">
-        <Setter Property="Padding" Value="16,8" />
-        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="Padding" Value="{StaticResource ControlPaddingProminent}" />
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeightProminent}" />
     </Style>
 
     <Style x:Key="BridgeSecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource FoundationButtonStyle}">
         <Setter Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource BorderDefaultBrush}" />
-        <Setter Property="Padding" Value="14,7" />
-        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="Padding" Value="{StaticResource ControlPaddingDefault}" />
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeightDefault}" />
     </Style>
 
     <Style x:Key="BridgeProfileComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource FoundationComboBoxStyle}">
@@ -123,7 +123,7 @@
                                                   ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" />
                                 <Border Grid.Column="1" Background="{DynamicResource CardBackgroundColor}"
                                         BorderBrush="{DynamicResource BorderColor}" BorderThickness="1,0,0,0"
-                                        CornerRadius="0,6,6,0">
+                                        CornerRadius="{StaticResource RadiusSmall}">
                                     <Path x:Name="ProfileArrow" Data="M 1 2 L 5 6 L 9 2"
                                           Width="10" Height="7" Stretch="Fill"
                                           Stroke="{DynamicResource MutedForegroundColor}" StrokeThickness="1.6"
@@ -237,7 +237,13 @@
     <Style x:Key="BridgeNavigationTabItemStyle" TargetType="TabItem">
         <Setter Property="Foreground" Value="{DynamicResource MutedForegroundColor}" />
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <!-- TabControl copies the selected TabItem's content alignment onto
+             itself, and the selected-content presenter follows it. Centring
+             here made every page size to its own content and float in the
+             middle of the window instead of filling it. The header is centred
+             by the template below, which is where that belongs. -->
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
         <Setter Property="Padding" Value="14,7" />
         <Setter Property="Template">
             <Setter.Value>
@@ -304,7 +310,7 @@
                                 BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1">
                             <TabPanel IsItemsHost="True" KeyboardNavigation.TabNavigation="Once" />
                         </Border>
-                        <ContentPresenter Grid.Row="1" ContentSource="SelectedContent" />
+                        <ContentPresenter Grid.Row="1" x:Name="PART_SelectedContentHost" ContentSource="SelectedContent" />
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
@@ -333,7 +339,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="TabControl">
                     <Border Background="{TemplateBinding Background}">
-                        <ContentPresenter ContentSource="SelectedContent" />
+                        <ContentPresenter x:Name="PART_SelectedContentHost" ContentSource="SelectedContent" />
                     </Border>
                 </ControlTemplate>
             </Setter.Value>

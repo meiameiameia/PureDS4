@@ -9,16 +9,17 @@
         lex:ResxLocalizationProvider.DefaultAssembly="PureDS4"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="{lex:Loc RenameProfileWin.WinTitle}" Height="200" Width="600"
+        Title="{lex:Loc RenameProfileWin.WinTitle}" Height="210" Width="480" MinHeight="180" MinWidth="360"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         Style="{DynamicResource WindowStyle}" Closed="Window_Closed">
-    <DockPanel x:Name="mainDockPanel" Margin="8">
-        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Height="30">
-            <Button x:Name="cancelBtn" Content="{lex:Loc Cancel}" Click="CancelBtn_Click" Width="60" />
-            <Button x:Name="confirmBtn" Content="{lex:Loc Confirm}" Click="ConfirmBtn_Click" Width="60" Margin="20,0,0,0" />
+    <DockPanel x:Name="mainDockPanel" Margin="16">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Style="{StaticResource FoundationButtonStyle}" x:Name="cancelBtn" Content="{lex:Loc Cancel}" Click="CancelBtn_Click" MinWidth="80" />
+            <Button Style="{StaticResource FoundationButtonStyle}" x:Name="confirmBtn" Content="{lex:Loc Confirm}" Click="ConfirmBtn_Click" MinWidth="80" Margin="8,0,0,0" />
         </StackPanel>
 
-        <DockPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBox DockPanel.Dock="Bottom" Margin="0,16,0,0" Text="{Binding ProfileName}">
+        <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Center">
+            <TextBox Style="{StaticResource FoundationTextBoxStyle}" DockPanel.Dock="Bottom" Margin="0,16,0,0" Text="{Binding ProfileName}" AutomationProperties.Name="New profile name">
             </TextBox>
 
             <TextBlock DockPanel.Dock="Top" Text="{lex:Loc RenameProfileWin.TypeNewProfileName}">
