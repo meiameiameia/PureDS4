@@ -31,6 +31,9 @@ namespace DS4WindowsTests
                 result.Status.Mode);
             Assert.AreEqual(ControllerExposureStage.NativePhysicalReady,
                 result.Status.Stage);
+            Assert.AreEqual(
+                "The physical controller is released to Windows; no PureDS4 virtual output is active. Launch the game after switching.",
+                result.Status.Detail);
             CollectionAssert.AreEqual(new[]
             {
                 "NeutralizeSyntheticOutputs",

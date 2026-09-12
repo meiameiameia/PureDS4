@@ -320,7 +320,7 @@ namespace DS4Windows
             ControllerExposureStatus ready = new ControllerExposureStatus(
                 ControllerExposureMode.NativePhysical,
                 ControllerExposureStage.NativePhysicalReady,
-                "The physical controller is released to Windows; no Reworked virtual output is active. Launch the game after switching.");
+                $"The physical controller is released to Windows; no {ProductIdentity.Name} virtual output is active. Launch the game after switching.");
             SetStatus(ready);
             return new ControllerExposureTransitionResult(true, ready);
         }
