@@ -14,6 +14,14 @@
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <PureDS4ExperimentalDS3 Condition="'$(PureDS4ExperimentalDS3)' == ''">false</PureDS4ExperimentalDS3>
+  </PropertyGroup>
+
+  <!-- The installer UI must match the payload it installs. Without this the
+       DS3 opt-in would be hidden in an experimental installer, or offered by a
+       standard one. -->
+  <PropertyGroup Condition="'$(PureDS4ExperimentalDS3)' == 'true'">
+    <DefineConstants>$(DefineConstants);PUREDS4_EXPERIMENTAL_DS3</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="WixToolset.BootstrapperApplicationApi" Version="5.0.2" />

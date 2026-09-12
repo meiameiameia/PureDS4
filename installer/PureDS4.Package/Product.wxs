@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Package
-      Name="PureDS4"
+      Name="$(var.PkgProductName)"
       Manufacturer="meiameiameia"
       Version="$(var.ProductVersion)"
-      UpgradeCode="FE00C21E-C0E6-4509-81EA-2D4B34D377A1"
+      UpgradeCode="$(var.PkgUpgradeCode)"
       Scope="perMachine"
       InstallerVersion="500"
       Compressed="yes">
@@ -22,7 +22,7 @@
     <Property Id="ARPURLINFOABOUT" Value="https://github.com/meiameiameia/pureds4" />
 
     <StandardDirectory Id="ProgramFiles64Folder">
-      <Directory Id="INSTALLFOLDER" Name="PureDS4" />
+      <Directory Id="INSTALLFOLDER" Name="$(var.PkgInstallFolder)" />
     </StandardDirectory>
 
     <Component Id="ManagedInstallRegistration" Directory="INSTALLFOLDER" Guid="EFF37CF6-5757-46CF-8180-6AC595300073">

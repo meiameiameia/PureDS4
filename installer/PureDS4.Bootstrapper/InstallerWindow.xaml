@@ -119,6 +119,22 @@
                 <TextBlock Text="Optional system driver. Existing healthy installations are left unchanged." Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="24,-2,0,5" />
                 <CheckBox x:Name="FakerInputCheckBox" IsChecked="False" Content="Install FakerInput (virtual keyboard and mouse)" />
                 <TextBlock Text="Useful for profiles that send keyboard or mouse input to elevated games." Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="24,-2,0,0" />
+                <StackPanel x:Name="Ds3Section" Visibility="Collapsed" Margin="0,12,0,0">
+                  <TextBlock Text="DualShock 3 (experimental)" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5" />
+                  <CheckBox x:Name="Ds3SupportCheckBox" IsChecked="False" Content="Enable DualShock 3 support" />
+                  <TextBlock x:Name="Ds3DriverStatus" TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="24,-2,0,0" />
+                  <TextBlock x:Name="Ds3DriverHelp" TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="24,5,0,0"
+                             Text="Download the .msi from the official releases page and run it, then press Re-check below. Requires 64-bit Windows 10 or 11." />
+                  <StackPanel Orientation="Horizontal" Margin="24,6,0,0">
+                    <TextBlock FontSize="12" VerticalAlignment="Center">
+                      <Hyperlink x:Name="Ds3DriverLink" NavigateUri="https://github.com/nefarius/DsHidMini/releases/latest" RequestNavigate="Ds3DriverLink_RequestNavigate">
+                        Open the official DsHidMini releases page
+                      </Hyperlink>
+                    </TextBlock>
+                    <Button x:Name="Ds3RecheckButton" Content="Re-check" Margin="14,0,0,0" Padding="10,3"
+                            Style="{StaticResource SecondaryButton}" Click="Ds3Recheck_Click" />
+                  </StackPanel>
+                </StackPanel>
               </StackPanel>
             </Border>
 

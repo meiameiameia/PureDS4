@@ -8,6 +8,16 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <PureDS4ExperimentalDS3 Condition="'$(PureDS4ExperimentalDS3)' == ''">false</PureDS4ExperimentalDS3>
+  </PropertyGroup>
+
+  <!-- The tests must compile in the same scope as the product. ProductScope's
+       flags are compile-time constants, so the C# compiler inlines whichever
+       value it sees into this assembly; without mirroring the property here, a
+       solution built with -p:PureDS4ExperimentalDS3=true would produce a
+       product that offers DS3 and a test assembly still asserting it does not. -->
+  <PropertyGroup Condition="'$(PureDS4ExperimentalDS3)' == 'true'">
+    <DefineConstants>$(DefineConstants);PUREDS4_EXPERIMENTAL_DS3</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

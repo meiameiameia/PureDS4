@@ -7,10 +7,47 @@ param(
     [string]$BundleVersion = "5.1.0-beta.1",
     [string]$OutputDirectory,
     [switch]$SkipApplicationPublish,
-    [switch]$RequireSigning
+    [switch]$RequireSigning,
+    # Builds the DualShock 3 hardware-validation installer instead of a normal
+    # one. Off unless passed explicitly. The resulting bundle is a separate
+    # product with its own name, upgrade code and install folder, so it can
+    # never upgrade over or be mistaken for a real PureDS4 installation, and
+    # it is refused outright when release signing is requested.
+    [switch]$ExperimentalDS3
 )
 
 $ErrorActionPreference = "Stop"
+if ($ExperimentalDS3 -and $RequireSigning) {
+    throw (
+        "The DualShock 3 hardware-validation build is not a release artifact " +
+        "and must never be produced through the signed release path."
+    )
+}
+$experimentalArgs = @()
+if ($ExperimentalDS3) {
+    $experimentalArgs = @("-p:PureDS4ExperimentalDS3=true")
+    # Switching the DS3 compile symbol changes every emitted assembly, but
+    # MSBuild judges CopyToPublishDirectory content as up to date from the
+    # previous publish of the same property set and skips it, leaving an
+    # extras-less package. The offline-package guard in PureDS4.csproj catches
+    # that, so it fails loudly rather than shipping a broken installer; this
+    # clean removes the cause on the experimental path.
+    foreach ($stale in @(
+        (Join-Path $PSScriptRoot "..\PureDS4\obj\x64\Release"),
+        (Join-Path $PSScriptRoot "..\PureDS4\bin\x64\Release"))) {
+        if (Test-Path -LiteralPath $stale) {
+            Remove-Item -LiteralPath $stale -Recurse -Force
+        }
+    }
+    Write-Warning (
+        "Building the DualShock 3 HARDWARE-VALIDATION installer. This is not " +
+        "a release artifact. It installs as a separate product and must not " +
+        "be published or promoted."
+    )
+    if (-not $DisplayVersion.Contains("ds3")) {
+        $DisplayVersion = "$DisplayVersion-ds3experimental"
+    }
+}
 $repoRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot ".."))
 $publishPath = [IO.Path]::GetFullPath($PublishRoot)
 $releaseInputValidator = Join-Path $repoRoot "utils\validate-release-inputs.py"
@@ -144,6 +181,7 @@ if (-not $SkipApplicationPublish) {
         -p:RestoreLockedMode=true `
         -p:AssemblyVersion=$ProductVersion -p:FileVersion=$ProductVersion `
         -p:Version=$ProductVersion -p:InformationalVersion=$DisplayVersion `
+        @experimentalArgs `
         -o $publishPath
     if ($LASTEXITCODE -ne 0) { throw "PureDS4 publish failed." }
 }
@@ -186,6 +224,7 @@ Invoke-SignAndVerify $setupActions
 & dotnet publish (Join-Path $repoRoot "installer\PureDS4.Bootstrapper\PureDS4.Bootstrapper.csproj") `
     -c Release -p:Platform=x64 -p:Version=$ProductVersion `
     -p:RestoreLockedMode=true `
+    @experimentalArgs `
     -r win-x64 --self-contained true `
     -o (Join-Path $repoRoot "installer\PureDS4.Bootstrapper\bin\x64\Release\publish")
 if ($LASTEXITCODE -ne 0) { throw "Bootstrapper UI build failed." }
@@ -196,10 +235,14 @@ $packageProject = Join-Path $repoRoot "installer\PureDS4.Package\PureDS4.Package
 & dotnet build $packageProject -t:Rebuild -c Release -p:Platform=x64 `
     -p:RestoreLockedMode=true `
     -p:Version=$ProductVersion -p:ProductVersion=$ProductVersion `
+    -p:ExperimentalDS3=$($ExperimentalDS3.IsPresent.ToString().ToLower()) `
     -p:PublishRoot=$publishPath
 if ($LASTEXITCODE -ne 0) { throw "PureDS4 MSI build failed." }
 
-$msiPath = Join-Path $repoRoot "installer\PureDS4.Package\bin\x64\Release\PureDS4_${ProductVersion}_x64.msi"
+# The experimental package carries a distinct file name so a DS3 MSI can
+# never be mistaken for, or picked up in place of, a release MSI.
+$msiSuffix = if ($ExperimentalDS3) { "_DS3Experimental" } else { "" }
+$msiPath = Join-Path $repoRoot "installer\PureDS4.Package\bin\x64\Release\PureDS4_${ProductVersion}_x64${msiSuffix}.msi"
 Invoke-SignAndVerify $msiPath
 $setupActionsHash = (Get-FileHash -LiteralPath $setupActions -Algorithm SHA256).Hash
 if ($setupActionsHash -notmatch '^[0-9A-F]{64}$') {
@@ -211,6 +254,7 @@ $bundleProject = Join-Path $repoRoot "installer\PureDS4.Bundle\PureDS4.Bundle.wi
     -p:RestoreLockedMode=true `
     -p:Version=$ProductVersion -p:BundleVersion=$BundleVersion `
     -p:DisplayVersion=$DisplayVersion `
+    -p:ExperimentalDS3=$($ExperimentalDS3.IsPresent.ToString().ToLower()) `
     -p:MsiPath=$msiPath -p:BootstrapperRoot=$baRoot `
     -p:SetupActionsPath=$setupActions -p:SetupActionsHash=$setupActionsHash `
     -p:ExtrasRoot=$extrasRoot

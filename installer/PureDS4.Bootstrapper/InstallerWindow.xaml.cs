@@ -26,6 +26,105 @@ namespace PureDS4.Bootstrapper
             Closed += (_, __) => application.OnWindowClosed();
         }
 
+        /// <summary>
+        /// Shows the DualShock 3 opt-in and reports whether the driver it
+        /// depends on is already present.
+        ///
+        /// PureDS4 does not ship or install DsHidMini. It is a third-party
+        /// user-mode driver whose author asks that it be obtained only from
+        /// their own releases, so this build detects it and points there
+        /// rather than redistributing it. Nothing here installs, removes, or
+        /// reconfigures a driver.
+        ///
+        /// In a standard installer the whole section stays collapsed, so an
+        /// ordinary install never mentions DualShock 3 at all.
+        /// </summary>
+        private void ConfigureExperimentalDS3Section()
+        {
+#if PUREDS4_EXPERIMENTAL_DS3
+            Ds3Section.Visibility = Visibility.Visible;
+            RefreshDsHidMiniStatus();
+#else
+            Ds3Section.Visibility = Visibility.Collapsed;
+#endif
+        }
+
+        /// <summary>
+        /// Re-reads the driver state and updates the DualShock 3 panel. Split
+        /// out so the Re-check button can call it: installing DsHidMini in
+        /// another window and pressing Re-check is far less error-prone than
+        /// asking someone to close and re-run the whole setup.
+        /// </summary>
+        private void RefreshDsHidMiniStatus()
+        {
+            bool present = IsDsHidMiniPresent();
+            Ds3DriverStatus.Text = present
+                ? "DsHidMini is installed. Open the DsHidMini app and set this "
+                    + "controller to SXS or DS4 emulation mode before testing."
+                : "DsHidMini is NOT installed. A DualShock 3 cannot be read "
+                    + "without it, and PureDS4 does not bundle it.";
+            Ds3DriverHelp.Text = present
+                ? "Nothing more is needed here. Tick the box above to enable "
+                    + "DualShock 3 detection in this build."
+                : "Download the .msi from the official releases page (v3.5.1 "
+                    + "or newer) and run it, then press Re-check. Requires "
+                    + "64-bit Windows 10 or 11.";
+        }
+
+        private void Ds3Recheck_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshDsHidMiniStatus();
+        }
+
+        /// <summary>
+        /// Read-only probe for the DsHidMini driver. Checks the service
+        /// registration rather than enumerating devices, so it reports the
+        /// driver as present whether or not a controller is plugged in.
+        /// </summary>
+        private static bool IsDsHidMiniPresent()
+        {
+            try
+            {
+                using (RegistryKey service = Registry.LocalMachine.OpenSubKey(
+                    @"SYSTEM\CurrentControlSet\Services\dshidmini"))
+                {
+                    if (service != null)
+                    {
+                        return true;
+                    }
+                }
+
+                using (RegistryKey vendor = Registry.LocalMachine.OpenSubKey(
+                    @"SOFTWARE\Nefarius Software Solutions e.U.\DsHidMini"))
+                {
+                    return vendor != null;
+                }
+            }
+            catch
+            {
+                // A probe that cannot read the registry must not claim the
+                // driver is missing, and must never block the install.
+                return false;
+            }
+        }
+
+        private void Ds3DriverLink_RequestNavigate(object sender,
+            System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(
+                    new System.Diagnostics.ProcessStartInfo(
+                        e.Uri.AbsoluteUri) { UseShellExecute = true });
+            }
+            catch
+            {
+                // An unavailable browser must not take the installer down.
+            }
+
+            e.Handled = true;
+        }
+
         internal void ShowConfirmation(InstallerMode detectedMode, IReadOnlyDictionary<string, PackageState> packages, bool infrastructureHealthy)
         {
             mode = detectedMode;
@@ -33,6 +132,7 @@ namespace PureDS4.Bootstrapper
             ConfirmationPage.Visibility = Visibility.Visible;
             OptionsCard.Visibility = Visibility.Visible;
             applying = false;
+            ConfigureExperimentalDS3Section();
 
             switch (mode)
             {

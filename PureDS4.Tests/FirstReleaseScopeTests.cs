@@ -33,7 +33,13 @@ namespace DS4WindowsTests
         [TestMethod]
         public void ReleaseScopeIsDualShock4Only()
         {
+#if !PUREDS4_EXPERIMENTAL_DS3
+            // Guarded rather than deleted: this is the assertion that proves a
+            // standard build does not offer DS3, so it must keep running in
+            // every ordinary Debug and Release build. The experimental build
+            // asserts the opposite in ExperimentalDualShock3BuildTests.
             Assert.IsFalse(ProductScope.DualShock3Offered);
+#endif
             Assert.AreEqual("DualShock 4",
                 ProductScope.SupportedControllerSummary);
             StringAssert.Contains(ProductScope.BroaderAlternativeUrl,
@@ -54,8 +60,10 @@ namespace DS4WindowsTests
             Assert.IsTrue(options.Enabled,
                 "The stored option must still round-trip for the future gate.");
 
+#if !PUREDS4_EXPERIMENTAL_DS3
             Assert.IsFalse(ProductScope.DualShock3Offered && options.Enabled,
                 "A stored setting must not activate DualShock 3 support.");
+#endif
         }
 
         [TestMethod]
@@ -146,6 +154,13 @@ namespace DS4WindowsTests
                 Directory.Delete(root, true);
             }
 
+#if PUREDS4_EXPERIMENTAL_DS3
+            // The hardware-validation build deliberately restores the DS3 rule
+            // so a tester can bind a profile to the controller under test.
+            CollectionAssert.AreEqual(
+                new[] { "Any", "DS4", "DS3" },
+                options.Select(option => option.DisplayName).ToArray());
+#else
             CollectionAssert.AreEqual(
                 new[] { "Any", "DS4" },
                 options.Select(option => option.DisplayName).ToArray());
@@ -154,6 +169,7 @@ namespace DS4WindowsTests
                 options.Any(option =>
                     option.ChoiceValue == AutoProfileDeviceOption.DS3),
                 "Auto Profiles still offers a DualShock 3 rule.");
+#endif
         }
 
         [TestMethod]

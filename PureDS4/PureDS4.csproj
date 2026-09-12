@@ -40,6 +40,13 @@
 		<InformationalVersion>5.1.0-beta.1</InformationalVersion>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 		<Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+		<!-- DualShock 3 hardware-validation switch. Off unless a build explicitly
+		     passes -p:PureDS4ExperimentalDS3=true, which no ordinary Debug or
+		     Release build and no installer build does. Turning it on is what
+		     lets ProductScope.DualShock3Offered become true, and nothing else
+		     in the tree sets it, so a standard artifact cannot inherit the DS3
+		     path by accident. See PureDS4/ProductScope.cs. -->
+		<PureDS4ExperimentalDS3 Condition="'$(PureDS4ExperimentalDS3)' == ''">false</PureDS4ExperimentalDS3>
 		<Platform Condition=" '$(Platform)' == '' ">x64</Platform>
 		<Product>PureDS4</Product>
 		<Title>PureDS4</Title>
@@ -82,6 +89,28 @@
 		<GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
 		<PlatformTarget>x86</PlatformTarget>
 	</PropertyGroup>
+
+	<!-- The DualShock 3 experiment is applied last, on purpose. The
+	     configuration blocks above assign DefineConstants rather than appending
+	     to it (Release|x64 sets it to a bare WIN64), so a symbol added before
+	     them would be silently discarded. Appending here is the only placement
+	     that survives every configuration.
+
+	     The stamped InformationalVersion is what makes the artifact
+	     self-identifying: Global.exeDisplayVersion feeds the About window, the
+	     log header and the startup diagnostics, so an experimental executable
+	     announces itself everywhere a version already appears. The warning
+	     makes an accidental experimental build visible in ordinary build
+	     output rather than only in the binary. -->
+	<PropertyGroup Condition="'$(PureDS4ExperimentalDS3)' == 'true'">
+		<DefineConstants>$(DefineConstants);PUREDS4_EXPERIMENTAL_DS3</DefineConstants>
+		<InformationalVersion>$(InformationalVersion)+ds3-experimental</InformationalVersion>
+	</PropertyGroup>
+
+	<Target Name="WarnExperimentalDS3" BeforeTargets="Build"
+	        Condition="'$(PureDS4ExperimentalDS3)' == 'true'">
+		<Warning Text="Building the DualShock 3 HARDWARE-VALIDATION build. This artifact offers DS3 and must never be published or promoted to Dev\current." />
+	</Target>
 
 	<ItemGroup>
 		<None Remove="libs\x64\**" Condition="'$(Platform)' != 'x64'" />

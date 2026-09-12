@@ -29,6 +29,21 @@
                 </TextBlock>
             </StackPanel>
 
+            <!-- Present only in a DualShock 3 hardware-validation build. A
+                 standard build binds nothing here because the panel is
+                 collapsed and ExperimentalDS3Build is a compile-time false. -->
+            <StackPanel DockPanel.Dock="Top" Margin="0,16,0,0"
+                        Visibility="{Binding ExperimentalDS3Build, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Text="DualShock 3 (experimental hardware validation)"
+                           FontWeight="SemiBold" />
+                <CheckBox Content="Enable DualShock 3 detection"
+                          IsChecked="{Binding DS3DeviceOpts.Enabled}"
+                          Margin="0,4,0,0"
+                          ToolTip="Experimental. Requires DsHidMini or a Sixaxis driver already installed. Not supported in a public release." />
+                <TextBlock TextWrapping="Wrap" Margin="0,4,0,0" Opacity="0.8"
+                           Text="This build is for testing a genuine DualShock 3 only. It is not a public release and must not be promoted." />
+            </StackPanel>
+
             <StackPanel DockPanel.Dock="Top" Margin="0,16,0,0">
                 <CheckBox Content="{lex:Loc EnableVerboseLog}" IsChecked="{Binding VerboseLogMessages}" ToolTip="{lex:Loc EnableVerboseLogTip}"/>
             </StackPanel>

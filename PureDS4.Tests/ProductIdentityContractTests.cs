@@ -153,7 +153,17 @@ namespace DS4WindowsTests
                 assembly.GetCustomAttribute<AssemblyTitleAttribute>()?.Title);
             Assert.AreEqual(ProductIdentity.Publisher,
                 assembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company);
-            Assert.AreEqual("5.1.0-beta.1",
+            // A DualShock 3 hardware-validation build must be impossible to
+            // mistake for a release artifact, and the informational version is
+            // the identity that reaches the About window, the log header and
+            // startup diagnostics. Asserting the stamped form here means the
+            // marker cannot be dropped without a test noticing.
+            Assert.AreEqual(
+#if PUREDS4_EXPERIMENTAL_DS3
+                "5.1.0-beta.1+ds3-experimental",
+#else
+                "5.1.0-beta.1",
+#endif
                 assembly.GetCustomAttribute<
                     AssemblyInformationalVersionAttribute>()?.InformationalVersion);
         }

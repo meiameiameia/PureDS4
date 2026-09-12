@@ -34,6 +34,15 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
         public bool EnableDS3 { get => serviceDeviceOpts.DS3DeviceOpts.Enabled; }
 
+        /// <summary>
+        /// Whether this build may show the DualShock 3 controls at all. False
+        /// in every standard build, so the panel bound to it stays collapsed
+        /// and a user is never invited to enable a path the release does not
+        /// claim. See <see cref="ProductScope.ExperimentalDualShock3Build"/>.
+        /// </summary>
+        public bool ExperimentalDS3Build =>
+            ProductScope.ExperimentalDualShock3Build;
+
         public DS4DeviceOptions DS4DeviceOpts { get => serviceDeviceOpts.DS4DeviceOpts; }
         public DS3DeviceOptions DS3DeviceOpts { get => serviceDeviceOpts.DS3DeviceOpts; }
 

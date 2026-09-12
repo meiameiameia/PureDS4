@@ -2,11 +2,22 @@
   <PropertyGroup>
     <Platform>x64</Platform>
     <OutputType>Package</OutputType>
-    <OutputName>PureDS4_$(ProductVersion)_x64</OutputName>
+    <ExperimentalDS3 Condition="'$(ExperimentalDS3)' == ''">false</ExperimentalDS3>
+    <!-- The DualShock 3 hardware-validation package is a separate product.
+         Its own name, upgrade code and install folder stop it from ever
+         upgrading over, or being mistaken for, a real PureDS4 install. -->
+    <PkgProductName Condition="'$(ExperimentalDS3)' != 'true'">PureDS4</PkgProductName>
+    <PkgProductName Condition="'$(ExperimentalDS3)' == 'true'">PureDS4 DS3 Experimental</PkgProductName>
+    <PkgUpgradeCode Condition="'$(ExperimentalDS3)' != 'true'">FE00C21E-C0E6-4509-81EA-2D4B34D377A1</PkgUpgradeCode>
+    <PkgUpgradeCode Condition="'$(ExperimentalDS3)' == 'true'">E19E4FF1-FCF6-4D15-8F12-9B38A7728A6B</PkgUpgradeCode>
+    <PkgInstallFolder Condition="'$(ExperimentalDS3)' != 'true'">PureDS4</PkgInstallFolder>
+    <PkgInstallFolder Condition="'$(ExperimentalDS3)' == 'true'">PureDS4 DS3 Experimental</PkgInstallFolder>
+    <PkgOutputSuffix Condition="'$(ExperimentalDS3)' == 'true'">_DS3Experimental</PkgOutputSuffix>
+    <OutputName>PureDS4_$(ProductVersion)_x64$(PkgOutputSuffix)</OutputName>
     <ProductVersion Condition="'$(ProductVersion)' == ''">5.1.0</ProductVersion>
     <PublishRoot Condition="'$(PublishRoot)' == ''">$(MSBuildThisFileDirectory)..\..\bin\x64\Release\output</PublishRoot>
     <RepoRoot Condition="'$(RepoRoot)' == ''">$(MSBuildThisFileDirectory)..\..\</RepoRoot>
-    <DefineConstants>ProductVersion=$(ProductVersion);PublishRoot=$(PublishRoot);RepoRoot=$(RepoRoot)</DefineConstants>
+    <DefineConstants>ProductVersion=$(ProductVersion);PublishRoot=$(PublishRoot);RepoRoot=$(RepoRoot);PkgProductName=$(PkgProductName);PkgUpgradeCode=$(PkgUpgradeCode);PkgInstallFolder=$(PkgInstallFolder)</DefineConstants>
     <!-- Burn owns downgrade ordering. The embedded MSI permits an equal
          three-field product version so successive CI prereleases can update
          cleanly while a stable 5.0.0 bundle still outranks 5.0.0-ci.*. -->
