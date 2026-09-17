@@ -552,7 +552,13 @@
             </TabItem>
             <TabItem x:Name="settingsTab" Header="{lex:Loc Settings}" Tag="&#xE713;" IsEnabled="{Binding ViewEnabled,Mode=OneWay}">
                 <TabItem.Resources>
-                    <Thickness x:Key="spaceMargin" Left="4" Right="0" Bottom="8" Top="0" />
+                    <!-- Every category uses the same column width, so switching categories
+                         never resizes the page. Tools shares the 760 DIP cap. -->
+                    <Style x:Key="SettingsPageStyle" TargetType="StackPanel">
+                        <Setter Property="MaxWidth" Value="760" />
+                        <Setter Property="HorizontalAlignment" Value="Stretch" />
+                        <Setter Property="Margin" Value="0,0,16,16" />
+                    </Style>
                     <Style x:Key="SettingsCategoryTabItemStyle" TargetType="TabItem">
                         <Setter Property="Foreground" Value="{DynamicResource ClassicSecondaryTextBrush}" />
                         <Setter Property="Padding" Value="12,8" />
@@ -581,20 +587,6 @@
                             </Setter.Value>
                         </Setter>
                     </Style>
-                    <!-- One label column width across the whole settings form, so
-                         every field control starts on the same vertical line. -->
-                    <Style x:Key="SettingsFieldLabelStyle" TargetType="Label">
-                        <Setter Property="Width" Value="150" />
-                        <Setter Property="Padding" Value="0,0,8,0" />
-                        <Setter Property="VerticalContentAlignment" Value="Center" />
-                        <Setter Property="Foreground" Value="{DynamicResource ClassicPrimaryTextBrush}" />
-                    </Style>
-
-                    <Style x:Key="SettingsDescriptionStyle" TargetType="TextBlock">
-                        <Setter Property="Foreground" Value="{DynamicResource ClassicSecondaryTextBrush}" />
-                        <Setter Property="TextWrapping" Value="Wrap" />
-                        <Setter Property="Margin" Value="0,0,0,12" />
-                    </Style>
                     <Style x:Key="SettingsCategoryTabControlStyle" TargetType="TabControl">
                         <Setter Property="ItemContainerStyle" Value="{StaticResource SettingsCategoryTabItemStyle}" />
                         <Setter Property="TabStripPlacement" Value="Left" />
@@ -611,348 +603,757 @@
                                                 <StackPanel IsItemsHost="True" Margin="6" KeyboardNavigation.DirectionalNavigation="Contained" />
                                             </ScrollViewer>
                                         </Border>
-                                        <ContentPresenter Grid.Column="1" Margin="18,0,0,0" ContentSource="SelectedContent" />
+                                        <ContentPresenter Grid.Column="1" Margin="16,0,0,0" ContentSource="SelectedContent" />
                                     </Grid>
                                 </ControlTemplate>
                             </Setter.Value>
                         </Setter>
                     </Style>
                 </TabItem.Resources>
-                <Grid Margin="14,10,18,10" Background="{DynamicResource ClassicWorkspaceBrush}">
+                <Grid Margin="16,8" Background="{DynamicResource ClassicWorkspaceBrush}">
                     <TabControl x:Name="settingsCategoryTabs" Style="{StaticResource SettingsCategoryTabControlStyle}" SelectedIndex="0">
                         <TabItem Header="General">
                             <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                                <StackPanel Margin="18,0,0,8" MaxWidth="760" HorizontalAlignment="Left">
-                                    <TextBlock Text="General" Style="{StaticResource ClassicSectionHeadingStyle}" />
-                                    <TextBlock Text="Startup, window behavior, notifications, appearance, and updates." Style="{StaticResource SettingsDescriptionStyle}" />
-                        <Border Style="{StaticResource ClassicPropertyGroupStyle}">
-                            <StackPanel>
-                        <local:LanguagePackControl Margin="{StaticResource spaceMargin}" />
-                        <CheckBox x:Name="runAtStartCk" Content="{lex:Loc RunAtStartup}" Margin="{StaticResource spaceMargin}"
-                              IsChecked="{Binding RunAtStartup}" IsEnabled="{Binding CanChangeRunAtStartup}"
-                              ToolTip="{lex:Loc Resources:RunAtStartup}" Click="RunAtStartCk_Click"
-                              Style="{StaticResource ClassicCompactCheckBoxStyle}" />
-                        <GroupBox x:Name="runAsGroupBox" Header="{lex:Loc RunAs}" BorderThickness="2" Visibility="{Binding ShowRunStartPanel}"
-                              Margin="{StaticResource spaceMargin}">
-                            <StackPanel Orientation="Horizontal">
-                                <StackPanel>
-                                    <RadioButton Content="{lex:Loc Program}" GroupName="RunAsOpt" Margin="{StaticResource spaceMargin}" IsChecked="{Binding RunStartProg}" />
-                                    <RadioButton Content="{lex:Loc Task}" GroupName="RunAsOpt" Margin="{StaticResource spaceMargin}"
-                                                 IsChecked="{Binding RunStartTask}" IsEnabled="{Binding CanWriteTask}" />
-                                </StackPanel>
-                                <Image x:Name="uacImg" Source="{Binding UACSource, Mode=OneTime}" Width="30" Height="30"
-                                   ToolTip="{lex:Loc Resources:UACTask}" Margin="20,0,0,0" />
-                            </StackPanel>
-                        </GroupBox>
-                        <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                            <Label Content="{lex:Loc ShowNotifications}" Style="{StaticResource SettingsFieldLabelStyle}" />
-                            <ComboBox MinWidth="100" SelectedIndex="{Binding ShowNotificationsIndex}">
-                                <ComboBoxItem Content="{lex:Loc None}" />
-                                <ComboBoxItem Content="{lex:Loc WarningsOnly}" />
-                                <ComboBoxItem Content="{lex:Loc All}" />
-                            </ComboBox>
-                        </StackPanel>
-                        <CheckBox Content="{lex:Loc ProfileSwitchNotification}" IsChecked="{Binding ProfileChangedNotification}"
-                                  Visibility="{Binding IsProfileChangedCheckVisible}" Margin="16 0 0 10"/>
-                        <CheckBox Content="{lex:Loc StartMinimized}" Margin="{StaticResource spaceMargin}"
-                              IsChecked="{Binding StartMinimize}" ToolTip="Open PureDS4 quietly without showing the main window."
-                              Style="{StaticResource ClassicCompactCheckBoxStyle}" />
-                        <CheckBox Content="{lex:Loc MinimizeToTaskbar}"
-                                  ToolTip="{lex:Loc MinimizeToTaskbarTip}"
-                                  IsChecked="{Binding MinimizeToTaskbar}" Margin="{StaticResource spaceMargin}"
-                                  Style="{StaticResource ClassicCompactCheckBoxStyle}" />
-                        <CheckBox Content="{lex:Loc CloseMinimizes}" Margin="{StaticResource spaceMargin}"
-                              IsChecked="{Binding CloseMinimizes}"
-                              ToolTip="{lex:Loc Resources:CloseMinimize}"
-                              Style="{StaticResource ClassicCompactCheckBoxStyle}" />
-                        <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                            <Label Content="{lex:Loc IconChoice}" ContentStringFormat="{}{0}:" Style="{StaticResource SettingsFieldLabelStyle}"/>
-                            <ComboBox x:Name="useIconChoiceCom" SelectedIndex="{Binding IconChoiceIndex,FallbackValue='0'}" Style="{StaticResource ClassicCompactComboBoxStyle}">
-                                <ComboBoxItem Content="System adaptive"/>
-                                <ComboBoxItem Content="Full color"/>
-                                <ComboBoxItem Content="Light"/>
-                                <ComboBoxItem Content="Dark"/>
-                                <ComboBoxItem Content="Battery status"/>
-                            </ComboBox>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                            <Label Content="{lex:Loc AppTheme}" ContentStringFormat="{}{0}:" Style="{StaticResource SettingsFieldLabelStyle}"/>
-                            <ComboBox x:Name="appThemeCom" SelectedIndex="{Binding AppChoiceIndex,FallbackValue='0'}" Style="{StaticResource ClassicCompactComboBoxStyle}">
-                                <ComboBoxItem Content="{lex:Loc Default}"/>
-                                <ComboBoxItem Content="{lex:Loc Light}"/>
-                                <ComboBoxItem Content="{lex:Loc Dark}"/>
-                            </ComboBox>
-                        </StackPanel>
-                        <CheckBox Content="{lex:Loc CheckUpdateStartup}" Margin="{StaticResource spaceMargin}"
-                              IsChecked="{Binding CheckForUpdates}" IsEnabled="False"
-                              ToolTip="Automatic product updates are disabled until an independent signed update channel is available."
-                              Style="{StaticResource ClassicCompactCheckBoxStyle}" />
-                        <StackPanel x:Name="checkEveryOptionsStack" Orientation="Horizontal" Margin="{StaticResource spaceMargin}"
-                                IsEnabled="False">
-                            <Label Content="{lex:Loc CheckEvery}" Style="{StaticResource SettingsFieldLabelStyle}" />
-                            <xctk:IntegerUpDown d:IsHidden="True" Value="{Binding CheckEvery}" MinWidth="30"
-                                            ButtonSpinnerLocation="Right" Increment="1" Maximum="30" Minimum="0" />
-                            <ComboBox SelectedIndex="{Binding CheckEveryUnit,FallbackValue=1}" Margin="8,0,0,0" Foreground="{DynamicResource ForegroundColor}" MinWidth="60">
-                                <ComboBoxItem Content="{lex:Loc Hours}" />
-                                <ComboBoxItem Content="{lex:Loc Days}" />
-                            </ComboBox>
-                        </StackPanel>
-                            </StackPanel>
-                        </Border>
+                                <StackPanel Style="{StaticResource SettingsPageStyle}">
+                                    <TextBlock Text="General" Style="{StaticResource FoundationPageTitleStyle}" />
+                                    <TextBlock Text="Startup, window behavior, notifications and appearance." Margin="0,3,0,0" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                                    <TextBlock Text="Startup" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Start with Windows" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Open PureDS4 automatically when you sign in." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <CheckBox x:Name="runAtStartCk" Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Start with Windows"
+                                                              IsChecked="{Binding RunAtStartup}" IsEnabled="{Binding CanChangeRunAtStartup}" Click="RunAtStartCk_Click" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingSubRowStyle}" x:Name="runAsGroupBox" Visibility="{Binding ShowRunStartPanel}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Launch as" VerticalAlignment="Center" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <RadioButton Content="Program" GroupName="RunAsOpt" VerticalAlignment="Center" IsChecked="{Binding RunStartProg}" />
+                                                    <RadioButton Content="Scheduled task" GroupName="RunAsOpt" Margin="16,0,0,0" VerticalAlignment="Center"
+                                                                 IsChecked="{Binding RunStartTask}" IsEnabled="{Binding CanWriteTask}" />
+                                                    <Image x:Name="uacImg" Source="{Binding UACSource, Mode=OneTime}" Width="16" Height="16" Margin="6,0,0,0"
+                                                           VerticalAlignment="Center" ToolTip="{lex:Loc Resources:UACTask}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Start minimized" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Open quietly in the notification area without showing this window." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Start minimized"
+                                                              IsChecked="{Binding StartMinimize}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <TextBlock Text="Window" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Minimize to taskbar" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Keep a taskbar button when minimized, not only the notification-area icon." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Minimize to taskbar"
+                                                              IsChecked="{Binding MinimizeToTaskbar}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Keep running when closed" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="The close button hides the window. Quit from the notification-area icon." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Keep running when closed"
+                                                              IsChecked="{Binding CloseMinimizes}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <TextBlock Text="Notifications" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Windows notifications" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Choose which events show a notification." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <ComboBox MinWidth="150" Style="{StaticResource FoundationComboBoxStyle}" AutomationProperties.Name="Windows notifications" SelectedIndex="{Binding ShowNotificationsIndex}">
+                                                        <ComboBoxItem Content="None" />
+                                                        <ComboBoxItem Content="Warnings only" />
+                                                        <ComboBoxItem Content="All" />
+                                                    </ComboBox>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}" Visibility="{Binding IsProfileChangedCheckVisible}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Profile switches" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Also notify when a profile is switched." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Notify on profile switches"
+                                                              IsChecked="{Binding ProfileChangedNotification}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <TextBlock Text="Appearance" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Theme" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Default follows your Windows setting." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <ComboBox x:Name="appThemeCom" MinWidth="150" Style="{StaticResource FoundationComboBoxStyle}" AutomationProperties.Name="Theme" SelectedIndex="{Binding AppChoiceIndex,FallbackValue='0'}">
+                                                        <ComboBoxItem Content="Default" />
+                                                        <ComboBoxItem Content="Light" />
+                                                        <ComboBoxItem Content="Dark" />
+                                                    </ComboBox>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Notification-area icon" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Style of the PureDS4 icon next to the clock." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <ComboBox x:Name="useIconChoiceCom" MinWidth="150" Style="{StaticResource FoundationComboBoxStyle}" AutomationProperties.Name="Notification-area icon" SelectedIndex="{Binding IconChoiceIndex,FallbackValue='0'}">
+                                                        <ComboBoxItem Content="System adaptive" />
+                                                        <ComboBoxItem Content="Full color" />
+                                                        <ComboBoxItem Content="Light" />
+                                                        <ComboBoxItem Content="Dark" />
+                                                        <ComboBoxItem Content="Battery status" />
+                                                    </ComboBox>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <!-- The first release ships English only and has no signed update channel.
+                                         These controls keep their bindings but stay hidden instead of showing
+                                         permanently disabled UI. -->
+                                    <StackPanel Visibility="Collapsed">
+                                        <local:LanguagePackControl />
+                                        <CheckBox IsChecked="{Binding CheckForUpdates}" IsEnabled="False" />
+                                        <StackPanel x:Name="checkEveryOptionsStack" Orientation="Horizontal" IsEnabled="False">
+                                            <xctk:IntegerUpDown d:IsHidden="True" Value="{Binding CheckEvery}" Maximum="30" Minimum="0" />
+                                            <ComboBox SelectedIndex="{Binding CheckEveryUnit,FallbackValue=1}">
+                                                <ComboBoxItem Content="{lex:Loc Hours}" />
+                                                <ComboBoxItem Content="{lex:Loc Days}" />
+                                            </ComboBox>
+                                        </StackPanel>
+                                    </StackPanel>
                                 </StackPanel>
                             </ScrollViewer>
                         </TabItem>
 
                         <TabItem Header="Controller">
                             <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                                <StackPanel Margin="18,0,0,8" MaxWidth="760" HorizontalAlignment="Left">
-                                    <TextBlock Text="Controller" Style="{StaticResource ClassicSectionHeadingStyle}" />
-                                    <TextBlock Text="Physical controller protection and profile gestures." Style="{StaticResource SettingsDescriptionStyle}" />
-                        <Border Style="{StaticResource ClassicPropertyGroupStyle}">
-                            <StackPanel>
-                        <CheckBox x:Name="hideDS4ContCk" Content="{lex:Loc HideDS4Controller}" x:Uid="hideDS4Checkbox"
-                              Margin="{StaticResource spaceMargin}" IsChecked="{Binding HideDS4Controller}" Click="HideDS4ContCk_Click"
-                              ToolTip="Prevents games from seeing both the physical controller and its virtual output. Controller protection is recommended on current Windows versions."
-                              Style="{StaticResource ClassicCompactCheckBoxStyle}">
-                        </CheckBox>
-                        <CheckBox x:Name="reclaimSteamInputCk" Content="Reclaim controller from Steam Input automatically"
-                              Margin="{StaticResource spaceMargin}" IsChecked="{Binding ReclaimSteamInput}"
-                              Click="ReclaimSteamInputCk_Click"
-                              ToolTip="Temporarily protects the physical controller, then safely refreshes its input collection so Steam releases any handle it opened first. Game output remains available."
-                              Style="{StaticResource ClassicCompactCheckBoxStyle}" />
-                        <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                            <CheckBox x:Name="swipeTouchCk" Content="{lex:Loc SwipeTouchpadToSwitchProfiles}" VerticalAlignment="Center"
-                                  IsChecked="{Binding SwipeTouchSwitchProfile}"
-                                  ToolTip="{lex:Loc Resources:TwoFingerSwipe}" Click="SwipeTouchCk_Click"
-                                  Style="{StaticResource ClassicCompactCheckBoxStyle}" />
-                            <Button x:Name="configSwipeProfilesBtn" Content="Config Swipe Profiles" Margin="12,0,0,0"
-                                  Padding="8,2" Click="ConfigSwipeProfilesBtn_Click"
-                                  ToolTip="Choose which profiles the two-finger swipe is allowed to switch between"
-                                  Style="{StaticResource ClassicCompactButtonStyle}" />
-                        </StackPanel>
-                        <CheckBox Content="{lex:Loc DisconnectFromBtWhenStopping}" Margin="{StaticResource spaceMargin}"
-                                  IsChecked="{Binding DisconnectBTStop}"
-                                  ToolTip="Disconnect Bluetooth controllers when the PureDS4 service is stopped."
-                                  Style="{StaticResource ClassicCompactCheckBoxStyle}" />
-                        <CheckBox Content="{lex:Loc QuickCharge}" Margin="{StaticResource spaceMargin}"
-                                  IsChecked="{Binding QuickCharge}"
-                                  ToolTip="{lex:Loc Resources:QuickCharge}"
-                                  Style="{StaticResource ClassicCompactCheckBoxStyle}" />
-                        <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                            <CheckBox Content="{lex:Loc FlashLightbarAtHighLatency}" VerticalAlignment="Center"
-                                      IsChecked="{Binding FlashHighLatency}" />
-                            <StackPanel Orientation="Horizontal" Margin="8,0,0,0"
-                                        IsEnabled="{Binding FlashHighLatency,FallbackValue='False'}">
-                                <xctk:IntegerUpDown d:IsHidden="True" Value="{Binding FlashHighLatencyAt}" MinWidth="30" ButtonSpinnerLocation="Right" Increment="1" Maximum="100" Minimum="10" />
-                                <Label Content="ms" />
-                            </StackPanel>
-                        </StackPanel>
-                            </StackPanel>
-                        </Border>
+                                <StackPanel Style="{StaticResource SettingsPageStyle}">
+                                    <TextBlock Text="Controller" Style="{StaticResource FoundationPageTitleStyle}" />
+                                    <TextBlock Text="Physical controller protection, gestures and battery." Margin="0,3,0,0" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                                    <TextBlock Text="Protection" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Controller protection" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Hide the physical controller from games so they only see game output. Prevents double input." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <CheckBox x:Name="hideDS4ContCk" x:Uid="hideDS4Checkbox" Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Controller protection"
+                                                              IsChecked="{Binding HideDS4Controller}" Click="HideDS4ContCk_Click" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Reclaim from Steam Input" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="If Steam grabs the controller first, briefly protect it so Steam lets go. Game output stays available." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <CheckBox x:Name="reclaimSteamInputCk" Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Reclaim from Steam Input"
+                                                              IsChecked="{Binding ReclaimSteamInput}" Click="ReclaimSteamInputCk_Click" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <TextBlock Text="Gestures" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Swipe to switch profiles" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Swipe two fingers left or right on the touchpad to change profile." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Button x:Name="configSwipeProfilesBtn" Content="Choose profiles" Margin="0,0,16,0" Style="{StaticResource FoundationButtonStyle}"
+                                                            Click="ConfigSwipeProfilesBtn_Click" ToolTip="Choose which profiles the swipe gesture switches between" />
+                                                    <CheckBox x:Name="swipeTouchCk" Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Swipe to switch profiles"
+                                                              IsChecked="{Binding SwipeTouchSwitchProfile}" Click="SwipeTouchCk_Click" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <TextBlock Text="Bluetooth and battery" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Disconnect Bluetooth when stopping" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Turn wireless controllers off when PureDS4 stops." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Disconnect Bluetooth when stopping"
+                                                              IsChecked="{Binding DisconnectBTStop}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Quick charge" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Disconnect Bluetooth automatically when the controller is plugged in by USB." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Quick charge"
+                                                              IsChecked="{Binding QuickCharge}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Flash the lightbar on high latency" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Warn with the lightbar when input from the controller is delayed." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Flash the lightbar on high latency"
+                                                              IsChecked="{Binding FlashHighLatency}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingSubRowStyle}" IsEnabled="{Binding FlashHighLatency,FallbackValue='False'}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Latency threshold" VerticalAlignment="Center" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <xctk:IntegerUpDown d:IsHidden="True" Width="80" Style="{StaticResource FoundationNumericInputStyle}" AutomationProperties.Name="Latency threshold in milliseconds"
+                                                                        Value="{Binding FlashHighLatencyAt}" Increment="1" Maximum="100" Minimum="10" />
+                                                    <TextBlock Text="ms" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
                                 </StackPanel>
                             </ScrollViewer>
                         </TabItem>
 
                         <TabItem Header="Game output">
                             <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                                <StackPanel Margin="18,0,0,8" MaxWidth="760" HorizontalAlignment="Left">
-                                    <TextBlock Text="Game output" Style="{StaticResource ClassicSectionHeadingStyle}" />
-                                    <TextBlock Text="Manage virtual-controller support used by output profiles." Style="{StaticResource SettingsDescriptionStyle}" />
-                        <Border Style="{StaticResource ClassicPropertyGroupStyle}">
-                            <StackPanel>
-                        <GroupBox Header="Game output runtime" Padding="8" Margin="{StaticResource spaceMargin}" HorizontalAlignment="Left">
-                            <StackPanel>
-                                <TextBlock Text="Set up the virtual controller used by game output profiles, including Xbox 360 output."
-                                           TextWrapping="Wrap" MaxWidth="520" Margin="0,0,0,6" />
-                                <local:StatusChip x:Name="viiperStatusChip"
-                                                  Label="Checking game output"
-                                                  State="Neutral"
-                                                  HorizontalAlignment="Left" />
-                                <TextBlock x:Name="viiperSummaryText"
-                                           Text="Checking whether game output is ready."
-                                           Margin="0,6,0,8"
-                                           TextWrapping="Wrap"
-                                           MaxWidth="520"
-                                           Style="{StaticResource FoundationSecondaryTextStyle}" />
-                                <StackPanel Orientation="Horizontal">
-                                    <Button x:Name="viiperSetupBtn" Style="{StaticResource ClassicCompactButtonStyle}"
-                                            Content="Set up / repair"
-                                            Padding="8,2"
-                                            Click="ViiperSetupBtn_Click" />
-                                    <Button x:Name="viiperRefreshBtn" Style="{StaticResource ClassicCompactButtonStyle}"
-                                            Content="Refresh"
-                                            Padding="8,2"
-                                            Margin="8,0,0,0"
-                                            Click="ViiperRefreshBtn_Click" />
-                                </StackPanel>
-                                <CheckBox Content="Prompt me when game output needs setup"
-                                          IsChecked="{Binding PromptForViiperSetup}"
-                                          ToolTip="Turn this off to suppress automatic game-output setup prompts. Set up / repair and Refresh remain available here."
-                                          Style="{StaticResource ClassicCompactCheckBoxStyle}"
-                                          Margin="0,8,0,0" />
-                                <Expander Header="Technical details" Margin="0,8,0,0">
-                                    <StackPanel Margin="0,6,0,0">
-                                        <TextBlock x:Name="viiperStatusText"
-                                                   Text="VIIPER status unknown"
-                                                   TextWrapping="Wrap" MaxWidth="520" />
-                                        <TextBlock Text="Required for VIIPER outputs: DualShock 4 and Xbox 360 over USB/IP."
-                                                   TextWrapping="Wrap" MaxWidth="520" Opacity="0.75" Margin="0,6,0,0" />
-                                    </StackPanel>
-                                </Expander>
-                            </StackPanel>
-                        </GroupBox>
-                            </StackPanel>
-                        </Border>
+                                <StackPanel Style="{StaticResource SettingsPageStyle}">
+                                    <TextBlock Text="Game output" Style="{StaticResource FoundationPageTitleStyle}" />
+                                    <TextBlock Text="The virtual controller that games see." Margin="0,3,0,0" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                                    <TextBlock Text="Virtual controller" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Game output runtime" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                <TextBlock x:Name="viiperSummaryText" Text="Checking whether game output is ready."
+                                                           Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <local:StatusChip x:Name="viiperStatusChip" Grid.Column="1" Label="Checking game output" State="Neutral"
+                                                              VerticalAlignment="Center" />
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Maintenance" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Install or repair the virtual controller used by game output, including Xbox 360 output." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Button x:Name="viiperRefreshBtn" Content="Refresh" Margin="0,0,8,0" Style="{StaticResource FoundationButtonStyle}" Click="ViiperRefreshBtn_Click" />
+                                                    <Button x:Name="viiperSetupBtn" Content="Set up / repair" Style="{StaticResource FoundationButtonStyle}" Click="ViiperSetupBtn_Click" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Prompt when setup is needed" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Offer setup automatically when game output isn't ready. Set up and Refresh stay available here." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Prompt when setup is needed"
+                                                              IsChecked="{Binding PromptForViiperSetup}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Expander Header="Technical details" VerticalAlignment="Center">
+                                            <StackPanel Margin="0,6,0,0">
+                                                <TextBlock x:Name="viiperStatusText" Text="VIIPER status unknown" TextWrapping="Wrap"
+                                                           Style="{StaticResource FoundationBodyTextStyle}" />
+                                                <TextBlock Text="Required for VIIPER outputs: DualShock 4 and Xbox 360 over USB/IP."
+                                                           Margin="0,4,0,0" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                                            </StackPanel>
+                                        </Expander>
+                                    </Border>
                                 </StackPanel>
                             </ScrollViewer>
                         </TabItem>
 
                         <TabItem Header="Integrations">
                             <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                                <StackPanel Margin="18,0,0,8" MaxWidth="760" HorizontalAlignment="Left">
-                                    <TextBlock Text="Integrations" Style="{StaticResource ClassicSectionHeadingStyle}" />
-                                    <TextBlock Text="Configure OSC and UDP server connections for compatible tools."
-                                               Style="{StaticResource SettingsDescriptionStyle}" />
-                            <Border Style="{StaticResource ClassicPropertyGroupStyle}">
-                                <StackPanel>
-                        <GroupBox Header="{lex:Loc OscServerHeading}" Padding="0,10,0,0" Margin="{StaticResource spaceMargin}">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" MinHeight="20">
-                                    <CheckBox x:Name="useOscServerCk" Content="{lex:Loc EnableOscServer}" IsChecked="{Binding UseOSCServer}" Click="UseOscServerCk_Click" VerticalAlignment="Center" />
-                                    <Label Content="Port" Padding="0" VerticalAlignment="Center" Margin="20,0,0,0" />
-                                    <xctk:IntegerUpDown d:IsHidden="False" x:Name="oscPortNum" IsEnabled="{Binding UseOSCServer}" MinWidth="20" Margin="8,0,0,0"
-                                        Value="{Binding OscPort, UpdateSourceTrigger=LostFocus,FallbackValue='9000'}" ButtonSpinnerLocation="Right" Increment="1" Maximum="65535" Minimum="0" />
-                                </StackPanel>
-
-                                <CheckBox x:Name="interpretingOscMonitoringCk" Content="{lex:Loc EnableInterpretingOscMonitoring}" Margin="0,4,0,10" IsChecked="{Binding InterpretingOscMonitoring}" IsEnabled="{Binding UseOSCServer}" />
-                                
-                                <StackPanel Orientation="Horizontal" MinHeight="20">
-                                    <CheckBox x:Name="useOscSenderCk" Content="{lex:Loc EnableOscSender}" IsChecked="{Binding UseOSCSender}" Click="UseOscSenderCk_Click" VerticalAlignment="Center" />
-                                    <TextBox x:Name="oscSenderTxt" IsEnabled="{Binding UseOSCSender,Mode=OneWay}" Text="{Binding OscSenderAddress, UpdateSourceTrigger=LostFocus,FallbackValue='127.0.0.1'}"
-                                 Margin="8,0,0,0" />
-                                    <Label Content="Port" Padding="0" Margin="20,0,0,0" VerticalAlignment="Center"/>
-                                    <xctk:IntegerUpDown d:IsHidden="False" x:Name="oscSendPort" IsEnabled="{Binding UseOSCSender}" MinWidth="20" Margin="8,0,0,0"
-                                            Value="{Binding OscSendPort, UpdateSourceTrigger=LostFocus,FallbackValue='9000'}" ButtonSpinnerLocation="Right" Increment="1" Maximum="65535" Minimum="0" />
-                                </StackPanel>
-                            </StackPanel>
-                        </GroupBox>
-                        <GroupBox Header="{lex:Loc UDPServer}" Padding="0,10,0,0" Margin="{StaticResource spaceMargin}">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" MinHeight="20">
-                                    <CheckBox x:Name="useUdpServerCk" Content="{lex:Loc MainWin.EnableServer}" IsChecked="{Binding UseUDPServer}" Click="UseUdpServerCk_Click" VerticalAlignment="Center" />
-                                    <TextBox x:Name="udpServerTxt" IsEnabled="{Binding UseUDPServer,Mode=OneWay}" Text="{Binding UdpIpAddress, UpdateSourceTrigger=LostFocus,FallbackValue='127.0.0.1'}"
-                                 Margin="8,0,0,0" />
-                                    <Label Content="{lex:Loc Port}" Padding="0" Margin="20,0,0,0" VerticalAlignment="Center" />
-                                    <!--<TextBox x:Name="updPortNum" IsEnabled="{Binding UseUDPServer}" Text="{Binding UdpPort, UpdateSourceTrigger=LostFocus,FallbackValue='26760'}" />-->
-                                    <xctk:IntegerUpDown d:IsHidden="True" x:Name="updPortNum" IsEnabled="{Binding UseUDPServer}" MinWidth="20" Margin="8,0,0,0"
-                                            Value="{Binding UdpPort, UpdateSourceTrigger=LostFocus,FallbackValue='26760'}" ButtonSpinnerLocation="Right" Increment="1" Maximum="65535" Minimum="0" />
-                                </StackPanel>
-
-                                <CheckBox Content="{lex:Loc UseSmoothing}" IsChecked="{Binding UseUdpSmoothing,FallbackValue='False'}" IsEnabled="{Binding UseUDPServer,Mode=OneWay}" Margin="0,4,0,10" />
-                                <StackPanel x:Name="udpEuroPanel" Orientation="Horizontal" Margin="{StaticResource spaceMargin}" Visibility="{Binding UdpServerOneEuroPanelVisibility,FallbackValue='Collapsed'}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Label Content="{lex:Loc MainWin.OneEuroMinCutoff}" />
-                                        <xctk:DoubleUpDown d:IsHidden="True" FormatString="F5" Value="{Binding UdpSmoothMinCutoff,FallbackValue=1.0,UpdateSourceTrigger=LostFocus}"
-                                                           Minimum="0.00001" Maximum="100.0" Increment="0.1" MinWidth="60" />
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="30,0,0,0">
-                                        <Label Content="{lex:Loc MainWin.OneEuroBeta}" />
-                                        <xctk:DoubleUpDown  d:IsHidden="True" FormatString="F5" Value="{Binding UdpSmoothBeta,FallbackValue=0.0,UpdateSourceTrigger=LostFocus}"
-                                                           Minimum="0.0" Maximum="1.0" Increment="0.1" MinWidth="60" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </StackPanel>
-
-                        </GroupBox>
-
-                                </StackPanel>
-                            </Border>
+                                <StackPanel Style="{StaticResource SettingsPageStyle}">
+                                    <TextBlock Text="Integrations" Style="{StaticResource FoundationPageTitleStyle}" />
+                                    <TextBlock Text="Connections for OSC apps and motion-aware emulators." Margin="0,3,0,0" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                                    <TextBlock Text="OSC (Open Sound Control)" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Control server" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Let OSC apps send commands to PureDS4." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <TextBlock Text="Port" Margin="0,0,8,0" VerticalAlignment="Center" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                                                    <xctk:IntegerUpDown d:IsHidden="False" x:Name="oscPortNum" Width="90" Margin="0,0,16,0" Style="{StaticResource FoundationNumericInputStyle}"
+                                                                        AutomationProperties.Name="Control server port" IsEnabled="{Binding UseOSCServer}"
+                                                                        Value="{Binding OscPort, UpdateSourceTrigger=LostFocus,FallbackValue='9000'}" Increment="1" Maximum="65535" Minimum="0" />
+                                                    <CheckBox x:Name="useOscServerCk" Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Control server"
+                                                              IsChecked="{Binding UseOSCServer}" Click="UseOscServerCk_Click" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingSubRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Interpret monitoring messages" VerticalAlignment="Center" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <CheckBox x:Name="interpretingOscMonitoringCk" Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Interpret monitoring messages"
+                                                              IsChecked="{Binding InterpretingOscMonitoring}" IsEnabled="{Binding UseOSCServer}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Monitoring service" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Send PureDS4 events to an OSC app." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <TextBox x:Name="oscSenderTxt" Width="110" Margin="0,0,8,0" Style="{StaticResource FoundationTextBoxStyle}" AutomationProperties.Name="Monitoring service address"
+                                                             IsEnabled="{Binding UseOSCSender,Mode=OneWay}"
+                                                             Text="{Binding OscSenderAddress, UpdateSourceTrigger=LostFocus,FallbackValue='127.0.0.1'}" />
+                                                    <TextBlock Text="Port" Margin="0,0,8,0" VerticalAlignment="Center" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                                                    <xctk:IntegerUpDown d:IsHidden="False" x:Name="oscSendPort" Width="90" Margin="0,0,16,0" Style="{StaticResource FoundationNumericInputStyle}"
+                                                                        AutomationProperties.Name="Monitoring service port" IsEnabled="{Binding UseOSCSender}"
+                                                                        Value="{Binding OscSendPort, UpdateSourceTrigger=LostFocus,FallbackValue='9000'}" Increment="1" Maximum="65535" Minimum="0" />
+                                                    <CheckBox x:Name="useOscSenderCk" Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Monitoring service"
+                                                              IsChecked="{Binding UseOSCSender}" Click="UseOscSenderCk_Click" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <TextBlock Text="Motion server (DSU)" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Motion server" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Share controller buttons and motion with emulators such as Cemu over the DSU protocol." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <TextBox x:Name="udpServerTxt" Width="110" Margin="0,0,8,0" Style="{StaticResource FoundationTextBoxStyle}" AutomationProperties.Name="Motion server address"
+                                                             IsEnabled="{Binding UseUDPServer,Mode=OneWay}"
+                                                             Text="{Binding UdpIpAddress, UpdateSourceTrigger=LostFocus,FallbackValue='127.0.0.1'}" />
+                                                    <TextBlock Text="Port" Margin="0,0,8,0" VerticalAlignment="Center" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                                                    <xctk:IntegerUpDown d:IsHidden="True" x:Name="updPortNum" Width="90" Margin="0,0,16,0" Style="{StaticResource FoundationNumericInputStyle}"
+                                                                        AutomationProperties.Name="Motion server port" IsEnabled="{Binding UseUDPServer}"
+                                                                        Value="{Binding UdpPort, UpdateSourceTrigger=LostFocus,FallbackValue='26760'}" Increment="1" Maximum="65535" Minimum="0" />
+                                                    <CheckBox x:Name="useUdpServerCk" Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Motion server"
+                                                              IsChecked="{Binding UseUDPServer}" Click="UseUdpServerCk_Click" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Smoothing" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Filter motion noise with a One Euro filter." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Motion smoothing"
+                                                              IsChecked="{Binding UseUdpSmoothing,FallbackValue='False'}" IsEnabled="{Binding UseUDPServer,Mode=OneWay}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border x:Name="udpEuroPanel" Style="{StaticResource FoundationSettingSubRowStyle}"
+                                            Visibility="{Binding UdpServerOneEuroPanelVisibility,FallbackValue='Collapsed'}">
+                                        <WrapPanel VerticalAlignment="Center">
+                                            <TextBlock Text="Minimum cutoff" Margin="0,0,8,0" VerticalAlignment="Center" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                            <xctk:DoubleUpDown d:IsHidden="True" Width="100" Margin="0,0,24,0" Style="{StaticResource FoundationNumericInputStyle}" FormatString="F5" AutomationProperties.Name="Minimum cutoff"
+                                                               Value="{Binding UdpSmoothMinCutoff,FallbackValue=1.0,UpdateSourceTrigger=LostFocus}"
+                                                               Minimum="0.00001" Maximum="100.0" Increment="0.1" />
+                                            <TextBlock Text="Beta" Margin="0,0,8,0" VerticalAlignment="Center" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                            <xctk:DoubleUpDown d:IsHidden="True" Width="100" Style="{StaticResource FoundationNumericInputStyle}" FormatString="F5" AutomationProperties.Name="Beta"
+                                                               Value="{Binding UdpSmoothBeta,FallbackValue=0.0,UpdateSourceTrigger=LostFocus}"
+                                                               Minimum="0.0" Maximum="1.0" Increment="0.1" />
+                                        </WrapPanel>
+                                    </Border>
                                 </StackPanel>
                             </ScrollViewer>
                         </TabItem>
 
                         <TabItem Header="Compatibility">
                             <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                                <StackPanel Margin="18,0,0,8" MaxWidth="760" HorizontalAlignment="Left">
-                                    <TextBlock Text="Compatibility" Style="{StaticResource ClassicSectionHeadingStyle}" />
-                                    <TextBlock Text="Language and process compatibility options for older integrations." Style="{StaticResource SettingsDescriptionStyle}" />
-                            <Border Style="{StaticResource ClassicPropertyGroupStyle}">
-                                <StackPanel>
-
-                        <!--<StackPanel Orientation="Horizontal">
-                        <Label Content="Use language pack" />
-                        <ComboBox x:Name="langPackCombo" MinWidth="100" IsEnabled="False">
-                        </ComboBox>
-                    </StackPanel>
-                    -->
-                        <StackPanel Margin="{StaticResource spaceMargin}">
-                            <CheckBox x:Name="customSteamCk" Content="{lex:Loc UseCustomSteamFolder}" Margin="{StaticResource spaceMargin}"
-                                  IsChecked="{Binding UseCustomSteamFolder}" />
-                            <TextBox x:Name="customSteamTxt" Text="{Binding CustomSteamFolder, UpdateSourceTrigger=LostFocus}"
-                                 IsEnabled="{Binding UseCustomSteamFolder}" />
-                        </StackPanel>
-                        <DockPanel Margin="{StaticResource spaceMargin}">
-                            <Label Content="{lex:Loc CustomExeName}" />
-                            <Button x:Name="fakeExeNameExplainBtn" DockPanel.Dock="Right" Margin="8,0,0,0" Click="FakeExeNameExplainBtn_Click"
-                                    AutomationProperties.Name="Explain custom executable name"
-                                    ToolTip="Explain custom executable name">
-                                <Image Source="{Binding QuestionMarkSource, Mode=OneTime}"
-                                   Width="20" Height="20" Stretch="UniformToFill" />
-                            </Button>
-                            <TextBox x:Name="fakeExeNameTxt" Text="{Binding FakeExeName, UpdateSourceTrigger=LostFocus}" MinWidth="200" />
-                        </DockPanel>
-
-                                </StackPanel>
-                            </Border>
+                                <StackPanel Style="{StaticResource SettingsPageStyle}">
+                                    <TextBlock Text="Compatibility" Style="{StaticResource FoundationPageTitleStyle}" />
+                                    <TextBlock Text="Options for games and launchers that need special handling." Margin="0,3,0,0" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                                    <TextBlock Text="Games and launchers" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Custom Steam folder" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Use your own Steam library location when adding Steam games to auto profiles." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <CheckBox x:Name="customSteamCk" Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Custom Steam folder"
+                                                              IsChecked="{Binding UseCustomSteamFolder}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingSubRowStyle}">
+                                        <TextBox x:Name="customSteamTxt" VerticalAlignment="Center" Style="{StaticResource FoundationTextBoxStyle}" AutomationProperties.Name="Custom Steam folder path"
+                                                 Text="{Binding CustomSteamFolder, UpdateSourceTrigger=LostFocus}" IsEnabled="{Binding UseCustomSteamFolder}" />
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Custom executable name" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Run PureDS4 under another process name, for games that refuse to start while it runs." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <TextBox x:Name="fakeExeNameTxt" Width="180" Margin="0,0,8,0" Style="{StaticResource FoundationTextBoxStyle}" AutomationProperties.Name="Custom executable name"
+                                                             Text="{Binding FakeExeName, UpdateSourceTrigger=LostFocus}" />
+                                                    <Button x:Name="fakeExeNameExplainBtn" Style="{StaticResource FoundationButtonStyle}" Click="FakeExeNameExplainBtn_Click"
+                                                            AutomationProperties.Name="Explain custom executable name" ToolTip="Explain custom executable name">
+                                                        <Image Source="{Binding QuestionMarkSource, Mode=OneTime}" Width="16" Height="16" />
+                                                    </Button>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
                                 </StackPanel>
                             </ScrollViewer>
                         </TabItem>
 
                         <TabItem Header="Advanced">
                             <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                                <StackPanel Margin="18,0,0,8" MaxWidth="760" HorizontalAlignment="Left">
-                                    <TextBlock Text="Advanced" Style="{StaticResource ClassicSectionHeadingStyle}" />
-                                    <TextBlock Text="Diagnostics, display settings, and maintenance utilities. Defaults are best for most users." Style="{StaticResource SettingsDescriptionStyle}" />
-                            <Border Style="{StaticResource ClassicPropertyGroupStyle}">
-                                <StackPanel>
-
-                        <CheckBox x:Name="verboseLoggingCheck" Content="Verbose logging" Margin="{StaticResource spaceMargin}"
-                                  IsChecked="{Binding VerboseStartupLogging}"
-                                  ToolTip="Writes detailed diagnostic markers to the log. Disable after testing."
-                                  Style="{StaticResource ClassicCompactCheckBoxStyle}" />
-                        <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                            <Label Content="{lex:Loc ProcessPriority}" ContentStringFormat="{}{0}:"/>
-                            <ComboBox x:Name="ProcessPriorityComboBox" Margin="10,0,0,0" SelectedIndex="{Binding ProcessPriorityIndex}" SelectionChanged="ProcessPriorityComboBox_OnSelectionChanged" Style="{StaticResource ClassicCompactComboBoxStyle}" />
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                            <Label Content="{lex:Loc MainWin.AbsDisplayMonitor}" ContentStringFormat="{}{0}:" />
-                            <ComboBox ItemsSource="{Binding AbsMonitorChoices}" DisplayMemberPath="DisplayItemString" SelectedValuePath="EDID"
-                                      SelectedValue="{Binding AbsMonitorSettingEDID}" Margin="10,0,0,0" Style="{StaticResource ClassicCompactComboBoxStyle}">
-                            </ComboBox>
-                        </StackPanel>
-
-                        <GroupBox Header="{lex:Loc Utils}" BorderThickness="2" Margin="{StaticResource spaceMargin}" Padding="6" HorizontalAlignment="Left">
-                            <WrapPanel HorizontalAlignment="Left">
-                                <Button x:Name="profFolderBtn" Margin="0,0,6,6" Style="{StaticResource ClassicCompactButtonStyle}" Click="ProfFolderBtn_Click" Content="{lex:Loc ProfileFolder}" />
-                                <Button x:Name="controlPanelBtn" Margin="0,0,6,6" Style="{StaticResource ClassicCompactButtonStyle}" Click="ControlPanelBtn_Click" Content="{lex:Loc ControlPanel}" />
-                                <Button x:Name="html5GameBtn" Margin="0,0,6,6" Style="{StaticResource ClassicCompactButtonStyle}" Click="Html5GameBtn_Click" Content="{lex:Loc GamepadTest}" />
-                                <Button x:Name="xinputCheckerBtn" Margin="0,0,6,6" Style="{StaticResource ClassicCompactButtonStyle}" Click="XinputCheckerBtn_Click" Content="{lex:Loc XInputChecker}" />
-                                <Button x:Name="hidHideBtn" Margin="0,0,6,6" Style="{StaticResource ClassicCompactButtonStyle}" Click="HidHideBtn_Click" Content="Controller protection settings" Visibility="{Binding HidHideClientFound, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}" />
-                                <Button x:Name="driverSetupBtn" Margin="0,0,6,6" Style="{StaticResource ClassicCompactButtonStyle}" Click="DriverSetupBtn_Click" Content="{lex:Loc DriverSetup}" />
-                                <Button x:Name="checkUpdatesBtn" Margin="0,0,6,6" Style="{StaticResource ClassicCompactButtonStyle}" Click="CheckUpdatesBtn_Click" Content="{lex:Loc CheckUpdateNow}" />
-                                <Button x:Name="checklogViewBtn" Margin="0,0,6,6" Style="{StaticResource ClassicCompactButtonStyle}" Click="ChecklogViewBtn_Click" Content="{lex:Loc Changelog}" />
-                            </WrapPanel>
-                        </GroupBox>
-
-                        <Button x:Name="deviceOptionSettingsBtn"
-                                HorizontalAlignment="Left"
-                                Margin="{StaticResource spaceMargin}"
-                                MaxWidth="140"
-                                Content="{lex:Loc DeviceOptions}"
-                                Click="DeviceOptionSettingsBtn_Click" Style="{StaticResource ClassicCompactButtonStyle}" />
-                                </StackPanel>
-                            </Border>
+                                <StackPanel Style="{StaticResource SettingsPageStyle}">
+                                    <TextBlock Text="Advanced" Style="{StaticResource FoundationPageTitleStyle}" />
+                                    <TextBlock Text="Diagnostics and maintenance utilities. Defaults are best for most people." Margin="0,3,0,0" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                                    <TextBlock Text="Diagnostics" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Verbose logging" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Write detailed diagnostic markers to the log. Turn off after testing." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <CheckBox x:Name="verboseLoggingCheck" Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Verbose logging"
+                                                              IsChecked="{Binding VerboseStartupLogging}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Process priority" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="How Windows schedules PureDS4 against other programs." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <ComboBox x:Name="ProcessPriorityComboBox" MinWidth="150" Style="{StaticResource FoundationComboBoxStyle}" AutomationProperties.Name="Process priority"
+                                                              SelectedIndex="{Binding ProcessPriorityIndex}" SelectionChanged="ProcessPriorityComboBox_OnSelectionChanged" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Absolute mouse display" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="The monitor used when a profile maps input to an absolute mouse position." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <ComboBox MinWidth="150" Style="{StaticResource FoundationComboBoxStyle}" AutomationProperties.Name="Absolute mouse display"
+                                                              ItemsSource="{Binding AbsMonitorChoices}" DisplayMemberPath="DisplayItemString" SelectedValuePath="EDID"
+                                                              SelectedValue="{Binding AbsMonitorSettingEDID}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <TextBlock Text="Utilities" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Device options" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Choose which controller types PureDS4 connects to." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Button x:Name="deviceOptionSettingsBtn" Content="Open" MinWidth="72" Style="{StaticResource FoundationButtonStyle}" Click="DeviceOptionSettingsBtn_Click"
+                                                            AutomationProperties.Name="Open device options" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Profile folder" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Open the folder where profiles and settings are stored." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Button x:Name="profFolderBtn" Content="Open" MinWidth="72" Style="{StaticResource FoundationButtonStyle}" Click="ProfFolderBtn_Click"
+                                                            AutomationProperties.Name="Open profile folder" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Game Controllers panel" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Open Windows' own game controller settings." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Button x:Name="controlPanelBtn" Content="Open" MinWidth="72" Style="{StaticResource FoundationButtonStyle}" Click="ControlPanelBtn_Click"
+                                                            AutomationProperties.Name="Open game controllers panel" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Online gamepad tester" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Check what a game sees, in your browser." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Button x:Name="html5GameBtn" Content="Open" MinWidth="72" Style="{StaticResource FoundationButtonStyle}" Click="Html5GameBtn_Click"
+                                                            AutomationProperties.Name="Open online gamepad tester" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="XInput checker" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="List the XInput controllers games can use." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Button x:Name="xinputCheckerBtn" Content="Open" MinWidth="72" Style="{StaticResource FoundationButtonStyle}" Click="XinputCheckerBtn_Click"
+                                                            AutomationProperties.Name="Open xinput checker" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}" Visibility="{Binding HidHideClientFound, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Controller protection settings" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Open HidHide, the driver behind controller protection." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Button x:Name="hidHideBtn" Content="Open" MinWidth="72" Style="{StaticResource FoundationButtonStyle}" Click="HidHideBtn_Click"
+                                                            AutomationProperties.Name="Open controller protection settings" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Driver setup" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Install or repair controller drivers. Stops PureDS4 first." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Button x:Name="driverSetupBtn" Content="Run" MinWidth="72" Style="{StaticResource FoundationButtonStyle}" Click="DriverSetupBtn_Click"
+                                                            AutomationProperties.Name="Run driver setup" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Updates" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Look for a newer PureDS4 release." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Button x:Name="checkUpdatesBtn" Content="Check" MinWidth="72" Style="{StaticResource FoundationButtonStyle}" Click="CheckUpdatesBtn_Click"
+                                                            AutomationProperties.Name="Check updates" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="Changelog" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="See what changed in each version." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Button x:Name="checklogViewBtn" Content="View" MinWidth="72" Style="{StaticResource FoundationButtonStyle}" Click="ChecklogViewBtn_Click"
+                                                            AutomationProperties.Name="View changelog" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
                                 </StackPanel>
                             </ScrollViewer>
                         </TabItem>
@@ -961,19 +1362,19 @@
 
             </TabItem>
             <TabItem x:Name="toolsTab" Header="Tools" Tag="&#xE713;">
-                <Grid Margin="16,12">
+                <Grid Margin="16,8">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <StackPanel Margin="0,0,0,12">
                         <TextBlock Text="Tools" Style="{StaticResource FoundationPageTitleStyle}" />
-                        <TextBlock Text="Specialist diagnostics and controller-output utilities. These destinations do not become permanent primary tabs."
+                        <TextBlock Text="Auto profiles, game output slots, logs, and moving over from DS4Windows."
                                    Margin="0,3,0,0"
                                    Style="{StaticResource FoundationSecondaryTextStyle}" />
                     </StackPanel>
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                        <StackPanel Width="760" HorizontalAlignment="Left">
+                        <StackPanel MaxWidth="760" HorizontalAlignment="Left">
                             <Border Style="{StaticResource FoundationPropertyGroupStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>

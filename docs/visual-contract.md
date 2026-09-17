@@ -1,4 +1,4 @@
-﻿# Visual contract
+# Visual contract
 
 PureDS4 is a compact Windows desktop tool. Its interface favors
 scannable tables, property groups, explicit state, and predictable navigation
@@ -89,6 +89,29 @@ Controller details separates observed runtime state from automatically saved
 profile properties. Use aligned label/control rows and shared horizontal sliders,
 not summary-card galleries. Keep output/audio selector commit timing intact,
 explain unavailable capabilities, and hide connection actions that do not apply.
+
+### Settings, Tools, and Auto Profiles composition
+
+Settings, Tools, and Auto Profiles share Home's 16/8 DIP workspace inset. Settings
+categories and Tools use one content column capped at 760 DIP, so switching
+categories never resizes the page.
+
+Options are setting rows (`FoundationSettingRowStyle`), the same geometry as Tools'
+rows: a title and a one-line plain-language description on the left, and the control
+on the right. Runs of rows sit under a short section label. A setting that only
+applies while another is on uses an indented sub-row directly below it.
+
+On/off options use the shared switch (`FoundationToggleSwitchStyle`). It is a
+`CheckBox`, so bindings and handlers are unchanged, and every switch carries an
+`AutomationProperties.Name` because it has no visible text of its own.
+
+Do not show permanently disabled controls. A feature that is unavailable for the
+whole release (such as language packs or update checks without a signed channel)
+stays bound but hidden until it can work.
+
+Auto Profiles hides the rule editor until a rule is selected, showing a short
+explanation instead; options that apply to every rule stay visible in their own
+section.
 
 ## Navigation and information architecture
 

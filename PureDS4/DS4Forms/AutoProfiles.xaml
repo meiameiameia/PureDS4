@@ -53,7 +53,7 @@
             <Setter Property="Margin" Value="0,1" />
         </Style>
     </UserControl.Resources>
-    <DockPanel Margin="16">
+    <DockPanel Margin="16,8">
         <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
             <TextBlock Text="Auto profiles" Style="{StaticResource FoundationPageTitleStyle}" />
             <TextBlock Text="Switch profiles automatically when a game or application takes focus."
@@ -66,18 +66,55 @@
                 <ScrollViewer.Resources>
                     <Thickness x:Key="spaceMargin" Bottom="8" />
                 </ScrollViewer.Resources>
-                <StackPanel x:Name="outerEditControlsPanel">
+                <StackPanel x:Name="outerEditControlsPanel" Margin="0,0,8,0" Grid.IsSharedSizeScope="True">
                     <StackPanel.Resources>
                         <CollectionViewSource x:Key="profileCollection" Source="{Binding ProfileList.ProfileListCol,Mode=OneWay}" />
                     </StackPanel.Resources>
 
+                    <StackPanel Margin="0,4,0,0">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsEnabled, ElementName=editControlsPanel}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <TextBlock Text="No rule selected" Style="{StaticResource FoundationGroupTitleStyle}" />
+                        <TextBlock Text="Select a rule to choose the profile it loads, or use Add programs to create one."
+                                   Margin="0,4,0,0" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                    </StackPanel>
+
                     <StackPanel x:Name="editControlsPanel" IsEnabled="False">
-                        <UniformGrid Columns="3" Height="34" Margin="0,0,0,10">
-                            <Button x:Name="removeAutoBtn" Content="{lex:Loc Remove}" Margin="0,0,6,0"
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Style.Triggers>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <TextBlock Text="Selected rule" Margin="0,0,0,8" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                        <UniformGrid Columns="3" Margin="0,0,0,12">
+                            <Button x:Name="removeAutoBtn" Content="Remove" Margin="0,0,6,0" Style="{StaticResource FoundationButtonStyle}"
                                     IsEnabled="{Binding Exists}" Click="RemoveAutoBtn_Click" />
-                            <Button x:Name="duplicateAutoBtn" Content="Duplicate" Margin="0,0,6,0" Click="DuplicateAutoBtn_Click" />
-                            <Button x:Name="saveAutoBtn" Content="{lex:Loc Save}" Click="SaveAutoBtn_Click" />
+                            <Button x:Name="duplicateAutoBtn" Content="Duplicate" Margin="0,0,6,0" Style="{StaticResource FoundationButtonStyle}"
+                                    Click="DuplicateAutoBtn_Click" />
+                            <Button x:Name="saveAutoBtn" Content="Save" Style="{StaticResource FoundationPrimaryButtonStyle}"
+                                    Click="SaveAutoBtn_Click" />
                         </UniformGrid>
+                        <Grid Margin="0,0,0,8" MinHeight="32">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Same profile for every controller" VerticalAlignment="Center" TextWrapping="Wrap"
+                                       Margin="0,0,12,0" Style="{StaticResource FoundationSettingTitleStyle}" />
+                            <CheckBox Grid.Column="1" Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Same profile for every controller"
+                                      IsChecked="{Binding ApplyToAllControllers}" />
+                        </Grid>
                         <Grid x:Name="autoProfilesGrid" Margin="0,8">
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
@@ -90,15 +127,12 @@
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="AutoProfileLabel" />
+                                <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                <Label Content="{lex:Loc Controller1Text}" Padding="0" VerticalAlignment="Center" />
-                                <CheckBox Content="All" Margin="10,0,0,0" VerticalAlignment="Center"
-                                          IsChecked="{Binding ApplyToAllControllers}" />
-                            </StackPanel>
+                            <Label Content="{lex:Loc Controller1Text}" Margin="{StaticResource spaceMargin}"
+                                   VerticalAlignment="Center" />
                             <ComboBox x:Name="cont1AutoProf" Grid.Column="1" Margin="{StaticResource spaceMargin}"
                               SelectedIndex="{Binding SelectedIndexCon1}">
                                 <ComboBox.Resources>
@@ -266,26 +300,40 @@
                             </ComboBox>
                         </Grid>
 
-                    <CheckBox Margin="{StaticResource spaceMargin}" IsChecked="{Binding Turnoff}">
-                        <TextBlock Text="{lex:Loc TurnOffDS4WindowsTemporarily}" TextWrapping="Wrap" />
-                    </CheckBox>
+                        <Grid Margin="0,4,0,8" MinHeight="32">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Margin="0,0,12,0" VerticalAlignment="Center">
+                                <TextBlock Text="Turn PureDS4 off" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                <TextBlock Text="While this program is active, for games with their own controller support."
+                                           Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                            </StackPanel>
+                            <CheckBox Grid.Column="1" Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Turn PureDS4 off while this program is active"
+                                      IsChecked="{Binding Turnoff}" />
+                        </Grid>
                         <Grid Margin="{StaticResource spaceMargin}">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="AutoProfileLabel" />
+                                <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <Label Content="Device" Padding="0" VerticalAlignment="Center" />
                             <ComboBox Grid.Column="1" ItemsSource="{Binding DataContext.DeviceOptionList, ElementName=outerEditControlsPanel}"
                                       DisplayMemberPath="DisplayName" SelectedValuePath="ChoiceValue"
                                       SelectedValue="{Binding DeviceOption}" />
                         </Grid>
+                        <TextBlock Text="Program path" Margin="0,4,0,4" Style="{StaticResource FoundationSettingTitleStyle}" />
                         <TextBox Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}" Margin="{StaticResource spaceMargin}" ToolTip="{lex:Loc AutoProfPathTip}"
+                                 AutomationProperties.Name="Program path"
                                  TextWrapping="Wrap" AcceptsReturn="False" VerticalScrollBarVisibility="Auto" MaxHeight="90"/>
 
+                        <TextBlock Text="Window title" Margin="0,4,0,4" Style="{StaticResource FoundationSettingTitleStyle}" />
                         <Grid>
-                            <TextBox x:Name="mainTxtBox" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Margin="{StaticResource spaceMargin}" ToolTip="{lex:Loc AutoProfTitleTip}" />
+                            <TextBox x:Name="mainTxtBox" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Margin="{StaticResource spaceMargin}" ToolTip="{lex:Loc AutoProfTitleTip}"
+                                     AutomationProperties.Name="Window title" />
 
-                            <TextBlock Margin="5,2" MinWidth="50" Text="Window title..." Foreground="{DynamicResource ForegroundColor}" Opacity="0.7" IsHitTestVisible="False">
+                            <TextBlock Margin="5,2" MinWidth="50" Text="Any title" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" IsHitTestVisible="False">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Style.Triggers>
@@ -302,21 +350,42 @@
                             </TextBlock>
 
                         </Grid>
-
-                        <Border Height="4" Background="{DynamicResource BorderColor}" Margin="0,10,0,0" />
                     </StackPanel>
-                <CheckBox x:Name="revertDefaultProfileOnUnknownCk" Margin="0,10,0,0" IsChecked="{Binding RevertDefaultProfileOnUnknown}">
-                    <TextBlock Text="{lex:Loc RevertToDefaultProfileOnUnknown}" TextWrapping="Wrap" />
-                </CheckBox>
-                <CheckBox x:Name="showAutoDebugCk" Margin="0,10,0,0" Click="ShowAutoDebugCk_Click">
-                    <TextBlock Text="{lex:Loc ShowAutoProfileDebugMessages}" TextWrapping="Wrap" />
-                </CheckBox>
-                <StackPanel Orientation="Vertical" Margin="0,8,0,0">
-                    <TextBlock Text="{lex:Loc AutoProfiles.DisplaySwitchVia}" TextWrapping="Wrap"
-                               Foreground="{DynamicResource MutedForegroundColor}" Margin="0,0,0,5" />
-                    <ComboBox ItemsSource="{Binding DisplayProfileSwitchList}" DisplayMemberPath="DisplayName" SelectedValuePath="ChoiceValue"
-                              SelectedValue="{Binding ProfileSwitchChoice}" />
-                </StackPanel>
+
+                    <Border Margin="0,16,0,0" BorderBrush="{DynamicResource BorderDefaultBrush}" BorderThickness="0,1,0,0" Padding="0,4,0,0">
+                        <StackPanel>
+                            <TextBlock Text="All rules" Margin="0,8,0,8" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                            <Grid Margin="0,0,0,8" MinHeight="32">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Margin="0,0,12,0" VerticalAlignment="Center">
+                                    <TextBlock Text="Return to the default profile" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                    <TextBlock Text="When the active program matches no rule." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                </StackPanel>
+                                <CheckBox x:Name="revertDefaultProfileOnUnknownCk" Grid.Column="1" Style="{StaticResource FoundationToggleSwitchStyle}"
+                                          AutomationProperties.Name="Return to the default profile when no rule matches"
+                                          IsChecked="{Binding RevertDefaultProfileOnUnknown}" />
+                            </Grid>
+                            <Grid Margin="0,0,0,8" MinHeight="32">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Margin="0,0,12,0" VerticalAlignment="Center">
+                                    <TextBlock Text="Log matching details" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                    <TextBlock Text="Write each rule decision to the log." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                </StackPanel>
+                                <CheckBox x:Name="showAutoDebugCk" Grid.Column="1" Style="{StaticResource FoundationToggleSwitchStyle}"
+                                          AutomationProperties.Name="Log matching details" Click="ShowAutoDebugCk_Click" />
+                            </Grid>
+                            <TextBlock Text="Announce profile switches" Margin="0,4,0,4" Style="{StaticResource FoundationSettingTitleStyle}" />
+                            <ComboBox ItemsSource="{Binding DisplayProfileSwitchList}" DisplayMemberPath="DisplayName" SelectedValuePath="ChoiceValue"
+                                      SelectedValue="{Binding ProfileSwitchChoice}" AutomationProperties.Name="Announce profile switches"
+                                      Style="{StaticResource FoundationComboBoxStyle}" />
+                        </StackPanel>
+                    </Border>
 
             </StackPanel>
             </ScrollViewer>
@@ -365,8 +434,8 @@
                 </Grid>
             </Border>
             <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,10">
-                <Button x:Name="addProgramsBtn" Content="{lex:Loc AddPrograms}" Click="AddProgramsBtn_Click"
-                        Style="{StaticResource BridgeSecondaryButtonStyle}" Margin="0,0,8,0">
+                <Button x:Name="addProgramsBtn" Content="Add programs" Click="AddProgramsBtn_Click"
+                        Style="{StaticResource FoundationPrimaryButtonStyle}" Margin="0,0,8,0">
                     <Button.ContextMenu>
                         <ContextMenu>
                             <MenuItem x:Name="steamMenuItem" Header="{lex:Loc AddSteamGames}" Click="SteamMenuItem_Click" />
@@ -378,8 +447,8 @@
                         </ContextMenu>
                     </Button.ContextMenu>
                 </Button>
-                <Button x:Name="hideUncheckedBtn" Content="{lex:Loc HideUnchecked}" Click="HideUncheckedBtn_Click"
-                        Style="{StaticResource BridgeSecondaryButtonStyle}" />
+                <Button x:Name="hideUncheckedBtn" Content="Hide missing programs" Click="HideUncheckedBtn_Click"
+                        Style="{StaticResource FoundationButtonStyle}" />
             </WrapPanel>
             <Grid>
             <StackPanel x:Name="autoProfilesEmptyState" HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -396,7 +465,7 @@
                 </StackPanel.Style>
                 <TextBlock Text="No auto-profile rules yet" HorizontalAlignment="Center"
                            Style="{StaticResource FoundationGroupTitleStyle}" />
-                <TextBlock Text="Use Add Programs to pick a game or application, then choose the profile it should load."
+                <TextBlock Text="Use Add programs to pick a game or application, then choose the profile it should load."
                            Margin="0,6,0,0" MaxWidth="360" TextAlignment="Center" TextWrapping="Wrap"
                            Style="{StaticResource FoundationSecondaryTextStyle}" />
             </StackPanel>
@@ -405,6 +474,15 @@
                       SelectedIndex="{Binding SelectedIndex}" SelectedItem="{Binding SelectedItem}"
                       ItemContainerStyle="{StaticResource AutoProfileRuleItemStyle}"
                       Background="Transparent" BorderThickness="0">
+                <ListView.Template>
+                    <!-- The theme's implicit ListView template draws a header rule that
+                         shows as a stray line over the empty state. Rules need no header. -->
+                    <ControlTemplate TargetType="ListView">
+                        <ScrollViewer Focusable="False" Padding="{TemplateBinding Padding}">
+                            <ItemsPresenter />
+                        </ScrollViewer>
+                    </ControlTemplate>
+                </ListView.Template>
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid>

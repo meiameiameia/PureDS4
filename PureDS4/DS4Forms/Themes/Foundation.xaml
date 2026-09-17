@@ -144,7 +144,18 @@
                             <ContentPresenter Margin="{TemplateBinding Padding}"
                                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                              RecognizesAccessKey="True" />
+                                              RecognizesAccessKey="True">
+                                <ContentPresenter.Resources>
+                                    <!-- The themes carry an implicit TextBlock style. An implicit style
+                                         beats an inherited value, so without this the label ignores the
+                                         button's own foreground and renders light text on the accent
+                                         fill. Bind it back to the button. -->
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground"
+                                                Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                    </Style>
+                                </ContentPresenter.Resources>
+                            </ContentPresenter>
                         </Border>
                         <Border x:Name="KeyboardFocusRing"
                                 Margin="1"
@@ -823,6 +834,109 @@
     <Style x:Key="FoundationFormCheckBoxStyle" TargetType="CheckBox"
            BasedOn="{StaticResource FoundationCheckBoxStyle}">
         <Setter Property="MinWidth" Value="{StaticResource FormLabelColumnWidth}" />
+    </Style>
+
+    <!-- Setting rows share Tools' row geometry: a raised surface with a bottom
+         divider, the title and a one-line description on the left, and the
+         control on the right. Settings, Tools and Auto Profiles use one pattern. -->
+    <Style x:Key="FoundationSettingRowStyle" TargetType="Border"
+           BasedOn="{StaticResource FoundationPropertyGroupStyle}">
+        <Setter Property="MinHeight" Value="48" />
+        <Setter Property="Padding" Value="12,8" />
+    </Style>
+
+    <!-- A row nested under the setting it depends on, such as a threshold that
+         only applies while its switch is on. -->
+    <Style x:Key="FoundationSettingSubRowStyle" TargetType="Border"
+           BasedOn="{StaticResource FoundationSettingRowStyle}">
+        <Setter Property="MinHeight" Value="40" />
+        <Setter Property="Padding" Value="36,6,12,6" />
+    </Style>
+
+    <Style x:Key="FoundationSettingTitleStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource FoundationBodyTextStyle}">
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="FoundationSettingDescriptionStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource FoundationSecondaryTextStyle}">
+        <Setter Property="Margin" Value="0,2,0,0" />
+    </Style>
+
+    <!-- Section label above a run of setting rows. -->
+    <Style x:Key="FoundationSectionHeadingStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource FoundationColumnHeaderStyle}">
+        <Setter Property="Margin" Value="0,16,0,6" />
+    </Style>
+
+    <!-- On/off switch for setting rows. It is still a CheckBox, so IsChecked
+         bindings, Click handlers and automation keep their existing meaning.
+         The pill shape conveys the control's function, so it stays rounded.
+         Give every switch an AutomationProperties.Name: it has no text of its own. -->
+    <Style x:Key="FoundationToggleSwitchStyle" TargetType="CheckBox">
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeightDense}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <Grid Background="Transparent">
+                        <Border x:Name="Track"
+                                Width="40" Height="20"
+                                CornerRadius="10"
+                                Background="{DynamicResource SurfaceInsetBrush}"
+                                BorderBrush="{DynamicResource TextSecondaryBrush}"
+                                BorderThickness="1">
+                            <Ellipse x:Name="Knob"
+                                     Width="12" Height="12"
+                                     Margin="4,0"
+                                     HorizontalAlignment="Left"
+                                     Fill="{DynamicResource TextSecondaryBrush}" />
+                        </Border>
+                        <Border x:Name="KeyboardFocusRing"
+                                Margin="-3"
+                                CornerRadius="13"
+                                BorderBrush="{DynamicResource FocusBrush}"
+                                BorderThickness="2"
+                                IsHitTestVisible="False"
+                                Visibility="Collapsed" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Track" Property="Background" Value="{DynamicResource AccentBrush}" />
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                            <Setter TargetName="Knob" Property="HorizontalAlignment" Value="Right" />
+                            <Setter TargetName="Knob" Property="Fill" Value="{DynamicResource AccentForegroundBrush}" />
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True" />
+                                <Condition Property="IsChecked" Value="False" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource TextPrimaryBrush}" />
+                            <Setter TargetName="Knob" Property="Fill" Value="{DynamicResource TextPrimaryBrush}" />
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True" />
+                                <Condition Property="IsChecked" Value="True" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Track" Property="Background" Value="{DynamicResource AccentHoverBrush}" />
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource AccentHoverBrush}" />
+                        </MultiTrigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="KeyboardFocusRing" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Track" Property="Opacity" Value="0.45" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- Content-only tabs are driven by an existing section or mode selector.
