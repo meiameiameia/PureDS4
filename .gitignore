@@ -334,3 +334,6 @@ ASALocalRun/
 !DS4Windows/libs/x64/
 !DS4Windows/libs/x86/
 
+
+# Local Claude Code permission rules, personal to each machine.
+.claude/settings.local.json
