@@ -534,6 +534,27 @@
         <Setter Property="Padding" Value="4,2" />
     </Style>
 
+    <!-- A destination rather than a command: repository links, lineage, anything
+         that opens something outside PureDS4. Reads as text, not as a field. -->
+    <Style x:Key="FoundationLinkButtonStyle" TargetType="Button"
+           BasedOn="{StaticResource FoundationButtonStyle}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="Padding" Value="0,2" />
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeightDense}" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Foreground" Value="{DynamicResource AccentHoverBrush}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
     <Style x:Key="FoundationToolbarButtonStyle"
            TargetType="Button"
            BasedOn="{StaticResource FoundationButtonStyle}">

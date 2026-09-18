@@ -1426,7 +1426,7 @@
                 </Grid>
             </TabItem>
             <TabItem x:Name="logTab" Header="{lex:Loc Log}" Tag="&#xE9D9;" Visibility="Collapsed" Style="{StaticResource BridgeHiddenToolTabItemStyle}">
-                <Grid Margin="16">
+                <Grid Margin="16,8">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -1506,12 +1506,17 @@
                                             <ColumnDefinition Width="100" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="{Binding Datetime, StringFormat=\{0:G\}}" />
+                                        <TextBlock Text="{Binding Datetime, StringFormat=\{0:HH:mm:ss\}}"
+                                                   ToolTip="{Binding Datetime, StringFormat=\{0:G\}}" />
                                         <TextBlock Grid.Column="1" Text="{Binding Severity}" FontWeight="SemiBold">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock" BasedOn="{StaticResource FoundationBodyTextStyle}">
+                                                    <!-- Ordinary events carry no label: what stands out should be
+                                                         the handful that need attention. -->
+                                                    <Setter Property="Visibility" Value="Collapsed" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding Warning}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
                                                             <Setter Property="Foreground" Value="{DynamicResource StateWarningBrush}" />
                                                         </DataTrigger>
                                                     </Style.Triggers>
@@ -1523,15 +1528,38 @@
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
+                        <StackPanel x:Name="logEmptyState" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    IsHitTestVisible="False" Margin="0,0,0,40" MaxWidth="360">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasItems, ElementName=logListView}" Value="False">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock Text="No events yet" HorizontalAlignment="Center"
+                                       Style="{StaticResource FoundationGroupTitleStyle}" />
+                            <TextBlock Text="Connecting a controller, starting game output or changing a profile is recorded here."
+                                       Margin="0,6,0,0" TextAlignment="Center"
+                                       Style="{StaticResource FoundationSecondaryTextStyle}" />
+                        </StackPanel>
                         <Border Grid.Row="1" Style="{StaticResource FoundationToolbarBarStyle}">
-                            <StackPanel Orientation="Horizontal">
-                                <Button Content="Copy selected" Click="CopySelectedLogBtn_Click"
+                            <Grid>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="Copy selected" Click="CopySelectedLogBtn_Click"
+                                            Style="{StaticResource FoundationToolbarButtonStyle}" />
+                                    <Button x:Name="exportLogBtn" Content="Export" Click="ExportLogBtn_Click"
+                                            Style="{StaticResource FoundationToolbarButtonStyle}" />
+                                </StackPanel>
+                                <!-- Clearing discards evidence, so it keeps its distance
+                                     from the two actions that only read the log. -->
+                                <Button x:Name="clearLogBtn" Content="Clear log" Click="ClearLogBtn_Click"
+                                        HorizontalAlignment="Right"
                                         Style="{StaticResource FoundationToolbarButtonStyle}" />
-                                <Button x:Name="exportLogBtn" Content="{lex:Loc Export}" Click="ExportLogBtn_Click"
-                                        Style="{StaticResource FoundationToolbarButtonStyle}" />
-                                <Button x:Name="clearLogBtn" Content="{lex:Loc Clear}" Click="ClearLogBtn_Click"
-                                        Style="{StaticResource FoundationToolbarButtonStyle}" />
-                            </StackPanel>
+                            </Grid>
                         </Border>
                     </Grid>
                 </Grid>

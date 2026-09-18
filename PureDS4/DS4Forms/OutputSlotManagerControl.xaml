@@ -13,7 +13,7 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </UserControl.Resources>
-    <Grid Margin="16">
+    <Grid Margin="16,8">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -73,9 +73,22 @@
                                        VerticalAlignment="Center" />
                             <TextBlock Grid.Column="3" Text="{Binding XInputSlotNum}" VerticalAlignment="Center"
                                        Visibility="{Binding DisplayXInputSlotNum, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}" />
-                            <CheckBox Grid.Column="4" IsChecked="{Binding BoundInput,Mode=OneWay}" IsEnabled="False"
-                                      VerticalAlignment="Center" Focusable="False"
-                                      AutomationProperties.Name="Slot active" />
+                            <TextBlock Grid.Column="4" VerticalAlignment="Center"
+                                       AutomationProperties.Name="Slot active">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource FoundationBodyTextStyle}">
+                                        <Setter Property="Text" Value="&#x2014;" />
+                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding BoundInput,Mode=OneWay}" Value="True">
+                                                <Setter Property="Text" Value="Active" />
+                                                <Setter Property="Foreground" Value="{DynamicResource StateSuccessBrush}" />
+                                                <Setter Property="FontWeight" Value="SemiBold" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>

@@ -51,7 +51,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Project" Style="{StaticResource FoundationColumnHeaderStyle}" />
                                 <Button Grid.Column="1" Content="Open source repository" HorizontalAlignment="Left"
-                                        Click="SourceLink_Click" Style="{StaticResource FoundationToolbarButtonStyle}" />
+                                        Click="SourceLink_Click" Style="{StaticResource FoundationLinkButtonStyle}" />
                             </Grid>
                         </Border>
                         <Border Style="{StaticResource FoundationPropertyGroupStyle}">
@@ -62,7 +62,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Upstream lineage" Style="{StaticResource FoundationColumnHeaderStyle}" />
                                 <Button Grid.Column="1" Content="hbashton/DS4Windows" HorizontalAlignment="Left"
-                                        Click="UpstreamLink_Click" Style="{StaticResource FoundationToolbarButtonStyle}" />
+                                        Click="UpstreamLink_Click" Style="{StaticResource FoundationLinkButtonStyle}" />
                             </Grid>
                         </Border>
                         <Border Style="{StaticResource FoundationPropertyGroupStyle}">
