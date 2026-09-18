@@ -58,6 +58,10 @@
             <local:StatusBanner x:Name="exposureStatusBanner"
                                 ActionLabel="Recover"
                                 ActionRequested="ExposureStatusBanner_ActionRequested" />
+            <local:StatusBanner x:Name="elevationStatusBanner"
+                                State="Warning"
+                                ShowAction="True"
+                                ActionRequested="ElevationStatusBanner_ActionRequested" />
         </StackPanel>
         <Grid DockPanel.Dock="Top">
             <TabControl x:Name="mainTabCon" SelectedIndex="1" SelectionChanged="MainTabCon_SelectionChanged" Style="{StaticResource BridgeMainTabControlStyle}">

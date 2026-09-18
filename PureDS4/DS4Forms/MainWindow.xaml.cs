@@ -197,6 +197,8 @@ namespace DS4WinWPF.DS4Forms
                 uacImg.Visibility = Visibility.Collapsed;
             }
 
+            ShowElevationNotice(isElevated);
+
             noContLb.Content = "No controllers connected";
 
             autoProfileHolder = autoProfControl.AutoProfileHolder;
@@ -1443,6 +1445,60 @@ Suspend support not enabled.", true);
             exposureRecoveryInstanceId = string.Empty;
             exposureStatusBanner.IsOpen = false;
             exposureStatusBanner.ShowAction = false;
+        }
+
+        /// <summary>
+        /// Without administrator rights PureDS4 cannot contain the controller
+        /// with HidHide, so it produces no game output. Say so in the window
+        /// instead of only in the log, and offer the one action that fixes it.
+        /// </summary>
+        private void ShowElevationNotice(bool isElevated)
+        {
+            ElevationNotice notice = ElevationNotice.Evaluate(isElevated);
+            if (notice == null)
+            {
+                elevationStatusBanner.IsOpen = false;
+                return;
+            }
+
+            elevationStatusBanner.Title = notice.Title;
+            elevationStatusBanner.Message = notice.Message;
+            elevationStatusBanner.ActionLabel = notice.ActionLabel;
+            elevationStatusBanner.ShowAction = true;
+            elevationStatusBanner.IsOpen = true;
+        }
+
+        private void ElevationStatusBanner_ActionRequested(object sender,
+            EventArgs e)
+        {
+            elevationStatusBanner.ShowAction = false;
+            ElevationRelaunchResult result = ElevationRelaunch.Restart(
+                Global.exelocation, string.Empty,
+                ElevationRelaunch.ShellExecuteElevated);
+
+            switch (result)
+            {
+                case ElevationRelaunchResult.Started:
+                    // The elevated instance owns the single-instance handle from
+                    // here; this one has to release it or the new one exits.
+                    RequestApplicationShutdown();
+                    break;
+
+                case ElevationRelaunchResult.Cancelled:
+                    elevationStatusBanner.Message =
+                        "The Windows elevation prompt was dismissed. " +
+                        $"{ProductIdentity.Name} is still running without the " +
+                        "rights it needs to hide controllers from games.";
+                    elevationStatusBanner.ShowAction = true;
+                    break;
+
+                default:
+                    elevationStatusBanner.Message =
+                        $"Windows would not start {ProductIdentity.Name} as " +
+                        "administrator. Close it and start it again with " +
+                        "Run as administrator.";
+                    break;
+            }
         }
 
         private void GameOutputStatusBanner_ActionRequested(object sender,
