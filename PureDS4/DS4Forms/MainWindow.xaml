@@ -549,6 +549,9 @@
 
                 </local:AutoProfiles>
             </TabItem>
+            <TabItem x:Name="inputDiagnosticsTab" Header="Input diagnostics" Tag="&#xE9D2;" Visibility="Collapsed" Style="{StaticResource BridgeHiddenToolTabItemStyle}" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
+                <local:InputDiagnosticsControl x:Name="inputDiagnosticsControl" />
+            </TabItem>
             <TabItem x:Name="outputSlotsTab" Header="{lex:Loc OutputSlots}" Tag="&#xE950;" Visibility="Collapsed" Style="{StaticResource BridgeHiddenToolTabItemStyle}" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
                 <local:OutputSlotManagerControl x:Name="slotManControl">
 
@@ -1384,6 +1387,13 @@
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                     <StackPanel><TextBlock Text="Auto Profiles" Style="{StaticResource FoundationGroupTitleStyle}" /><TextBlock Text="Associate profiles with games and applications." Style="{StaticResource FoundationSecondaryTextStyle}" /></StackPanel>
                                     <Button Grid.Column="1" Content="Open" Tag="auto" Margin="12,0,0,0" Click="ToolsMenuItem_Click" Style="{StaticResource FoundationButtonStyle}" />
+                                </Grid>
+                            </Border>
+                            <Border Style="{StaticResource FoundationPropertyGroupStyle}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel><TextBlock Text="Input diagnostics" Style="{StaticResource FoundationGroupTitleStyle}" /><TextBlock Text="Check report rate, worst gaps, and reports lost on the way from the controller." Style="{StaticResource FoundationSecondaryTextStyle}" /></StackPanel>
+                                    <Button Grid.Column="1" Content="Open" Tag="diagnostics" Margin="12,0,0,0" Click="ToolsMenuItem_Click" Style="{StaticResource FoundationButtonStyle}" />
                                 </Grid>
                             </Border>
                             <Border Style="{StaticResource FoundationPropertyGroupStyle}">

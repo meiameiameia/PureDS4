@@ -74,6 +74,80 @@ public class ToolsDiagnosticsPresentationTests
         });
     }
 
+    [TestMethod]
+    public void InputDiagnosticsFitsBothThemesAndViewports()
+    {
+        WpfTestHost.Run(() =>
+        {
+            foreach (bool dark in new[] { false, true })
+            foreach (Size size in PresentationHarness.Viewports)
+            {
+                PresentationHarness.Theme(dark);
+                UserControl view = PresentationHarness.LoadControl("InputDiagnosticsControl");
+                var owner = new Window { Content = view, DataContext = new DiagnosticsFixture() };
+                PresentationHarness.Layout(view, size);
+                PresentationHarness.Preview(view, "diagnostics-" + (int)size.Width, dark);
+                foreach (Control control in PresentationHarness.Descendants<Control>(view)
+                    .Where(c => c.ActualWidth > 0 && PresentationHarness.Participates(c)))
+                    PresentationHarness.AssertInside(view, control, "input diagnostics");
+                owner.Content = null;
+            }
+        });
+    }
+
+    /// <summary>A healthy cable beside the Bluetooth fault we actually measured.</summary>
+    public sealed class DiagnosticsFixture
+    {
+        public Visibility EmptyStateVisibility { get; } = Visibility.Collapsed;
+
+        public object[] Controllers { get; } =
+        {
+            new
+            {
+                Slot = 1,
+                Title = "Controller 1: DS4 v.2",
+                Identity = "DS4 v.2",
+                Connection = "USB",
+                Verdict = "Steady",
+                VerdictState = DS4WinWPF.DS4Forms.StatusVisualState.Success,
+                Explanation = "Every report arrived on time, about 250 per second.",
+                Rate = "250 Hz",
+                TypicalInterval = "4.0 ms",
+                P95Interval = "4.4 ms",
+                P99Interval = "4.4 ms",
+                WorstInterval = "4.5 ms",
+                Stalls = "0",
+                LostReports = "0 (0.00%)",
+                Window = "8,192 reports over 33 s",
+                HostNote = "",
+                HostNoteVisibility = Visibility.Collapsed,
+            },
+            new
+            {
+                Slot = 2,
+                Title = "Controller 2: DS4 v.2",
+                Identity = "DS4 v.2",
+                Connection = "Bluetooth",
+                Verdict = "Frequent stalls",
+                VerdictState = DS4WinWPF.DS4Forms.StatusVisualState.Error,
+                Explanation = "About 1.6% of reports never arrived. The worst gap was 28 ms, " +
+                    "around 7 times the usual 4.0 ms. On a wireless link this is usually " +
+                    "interference or the Bluetooth adapter.",
+                Rate = "246 Hz",
+                TypicalInterval = "4.0 ms",
+                P95Interval = "4.4 ms",
+                P99Interval = "8.1 ms",
+                WorstInterval = "28.1 ms",
+                Stalls = "26",
+                LostReports = "104 (1.58%)",
+                Window = "8,192 reports over 33 s",
+                HostNote = "The controller kept cadence, but Windows delivered reports late: " +
+                    "worst 15.0 ms. Background load or a busy USB port usually causes this.",
+                HostNoteVisibility = Visibility.Visible,
+            },
+        };
+    }
+
     /// <summary>
     /// Every specialist workspace keeps Home's inset, like Settings and Tools.
     /// </summary>

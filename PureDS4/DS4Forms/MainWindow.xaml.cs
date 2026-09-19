@@ -209,6 +209,8 @@ namespace DS4WinWPF.DS4Forms
             slotManControl.SetupDataContext(controlService: App.rootHub,
                 App.rootHub.OutputslotMan);
 
+            inputDiagnosticsControl.SetupDataContext(App.rootHub);
+
             SetupEvents();
             RefreshControllerExposureSessions();
             foreach (CompositeDeviceModel controller in conLvViewModel.ControllerCol)
@@ -1218,6 +1220,7 @@ Suspend support not enabled.", true);
             {
                 "auto" => autoProfilesTab,
                 "slots" => outputSlotsTab,
+                "diagnostics" => inputDiagnosticsTab,
                 "log" => logTab,
                 _ => null,
             };

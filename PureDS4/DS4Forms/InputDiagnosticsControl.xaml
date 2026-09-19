@@ -1,0 +1,132 @@
+﻿<UserControl x:Class="DS4WinWPF.DS4Forms.InputDiagnosticsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:DS4WinWPF.DS4Forms"
+             mc:Ignorable="d"
+             d:DesignHeight="420" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style x:Key="MeasureLabelStyle" TargetType="TextBlock"
+               BasedOn="{StaticResource FoundationColumnHeaderStyle}">
+            <Setter Property="Margin" Value="0,0,0,2" />
+        </Style>
+        <Style x:Key="MeasureValueStyle" TargetType="TextBlock"
+               BasedOn="{StaticResource FoundationBodyTextStyle}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+    </UserControl.Resources>
+    <Grid Margin="16,8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="Input diagnostics" Style="{StaticResource FoundationPageTitleStyle}" />
+            <TextBlock Text="How steadily each controller reports, measured by the controller's own clock rather than by the PC's."
+                       Margin="0,3,0,0" Style="{StaticResource FoundationSecondaryTextStyle}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" x:Name="diagnosticsEmptyState"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    MaxWidth="380" Margin="0,0,0,40"
+                    Visibility="{Binding EmptyStateVisibility}">
+            <TextBlock Text="No controllers connected" HorizontalAlignment="Center"
+                       Style="{StaticResource FoundationGroupTitleStyle}" />
+            <TextBlock Text="Connect a controller to measure its report rate, its worst gaps, and how many reports never arrive."
+                       Margin="0,6,0,0" TextAlignment="Center"
+                       Style="{StaticResource FoundationSecondaryTextStyle}" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl x:Name="controllerList" ItemsSource="{Binding Controllers}"
+                          HorizontalAlignment="Stretch">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource FoundationSettingRowStyle}" Padding="12,10">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                        <TextBlock Text="{Binding Title}"
+                                                   Style="{StaticResource FoundationSettingTitleStyle}" />
+                                        <TextBlock Text="{Binding Connection}"
+                                                   Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                    </StackPanel>
+                                    <local:StatusChip Grid.Column="1" VerticalAlignment="Center"
+                                                      Label="{Binding Verdict}"
+                                                      State="{Binding VerdictState}" />
+                                </Grid>
+
+                                <TextBlock Text="{Binding Explanation}" Margin="0,8,0,0"
+                                           Style="{StaticResource FoundationBodyTextStyle}"
+                                           TextWrapping="Wrap" />
+
+                                <UniformGrid Columns="4" Margin="0,12,0,0">
+                                    <StackPanel Margin="0,0,12,8">
+                                        <TextBlock Text="REPORT RATE" Style="{StaticResource MeasureLabelStyle}" />
+                                        <TextBlock Text="{Binding Rate}" Style="{StaticResource MeasureValueStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,12,8">
+                                        <TextBlock Text="TYPICAL GAP" Style="{StaticResource MeasureLabelStyle}" />
+                                        <TextBlock Text="{Binding TypicalInterval}" Style="{StaticResource MeasureValueStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,12,8">
+                                        <TextBlock Text="95TH" Style="{StaticResource MeasureLabelStyle}" />
+                                        <TextBlock Text="{Binding P95Interval}" Style="{StaticResource MeasureValueStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,0,8">
+                                        <TextBlock Text="99TH" Style="{StaticResource MeasureLabelStyle}" />
+                                        <TextBlock Text="{Binding P99Interval}" Style="{StaticResource MeasureValueStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,12,0">
+                                        <TextBlock Text="WORST GAP" Style="{StaticResource MeasureLabelStyle}" />
+                                        <TextBlock Text="{Binding WorstInterval}" Style="{StaticResource MeasureValueStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,12,0">
+                                        <TextBlock Text="STALLS" Style="{StaticResource MeasureLabelStyle}" />
+                                        <TextBlock Text="{Binding Stalls}" Style="{StaticResource MeasureValueStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,12,0">
+                                        <TextBlock Text="REPORTS LOST" Style="{StaticResource MeasureLabelStyle}" />
+                                        <TextBlock Text="{Binding LostReports}" Style="{StaticResource MeasureValueStyle}" />
+                                    </StackPanel>
+                                    <StackPanel>
+                                        <TextBlock Text="MEASURED OVER" Style="{StaticResource MeasureLabelStyle}" />
+                                        <TextBlock Text="{Binding Window}" Style="{StaticResource MeasureValueStyle}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </UniformGrid>
+
+                                <TextBlock Text="{Binding HostNote}" Margin="0,10,0,0"
+                                           Visibility="{Binding HostNoteVisibility}"
+                                           TextWrapping="Wrap"
+                                           Style="{StaticResource FoundationSecondaryTextStyle}" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" Margin="0,12,0,0" Style="{StaticResource FoundationToolbarBarStyle}">
+            <Grid>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="copyReportBtn" Content="Copy report" Click="CopyReportBtn_Click"
+                            Style="{StaticResource FoundationToolbarButtonStyle}"
+                            ToolTip="Copy these measurements as text" />
+                </StackPanel>
+                <Button x:Name="resetMeasurementsBtn" Content="Start over"
+                        HorizontalAlignment="Right" Click="ResetMeasurementsBtn_Click"
+                        Style="{StaticResource FoundationToolbarButtonStyle}"
+                        ToolTip="Discard what has been measured so far and begin again" />
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

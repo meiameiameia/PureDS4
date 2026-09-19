@@ -1,4 +1,4 @@
-/*
+﻿/*
 DS4Windows
 Copyright (C) 2023  Travis Nickles
 
@@ -1506,6 +1506,15 @@ namespace DS4Windows
         }
 
         public double Latency = 0.0;
+
+        // Latency is a twenty-sample average, which hides the occasional stall
+        // that a player actually feels. This keeps the raw gaps so the
+        // diagnostics screen can report the worst of them and what they cost.
+        private readonly InputReportStatistics reportStatistics =
+            new InputReportStatistics();
+
+        /// <summary>Report cadence and losses over the recent past.</summary>
+        public InputReportStatistics ReportStatistics => reportStatistics;
         public string error;
         public bool firstReport = true;
         public bool oldCharging = false;
@@ -1958,6 +1967,9 @@ namespace DS4Windows
                     }
 
                     cState.elapsedTime = elapsedDeltaTime;
+                    // Runs per report on the input thread: two stores, no work.
+                    reportStatistics.Add(elapsedDeltaTime * 1000.0,
+                        lastTimeElapsedDouble);
                     cState.ds4Timestamp = (ushort)tempStamp;
                     timeStampPrevious = tempStamp;
 
