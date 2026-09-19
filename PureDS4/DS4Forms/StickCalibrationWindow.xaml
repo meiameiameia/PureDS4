@@ -9,26 +9,67 @@
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
         ResizeMode="NoResize"
-        Title="Stick calibration" Height="210" Width="400"
+        Title="Stick calibration" Height="316" Width="460"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         Style="{DynamicResource WindowStyle}">
-    <Grid Margin="16">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition Width="88" />
-            <ColumnDefinition Width="88" />
-        </Grid.ColumnDefinitions>
+    <Grid Margin="20,16,20,16">
         <Grid.RowDefinitions>
-            <RowDefinition />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.ColumnSpan="3"
-                   Padding="5" TextWrapping="Wrap">
-            Please move your stick to the sides and release it a few times, then after you are done press Save.
-        </TextBlock>
+        <StackPanel>
+            <TextBlock x:Name="headingText" Text="Measure where this stick rests"
+                       Style="{StaticResource FoundationPageTitleStyle}" />
+            <TextBlock Text="Let go of the stick and put the controller down. PureDS4 watches where the stick settles over many readings, instead of trusting one instant."
+                       Margin="0,4,0,0" TextWrapping="Wrap"
+                       Style="{StaticResource FoundationSecondaryTextStyle}" />
+        </StackPanel>
 
-        <Button Style="{StaticResource FoundationButtonStyle}" Grid.Row="1" Grid.Column="1" Content="Cancel" Click="CloseButton_OnClick" Margin="8,8,0,0" />
-        <Button Style="{StaticResource FoundationPrimaryButtonStyle}" Grid.Row="1" Grid.Column="2" Content="Save" Click="SaveButton_OnClick" Margin="8,8,0,0"/>
+        <Border Grid.Row="1" Margin="0,14,0,0" Padding="12,10"
+                Background="{DynamicResource SurfaceRaisedBrush}"
+                BorderBrush="{DynamicResource BorderDefaultBrush}" BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="RESTING AT" Style="{StaticResource FoundationColumnHeaderStyle}" />
+                    <TextBlock x:Name="restingText" Text="—" Margin="0,2,0,0"
+                               Style="{StaticResource FoundationBodyTextStyle}" FontWeight="SemiBold" />
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="STEADINESS" Style="{StaticResource FoundationColumnHeaderStyle}" />
+                    <TextBlock x:Name="steadinessText" Text="—" Margin="0,2,0,0"
+                               Style="{StaticResource FoundationBodyTextStyle}" FontWeight="SemiBold" />
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="READINGS" Style="{StaticResource FoundationColumnHeaderStyle}" />
+                    <TextBlock x:Name="readingsText" Text="0" Margin="0,2,0,0"
+                               Style="{StaticResource FoundationBodyTextStyle}" FontWeight="SemiBold" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <TextBlock Grid.Row="2" x:Name="statusText" Margin="0,12,0,0" VerticalAlignment="Top"
+                   TextWrapping="Wrap" Style="{StaticResource FoundationBodyTextStyle}"
+                   Text="Measuring. Let go of the stick and keep the controller still." />
+
+        <Grid Grid.Row="3" Margin="0,12,0,0">
+            <Button x:Name="restartButton" Content="Measure again" HorizontalAlignment="Left"
+                    MinWidth="110" Click="RestartButton_OnClick"
+                    Style="{StaticResource FoundationButtonStyle}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" MinWidth="88" Click="CloseButton_OnClick"
+                        Style="{StaticResource FoundationButtonStyle}" />
+                <Button x:Name="saveButton" Content="Save" MinWidth="88" Margin="8,0,0,0"
+                        IsEnabled="False" Click="SaveButton_OnClick"
+                        Style="{StaticResource FoundationPrimaryButtonStyle}" />
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

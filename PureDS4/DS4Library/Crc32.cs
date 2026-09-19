@@ -206,6 +206,15 @@ namespace DS4Windows
 
         public static unsafe uint CalculateBasicHash(ref uint seed, ref byte[] buffer, int offset, int size)
         {
+            // The slice-by-16 table is filled lazily. Without this guard the
+            // result depends on someone having called InitializeTable earlier,
+            // and an uninitialised table returns the seed for every input —
+            // which makes a checksum comparison pass anything it is given.
+            if (!secondTablePop)
+            {
+                InitializeTable(DefaultPolynomial);
+            }
+
             uint crc = seed;
             int i = offset;
 

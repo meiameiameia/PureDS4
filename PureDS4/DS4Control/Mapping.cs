@@ -1269,6 +1269,11 @@ namespace DS4Windows
             StickAntiSnapbackInfo lsAntiSnapback = GetLSAntiSnapbackInfo(device);
             StickAntiSnapbackInfo rsAntiSnapback = GetRSAntiSnapbackInfo(device);
 
+            // Correct the resting point before anything judges movement:
+            // anti-snapback and fuzz both measure how far a stick travelled,
+            // and used to measure it from an uncorrected centre.
+            ApplyStickCalibration(device, cState);
+
             if (lsAntiSnapback.enabled)
             {
                 CalcAntiSnapbackStick(device, 0, lsAntiSnapback.delta, lsAntiSnapback.timeout, cState.LX, cState.LY, out cState.LX, out cState.LY);
@@ -1295,7 +1300,7 @@ namespace DS4Windows
             cState.CopyTo(dState);
             //DS4State dState = new DS4State(cState);
 
-            cState = ApplyStickCalibration(device, dState);
+            cState = dState;
 
 
             if (lsMod.deadzoneType == StickDeadZoneInfo.DeadZoneType.Radial)
@@ -2449,30 +2454,17 @@ namespace DS4Windows
             return dState;
         }
 
+        /// <summary>
+        /// Move each axis so its measured resting point reads as centre. The
+        /// two halves are rescaled rather than shifted, so a stick that rests
+        /// off centre keeps full travel in both directions.
+        /// </summary>
         public static DS4State ApplyStickCalibration(int device, DS4State state)
         {
-            if (RightStickDriftXAxis[device] != 0)
-            {
-                var translated = state.RX - RightStickDriftXAxis[device];
-                state.RX = (byte)Math.Clamp(translated, 0, 255);
-            }
-            if (RightStickDriftYAxis[device] != 0)
-            {
-                var translated = state.RY - RightStickDriftYAxis[device];
-                state.RY = (byte)Math.Clamp(translated, 0, 255);
-            }
-
-            if (LeftStickDriftXAxis[device] != 0)
-            {
-                var translated = state.LX - LeftStickDriftXAxis[device];
-                state.LX = (byte)Math.Clamp(translated, 0, 255);
-            }
-
-            if (LeftStickDriftYAxis[device] != 0)
-            {
-                var translated = state.LY - LeftStickDriftYAxis[device];
-                state.LY = (byte)Math.Clamp(translated, 0, 255);
-            }
+            state.RX = StickCalibration.Correct(state.RX, RightStickDriftXAxis[device]);
+            state.RY = StickCalibration.Correct(state.RY, RightStickDriftYAxis[device]);
+            state.LX = StickCalibration.Correct(state.LX, LeftStickDriftXAxis[device]);
+            state.LY = StickCalibration.Correct(state.LY, LeftStickDriftYAxis[device]);
 
             return state;
         }

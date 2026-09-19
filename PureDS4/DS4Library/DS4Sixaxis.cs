@@ -192,6 +192,12 @@ namespace DS4Windows
         };
         private bool calibrationDone = false;
 
+        /// <summary>
+        /// Whether usable factory calibration was applied. False means motion
+        /// values pass through uncalibrated.
+        /// </summary>
+        public bool CalibrationDone => calibrationDone;
+
         // for continuous calibration (JoyShockLibrary)
         const int num_gyro_average_windows = 3;
         private int gyro_average_window_front_index = 0;

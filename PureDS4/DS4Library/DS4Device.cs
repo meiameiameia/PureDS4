@@ -929,6 +929,32 @@ namespace DS4Windows
 
         protected const int DS4_FEATURE_REPORT_5_LEN = 41;
         protected const int DS4_FEATURE_REPORT_5_CRC32_POS = DS4_FEATURE_REPORT_5_LEN - 4;
+
+        /// <summary>Reads to attempt before giving up on factory calibration.</summary>
+        public const int CALIBRATION_READ_ATTEMPTS = 5;
+
+        /// <summary>
+        /// Whether a Bluetooth calibration feature report carries the checksum
+        /// the controller computed for it. Separated out so the check itself can
+        /// be tested without a controller.
+        /// </summary>
+        public static bool HasValidCalibrationChecksum(byte[] calibration)
+        {
+            if (calibration == null || calibration.Length < DS4_FEATURE_REPORT_5_LEN)
+            {
+                return false;
+            }
+
+            uint reported = calibration[DS4_FEATURE_REPORT_5_CRC32_POS] |
+                (uint)(calibration[DS4_FEATURE_REPORT_5_CRC32_POS + 1] << 8) |
+                (uint)(calibration[DS4_FEATURE_REPORT_5_CRC32_POS + 2] << 16) |
+                (uint)(calibration[DS4_FEATURE_REPORT_5_CRC32_POS + 3] << 24);
+
+            uint computed = ~Crc32Algorithm.Compute(new byte[] { 0xA3 });
+            computed = ~Crc32Algorithm.CalculateBasicHash(ref computed, ref calibration,
+                0, DS4_FEATURE_REPORT_5_LEN - 4);
+            return reported == computed;
+        }
         public virtual void RefreshCalibration()
         {
             byte[] calibration = new byte[41];
@@ -937,26 +963,22 @@ namespace DS4Windows
             if (conType == ConnectionType.BT)
             {
                 bool found = false;
-                for (int tries = 0; !found && tries < 5; tries++)
+                for (int tries = 0; !found && tries < CALIBRATION_READ_ATTEMPTS; tries++)
                 {
                     hDevice.readFeatureData(calibration);
-                    uint recvCrc32 = calibration[DS4_FEATURE_REPORT_5_CRC32_POS] |
-                                (uint)(calibration[DS4_FEATURE_REPORT_5_CRC32_POS + 1] << 8) |
-                                (uint)(calibration[DS4_FEATURE_REPORT_5_CRC32_POS + 2] << 16) |
-                                (uint)(calibration[DS4_FEATURE_REPORT_5_CRC32_POS + 3] << 24);
+                    found = HasValidCalibrationChecksum(calibration);
+                }
 
-                    uint calcCrc32 = ~Crc32Algorithm.Compute(new byte[] { 0xA3 });
-                    calcCrc32 = ~Crc32Algorithm.CalculateBasicHash(ref calcCrc32, ref calibration, 0, DS4_FEATURE_REPORT_5_LEN - 4);
-                    bool validCrc = recvCrc32 == calcCrc32;
-                    if (!validCrc && tries >= 5)
-                    {
-                        AppLogger.LogToGui("Gyro Calibration Failed", true);
-                        continue;
-                    }
-                    else if (validCrc)
-                    {
-                        found = true;
-                    }
+                if (!found)
+                {
+                    // The old guard could never fire, so calibration that failed
+                    // its own checksum was applied anyway. Motion falls back to
+                    // uncalibrated values, which is honest and recoverable.
+                    AppLogger.LogToGui("Gyro calibration could not be read from " +
+                        $"{Mac}: the data failed its checksum " +
+                        $"{CALIBRATION_READ_ATTEMPTS} times. Motion will use " +
+                        "uncalibrated values until the controller reconnects.", true);
+                    return;
                 }
 
                 sixAxis.setCalibrationData(ref calibration, conType == ConnectionType.USB);
@@ -967,8 +989,16 @@ namespace DS4Windows
             }
             else
             {
+                // The USB calibration report carries no checksum. Applying it is
+                // still safe: setCalibrationData refuses data it cannot divide
+                // by, leaving motion uncalibrated rather than wrong.
                 hDevice.readFeatureData(calibration);
                 sixAxis.setCalibrationData(ref calibration, conType == ConnectionType.USB);
+                if (!sixAxis.CalibrationDone)
+                {
+                    AppLogger.LogToGui($"Gyro calibration from {Mac} was unusable. " +
+                        "Motion will use uncalibrated values.", true);
+                }
             }
         }
 
