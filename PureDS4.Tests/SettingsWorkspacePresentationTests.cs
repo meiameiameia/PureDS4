@@ -87,6 +87,21 @@ public class SettingsWorkspacePresentationTests
     /// is the accepted reference; content never sits flush against the window.
     /// </summary>
     [TestMethod]
+    public void PublicMigrationCopyNamesOnlyTheReleasedPredecessor()
+    {
+        XElement tools = Source("MainWindow").Descendants()
+            .Single(element => (string)element.Attribute(X + "Name") == "toolsTab");
+        string[] copy = tools.Descendants(Wpf + "TextBlock")
+            .Select(element => (string)element.Attribute("Text"))
+            .Where(text => text != null).ToArray();
+
+        Assert.IsTrue(copy.Any(text => text.Contains("existing DS4Windows installation")));
+        Assert.IsTrue(copy.Any(text => text.Contains("Opening the plan does not remove anything")));
+        Assert.IsFalse(copy.Any(text => text.Contains("DS4Windows Reworked")),
+            "An unreleased development name must not be offered as a public migration path.");
+    }
+
+    [TestMethod]
     public void WorkspaceInsetsMatchHome()
     {
         XElement main = Source("MainWindow");

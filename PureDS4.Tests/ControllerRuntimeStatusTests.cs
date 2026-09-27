@@ -30,6 +30,11 @@ namespace DS4WindowsTests
                     alive: false, virtualConnected: false));
             Assert.AreEqual("Connecting", connecting.Title);
 
+            ControllerStartupStatus stale =
+                ControllerRuntimeStatusPolicy.Evaluate(Signals(alive: false));
+            Assert.IsFalse(stale.IsReady);
+            StringAssert.Contains(stale.Detail, "recent input report");
+
             ControllerStartupStatus creating =
                 ControllerRuntimeStatusPolicy.Evaluate(Signals(
                     virtualConnected: false));
@@ -67,6 +72,8 @@ namespace DS4WindowsTests
                     microphone: ControllerRuntimeLaneState.Ready));
             Assert.IsTrue(status.IsReady);
             Assert.AreEqual("Ready", status.Title);
+            StringAssert.Contains(status.Detail, "backend is connected");
+            StringAssert.Contains(status.Detail, "Game response is not verified");
         }
 
         [TestMethod]

@@ -27,41 +27,48 @@
 
         <Border Grid.Row="0" Style="{StaticResource FoundationPropertyGroupStyle}"
                 Padding="12,8" Margin="0,0,0,8">
-            <local:ActionGroupPanel x:Name="profileEditorActions">
-                <Grid VerticalAlignment="Center">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <Label Content="{lex:BLoc Profile}" ContentStringFormat="{}{0}:"
-                           Target="{Binding ElementName=profileNameTxt}"
-                           Style="{StaticResource FoundationPropertyLabelStyle}" />
-                    <!-- An existing profile is renamed from the profiles list, not
-                         here, so its name is the heading of this page rather than a
-                         greyed-out input. A disabled TextBox paints its text at a
-                         disabled weight whatever its Foreground says, which made the
-                         name read as an empty field with a watermark. The editable
-                         box stays for a profile that is still being named. -->
-                    <TextBlock Grid.Column="1" Margin="0,0,0,1"
-                               Text="{Binding Text, ElementName=profileNameTxt}"
-                               ToolTip="{Binding Text, ElementName=profileNameTxt}"
-                               Style="{StaticResource FoundationGroupTitleStyle}"
-                               VerticalAlignment="Center" MaxWidth="320"
-                               TextTrimming="CharacterEllipsis"
-                               Visibility="{Binding IsEnabled, ElementName=profileNameTxt, Converter={StaticResource InvertBoolToVisibilityConverter}}" />
-                    <TextBox Grid.Column="1" x:Name="profileNameTxt" Text="" Width="180"
-                             Style="{StaticResource FoundationTextBoxStyle}"
-                             AutomationProperties.Name="Profile name"
-                             Visibility="{Binding IsEnabled, ElementName=profileNameTxt, Converter={StaticResource BooleanToVisibilityConverter}}"
-                             TextChanged="ProfileNameTxt_TextChanged" />
-                </Grid>
-                <WrapPanel VerticalAlignment="Center">
-                    <Button x:Name="presetBtn" Content="Select Preset" Margin="0,0,8,0" Click="PresetBtn_Click" Style="{StaticResource FoundationButtonStyle}" />
-                    <Button x:Name="applyBtn" Content="{lex:Loc Apply}" Margin="0,0,8,0" Click="ApplyBtn_Click" IsEnabled="False" Style="{StaticResource FoundationButtonStyle}" />
-                    <Button x:Name="cancelBtn" Content="{lex:Loc Cancel}" Margin="0,0,8,0" Click="CancelBtn_Click" Style="{StaticResource FoundationButtonStyle}" />
-                    <Button x:Name="saveBtn" Content="{lex:Loc SaveProfile}" Click="SaveBtn_Click" Style="{StaticResource FoundationPrimaryButtonStyle}" />
-                </WrapPanel>
-            </local:ActionGroupPanel>
+            <StackPanel>
+                <local:ActionGroupPanel x:Name="profileEditorActions">
+                    <Grid VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Label Content="{lex:BLoc Profile}" ContentStringFormat="{}{0}:"
+                               Target="{Binding ElementName=profileNameTxt}"
+                               Style="{StaticResource FoundationPropertyLabelStyle}" />
+                        <!-- An existing profile is renamed from the profiles list, not
+                             here, so its name is the heading of this page rather than a
+                             greyed-out input. A disabled TextBox paints its text at a
+                             disabled weight whatever its Foreground says, which made the
+                             name read as an empty field with a watermark. The editable
+                             box stays for a profile that is still being named. -->
+                        <TextBlock Grid.Column="1" Margin="0,0,0,1"
+                                   Text="{Binding Text, ElementName=profileNameTxt}"
+                                   ToolTip="{Binding Text, ElementName=profileNameTxt}"
+                                   Style="{StaticResource FoundationGroupTitleStyle}"
+                                   VerticalAlignment="Center" MaxWidth="320"
+                                   TextTrimming="CharacterEllipsis"
+                                   Visibility="{Binding IsEnabled, ElementName=profileNameTxt, Converter={StaticResource InvertBoolToVisibilityConverter}}" />
+                        <TextBox Grid.Column="1" x:Name="profileNameTxt" Text="" Width="180"
+                                 Style="{StaticResource FoundationTextBoxStyle}"
+                                 AutomationProperties.Name="Profile name"
+                                 Visibility="{Binding IsEnabled, ElementName=profileNameTxt, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                 TextChanged="ProfileNameTxt_TextChanged" />
+                    </Grid>
+                    <WrapPanel VerticalAlignment="Center">
+                        <Button x:Name="presetBtn" Content="Select Preset" Margin="0,0,8,0" Click="PresetBtn_Click" Style="{StaticResource FoundationButtonStyle}" />
+                        <Button x:Name="applyBtn" Content="{lex:Loc Apply}" Margin="0,0,8,0" Click="ApplyBtn_Click" IsEnabled="False" Style="{StaticResource FoundationButtonStyle}"
+                                ToolTip="Save changes and keep this editor open." AutomationProperties.HelpText="Save changes and keep this editor open." />
+                        <Button x:Name="cancelBtn" Content="{lex:Loc Cancel}" Margin="0,0,8,0" Click="CancelBtn_Click" Style="{StaticResource FoundationButtonStyle}"
+                                ToolTip="Close without saving further changes. Earlier applied changes stay saved." />
+                        <Button x:Name="saveBtn" Content="{lex:Loc SaveProfile}" Click="SaveBtn_Click" Style="{StaticResource FoundationPrimaryButtonStyle}"
+                                ToolTip="Save changes and close this editor." AutomationProperties.HelpText="Save changes and close this editor." />
+                    </WrapPanel>
+                </local:ActionGroupPanel>
+                <TextBlock Text="Apply saves and keeps editing. Save saves and closes."
+                           Margin="0,6,0,0" Style="{StaticResource FoundationSecondaryTextStyle}" />
+            </StackPanel>
         </Border>
 
         <Grid Grid.Row="1">

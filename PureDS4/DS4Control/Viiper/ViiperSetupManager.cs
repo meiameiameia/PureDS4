@@ -204,8 +204,6 @@ namespace DS4Windows
         private const string BundledUsbipName = "USBip-0.9.7.7-x64.exe";
         private const string BundledHidHideName =
             "HidHide_1.5.230_x64.exe";
-        private const string BundledFakerInputName =
-            "FakerInput_0.1.0_x64.msi";
         private const string TerminateForeignViiperArgument =
             "--terminate-foreign-viiper";
         private const string ViiperStartupTaskName =
@@ -1065,7 +1063,6 @@ namespace DS4Windows
                 Path.Combine(stagedExtras, BundledViiperHashName),
                 Path.Combine(stagedExtras, BundledUsbipName),
                 Path.Combine(stagedExtras, BundledHidHideName),
-                Path.Combine(stagedExtras, BundledFakerInputName),
             };
             string missingOfflineFile = Array.Find(requiredOfflineFiles,
                 path => !File.Exists(path));

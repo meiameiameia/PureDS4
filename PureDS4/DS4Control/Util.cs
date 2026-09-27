@@ -31,7 +31,6 @@ namespace DS4Windows
     public class Util
     {
         public static Guid sysGuid = Guid.Parse("{4d36e97d-e325-11ce-bfc1-08002be10318}");
-        public static Guid fakerInputGuid = Guid.Parse("{ab67b0fa-d0f5-4f60-81f4-346e18fd0805}");
 
         public enum PROCESS_INFORMATION_CLASS : int
         {

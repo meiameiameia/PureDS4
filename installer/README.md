@@ -2,7 +2,7 @@
 
 `build-installer.ps1` composes the standard x64 distribution as a WiX 5 Burn
 bundle with a custom WPF interface. It contains the managed PureDS4 MSI,
-VIIPER 0.1.0, USB-IP 0.9.7.7, and optional HidHide/FakerInput packages.
+VIIPER 0.1.0, USB-IP 0.9.7.7, and an optional HidHide package.
 
 The installer intentionally has no portable mode or destination selector. The
 portable ZIP remains a separate CI artifact. The standard installer places
@@ -16,8 +16,8 @@ installer gate must enforce that boundary before public distribution.
 .\installer\build-installer.ps1 `
   -PublishRoot .\bin\x64\Release\output `
   -ProductVersion 5.1.0 `
-  -BundleVersion 5.1.0-beta.1 `
-  -DisplayVersion 5.1.0-beta.1 `
+  -BundleVersion 5.1.0 `
+  -DisplayVersion 5.1.0 `
   -SkipApplicationPublish
 ```
 
@@ -32,27 +32,39 @@ One transaction ID is preserved across Burn, setup actions, the infrastructure
 backend, and reboot resume so those logs can be correlated without timestamp
 guesswork.
 
-The output is named `PureDS4_5.1.0-beta.1_Setup_x64.exe` and the installed
-executable is `PureDS4.exe`. That version line records identity only; no first
-public PureDS4 version has been chosen.
+The output is named `PureDS4_5.1.0_Setup_x64.exe` and the installed
+executable is `PureDS4.exe`. `5.1.0` is the owner-selected first public version
+target, not a release-readiness or publication claim. The exact final bundle
+must upgrade the existing `5.1.0-beta.2` dogfood installation and pass the
+recovery checks before publication is considered.
 
-Authenticode signing is supported but **not decided as release policy**.
-Whether a public PureDS4 artifact must be signed is an open owner decision;
-this section describes the mechanism only.
+The owner accepts an unsigned first public release. Its official download
+must state that there is no verified publisher and include the exact artifact
+version and SHA-256. SmartScreen or Smart App Control may warn or block it;
+users should verify the download source and hash, not disable Windows
+protections. A test of the exact downloaded candidate with normal protections
+enabled is still required before public distribution.
 
 Set `DS4W_SIGN_CERT_PATH`, `DS4W_SIGN_CERT_PASSWORD`, and optionally
 `DS4W_SIGN_TIMESTAMP_URL` to sign the application, setup hosts, MSI, and final
 EXE in a protected release environment. Passing `-RequireSigning` makes the
 build fail closed unless PureDS4 and the packaged VIIPER binary both have
 valid signatures; a release job that signs also needs the
-`DS4W_SIGN_CERT_BASE64` and `DS4W_SIGN_CERT_PASSWORD` secrets. If the owner
-settles on unsigned releases, `-RequireSigning` is simply not passed.
+`DS4W_SIGN_CERT_BASE64` and `DS4W_SIGN_CERT_PASSWORD` secrets. The approved
+unsigned first-release path does not pass `-RequireSigning`.
+
+For a manually dispatched CI candidate, the portable and installer artifacts
+also contain `candidate-identity.json` and `SHA256SUMS.txt`. They bind the
+source commit, artifact version, SHA-256 of the inner ZIP/EXE, installer
+signature status, and .NET/Windows Desktop runtime-pack versions selected by
+that restore. Compare the hashes with the downloaded inner files; GitHub's
+artifact wrapper has its own identity. These records do not replace the
+downloaded-candidate security check or owner approval to publish.
 
 The PowerShell infrastructure backend is the sole VIIPER/USB-IP mutation
 engine. Burn and the in-app repair surface only validate, stage, elevate, and
-report that same engine. HidHide and FakerInput are optional non-vital packages:
-their failure is reported without rolling back a healthy PureDS4 + VIIPER
-installation.
+report that same engine. HidHide is an optional non-vital package: its failure
+is reported without rolling back a healthy PureDS4 + VIIPER installation.
 
 VIIPER's legacy Windows network installer is developer-only and fail-closed by
 default. It cannot silently create a second LocalAppData/HKCU owner beside this

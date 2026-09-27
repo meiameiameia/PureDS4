@@ -82,9 +82,9 @@
                             <TextBlock x:Name="activeProfileText" Grid.Row="2" Grid.Column="1" Text="{Binding CurrentProfileName}" ToolTip="{Binding CurrentProfileName}" Margin="0,4" TextTrimming="CharacterEllipsis"/>
                             <TextBlock Grid.Row="3" Text="Active game output" Margin="0,4,12,4" Style="{StaticResource FoundationSecondaryTextStyle}"/>
                             <TextBlock x:Name="runtimeOutputText" Grid.Row="3" Grid.Column="1" Text="{Binding SelectedRuntimeOutputControllerName}" Margin="0,4" FontWeight="SemiBold" TextWrapping="Wrap"/>
-                            <TextBlock Grid.Row="4" Text="Latency / polling rate" Margin="0,4,12,4" Style="{StaticResource FoundationSecondaryTextStyle}"/>
+                            <TextBlock Grid.Row="4" Text="Report interval / rate" Margin="0,4,12,4" Style="{StaticResource FoundationSecondaryTextStyle}"/>
                             <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedControllerLatency}" Margin="0,4" TextWrapping="Wrap"
-                                ToolTip="Observed input interval and effective polling frequency"/>
+                                ToolTip="Observed controller report interval and effective rate; not controller-to-game latency."/>
                         </Grid>
                         <TextBlock x:Name="runtimeDetailText" Text="{Binding SelectedControllerStartupDetail}" Margin="0,8,0,12" TextWrapping="Wrap"
                             Style="{StaticResource FoundationSecondaryTextStyle}"/>

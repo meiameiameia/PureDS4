@@ -120,6 +120,7 @@ def main() -> None:
         "parentOwnedRelatedUninstall",
         "IsParentOwnedRelatedUninstall",
         "IsRelatedBundleNewer",
+        "engine.CompareVersions(relatedVersion, currentVersion) > 0",
         "ShowFailure(1638",
         "command.Resume == ResumeType.Reboot",
         "Interlocked.CompareExchange(ref planStarted, 1, 0)",

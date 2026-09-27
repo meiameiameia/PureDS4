@@ -155,7 +155,7 @@ namespace DS4WinWPF.DS4Forms
 
             StartStopBtn.Content = App.rootHub.running ? Translations.Strings.StopText :
                 Translations.Strings.StartText;
-            serviceStatusText.Text = App.rootHub.running ? "Service running" : "Service stopped";
+            serviceStatusText.Text = DescribeServiceStatus(App.rootHub);
 
             conLvViewModel = new ControllerListViewModel(App.rootHub, profileListHolder);
             mainWinVM.ControllerCol = conLvViewModel.ControllerCol;
@@ -1175,7 +1175,7 @@ Suspend support not enabled.", true);
                 }
 
                 StartStopBtn.IsEnabled = true;
-                serviceStatusText.Text = service.running ? "Service running" : "Service stopped";
+                serviceStatusText.Text = DescribeServiceStatus(service);
                 slotManControl.IsEnabled = service.running;
             }));
         }
@@ -1229,6 +1229,81 @@ Suspend support not enabled.", true);
             {
                 target.Visibility = Visibility.Visible;
                 mainTabCon.SelectedItem = target;
+            }
+        }
+
+        private static string DescribeServiceStatus(ControlService service) =>
+            service.running ? "Service running" :
+            service.HidHideRecoveryRequired
+                ? "Stopped — controller recovery required"
+                : "Service stopped";
+
+        private async void RecoverHidHideBtn_Click(object sender,
+            RoutedEventArgs e)
+        {
+            recoverHidHideBtn.IsEnabled = false;
+            try
+            {
+                HidHideRecoveryPreview preview = await Task.Run(() =>
+                    App.rootHub.InspectPersistentHidHideRecovery());
+                serviceStatusText.Text = DescribeServiceStatus(App.rootHub);
+                if (!preview.CanRecover)
+                {
+                    MessageBox.Show(this, preview.Error, "HidHide recovery",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                string ids = preview.Pending.Count == 0
+                    ? "No controller IDs remain in the recovery record."
+                    : string.Join(Environment.NewLine,
+                        preview.Pending.Select(id =>
+                            $"{id} — " +
+                            (preview.Present.Contains(id,
+                                StringComparer.OrdinalIgnoreCase)
+                                ? "listed in HidHide" : "already absent")));
+                string active = "HidHide active setting: " +
+                    (preview.ActiveStateObserved == true ? "on" : "off") +
+                    (preview.ActiveStateUncertain
+                        ? " (its ownership is uncertain after the interruption)."
+                        : ".") +
+                    " This operation leaves that setting unchanged.";
+                string prompt = "Recovery record:" + Environment.NewLine +
+                    ids + Environment.NewLine + Environment.NewLine + active +
+                    Environment.NewLine + Environment.NewLine +
+                    "Continue? Only these exact controller IDs will be removed " +
+                    "if present. If another application added the same ID " +
+                    "after the interruption, its rule would also be removed. " +
+                    "All other rules are preserved.";
+                if (MessageBox.Show(this, prompt, "Confirm HidHide recovery",
+                        MessageBoxButton.YesNo, MessageBoxImage.Warning) !=
+                    MessageBoxResult.Yes)
+                {
+                    return;
+                }
+
+                string error = await Task.Run(() =>
+                    App.rootHub.CompletePersistentHidHideRecovery(preview));
+                serviceStatusText.Text = DescribeServiceStatus(App.rootHub);
+                MessageBox.Show(this,
+                    string.IsNullOrEmpty(error)
+                        ? "The exact controller IDs were verified absent and " +
+                          "the recovery record was completed. Other HidHide " +
+                          "rules and its active setting were not changed."
+                        : error,
+                    "HidHide recovery", MessageBoxButton.OK,
+                    string.IsNullOrEmpty(error)
+                        ? MessageBoxImage.Information : MessageBoxImage.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "HidHide recovery failed: " +
+                    ex.Message, "HidHide recovery", MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
+            finally
+            {
+                recoverHidHideBtn.IsEnabled = true;
             }
         }
 
@@ -1290,7 +1365,7 @@ Suspend support not enabled.", true);
                     return;
                 }
 
-                BeginExposureOperation("Switching to Native Physical",
+                BeginExposureOperation("Using controller directly",
                     "Stopping game output and safely exposing the physical controller.");
                 ControllerExposureTransitionResult result =
                     await App.rootHub.SetControllerExposureModeAsync(
@@ -1299,7 +1374,7 @@ Suspend support not enabled.", true);
                         allowExternalContainmentSuspension: true);
                 if (!result.Succeeded)
                 {
-                    ShowExposureFailure("Native Physical was not enabled",
+                    ShowExposureFailure("Could not use controller directly",
                         result.Status.Detail, result.Status.NeedsRecovery);
                 }
                 else
@@ -1334,14 +1409,14 @@ Suspend support not enabled.", true);
             button.IsEnabled = false;
             try
             {
-                BeginExposureOperation("Returning to Managed/Virtual",
+                BeginExposureOperation("Restoring game output",
                     "Restoring controller protection and game output.");
                 ControllerExposureTransitionResult result =
                     await App.rootHub.SetControllerExposureModeAsync(instanceId,
                         ControllerExposureMode.ManagedVirtual);
                 if (!result.Succeeded)
                 {
-                    ShowExposureFailure("Managed/Virtual was not restored",
+                    ShowExposureFailure("Game output was not restored",
                         result.Status.Detail, result.Status.NeedsRecovery);
                 }
                 else
@@ -1451,9 +1526,8 @@ Suspend support not enabled.", true);
         }
 
         /// <summary>
-        /// Without administrator rights PureDS4 cannot contain the controller
-        /// with HidHide, so it produces no game output. Say so in the window
-        /// instead of only in the log, and offer the one action that fixes it.
+        /// Explain process-level limitations without inferring the selected
+        /// controller's containment or virtual-output state from elevation.
         /// </summary>
         private void ShowElevationNotice(bool isElevated)
         {
@@ -1475,15 +1549,29 @@ Suspend support not enabled.", true);
             EventArgs e)
         {
             elevationStatusBanner.ShowAction = false;
+            RelaunchStorageLocation storageLocation =
+                ElevationRelaunch.DetectStorageLocation(Global.appdatapath,
+                    Global.exedirpath, Global.appDataPpath);
+            string relaunchArguments = ElevationRelaunch.BuildArguments(
+                Environment.ProcessId, storageLocation);
+            if (relaunchArguments == null)
+            {
+                elevationStatusBanner.Message =
+                    $"{ProductIdentity.Name} could not identify the active " +
+                    "profile location. Close it and start it again with Run " +
+                    "as administrator.";
+                return;
+            }
+
             ElevationRelaunchResult result = ElevationRelaunch.Restart(
-                Global.exelocation, string.Empty,
+                Global.exelocation, relaunchArguments,
                 ElevationRelaunch.ShellExecuteElevated);
 
             switch (result)
             {
                 case ElevationRelaunchResult.Started:
-                    // The elevated instance owns the single-instance handle from
-                    // here; this one has to release it or the new one exits.
+                    // The elevated child waits for this process to release the
+                    // single-instance handle before continuing startup.
                     RequestApplicationShutdown();
                     break;
 
@@ -1888,17 +1976,6 @@ Suspend support not enabled.", true);
             {
                 LogWriter logWriter = new LogWriter(dialog.FileName, logvm.LogItems.ToList());
                 logWriter.Process();
-            }
-        }
-
-        private void IdColumnTxtB_ToolTipOpening(object sender, ToolTipEventArgs e)
-        {
-            TextBlock statusBk = sender as TextBlock;
-            int idx = Convert.ToInt32(statusBk.Tag);
-            if (idx >= 0)
-            {
-                CompositeDeviceModel item = conLvViewModel.ControllerDict[idx];
-                item.RequestUpdatedTooltipID();
             }
         }
 
@@ -2605,7 +2682,6 @@ Suspend support not enabled.", true);
                 {
                     temp.WaitForExit();
                     Global.RefreshHidHideInfo();
-                    Global.RefreshFakerInputInfo();
 
                     settingsWrapVM.DriverCheckRefresh();
                 }
@@ -2633,14 +2709,14 @@ Suspend support not enabled.", true);
 
             ViiperPrerequisiteStatus status = ViiperSetupManager.GetStatus(tryStartServer: false);
             viiperStatusChip.Label = status.Ready
-                ? "Game output ready"
-                : "Game output needs attention";
+                ? "Game output setup ready"
+                : "Game output setup needs attention";
             viiperStatusChip.Detail = status.UserFacingDisplayText;
             viiperStatusChip.State = status.Ready
                 ? StatusVisualState.Success
                 : StatusVisualState.Warning;
             viiperSummaryText.Text = status.Ready
-                ? "Virtual controllers can be created for active game output profiles."
+                ? "Required components are available. Check a connected controller's status for actual virtual output."
                 : "Profiles can still be edited, but virtual game output is unavailable until setup is repaired.";
 
             gameOutputStatusBanner.Title = "Game output is unavailable";

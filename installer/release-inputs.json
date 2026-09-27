@@ -1,10 +1,7 @@
 {
   "schemaVersion": 1,
-  "releaseReady": false,
-  "releaseBlockers": [
-    "fakerinput-managed-wrapper",
-    "fakerinput-native-wrapper"
-  ],
+  "releaseReady": true,
+  "releaseBlockers": [],
   "components": [
     {
       "id": "viiper",
@@ -63,33 +60,6 @@
       ]
     },
     {
-      "id": "fakerinput-driver",
-      "version": "0.1.0",
-      "status": "verified",
-      "sourceRepository": "https://github.com/Ryochan7/FakerInput",
-      "sourceCommit": "0bf881f603dc40c4a0a2eef3d8d8da6196c405dc",
-      "sourceTag": "v0.1.0",
-      "licensePath": "extras/FakerInput-0.1.0-LICENSE.txt",
-      "artifacts": [
-        {
-          "kind": "repository",
-          "path": "extras/FakerInput_0.1.0_x64.msi",
-          "sha256": "30CF218B624740A91BE4FCCA3ADFB4550BA8CC8F31AC9625FE39D238E64D13EA",
-          "originUrl": "https://github.com/Ryochan7/FakerInput/releases/download/v0.1.0/FakerInput_0.1.0_x64.msi",
-          "originSha256": "30CF218B624740A91BE4FCCA3ADFB4550BA8CC8F31AC9625FE39D238E64D13EA",
-          "signerThumbprint": "2DDC38159B0A27AD29CAABECFE7E95F9450E5C9A"
-        },
-        {
-          "kind": "repository",
-          "path": "extras/FakerInput_0.1.0_x86.msi",
-          "sha256": "0C0A01EEF8C57C9B3DB917131995A10ADB3599CC643D2F27AD28D9511B96DEC1",
-          "originUrl": "https://github.com/Ryochan7/FakerInput/releases/download/v0.1.0/FakerInput_0.1.0_x86.msi",
-          "originSha256": "0C0A01EEF8C57C9B3DB917131995A10ADB3599CC643D2F27AD28D9511B96DEC1",
-          "signerThumbprint": "2DDC38159B0A27AD29CAABECFE7E95F9450E5C9A"
-        }
-      ]
-    },
-    {
       "id": "rnnoise-net",
       "version": "0.1.9",
       "status": "verified",
@@ -125,52 +95,6 @@
           "kind": "repository",
           "path": "PureDS4/libs/x86/SharpOSC/SharpOSC.dll",
           "sha256": "2BA7A8C0D6459F16A05725159903A2725955A3AF6D69018CBC1F15DEFF87F1CE"
-        }
-      ]
-    },
-    {
-      "id": "fakerinput-managed-wrapper",
-      "version": "1.0.3",
-      "status": "blocked",
-      "blocker": "The companion repository does not document whether the FakerInput MIT license covers this wrapper. The binary was inherited through the GPL-licensed DS4Windows lineage, but its precise standalone license scope is not established.",
-      "sourceRepository": "https://github.com/Ryochan7/FakerInputWrapper",
-      "sourceCommit": "a6ba4055d4c53c7b748f182c4d136e433a2400dc",
-      "inheritedDistributionLicensePath": "COPYING",
-      "licenseScope": "unconfirmed",
-      "licensePath": null,
-      "artifacts": [
-        {
-          "kind": "repository",
-          "path": "PureDS4/libs/x64/FakerInputWrapper/FakerInputWrapper.dll",
-          "sha256": "4792671766A575394D3402A9365AF9908AF94E812EC1969BFE4975C0AB4F5430"
-        },
-        {
-          "kind": "repository",
-          "path": "PureDS4/libs/x86/FakerInputWrapper/FakerInputWrapper.dll",
-          "sha256": "1A97250E793E22A7A961142C61BFED930F6A5080AAD739D32D79BE021E13B1A8"
-        }
-      ]
-    },
-    {
-      "id": "fakerinput-native-wrapper",
-      "version": "unresolved",
-      "status": "blocked",
-      "blocker": "The companion repository does not document whether the FakerInput MIT license covers this native wrapper, and the inherited binary has no embedded source revision. The binary was inherited through the GPL-licensed DS4Windows lineage, but its precise standalone license scope and exact source revision are not established.",
-      "sourceRepository": "https://github.com/Ryochan7/FakerInputDll",
-      "sourceCommit": null,
-      "inheritedDistributionLicensePath": "COPYING",
-      "licenseScope": "unconfirmed",
-      "licensePath": null,
-      "artifacts": [
-        {
-          "kind": "repository",
-          "path": "PureDS4/libs/x64/FakerInputWrapper/FakerInputDll.dll",
-          "sha256": "7E3D67A3E6B4EF2ABA039A3B1E079ACDE3AD95E0286A87623949AD74607D1A50"
-        },
-        {
-          "kind": "repository",
-          "path": "PureDS4/libs/x86/FakerInputWrapper/FakerInputDll.dll",
-          "sha256": "1A73F0D2CA7ECB19F00A390A3FD27BA3BA5E21C3363325EBBCC298EE10D10763"
         }
       ]
     }

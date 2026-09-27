@@ -11,11 +11,17 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="460"
              Background="{DynamicResource SurfaceBaseBrush}">
+    <ScrollViewer x:Name="readingsScroll"
+                  VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  CanContentScroll="False">
     <DockPanel LastChildFill="False" Margin="12">
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-            <StackPanel Orientation="Horizontal" Width="200">
+            <StackPanel Orientation="Horizontal" Width="310">
                 <Label x:Name="inputContNum" Content="#" FontWeight="Bold"/>
-                <Label x:Name="inputDelayLb" Content="{lex:Loc ReadingsControl.InputDelayNA}"  Margin="8,0,0,0">
+                <Label x:Name="inputDelayLb" Content="{lex:Loc ReadingsControl.InputDelayNA}" Margin="8,0,0,0"
+                       ToolTip="Average time between recent controller reports, not controller-to-game latency."
+                       AutomationProperties.HelpText="Average time between recent controller reports, not controller-to-game latency.">
                     <Label.Background>
                         <SolidColorBrush x:Name="inpuDelayBackBrush" Color="Transparent" />
                     </Label.Background>
@@ -24,8 +30,8 @@
                     </Label.Foreground>
                 </Label>
             </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
-                <Label x:Name="batteryLvlLb" Content="{lex:Loc ReadingsControl.BatteryZero}" Margin="8,0,0,0" />
+            <StackPanel Orientation="Horizontal" Margin="8,0,0,0">
+                <Label x:Name="batteryLvlLb" Content="{lex:Loc ReadingsControl.BatteryZero}" />
             </StackPanel>
         </StackPanel>
         <Grid DockPanel.Dock="Top" Width="450" Margin="0,8,0,0">
@@ -259,4 +265,5 @@
             </Border>
         </Grid>
     </DockPanel>
+    </ScrollViewer>
 </UserControl>

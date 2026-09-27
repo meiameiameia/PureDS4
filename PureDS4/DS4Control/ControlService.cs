@@ -48,6 +48,7 @@ namespace DS4Windows
         private readonly HashSet<string> hidHidePersistentManagedInstanceIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private HashSet<string> hidHideBaselineBlacklist;
         private HidHideOwnershipJournal hidHideOwnershipJournal;
+        private bool hidHideExternalRecoveryAttempted;
         private bool hidHideTransientRunStarted;
         private bool hidHideRecoveryReported;
         private readonly object steamInputReclaimLock = new object();
@@ -107,8 +108,6 @@ namespace DS4Windows
         private HashSet<string> hidDeviceHidingExemptedDevs = new HashSet<string>();
         private bool hidDeviceHidingForced = false;
         private bool hidDeviceHidingEnabled = false;
-        private bool stickMouseFakerInputNoticeShown = false;
-        private bool stickMouseFakerInputMissingNoticeShown = false;
         private readonly object outputKbmHandlerLock = new object();
         private readonly object serviceLifecycleLock = new object();
         private readonly ControllerExposureTransitionCoordinator[]
@@ -279,209 +278,53 @@ namespace DS4Windows
         //    LogDebug($"Associated input controller #{outSlotDev.InputIndex + 1} ({outSlotDev.InputDisplayString}) to virtual {outSlotDev.OutputDevice.GetDeviceType()} Controller in{(outSlotDev.PermanentType != OutContType.None ? " permanent" : "")} output slot #{outSlotDev.Index + 1}");
         //}
 
-        private string[] MapMonitoringOscMessageToCommand(string[] command)
+        private long nextOscWarningTick;
+
+        private void LogOscWarning(string message)
         {
-            // Overwrite "monitor" with the controller Id
-            command[2] = command[3];
-
-            switch (command[4])
+            if (OscInputPacketPolicy.ShouldLogMalformed(ref nextOscWarningTick,
+                Stopwatch.GetTimestamp(), Stopwatch.Frequency * 10))
             {
-                case "battery":
-                    command[3] = "battery";
-                    break;
-                case "l2":
-                case "r2":
-                    command[3] = "trigger";
-                    break;
-                case "rx":
-                case "ry":
-                case "lx":
-                case "ly":
-                    command[3] = "stick";
-                    break;
-                default:
-                    command[3] = "press";
-                    break;
+                AppLogger.LogToGui(message, false);
             }
-
-            return command;
         }
 
         private void CreateOSCCallback()
         {
-            oscCallback = delegate (OscPacket packet)
+            oscCallback = packet =>
             {
-                var messageReceived = (OscMessage)packet;
-
-                // If typecase fails, exit
-                if (messageReceived == null)
+                if (!OscInputPacketPolicy.TryParse(packet,
+                    Global.isInterpretingOscMonitoring(), oscState.Length,
+                    out OscInputCommand command))
                 {
+                    LogOscWarning("Ignored invalid OSC input packet.");
                     return;
                 }
 
-                string[] command = null;
-                try
+                if (command.Kind == OscInputKind.BatteryRequest)
                 {
-                    command = messageReceived.Address.Split("/");
-                }
-                catch (Exception e)
-                {
-                    AppLogger.LogToGui("Error Receiving OSC Message: " + e.Message, false, true);
-                }
-
-                if (command == null)
-                {
-                    return;
-                }
-
-                if (command[1] != "ds4windows")
-                {
-                    return;
-                }
-
-                if (command[2] == "monitor")
-                {
-                    if (Global.isInterpretingOscMonitoring())
+                    UDPSender sender = oscSender;
+                    if (sender == null || !isUsingOSCSender())
                     {
-                        command = MapMonitoringOscMessageToCommand(command);
-                    }
-                    else
-                    {
+                        LogOscWarning("OSC battery request ignored because the sender is off.");
                         return;
                     }
-                }
 
-                int stateInd = -1;
-                if (!int.TryParse(command[2], out stateInd))
-                {
-                    stateInd = -1;
-                }
-
-                if (stateInd == -1)
-                {
-                    AppLogger.LogToGui("Received malformed OSC address: " + messageReceived.Address, false);
+                    try
+                    {
+                        sender.Send(new OscMessage(
+                            "/ds4windows/monitor/" + command.ControllerIndex + "/battery",
+                            oscState[command.ControllerIndex].Battery));
+                    }
+                    catch (Exception e)
+                    {
+                        LogOscWarning("OSC battery response failed: " +
+                            e.GetType().Name);
+                    }
                     return;
                 }
 
-                if (command[3] == "battery")
-                {
-                    if (!isUsingOSCSender())
-                    {
-                        AppLogger.LogToGui("Battery level requested, but the OSC Sender isn't active. Turn it on in Settings.", false);
-                    }
-                    else
-                    {
-                        oscSender.Send(new SharpOSC.OscMessage("/ds4windows/monitor/" + stateInd + "/battery", oscState[stateInd].Battery));
-                    }
-                    return;
-                }
-                else if (command[3] == "press")
-                {
-                    int messageValue = Convert.ToInt32(messageReceived.Arguments[0]);
-                    bool buttonBool = messageValue == 1 ? true : false;
-
-                    switch (command[4])
-                    {
-                        case "cross":
-                            oscState[stateInd].Cross = buttonBool;
-                            break;
-                        case "square":
-                            oscState[stateInd].Square = buttonBool;
-                            break;
-                        case "circle":
-                            oscState[stateInd].Circle = buttonBool;
-                            break;
-                        case "triangle":
-                            oscState[stateInd].Triangle = buttonBool;
-                            break;
-                        case "r1":
-                            oscState[stateInd].R1 = buttonBool;
-                            break;
-                        case "r2":
-                            oscState[stateInd].R2 = Convert.ToByte(buttonBool ? 255 : 0);
-                            break;
-                        case "r3":
-                            oscState[stateInd].R3 = buttonBool;
-                            break;
-                        case "l1":
-                            oscState[stateInd].L1 = buttonBool;
-                            break;
-                        case "l2":
-                            oscState[stateInd].L2 = Convert.ToByte(buttonBool ? 255 : 0);
-                            break;
-                        case "l3":
-                            oscState[stateInd].L3 = buttonBool;
-                            break;
-                        case "dpadup":
-                        case "dup":
-                            oscState[stateInd].DpadUp = buttonBool;
-                            break;
-                        case "dpaddown":
-                        case "ddown":
-                            oscState[stateInd].DpadDown = buttonBool;
-                            break;
-                        case "dpadleft":
-                        case "dleft":
-                            oscState[stateInd].DpadLeft = buttonBool;
-                            break;
-                        case "dpadright":
-                        case "dright":
-                            oscState[stateInd].DpadRight = buttonBool;
-                            break;
-                        case "options":
-                            oscState[stateInd].Options = buttonBool;
-                            break;
-                        case "share":
-                            oscState[stateInd].Share = buttonBool;
-                            break;
-                    }
-                }
-                else if (command[3] == "stick" && messageReceived.Arguments.Count == 1)
-                {
-                    switch (command[4])
-                    {
-                        case "lx":
-                            oscState[stateInd].LX = Convert.ToByte(Convert.ToSingle(messageReceived.Arguments[0]));
-                            break;
-                        case "ly":
-                            oscState[stateInd].LY = Convert.ToByte(Convert.ToSingle(messageReceived.Arguments[0]));
-                            break;
-                        case "rx":
-                            oscState[stateInd].RX = Convert.ToByte(Convert.ToSingle(messageReceived.Arguments[0]));
-                            break;
-                        case "ry":
-                            oscState[stateInd].RY = Convert.ToByte(Convert.ToSingle(messageReceived.Arguments[0]));
-                            break;
-                    }
-                }
-                else if (command[3] == "stick" && messageReceived.Arguments.Count == 2)
-                {
-                    float xValue = Convert.ToSingle(messageReceived.Arguments[0]);
-                    float yValue = Convert.ToSingle(messageReceived.Arguments[1]);
-
-                    if (command[4] == "left")
-                    {
-                        oscState[stateInd].LX = Convert.ToByte(xValue * 255);
-                        oscState[stateInd].LY = Convert.ToByte(yValue * 255);
-                    }
-                    else if (command[4] == "right")
-                    {
-                        oscState[stateInd].RX = Convert.ToByte(xValue * 255);
-                        oscState[stateInd].RY = Convert.ToByte(yValue * 255);
-                    }
-                }
-                else if (command[3] == "trigger")
-                {
-                    switch (command[4])
-                    {
-                        case "r2":
-                            oscState[stateInd].R2 = Convert.ToByte(Convert.ToSingle(messageReceived.Arguments[0]));
-                            break;
-                        case "l2":
-                            oscState[stateInd].L2 = Convert.ToByte(Convert.ToSingle(messageReceived.Arguments[0]));
-                            break;
-                    }
-                }
+                command.ApplyTo(oscState[command.ControllerIndex]);
             };
         }
 
@@ -534,133 +377,11 @@ namespace DS4Windows
                 StartupDiag($"OutputKBM falling back to {VirtualKBMFactory.GetFallbackHandlerIdentifier()}");
                 Global.outputKBMHandler = VirtualKBMFactory.GetFallbackHandler();
             }
-            else
-            {
-                // Connection was made. Check if version number should get populated
-                if (outputKBMHandler.GetIdentifier() == FakerInputHandler.IDENTIFIER)
-                {
-                    Global.outputKBMHandler.Version = Global.fakerInputVersion;
-                }
-            }
 
             Global.InitOutputKBMMapping(Global.outputKBMHandler.GetIdentifier());
             Global.outputKBMMapping.PopulateConstants();
             Global.outputKBMMapping.PopulateMappings();
             StartupDiag($"InitOutputKBMHandler end active={Global.outputKBMHandler?.GetFullDisplayName()} mapping={Global.outputKBMMapping?.GetType().Name}");
-        }
-
-        private bool SwitchOutputKBMHandler(string identifier)
-        {
-            lock (outputKbmHandlerLock)
-            {
-                if (Global.outputKBMHandler != null &&
-                    Global.outputKBMHandler.GetIdentifier() == identifier)
-                {
-                    return true;
-                }
-
-                VirtualKBMBase oldHandler = Global.outputKBMHandler;
-                VirtualKBMMapping oldMapping = Global.outputKBMMapping;
-
-                try
-                {
-                    InitOutputKBMHandler(identifier);
-                    if (Global.outputKBMHandler?.GetIdentifier() == identifier)
-                    {
-                        RefreshLoadedActionAliases();
-                        oldHandler?.Disconnect();
-                        return true;
-                    }
-                }
-                catch { }
-
-                Global.outputKBMHandler?.Disconnect();
-                Global.outputKBMHandler = oldHandler;
-                Global.outputKBMMapping = oldMapping;
-                return false;
-            }
-        }
-
-        private void EnsureVirtualMouseForStickMouseProfile(int ind)
-        {
-            if (!ProfileUsesStickMouse(ind))
-            {
-                return;
-            }
-
-            if (Global.outputKBMHandler?.GetIdentifier() == FakerInputHandler.IDENTIFIER)
-            {
-                return;
-            }
-
-            Global.RefreshFakerInputInfo();
-            if (Global.fakerInputInstalled)
-            {
-                bool switched = SwitchOutputKBMHandler(FakerInputHandler.IDENTIFIER);
-                if (switched && !stickMouseFakerInputNoticeShown)
-                {
-                    stickMouseFakerInputNoticeShown = true;
-                    LogDebug("Stick mouse profile detected. Using FakerInput virtual mouse so Windows keeps a real pointer device available.");
-                }
-                else if (!switched && !stickMouseFakerInputMissingNoticeShown)
-                {
-                    stickMouseFakerInputMissingNoticeShown = true;
-                    LogDebug($"Stick mouse profile detected, but {ProductIdentity.Name} could not connect to FakerInput. SendInput will remain active.");
-                }
-
-                return;
-            }
-
-            if (!stickMouseFakerInputMissingNoticeShown)
-            {
-                stickMouseFakerInputMissingNoticeShown = true;
-                string helpURL = "https://github.com/Ryochan7/FakerInput/";
-                LogDebug($"Stick mouse profile detected, but FakerInput is not installed. Install FakerInput to expose a persistent virtual mouse and avoid hidden cursor behavior on couch/TV setups: {helpURL}");
-                AppLogger.LogToTray("Stick mouse works best with FakerInput installed for a persistent virtual mouse.");
-            }
-        }
-
-        private static bool ProfileUsesStickMouse(int ind)
-        {
-            return StickDirectionMapsToMouse(ind, DS4Controls.LXNeg) ||
-                StickDirectionMapsToMouse(ind, DS4Controls.LXPos) ||
-                StickDirectionMapsToMouse(ind, DS4Controls.LYNeg) ||
-                StickDirectionMapsToMouse(ind, DS4Controls.LYPos) ||
-                StickDirectionMapsToMouse(ind, DS4Controls.RXNeg) ||
-                StickDirectionMapsToMouse(ind, DS4Controls.RXPos) ||
-                StickDirectionMapsToMouse(ind, DS4Controls.RYNeg) ||
-                StickDirectionMapsToMouse(ind, DS4Controls.RYPos);
-        }
-
-        private static bool StickDirectionMapsToMouse(int ind, DS4Controls control)
-        {
-            DS4ControlSettings setting = GetDS4CSetting(ind, control);
-            return ActionMapsToMouse(setting.actionType, setting.action.actionBtn) ||
-                ActionMapsToMouse(setting.shiftActionType, setting.shiftAction.actionBtn);
-        }
-
-        private static bool ActionMapsToMouse(DS4ControlSettings.ActionType actionType, X360Controls outputControl)
-        {
-            if (actionType != DS4ControlSettings.ActionType.Button)
-            {
-                return false;
-            }
-
-            return outputControl >= X360Controls.MouseUp &&
-                outputControl <= X360Controls.AbsMouseRight;
-        }
-
-        private static void RefreshLoadedActionAliases()
-        {
-            for (int device = 0; device < Global.MAX_DS4_CONTROLLER_COUNT; device++)
-            {
-                foreach (DS4Controls control in Enum.GetValues(typeof(DS4Controls)))
-                {
-                    DS4ControlSettings setting = GetDS4CSetting(device, control);
-                    Global.RefreshActionAlias(setting, false);
-                    Global.RefreshActionAlias(setting, true);
-                }
-            }
         }
 
         public void PostDS4DeviceInit(DS4Device device)
@@ -725,6 +446,12 @@ namespace DS4Windows
         private void ShutDownCore()
         {
             ReleaseHidHideManagedDevices();
+            if (hidHideOwnershipJournal?.IsTransientRunInProgress == true &&
+                !hidHideOwnershipJournal.MarkStoppedRunRecoveryRequired())
+            {
+                StartupDiag("HidHide recovery state could not be saved " +
+                    "during shutdown");
+            }
             outputslotMan.ShutDown();
             OutputSlotPersist.WriteConfig(outputslotMan);
 
@@ -1014,7 +741,14 @@ namespace DS4Windows
             }
         }
 
-        private HidHideOwnershipJournal GetHidHideOwnershipJournal()
+        internal bool HidHideRecoveryRequired =>
+            hidHideOwnershipJournal != null &&
+            (!hidHideOwnershipJournal.IsReliable ||
+             hidHideOwnershipJournal.RecoveryRequired ||
+             (!running && hidHideOwnershipJournal.IsTransientRunInProgress));
+
+        private HidHideOwnershipJournal GetHidHideOwnershipJournal(
+            bool restoreExternalContainment = true)
         {
             if (hidHideOwnershipJournal == null)
             {
@@ -1030,6 +764,11 @@ namespace DS4Windows
                     Path.Combine(appDataRoot,
                         HidHideOwnershipJournal.FileName));
                 hidHideOwnershipJournal.Load();
+            }
+            if (restoreExternalContainment &&
+                !hidHideExternalRecoveryAttempted)
+            {
+                hidHideExternalRecoveryAttempted = true;
                 if (hidHideOwnershipJournal.IsReliable &&
                     hidHideOwnershipJournal.ExternalContainmentSuspensions.Count > 0)
                 {
@@ -1053,7 +792,8 @@ namespace DS4Windows
                 string message =
                     $"HidHide recovery is required. {ProductIdentity.Name} preserved " +
                     "uncertain global configuration instead of removing it. " +
-                    $"Review HidHide Configuration Client and {hidHideOwnershipJournal.Path}. " +
+                    "Stop controller handling and open Tools > HidHide recovery. " +
+                    $"If inspection fails, review HidHide Configuration Client and {hidHideOwnershipJournal.Path}. " +
                     $"Details: {detail}.";
                 StartupDiag(message);
                 AppLogger.LogToGui(message, true);
@@ -2016,10 +1756,9 @@ namespace DS4Windows
                 Thread.Sleep(2000);
 
                 bool runningAsAdmin = Global.IsAdministrator();
-                if (Global.outputKBMHandler.GetIdentifier() != FakerInputHandler.IDENTIFIER && !runningAsAdmin)
+                if (!runningAsAdmin)
                 {
-                    string helpURL = @"https://ryochan7.github.io/ds4windows-site/troubleshooting/kb-mouse-issues/#windows-not-responding-to-ds4ws-kb-m-commands-in-some-situations";
-                    LogDebug($"Some applications may block controller inputs. (Windows UAC Conflictions). Please go to {helpURL} for more information and workarounds.");
+                    LogDebug($"Keyboard and mouse output cannot reach a window that is running with administrator rights while {ProductIdentity.Name} is not. Restart as administrator if a game ignores mapped keys or mouse movement.");
                 }
 
                 LogDebug($"Using output KB+M handler: {Global.outputKBMHandler.GetFullDisplayName()}");
@@ -2396,12 +2135,18 @@ namespace DS4Windows
             // controller handles are closed. Unrelated HidHide entries remain untouched.
             // Start will reacquire hiding as each managed controller is discovered again.
             ReleaseHidHideManagedDevices();
+            if (hidHideOwnershipJournal?.IsTransientRunInProgress == true &&
+                !hidHideOwnershipJournal.MarkStoppedRunRecoveryRequired())
+            {
+                StartupDiag("HidHide recovery state could not be saved " +
+                    "after controller handling stopped");
+            }
             ResetControllerExposureSessionsForServiceStop();
             StartupDiag("ControlService.Stop before stopped events");
             ServiceStopped?.Invoke(this, EventArgs.Empty);
             RunningChanged?.Invoke(this, EventArgs.Empty);
             StartupDiag("ControlService.Stop exit");
-            return true;
+            return !HidHideRecoveryRequired;
         }
 
         public bool HotPlug()
@@ -2813,8 +2558,6 @@ namespace DS4Windows
 
         public void CheckProfileOptions(int ind, DS4Device device, bool startUp = false)
         {
-            EnsureVirtualMouseForStickMouseProfile(ind);
-
             ViiperOutDevice playStationFeatureOutput =
                 EnsurePlayStationFeatureOutput(ind, device);
             OutContType playStationFeatureOutputType =

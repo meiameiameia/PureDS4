@@ -70,14 +70,58 @@ namespace DS4WindowsTests
         }
 
         [DataTestMethod]
-        [DataRow(true, true)]
-        [DataRow(false, false)]
-        public void BluetoothInputTimeoutPreservesOnlyPresentPhysicalInterface(
-            bool interfaceStillPresent, bool expectedRetry)
+        [DataRow(true, 0L, 1000L, false)]
+        [DataRow(false, 1000L, 2000L, false)]
+        [DataRow(true, 1000L, 999L, false)]
+        [DataRow(true, 1000L, 1000L, true)]
+        [DataRow(true, 1000L, 9999L, true)]
+        [DataRow(true, 1000L, 10000L, false)]
+        [DataRow(true, 9000L, 10000L, true)]
+        public void BluetoothInputTimeoutHasBoundedGraceFromLastValidState(
+            bool interfaceStillPresent, long lastValidTick, long nowTick,
+            bool expectedRetry)
         {
             Assert.AreEqual(expectedRetry,
                 DS4Device.ShouldRetryBluetoothInputAfterTimeout(
-                    interfaceStillPresent));
+                    interfaceStillPresent, lastValidTick, nowTick));
+        }
+
+        [DataTestMethod]
+        [DataRow(0L, 3000L, false)]
+        [DataRow(1000L, 999L, false)]
+        [DataRow(1000L, 3999L, true)]
+        [DataRow(1000L, 4000L, false)]
+        [DataRow(5000L, 6000L, true)]
+        public void BluetoothReadinessRequiresRecentPhysicalState(
+            long lastValidTick, long nowTick, bool expectedFresh)
+        {
+            Assert.AreEqual(expectedFresh,
+                DS4Device.IsBluetoothInputFresh(lastValidTick, nowTick));
+        }
+
+        [DataTestMethod]
+        [DataRow(1000L, 0L, 3999L, false)]
+        [DataRow(1000L, 0L, 4000L, true)]
+        [DataRow(1000L, 2000L, 10999L, false)]
+        [DataRow(1000L, 2000L, 11000L, true)]
+        [DataRow(1000L, 9000L, 11000L, false)]
+        [DataRow(1000L, 2000L, 1999L, true)]
+        public void AudioOnlyReportsCannotKeepControllerStateAlive(
+            long inputLoopStartTick, long lastValidTick, long nowTick,
+            bool expectedRetirement)
+        {
+            Assert.AreEqual(expectedRetirement,
+                DS4Device.ShouldRetireBluetoothAudioOnlyStream(
+                    inputLoopStartTick, lastValidTick, nowTick));
+        }
+
+        [TestMethod]
+        public void BluetoothDisconnectReportRequiresPriorValidInput()
+        {
+            Assert.IsFalse(DS4Device.ShouldSendBluetoothDisconnectReport(
+                receivedValidInput: false));
+            Assert.IsTrue(DS4Device.ShouldSendBluetoothDisconnectReport(
+                receivedValidInput: true));
         }
 
         [TestMethod]

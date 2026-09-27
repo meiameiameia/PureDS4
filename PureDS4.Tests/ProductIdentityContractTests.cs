@@ -160,9 +160,9 @@ namespace DS4WindowsTests
             // marker cannot be dropped without a test noticing.
             Assert.AreEqual(
 #if PUREDS4_EXPERIMENTAL_DS3
-                "5.1.0-beta.1+ds3-experimental",
+                "5.1.0+ds3-experimental",
 #else
-                "5.1.0-beta.1",
+                "5.1.0",
 #endif
                 assembly.GetCustomAttribute<
                     AssemblyInformationalVersionAttribute>()?.InformationalVersion);

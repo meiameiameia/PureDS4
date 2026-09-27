@@ -128,7 +128,7 @@ namespace DS4Windows
             {
                 return new ControllerStartupStatus(
                     ControllerStartupStage.Connecting, "Connecting",
-                    "Waiting for stable input from the physical controller.");
+                    "Waiting for a recent input report from the physical controller.");
             }
 
             if (signals.VirtualRequired && !signals.VirtualConnected &&
@@ -184,8 +184,8 @@ namespace DS4Windows
             }
 
             string detail = signals.VirtualRequired
-                ? "Physical input, virtual pad, and enabled media lanes are stable."
-                : "Physical input and every enabled media lane are stable.";
+                ? "Physical input was detected and the virtual output backend is connected. Game response is not verified."
+                : "Physical input was detected. Game response is not verified.";
             return new ControllerStartupStatus(ControllerStartupStage.Ready,
                 "Ready", detail);
         }

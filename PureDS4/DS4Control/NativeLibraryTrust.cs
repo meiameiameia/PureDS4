@@ -1,4 +1,3 @@
-using FakerInputWrapper;
 using System;
 using System.IO;
 using System.Reflection;
@@ -12,13 +11,8 @@ namespace DS4Windows
     {
         internal const string RnnoiseSha256 =
             "12E19BF7A18D13E092A5FBE5A7C5B2081F5E7B56F6D77AEAB5837335F44CEEDF";
-        internal const string FakerInputX64Sha256 =
-            "7E3D67A3E6B4EF2ABA039A3B1E079ACDE3AD95E0286A87623949AD74607D1A50";
-        internal const string FakerInputX86Sha256 =
-            "1A73F0D2CA7ECB19F00A390A3FD27BA3BA5E21C3363325EBBCC298EE10D10763";
 
         private static int applicationResolverConfigured;
-        private static int fakerInputResolverConfigured;
 
         internal static void EnsureApplicationResolver()
         {
@@ -37,26 +31,6 @@ namespace DS4Windows
             catch
             {
                 Volatile.Write(ref applicationResolverConfigured, 0);
-                throw;
-            }
-        }
-
-        internal static void EnsureFakerInputResolver()
-        {
-            if (Interlocked.CompareExchange(
-                    ref fakerInputResolverConfigured, 1, 0) != 0)
-            {
-                return;
-            }
-
-            try
-            {
-                NativeLibrary.SetDllImportResolver(typeof(FakerInput).Assembly,
-                    ResolveFakerInputLibrary);
-            }
-            catch
-            {
-                Volatile.Write(ref fakerInputResolverConfigured, 0);
                 throw;
             }
         }
@@ -113,20 +87,6 @@ namespace DS4Windows
 
             return LoadVerifiedApplicationLibrary("rnnoise.dll",
                 RnnoiseSha256);
-        }
-
-        private static IntPtr ResolveFakerInputLibrary(string libraryName,
-            Assembly assembly, DllImportSearchPath? searchPath)
-        {
-            if (!string.Equals(Path.GetFileName(libraryName),
-                    "FakerInputDll.dll", StringComparison.OrdinalIgnoreCase))
-            {
-                return IntPtr.Zero;
-            }
-
-            return LoadVerifiedApplicationLibrary("FakerInputDll.dll",
-                Environment.Is64BitProcess ? FakerInputX64Sha256 :
-                    FakerInputX86Sha256);
         }
 
         private static IntPtr LoadVerifiedApplicationLibrary(string fileName,

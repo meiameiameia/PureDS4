@@ -19,14 +19,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
+using System.IO;
 
 namespace DS4Windows
 {
     /// <summary>
-    /// Started without administrator rights, PureDS4 finds the controller but
-    /// cannot hide it from games, so no virtual controller is created and the
-    /// controller-protection app cannot open either. That state used to reach
-    /// only the log, leaving the window looking like everything worked.
+    /// Elevation is a process capability, not evidence that a particular
+    /// controller was contained or that its virtual output was created.
     /// </summary>
     public sealed class ElevationNotice
     {
@@ -49,7 +49,7 @@ namespace DS4Windows
 
         /// <summary>
         /// The notice to show, or <see langword="null"/> when PureDS4 is
-        /// elevated and can protect the controller.
+        /// elevated. Controller readiness is reported separately.
         /// </summary>
         public static ElevationNotice Evaluate(bool isElevated)
         {
@@ -59,10 +59,10 @@ namespace DS4Windows
             }
 
             return new ElevationNotice(
-                $"{ProductIdentity.Name} is running without administrator rights",
-                "Controllers cannot be hidden from games, so no game output is " +
-                "created: a game may see the controller twice, or not at all. " +
-                "Controller protection settings cannot open either.");
+                "Some actions need administrator rights",
+                "Game output may still work. Setup and protection changes may " +
+                "need elevation; keyboard and mouse mappings cannot reach " +
+                "an elevated game from this process.");
         }
     }
 
@@ -78,6 +78,13 @@ namespace DS4Windows
         Failed,
     }
 
+    public enum RelaunchStorageLocation
+    {
+        Unspecified,
+        Portable,
+        WindowsAccount,
+    }
+
     /// <summary>
     /// Restarts PureDS4 with administrator rights. The launcher is injected so
     /// the decision and result mapping stay testable without spawning a process
@@ -87,8 +94,155 @@ namespace DS4Windows
     {
         /// <summary>The Windows error for a dismissed elevation prompt.</summary>
         public const int ErrorCancelled = 1223;
+        public const string PortableStorageArgument = "portable";
+        public const string WindowsAccountStorageArgument = "appdata";
+        public const int PredecessorExitTimeoutMilliseconds = 30000;
 
         public delegate void Launcher(string fileName, string arguments);
+        public delegate bool PredecessorWaiter(int processId,
+            int timeoutMilliseconds);
+
+        public static string BuildArguments(int predecessorProcessId,
+            RelaunchStorageLocation storageLocation)
+        {
+            if (predecessorProcessId <= 0 ||
+                storageLocation == RelaunchStorageLocation.Unspecified)
+            {
+                return null;
+            }
+
+            string storageArgument = storageLocation switch
+            {
+                RelaunchStorageLocation.Portable => PortableStorageArgument,
+                RelaunchStorageLocation.WindowsAccount =>
+                    WindowsAccountStorageArgument,
+                _ => null,
+            };
+            if (storageArgument == null)
+            {
+                return null;
+            }
+            return "-wait-for-process " + predecessorProcessId.ToString(
+                CultureInfo.InvariantCulture) + " -storage " + storageArgument;
+        }
+
+        public static bool TryParseStorageArgument(string value,
+            out RelaunchStorageLocation storageLocation)
+        {
+            if (string.Equals(value, PortableStorageArgument,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                storageLocation = RelaunchStorageLocation.Portable;
+                return true;
+            }
+
+            if (string.Equals(value, WindowsAccountStorageArgument,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                storageLocation = RelaunchStorageLocation.WindowsAccount;
+                return true;
+            }
+
+            storageLocation = RelaunchStorageLocation.Unspecified;
+            return false;
+        }
+
+        public static RelaunchStorageLocation DetectStorageLocation(
+            string activePath, string portablePath, string accountPath)
+        {
+            if (PathsEqual(activePath, portablePath))
+            {
+                return RelaunchStorageLocation.Portable;
+            }
+
+            if (PathsEqual(activePath, accountPath))
+            {
+                return RelaunchStorageLocation.WindowsAccount;
+            }
+
+            return RelaunchStorageLocation.Unspecified;
+        }
+
+        public static bool TryResolveStoragePath(
+            RelaunchStorageLocation storageLocation, string portablePath,
+            string accountPath, Func<string, bool> markerExists,
+            out string selectedPath)
+        {
+            selectedPath = null;
+            if (markerExists == null)
+            {
+                return false;
+            }
+
+            string candidate = storageLocation switch
+            {
+                RelaunchStorageLocation.Portable => portablePath,
+                RelaunchStorageLocation.WindowsAccount => accountPath,
+                _ => null,
+            };
+            if (string.IsNullOrWhiteSpace(candidate) ||
+                !markerExists(Path.Combine(candidate, "Auto Profiles.xml")))
+            {
+                return false;
+            }
+
+            selectedPath = candidate;
+            return true;
+        }
+
+        public static bool WaitForPredecessor(int processId,
+            int timeoutMilliseconds, PredecessorWaiter waiter)
+        {
+            return processId > 0 && processId != Environment.ProcessId &&
+                timeoutMilliseconds > 0 && waiter != null &&
+                waiter(processId, timeoutMilliseconds);
+        }
+
+        public static bool WaitForProcessExit(int processId,
+            int timeoutMilliseconds)
+        {
+            try
+            {
+                using Process predecessor = Process.GetProcessById(processId);
+                return predecessor.WaitForExit(timeoutMilliseconds);
+            }
+            catch (ArgumentException)
+            {
+                return true;
+            }
+            catch (InvalidOperationException)
+            {
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static bool PathsEqual(string left, string right)
+        {
+            if (string.IsNullOrWhiteSpace(left) ||
+                string.IsNullOrWhiteSpace(right))
+            {
+                return false;
+            }
+
+            try
+            {
+                return string.Equals(Path.GetFullPath(left).TrimEnd(
+                        Path.DirectorySeparatorChar,
+                        Path.AltDirectorySeparatorChar),
+                    Path.GetFullPath(right).TrimEnd(
+                        Path.DirectorySeparatorChar,
+                        Path.AltDirectorySeparatorChar),
+                    StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         public static ElevationRelaunchResult Restart(string executablePath,
             string arguments, Launcher launcher)

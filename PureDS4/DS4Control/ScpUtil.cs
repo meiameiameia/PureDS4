@@ -674,9 +674,6 @@ namespace DS4Windows
         public static bool openRGBSyncEnabled = false;
         public static int openRGBServerPort   = 6743;
 
-        public static bool fakerInputInstalled = IsFakerInputInstalled();
-        public const string BLANK_FAKERINPUT_VERSION = "0.0.0.0";
-        public static string fakerInputVersion = FakerInputVersion();
         public static Rect absDisplayBounds = new Rect(0, 0, 2, 2);
         public static Rect fullDesktopBounds = new Rect(0, 0, 2, 2);
         //public static Rect absDisplayBounds = new Rect(800, 0, 1024, 768);
@@ -1172,51 +1169,9 @@ namespace DS4Windows
             return CheckForSysDevice(@"root\HidHide");
         }
 
-        public static bool IsFakerInputInstalled()
-        {
-            return CheckForSysDevice(@"root\FakerInput");
-        }
-
         public static void RefreshHidHideInfo()
         {
             hidHideInstalled = IsHidHideInstalled();
-        }
-
-        private static string FakerInputVersion()
-        {
-            // Start with BLANK_FAKERINPUT_VERSION for result
-            string result = BLANK_FAKERINPUT_VERSION;
-            IntPtr deviceInfoSet = NativeMethods.SetupDiGetClassDevs(ref Util.fakerInputGuid, null, 0, NativeMethods.DIGCF_DEVICEINTERFACE);
-            NativeMethods.SP_DEVINFO_DATA deviceInfoData = new NativeMethods.SP_DEVINFO_DATA();
-            deviceInfoData.cbSize = System.Runtime.InteropServices.Marshal.SizeOf(deviceInfoData);
-            bool foundDev = false;
-            //bool success = NativeMethods.SetupDiEnumDeviceInfo(deviceInfoSet, 0, ref deviceInfoData);
-            for (int i = 0; !foundDev && NativeMethods.SetupDiEnumDeviceInfo(deviceInfoSet, i, ref deviceInfoData); i++)
-            {
-                ulong devPropertyType = 0;
-                int requiredSizeProp = 0;
-                NativeMethods.SetupDiGetDeviceProperty(deviceInfoSet, ref deviceInfoData,
-                    ref NativeMethods.DEVPKEY_Device_DriverVersion, ref devPropertyType, null, 0, ref requiredSizeProp, 0);
-
-                if (requiredSizeProp > 0)
-                {
-                    var versionTextBuffer = new byte[requiredSizeProp];
-                    NativeMethods.SetupDiGetDeviceProperty(deviceInfoSet, ref deviceInfoData,
-                        ref NativeMethods.DEVPKEY_Device_DriverVersion, ref devPropertyType, versionTextBuffer, requiredSizeProp, ref requiredSizeProp, 0);
-
-                    string tmpitnow = System.Text.Encoding.Unicode.GetString(versionTextBuffer);
-                    string tempStrip = tmpitnow.TrimEnd('\0');
-                    foundDev = true;
-                    result = tempStrip;
-                }
-            }
-
-            if (deviceInfoSet.ToInt64() != NativeMethods.INVALID_HANDLE_VALUE)
-            {
-                NativeMethods.SetupDiDestroyDeviceInfoList(deviceInfoSet);
-            }
-
-            return result;
         }
 
         public static string GetInstanceIdFromDevicePath(string devicePath)
@@ -1406,8 +1361,20 @@ namespace DS4Windows
             return false;
         }
 
-        public static void FindConfigLocation()
+        public static void FindConfigLocation(
+            RelaunchStorageLocation preferredLocation =
+                RelaunchStorageLocation.Unspecified)
         {
+            if (ElevationRelaunch.TryResolveStoragePath(preferredLocation,
+                    exedirpath, appDataPpath, File.Exists,
+                    out string preferredPath))
+            {
+                SaveWhere(preferredPath);
+                Global.firstRun = false;
+                Global.multisavespots = false;
+                return;
+            }
+
             bool programFolderAutoProfilesExists = File.Exists(Path.Combine(exedirpath, "Auto Profiles.xml"));
             bool appDataAutoProfilesExists = File.Exists(Path.Combine(appDataPpath, "Auto Profiles.xml"));
             //bool localAppDataAutoProfilesExists = File.Exists(Path.Combine(localAppDataPpath, "Auto Profiles.xml"));
@@ -3282,12 +3249,6 @@ namespace DS4Windows
         public static void InitOutputKBMMapping(string identifier)
         {
             outputKBMMapping = VirtualKBMFactory.GetMappingInstance(identifier);
-        }
-
-        public static void RefreshFakerInputInfo()
-        {
-            fakerInputInstalled = IsFakerInputInstalled();
-            fakerInputVersion = FakerInputVersion();
         }
 
         /// <summary>

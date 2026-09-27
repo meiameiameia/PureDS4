@@ -23,6 +23,7 @@ namespace DS4WindowsTests
 
             StringAssert.Contains(summary, "No DS4Windows");
             StringAssert.Contains(summary, "nothing to");
+            Assert.IsFalse(summary.Contains("DS4Windows Reworked"));
         }
 
         [TestMethod]
@@ -61,6 +62,7 @@ namespace DS4WindowsTests
 
             StringAssert.Contains(summary, "No active DS4Windows");
             StringAssert.Contains(summary, "do not block PureDS4");
+            Assert.IsFalse(summary.Contains("DS4Windows Reworked"));
         }
 
         [TestMethod]

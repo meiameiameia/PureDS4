@@ -413,7 +413,7 @@ namespace DS4Windows.SetupActions
                     ex.Message);
             }
 
-            // USB-IP, HidHide, and FakerInput are shared system drivers. They are
+            // USB-IP and HidHide are shared system drivers. They are
             // deliberately not removed with PureDS4; each has its own ARP entry.
             return 0;
         }

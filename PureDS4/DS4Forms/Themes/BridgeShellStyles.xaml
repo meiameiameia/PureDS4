@@ -255,7 +255,9 @@
                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
+                        <!-- The selected TabItem also owns its page content. Hover must
+                             follow the visible header, not the whole selected page. -->
+                        <Trigger SourceName="TabChrome" Property="IsMouseOver" Value="True">
                             <Setter TargetName="TabChrome" Property="Background" Value="{DynamicResource RaisedBackgroundColor}" />
                             <Setter Property="Foreground" Value="{DynamicResource ForegroundColor}" />
                         </Trigger>

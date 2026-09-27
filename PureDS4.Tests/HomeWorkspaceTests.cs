@@ -2,6 +2,7 @@ using DS4WinWPF.DS4Forms;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,6 +23,15 @@ namespace DS4WindowsTests;
 [DoNotParallelize]
 public class HomeWorkspaceTests
 {
+    [TestMethod]
+    public void HomeKeepsRawControllerIdentifierOutOfTheEverydayView()
+    {
+        XElement home = HomeSource();
+        Assert.IsFalse(home.DescendantsAndSelf().Attributes()
+            .Any(attribute => attribute.Value.Contains("IdText", StringComparison.Ordinal)),
+            "Controller IDs belong in technical details, not Home rows or the summary.");
+    }
+
     [TestMethod]
     public void HomeFitsBothViewportsWithZeroOneTwoAndFourControllers()
     {
@@ -261,6 +271,37 @@ public class HomeWorkspaceTests
         Assert.IsFalse(rowTemplate.ToString().Contains("Bridge"));
         Assert.IsFalse(home.ToString().Contains("Mode=OneTime"),
             "Recycled or selected targets must follow the current model, not an old slot.");
+    }
+
+    [TestMethod]
+    public void ExposureActionsExplainTheModeInsteadOfOnlyNamingIt()
+    {
+        XElement home = HomeSource();
+        XElement Action(string handler) => home.Descendants().Single(e =>
+            (string)e.Attribute("Click") == handler);
+
+        Assert.AreEqual("Use controller directly",
+            (string)Action("HomeUseNativeBtn_Click").Attribute("Content"));
+        StringAssert.Contains((string)Action("HomeUseNativeBtn_Click")
+            .Attribute("ToolTip"), "Stop virtual game output");
+        Assert.AreEqual("Use game output",
+            (string)Action("HomeUseManagedBtn_Click").Attribute("Content"));
+    }
+
+    [TestMethod]
+    public void ReportIntervalHasBoundedPrecisionAndDoesNotClaimGameLatency()
+    {
+        string format = DS4WinWPF.Properties.Resources.ResourceManager.GetString(
+            "InputDelay", CultureInfo.InvariantCulture);
+        Assert.AreEqual("Report interval: 4.00 ms", string.Format(
+            CultureInfo.InvariantCulture, format, 3.9996149987304));
+
+        XElement readings = PresentationHarness.Source("ControllerReadingsControl");
+        XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
+        XElement label = readings.Descendants().Single(e =>
+            (string)e.Attribute(x + "Name") == "inputDelayLb");
+        StringAssert.Contains((string)label.Attribute("ToolTip"),
+            "not controller-to-game latency");
     }
 
     private static void LoadTheme(bool dark)

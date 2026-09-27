@@ -1209,10 +1209,10 @@
     <value>电池电量：0%</value>
   </data>
   <data name="ReadingsControl.InputDelayNA" xml:space="preserve">
-    <value>输入延迟：N/A</value>
+    <value>报告间隔：N/A</value>
   </data>
   <data name="ReadingsControl.SixAxisXText" xml:space="preserve">
-    <value>六轴：为了可读性X轴已翻转</value>
+    <value>运动传感器 X 轴反向显示，便于读取。</value>
   </data>
   <data name="RecordBox.AddRumble" xml:space="preserve">
     <value>添加震动</value>
@@ -1402,12 +1402,6 @@
   </data>
   <data name="Welcome.Step4Text" xml:space="preserve">
     <value>（可选）步骤4：安装HidHide驱动</value>
-  </data>
-  <data name="Welcome.Step5Text" xml:space="preserve">
-    <value>（可选）步骤5：安装FakerInput驱动</value>
-  </data>
-  <data name="Welcome.Step5HelpText" xml:space="preserve">
-    <value>使用FakerInput驱动来设置全局的虚拟键盘，相对鼠标，和绝对鼠标。在某些情况下，SendInput失效时可以发送虚拟的键盘与鼠标事件。这些情况包括提升优先级的进程与游戏，UAC提示框，以及一些反作弊系统会屏蔽SendInput事件。为了能让DS4Windows在一些带有反作弊保护的游戏，比如 Valorant，中正常运行，FakerInput是必要的。</value>
   </data>
   <data name="SpecialActionEdit.CheckBattery" xml:space="preserve">
     <value>检查电池电量</value>

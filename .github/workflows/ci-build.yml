@@ -1,8 +1,10 @@
 name: CI Build
 
 # Autobuild that runs on every push and pull request, plus manual triggers.
-# Public release automation is intentionally absent until signing, provenance,
-# and release-channel gates are complete. This workflow produces CI artifacts.
+# Public release automation is intentionally absent until provenance,
+# unsigned-distribution checks, and release-channel gates are complete. Only
+# manually dispatched runs retain downloadable CI artifacts; push and PR runs
+# still build and test everything.
 
 on:
   push:
@@ -24,7 +26,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.421
+          dotnet-version: 8.0.425
 
       - name: Verify pinned .NET SDK
         shell: pwsh
@@ -43,8 +45,27 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore .\PureDS4.sln --locked-mode
 
+      - name: Check package security advisories
+        shell: pwsh
+        run: |
+          $report = dotnet list .\PureDS4.sln package --vulnerable --include-transitive --format json | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) { throw "NuGet advisory query failed." }
+          if (-not $report.sources -or -not $report.projects) {
+            throw "NuGet advisory query returned no source or projects."
+          }
+          $affected = @($report.projects | ForEach-Object { $_.frameworks } |
+            ForEach-Object { @($_.topLevelPackages) + @($_.transitivePackages) } |
+            Where-Object { $_.vulnerabilities.Count -gt 0 })
+          if ($affected.Count -gt 0) {
+            $affected | ConvertTo-Json -Depth 8 | Write-Host
+            throw "A restored dependency has a reported security advisory."
+          }
+
       - name: Test release-input gate
         run: python .\utils\test-release-inputs.py
+
+      - name: Test managed-notice gate
+        run: python .\utils\test-managed-notices.py
 
       - name: Run tests (x64)
         # The whole suite gates the build. The three XML snapshot tests that
@@ -66,7 +87,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.421
+          dotnet-version: 8.0.425
 
       - name: Verify pinned .NET SDK
         shell: pwsh
@@ -154,6 +175,7 @@ jobs:
               throw "MSI $phase failed with $($process.ExitCode). Log: $logRoot\$phase.log"
             }
           }
+
           try {
             Invoke-Msi "/i `"$msi`"" "install"
             if (-not (Test-Path "$env:ProgramFiles\PureDS4\PureDS4.exe")) {
@@ -173,23 +195,88 @@ jobs:
             }
           }
 
+      - name: Record exact candidate identity
+        if: github.event_name == 'workflow_dispatch'
+        shell: pwsh
+        run: |
+          $components = [ordered]@{
+            application = '.\PureDS4\obj\project.assets.json'
+            setupActions = '.\installer\PureDS4.SetupActions\obj\project.assets.json'
+            bootstrapper = '.\installer\PureDS4.Bootstrapper\obj\project.assets.json'
+          }
+          $runtimeNames = @('Microsoft.NETCore.App.Runtime.win-x64', 'Microsoft.WindowsDesktop.App.Runtime.win-x64')
+          $runtimePacks = @()
+          foreach ($component in $components.Keys) {
+            $assets = Get-Content -LiteralPath $components[$component] -Raw | ConvertFrom-Json
+            $framework = @($assets.project.frameworks.PSObject.Properties.Value)
+            if ($framework.Count -ne 1) { throw "Expected one framework for $component." }
+            foreach ($name in $runtimeNames) {
+              $entry = @($framework[0].downloadDependencies | Where-Object { $_.name -eq $name })
+              if ($entry.Count -ne 1 -or $entry[0].version -notmatch '^\[(\d+\.\d+\.\d+), \1\]$') {
+                throw "Cannot identify the exact $component $name runtime pack from restore assets."
+              }
+              $version = $Matches[1]
+              if ([version]$version -lt [version]'8.0.31') {
+                throw "$component $name is stale: $version (minimum reviewed patch: 8.0.31)."
+              }
+              $runtimePacks += [ordered]@{ component = $component; name = $name; version = $version }
+            }
+          }
+          if (@($runtimePacks | Select-Object -ExpandProperty version -Unique).Count -ne 1) {
+            throw "Application and installer helpers contain different .NET runtime patches."
+          }
+          $zip = ".\bin\${{ matrix.platform }}\Release\PureDS4_${{ env.VERSION }}_${{ matrix.platform }}.zip"
+          $installer = ".\bin\${{ matrix.platform }}\Release\installer\PureDS4_${{ env.VERSION }}_Setup_${{ matrix.platform }}.exe"
+          $files = @(@($zip, $installer) | ForEach-Object {
+            if (-not (Test-Path -LiteralPath $_ -PathType Leaf)) { throw "Missing candidate artifact: $_" }
+            $file = Get-Item -LiteralPath $_
+            [ordered]@{ name = $file.Name; bytes = $file.Length; sha256 = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant() }
+          })
+          $identity = [ordered]@{
+            product = 'PureDS4'
+            version = '${{ env.VERSION }}'
+            sourceCommit = (git rev-parse HEAD).Trim()
+            runtimePacks = $runtimePacks
+            installerSignatureStatus = (Get-AuthenticodeSignature -LiteralPath $installer).Status.ToString()
+            files = $files
+          }
+          $output = ".\bin\${{ matrix.platform }}\Release\installer"
+          $identity | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $output 'candidate-identity.json') -Encoding utf8
+          $files | ForEach-Object { "$($_.sha256) *$($_.name)" } |
+            Set-Content -LiteralPath (Join-Path $output 'SHA256SUMS.txt') -Encoding ascii
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "Source commit: ``$($identity.sourceCommit)``"
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "Runtime packs: $($runtimePacks[0].version) (application, setup actions, bootstrapper)"
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "Installer signature: $($identity.installerSignatureStatus)"
+          $files | ForEach-Object { Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "SHA-256 ``$($_.name)``: ``$($_.sha256)``" }
+
       - name: Upload portable ZIP
+        if: github.event_name == 'workflow_dispatch'
         id: upload_portable
         uses: actions/upload-artifact@v4
         with:
           name: PureDS4_${{ env.VERSION }}_${{ matrix.platform }}_Portable
-          path: .\bin\${{ matrix.platform }}\Release\PureDS4_${{ env.VERSION }}_${{ matrix.platform }}.zip
+          path: |
+            .\bin\${{ matrix.platform }}\Release\PureDS4_${{ env.VERSION }}_${{ matrix.platform }}.zip
+            .\bin\${{ matrix.platform }}\Release\installer\candidate-identity.json
+            .\bin\${{ matrix.platform }}\Release\installer\SHA256SUMS.txt
           if-no-files-found: error
+          retention-days: 3
 
       - name: Upload standard installer EXE
+        if: github.event_name == 'workflow_dispatch'
         id: upload_installer
         uses: actions/upload-artifact@v4
         with:
           name: PureDS4_${{ env.VERSION }}_Setup_${{ matrix.platform }}
-          path: .\bin\${{ matrix.platform }}\Release\installer\PureDS4_${{ env.VERSION }}_Setup_${{ matrix.platform }}.exe
+          path: |
+            .\bin\${{ matrix.platform }}\Release\installer\PureDS4_${{ env.VERSION }}_Setup_${{ matrix.platform }}.exe
+            .\bin\${{ matrix.platform }}\Release\installer\candidate-identity.json
+            .\bin\${{ matrix.platform }}\Release\installer\SHA256SUMS.txt
           if-no-files-found: error
+          retention-days: 3
 
       - name: Publish artifact link to run summary
+        if: github.event_name == 'workflow_dispatch'
         shell: bash
         run: |
           echo "### PureDS4 ${{ matrix.platform }} build" >> "$GITHUB_STEP_SUMMARY"
@@ -198,4 +285,3 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "- [Portable ZIP](${{ steps.upload_portable.outputs.artifact-url }})" >> "$GITHUB_STEP_SUMMARY"
           echo "- [Standard installer EXE](${{ steps.upload_installer.outputs.artifact-url }})" >> "$GITHUB_STEP_SUMMARY"
-

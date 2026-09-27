@@ -64,18 +64,12 @@
                                Height="90" Stretch="Uniform" />
                     </Grid>
                 </GroupBox>
-                <GroupBox Header="Optional compatibility tools">
+                <GroupBox Header="Optional compatibility tool">
                     <StackPanel>
                         <StackPanel x:Name="step4HidHidePanel">
                             <Button x:Name="hidHideInstallBtn" Content="Install controller protection"
                                     HorizontalAlignment="Left" Click="HidHideInstall_Click" />
-                            <TextBlock Text="Prevents double input in games that must see only one controller." Margin="0,6,0,12"
-                                       Style="{StaticResource FoundationSecondaryTextStyle}" />
-                        </StackPanel>
-                        <StackPanel x:Name="step5FakerInputPanel">
-                            <Button x:Name="fakerInputInstallBtn" Content="Install keyboard and mouse support"
-                                    HorizontalAlignment="Left" Click="FakerInputInstallBtn_Click" />
-                            <TextBlock Text="Adds system-wide virtual keyboard and mouse input for games that block standard input simulation." Margin="0,6,0,0"
+                            <TextBlock Text="Prevents double input in games that must see only one controller." Margin="0,6,0,0"
                                        Style="{StaticResource FoundationSecondaryTextStyle}" />
                         </StackPanel>
                     </StackPanel>

@@ -10,13 +10,15 @@ namespace DS4Windows
     {
         internal HidHideBlacklistMutationResult(bool succeeded, bool changed,
             bool writeAttempted, IReadOnlyCollection<string> before,
-            IReadOnlyCollection<string> after, string error)
+            IReadOnlyCollection<string> after, string error,
+            bool afterKnown = true)
         {
             Succeeded = succeeded;
             Changed = changed;
             WriteAttempted = writeAttempted;
             Before = before ?? Array.Empty<string>();
             After = after ?? Array.Empty<string>();
+            AfterKnown = afterKnown;
             Error = error ?? string.Empty;
         }
 
@@ -25,6 +27,7 @@ namespace DS4Windows
         internal bool WriteAttempted { get; }
         internal IReadOnlyCollection<string> Before { get; }
         internal IReadOnlyCollection<string> After { get; }
+        internal bool AfterKnown { get; }
         internal string Error { get; }
     }
 
@@ -60,6 +63,8 @@ namespace DS4Windows
             {
                 Mutex mutex = null;
                 bool mutexHeld = false;
+                List<string> before = null;
+                bool writeAttempted = false;
                 try
                 {
                     if (useMachineMutex)
@@ -81,8 +86,14 @@ namespace DS4Windows
                         }
                     }
 
-                    List<string> before = Normalize(device.GetBlacklist());
-                    List<string> desired = Normalize(createDesired(before));
+                    before = Normalize(ReadBlacklist(device));
+                    IReadOnlyCollection<string> requested = createDesired(before);
+                    if (requested == null)
+                    {
+                        throw new InvalidOperationException(
+                            "The HidHide mutation produced no configuration.");
+                    }
+                    List<string> desired = Normalize(requested);
                     if (Equivalent(before, desired))
                     {
                         return new HidHideBlacklistMutationResult(true, false,
@@ -97,7 +108,7 @@ namespace DS4Windows
                     }
 
                     List<string> immediatelyBeforeWrite = Normalize(
-                        device.GetBlacklist());
+                        ReadBlacklist(device));
                     if (!Equivalent(before, immediatelyBeforeWrite))
                     {
                         return new HidHideBlacklistMutationResult(false, false,
@@ -105,14 +116,17 @@ namespace DS4Windows
                             "HidHide configuration changed concurrently; no mutation was applied.");
                     }
 
+                    // A setter can apply the update and then fail or throw.
+                    // Once entered, the durable intent must survive uncertainty.
+                    writeAttempted = true;
                     if (!device.SetBlacklist(desired))
                     {
                         return new HidHideBlacklistMutationResult(false, false,
-                            true, before, Normalize(device.GetBlacklist()),
+                            true, before, Normalize(ReadBlacklist(device)),
                             "HidHide rejected the persistent blacklist update.");
                     }
 
-                    List<string> after = Normalize(device.GetBlacklist());
+                    List<string> after = Normalize(ReadBlacklist(device));
                     if (!Equivalent(desired, after))
                     {
                         return new HidHideBlacklistMutationResult(false, true,
@@ -125,7 +139,10 @@ namespace DS4Windows
                 }
                 catch (Exception ex)
                 {
-                    return Failure($"HidHide mutation failed: {ex.Message}");
+                    return new HidHideBlacklistMutationResult(false, false,
+                        writeAttempted, before, null,
+                        $"HidHide mutation failed: {ex.Message}",
+                        afterKnown: false);
                 }
                 finally
                 {
@@ -183,6 +200,11 @@ namespace DS4Windows
             new HashSet<string>(Normalize(left),
                 StringComparer.OrdinalIgnoreCase).SetEquals(Normalize(right));
 
+        private static List<string> ReadBlacklist(
+            IHidHideBlacklistDevice device) =>
+            device.GetBlacklist() ?? throw new InvalidOperationException(
+                "HidHide returned no persistent blacklist configuration.");
+
         private static List<string> Normalize(IEnumerable<string> entries) =>
             (entries ?? Array.Empty<string>())
                 .Where(entry => !string.IsNullOrWhiteSpace(entry))
@@ -191,6 +213,151 @@ namespace DS4Windows
 
         private static HidHideBlacklistMutationResult Failure(string error) =>
             new HidHideBlacklistMutationResult(false, false, false,
-                Array.Empty<string>(), Array.Empty<string>(), error);
+                Array.Empty<string>(), Array.Empty<string>(), error,
+                afterKnown: false);
+    }
+
+    internal sealed class HidHideRecoveryPreview
+    {
+        internal HidHideRecoveryPreview(IReadOnlyCollection<string> pending,
+            IReadOnlyCollection<string> present,
+            IReadOnlyCollection<string> observedBlacklist,
+            bool activeStateUncertain, bool? activeStateObserved,
+            string error)
+        {
+            Pending = pending ?? Array.Empty<string>();
+            Present = present ?? Array.Empty<string>();
+            ObservedBlacklist = observedBlacklist ?? Array.Empty<string>();
+            ActiveStateUncertain = activeStateUncertain;
+            ActiveStateObserved = activeStateObserved;
+            Error = error ?? string.Empty;
+        }
+
+        internal bool CanRecover => string.IsNullOrEmpty(Error);
+        internal IReadOnlyCollection<string> Pending { get; }
+        internal IReadOnlyCollection<string> Present { get; }
+        internal IReadOnlyCollection<string> ObservedBlacklist { get; }
+        internal bool ActiveStateUncertain { get; }
+        internal bool? ActiveStateObserved { get; }
+        internal string Error { get; }
+    }
+
+    internal static class HidHidePersistentRecovery
+    {
+        internal static HidHideRecoveryPreview Inspect(
+            IHidHideBlacklistDevice device, HidHideOwnershipJournal journal,
+            Func<bool> readActiveState = null)
+        {
+            if (device == null || journal == null || !journal.Load() ||
+                !journal.IsReliable)
+            {
+                return Failure("HidHide or its ownership record is unavailable.");
+            }
+            if (journal.IsTransientRunInProgress)
+            {
+                return Failure("Stop PureDS4 controller handling before recovery.");
+            }
+            if (journal.ExternalContainmentSuspensions.Count > 0)
+            {
+                return Failure("External HidHide containment must be restored " +
+                    "before persistent recovery.");
+            }
+
+            string[] pending = journal.UnresolvedPersistentBlacklistEntries
+                .OrderBy(id => id, StringComparer.OrdinalIgnoreCase).ToArray();
+            bool activeUncertain = journal.ActiveStateRecoveryRequired;
+            if (pending.Length == 0 && !activeUncertain)
+            {
+                return Failure("No pending HidHide recovery was found.");
+            }
+
+            try
+            {
+                List<string> observed = device.GetBlacklist() ??
+                    throw new InvalidOperationException(
+                        "HidHide returned no blacklist configuration.");
+                bool? active = readActiveState?.Invoke();
+                string[] present = pending.Where(id =>
+                    HidHideBlacklistMutationGateway.Contains(observed, id))
+                    .ToArray();
+                return new HidHideRecoveryPreview(pending, present,
+                    observed.ToArray(), activeUncertain, active,
+                    string.Empty);
+            }
+            catch (Exception ex)
+            {
+                return Failure("HidHide blacklist could not be inspected: " +
+                    ex.Message);
+            }
+        }
+
+        internal static string Complete(IHidHideBlacklistDevice device,
+            HidHideOwnershipJournal journal, HidHideRecoveryPreview preview,
+            bool useMachineMutex = true,
+            Func<bool> readActiveState = null)
+        {
+            if (device == null || journal == null || preview?.CanRecover != true ||
+                !journal.Load() || !journal.IsReliable ||
+                journal.IsTransientRunInProgress ||
+                journal.ExternalContainmentSuspensions.Count > 0 ||
+                journal.ActiveStateRecoveryRequired !=
+                    preview.ActiveStateUncertain ||
+                !HidHideBlacklistMutationGateway.Equivalent(
+                    journal.UnresolvedPersistentBlacklistEntries,
+                    preview.Pending))
+            {
+                return "The recovery record changed; inspect it again.";
+            }
+
+            try
+            {
+                if (preview.ActiveStateObserved.HasValue &&
+                    (readActiveState == null || readActiveState() !=
+                        preview.ActiveStateObserved.Value))
+                {
+                    return "HidHide's active setting changed after " +
+                        "inspection; inspect again.";
+                }
+            }
+            catch (Exception ex)
+            {
+                return "HidHide's active setting could not be verified: " +
+                    ex.Message;
+            }
+
+            HidHideBlacklistMutationResult mutation =
+                HidHideBlacklistMutationGateway.Mutate(device,
+                    current =>
+                    {
+                        if (!HidHideBlacklistMutationGateway.Equivalent(
+                                current, preview.ObservedBlacklist))
+                        {
+                            throw new InvalidOperationException(
+                                "HidHide configuration changed after inspection.");
+                        }
+                        return HidHideBlacklistMutationGateway.RemoveExact(
+                            current, preview.Pending);
+                    }, useMachineMutex: useMachineMutex);
+            if (!mutation.Succeeded ||
+                preview.Pending.Any(id =>
+                    HidHideBlacklistMutationGateway.Contains(
+                        mutation.After, id)))
+            {
+                return string.IsNullOrWhiteSpace(mutation.Error)
+                    ? "The exact HidHide entries could not be verified as absent."
+                    : mutation.Error;
+            }
+
+            if (!journal.CompleteVerifiedRecovery(preview.Pending,
+                    acknowledgeActiveState: true))
+            {
+                return "HidHide entries are absent, but the recovery record " +
+                    "could not be finalized; retry after inspecting again.";
+            }
+            return string.Empty;
+        }
+
+        private static HidHideRecoveryPreview Failure(string error) =>
+            new HidHideRecoveryPreview(null, null, null, false, null, error);
     }
 }

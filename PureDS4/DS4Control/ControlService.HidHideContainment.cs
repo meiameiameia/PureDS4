@@ -7,6 +7,102 @@ namespace DS4Windows
 {
     public partial class ControlService
     {
+        internal HidHideRecoveryPreview InspectPersistentHidHideRecovery()
+        {
+            lock (serviceLifecycleLock)
+            {
+                if (running)
+                {
+                    return new HidHideRecoveryPreview(null, null, null,
+                        false, null,
+                        "Stop controller handling before HidHide recovery.");
+                }
+                if (!Global.hidHideInstalled)
+                {
+                    return new HidHideRecoveryPreview(null, null, null,
+                        false, null, "HidHide is not installed or available.");
+                }
+
+                try
+                {
+                    HidHideOwnershipJournal journal =
+                        GetHidHideOwnershipJournal(
+                            restoreExternalContainment: false);
+                    using HidHideAPIDevice device = new HidHideAPIDevice();
+                    return device.IsOpen()
+                        ? HidHidePersistentRecovery.Inspect(device, journal,
+                            device.GetActiveState)
+                        : new HidHideRecoveryPreview(null, null, null,
+                            false, null,
+                            "The HidHide control device could not be opened.");
+                }
+                catch (Exception ex)
+                {
+                    return new HidHideRecoveryPreview(null, null, null,
+                        false, null, "HidHide recovery inspection failed: " +
+                            ex.Message);
+                }
+            }
+        }
+
+        internal string CompletePersistentHidHideRecovery(
+            HidHideRecoveryPreview preview)
+        {
+            lock (serviceLifecycleLock)
+            {
+                if (running)
+                {
+                    return "Stop controller handling before HidHide recovery.";
+                }
+                if (!Global.hidHideInstalled)
+                {
+                    return "HidHide is not installed or available.";
+                }
+                lock (hidHideSessionLock)
+                {
+                    if (hidHideSessionManagedInstanceIds.Count > 0)
+                    {
+                        return "Session-only HidHide entries remain; exit " +
+                            "PureDS4 before retrying recovery.";
+                    }
+                }
+
+                try
+                {
+                    HidHideOwnershipJournal journal =
+                        GetHidHideOwnershipJournal(
+                            restoreExternalContainment: false);
+                    using HidHideAPIDevice device = new HidHideAPIDevice();
+                    if (!device.IsOpen())
+                    {
+                        return "The HidHide control device could not be opened.";
+                    }
+
+                    string error = HidHidePersistentRecovery.Complete(
+                        device, journal, preview,
+                        readActiveState: device.GetActiveState);
+                    if (string.IsNullOrEmpty(error))
+                    {
+                        lock (hidHideSessionLock)
+                        {
+                            hidHidePersistentManagedInstanceIds.ExceptWith(
+                                preview.Pending);
+                            hidHideActiveStateBeforeManagedSession = null;
+                            hidHideBaselineBlacklist = null;
+                            hidHideTransientRunStarted = false;
+                        }
+                        StartupDiag("Verified exact HidHide recovery entries " +
+                            "absent and completed their ownership record");
+                    }
+                    return error;
+                }
+                catch (Exception ex)
+                {
+                    return "HidHide recovery failed: " + ex.Message;
+                }
+            }
+        }
+
         private bool TrySuspendExternalContainment(
             IHidHideBlacklistDevice hidHideDevice,
             ControllerExposureRuntimeSession session, out string error)

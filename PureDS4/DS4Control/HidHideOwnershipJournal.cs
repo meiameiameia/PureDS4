@@ -61,6 +61,8 @@ namespace DS4Windows
             state.ActiveStateRecoveryRequired ||
             externalContainmentRecoveryRequired;
         internal bool IsTransientRunInProgress => state.RunInProgress;
+        internal bool ActiveStateRecoveryRequired =>
+            state.ActiveStateRecoveryRequired;
         internal IReadOnlyCollection<string> UnresolvedPersistentBlacklistEntries =>
             state.UnresolvedPersistentBlacklistEntries;
         internal IReadOnlyCollection<string> PersistentWhitelistEntries
@@ -259,6 +261,55 @@ namespace DS4Windows
                 state.RunId = string.Empty;
             }
 
+            return Save();
+        }
+
+        internal bool MarkStoppedRunRecoveryRequired()
+        {
+            if (!Load())
+            {
+                return false;
+            }
+            if (!state.RunInProgress)
+            {
+                return true;
+            }
+
+            state.UnresolvedPersistentBlacklistEntries.UnionWith(
+                state.CurrentRunPersistentBlacklistEntries);
+            state.ActiveStateRecoveryRequired |=
+                state.CurrentRunEnabledActiveState;
+            state.CurrentRunPersistentBlacklistEntries.Clear();
+            state.CurrentRunEnabledActiveState = false;
+            state.RunInProgress = false;
+            state.RunId = string.Empty;
+            return Save();
+        }
+
+        internal bool CompleteVerifiedRecovery(
+            IReadOnlyCollection<string> verifiedAbsentEntries,
+            bool acknowledgeActiveState)
+        {
+            if (!Load() || state.RunInProgress ||
+                verifiedAbsentEntries == null)
+            {
+                return false;
+            }
+
+            HashSet<string> verified = new HashSet<string>(
+                verifiedAbsentEntries, StringComparer.OrdinalIgnoreCase);
+            if (verified.Any(string.IsNullOrWhiteSpace) ||
+                !verified.SetEquals(state.UnresolvedPersistentBlacklistEntries) ||
+                (state.ActiveStateRecoveryRequired && !acknowledgeActiveState))
+            {
+                return false;
+            }
+
+            state.UnresolvedPersistentBlacklistEntries.Clear();
+            if (acknowledgeActiveState)
+            {
+                state.ActiveStateRecoveryRequired = false;
+            }
             return Save();
         }
 

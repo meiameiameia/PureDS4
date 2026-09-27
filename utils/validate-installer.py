@@ -14,15 +14,25 @@ from pathlib import Path, PurePosixPath
 REQUIRED_PUBLISH_FILES = {
     "PureDS4.exe",
     "PureDS4.release",
+    "COPYING",
     "extras/install-viiper-backend.ps1",
     "extras/VIIPER-0.1.0-x64.exe",
     "extras/VIIPER-0.1.0-x64.exe.sha256",
     "extras/VIIPER-0.1.0-LICENSES.txt",
     "extras/USBip-0.9.7.7-x64.exe",
+    "extras/USBip-0.9.7.7-LICENSE.txt",
     "extras/HidHide_1.5.230_x64.exe",
-    "extras/FakerInput_0.1.0_x64.msi",
+    "extras/HidHide-1.5.230-LICENSE.txt",
+    "Resources/ControllerArtwork.NOTICE.txt",
     "ThirdParty/RNNoise.NET-LICENSE.txt",
     "ThirdParty/SharpOSC-LICENSE.txt",
+    "ThirdParty/ManagedDependencies.NOTICE.txt",
+    "ThirdParty/DotNet-LICENSE.txt",
+    "ThirdParty/DotNet-THIRD-PARTY-NOTICES.txt",
+    "ThirdParty/DotNet-RuntimePack-THIRD-PARTY-NOTICES.txt",
+    "ThirdParty/System.Management-THIRD-PARTY-NOTICES.txt",
+    "ThirdParty/SbcSharp/LICENSE.txt",
+    "ThirdParty/SbcSharp/NOTICE.md",
 }
 
 
@@ -178,7 +188,6 @@ def main() -> int:
     required_contracts = [
         'Name="CreateDesktopShortcut"',
         'Name="InstallHidHide"',
-        'Name="InstallFakerInput"',
         'Id="ViiperUsbipSetup"',
         'Id="PureDS4Msi"',
         'Id="PostUninstallCleanup"',
@@ -187,7 +196,6 @@ def main() -> int:
         'RepairArguments="repair ',
         'UninstallArguments="uninstall ',
         'InstallCondition="InstallHidHide"',
-        'InstallCondition="InstallFakerInput"',
         'Name="TargetUserSid"',
         '--target-roaming-appdata',
         'Variable="ManagedInstallRegistered"',
@@ -196,7 +204,6 @@ def main() -> int:
         'CacheId="PureDS4SetupActionsUninstallPreflight-$(var.SetupActionsHash)"',
         'CacheId="PureDS4SetupActionsInfrastructure-$(var.SetupActionsHash)"',
         'Id="HidHide"',
-        'Id="FakerInput"',
         'Vital="yes"',
     ]
     for contract in required_contracts:
@@ -225,7 +232,7 @@ def main() -> int:
             raise SystemExit(f"Bundle package is missing: {package_id}")
         if packages[package_id].get("Vital") != "yes":
             raise SystemExit(f"Bundle package must be vital: {package_id}")
-    for package_id in ("HidHide", "FakerInput"):
+    for package_id in ("HidHide",):
         if package_id not in packages:
             raise SystemExit(f"Bundle package is missing: {package_id}")
         if packages[package_id].get("Vital") != "no":
@@ -234,8 +241,6 @@ def main() -> int:
             )
     if packages["HidHide"].get("InstallCondition") != "InstallHidHide":
         raise SystemExit("HidHide optional-install condition is invalid.")
-    if packages["FakerInput"].get("InstallCondition") != "InstallFakerInput":
-        raise SystemExit("FakerInput optional-install condition is invalid.")
     cache_ids = {
         packages["PostUninstallCleanup"].get("CacheId"),
         packages["CloseRunningApplications"].get("CacheId"),
@@ -271,7 +276,7 @@ def main() -> int:
         'test-viiper-reboot-boundary.ps1',
         'test-installer-state-machine.py',
         '[switch]$RequireSigning',
-        'Unsigned public installers are intentionally blocked',
+        'Signing was explicitly required for this build',
         'Invoke-SignAndVerify $msiPath',
         'Invoke-SignAndVerify $pendingInstaller',
     ]:
@@ -295,8 +300,8 @@ def main() -> int:
     )
     if release_workflow_path.exists():
         raise SystemExit(
-            "Public release automation is not authorized until the signing "
-            "and provenance gates are complete."
+            "Public release automation is not authorized until the provenance "
+            "and owner-approval gates are complete."
         )
     ci_workflow = (
         args.bundle_source.parent.parent.parent

@@ -93,7 +93,13 @@ namespace DS4Windows
                 inputs++;
             }
 
-            SendInput(inputs, tempInput, (int)inputs * Marshal.SizeOf(tempInput[0]));
+            if (inputs == 0)
+            {
+                return;
+            }
+
+            // SendInput expects the size of one INPUT, not the entire array.
+            SendInput(inputs, tempInput, Marshal.SizeOf(tempInput[0]));
         }
 
         public static void MouseEvent(uint mouseButton)

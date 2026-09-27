@@ -1,12 +1,42 @@
-# Migrating to PureDS4 from DS4Windows
+# Installing, upgrading, and rolling back PureDS4
 
-PureDS4 replaces DS4Windows or an earlier DS4Windows Reworked
-installation. It is not a companion to one, and running both is not a
-supported configuration: DS4Windows supports everything PureDS4 supports
-and more, so keeping both installed gains nothing and leaves two products
+## Upgrading an existing PureDS4 installation
+
+The first public-version target is `5.1.0`. The owner's current dogfood
+installation is `5.1.0-beta.2`; this is an **in-place PureDS4 upgrade**, not
+the DS4Windows-to-PureDS4 replacement described below. The bundle and MSI
+share PureDS4's upgrade codes, and the existing beta MSI already has numeric
+version `5.1.0`. The same-version MSI upgrade rule and Burn's beta-to-stable
+ordering therefore need an actual-machine test; a successful build or MSI-only
+CI run is insufficient.
+
+Use the **exact, source-identified installer intended for distribution**, not
+an earlier disposable build. Before running it, record its SHA-256 and the
+installed beta version, verify the cached beta installer is recoverable,
+preserve a copy of PureDS4's settings/profiles and ownership journal, inspect
+running processes and canonical startup tasks, and check for a pending
+infrastructure reboot. Close the app and obtain normal elevation; do not
+disable Windows protections. Afterward verify the installed executable and
+registration, both task actions, preserved settings/profiles, infrastructure
+readiness, controller visibility, virtual and native modes, and a restart.
+Exercise repair and failure/recovery scenarios on a separate disposable
+Windows installation; do not deliberately break the owner's daily-driver PC.
+
+Do not treat the old beta installer as an automatic downgrade: after `5.1.0`
+is installed, rolling back may require uninstalling the new version and then
+reinstalling the preserved beta package. That is a separate, owner-approved
+host change, followed by restoring only the backed-up PureDS4 data that the
+rollback needs. If any identity or recovery prerequisite is missing, stop
+before the in-place upgrade rather than experimenting on the current install.
+
+## Migrating from DS4Windows
+
+PureDS4 replaces DS4Windows. It is not a companion to it, and running both
+is not a supported configuration: DS4Windows supports everything PureDS4
+supports and more, so keeping both installed gains nothing and leaves two products
 competing for the same controller.
 
-PureDS4 exists for people who want the narrower tool — DualShock hardware,
+PureDS4 exists for people who want the narrower tool — DualShock 4 hardware,
 without DualSense features or the complexity that comes with them. If you
 need DualSense, DualSense Edge, Switch Pro, or Joy-Con support, use
 [DS4Windows](https://github.com/hbashton/DS4Windows) instead; PureDS4 will
@@ -46,14 +76,14 @@ activation because none can start the old runtime.
 
 ## Shared components
 
-Three pieces are machine-wide infrastructure that any DS4Windows-derived
-mapper uses. PureDS4 installs them only when missing, and its own uninstall
-deliberately leaves them behind:
+The machine-wide infrastructure is shared with other controller tools.
+PureDS4 verifies the identities it needs, installs or repairs its pinned
+prerequisites when required, and its own uninstall deliberately leaves shared
+drivers behind:
 
 - **HidHide** — hides the physical controller so games see only the virtual
   pad.
 - **USB-IP** — the transport VIIPER uses to publish a virtual controller.
-- **FakerInput** — optional, and not installed by default.
 
 **VIIPER** is shared too, and only one copy can own the backend at a time.
 See the handover section below.
@@ -78,7 +108,11 @@ and will refuse to start while it runs.
 
 ### 3. Install PureDS4
 
-Run the setup executable. Unsigned builds will raise a SmartScreen warning.
+Run the setup executable from the official source. The first public release
+may be unsigned: compare its SHA-256 with the published hash before running
+it. SmartScreen or Smart App Control may warn or block an unfamiliar download;
+the absence of a warning on one PC does not establish trust for other users.
+Do not disable Windows protections to install it.
 The installer adds PureDS4's own files, registry entry, and shortcuts, and
 installs VIIPER, USB-IP, or HidHide only if they are absent.
 
@@ -124,9 +158,11 @@ decision.
   take over. Note that a predecessor's VIIPER may offer to update itself;
   PureDS4 pins a specific version by hash, so a self-updated shared copy can
   stop being trusted.
-- **Startup**: enable *Run at startup* in PureDS4's settings if you want it
-  to launch at logon. This is what creates the `RunPureDS4` task — the
-  installer does not create it.
+- **Startup**: a standard installation may create the canonical
+  `RunPureDS4` and `RunPureDS4VIIPER` tasks. An upgrade preserves tasks that
+  already match the installer-owned paths and actions. PureDS4's startup
+  preference controls only its own verified task; it must not adopt a task
+  belonging to another installation.
 
 ### 7. Verify
 
@@ -157,7 +193,10 @@ program files, registry key, scheduled tasks, and shortcut.
 
 It deliberately does **not** remove:
 
-- HidHide, USB-IP, or FakerInput — a predecessor may still need them;
+- HidHide or USB-IP — a predecessor may still need them;
+- a FakerInput driver installed by an older PureDS4 or DS4Windows build —
+  current PureDS4 neither uses nor distributes it, and removing a shared
+  system driver requires a separate, explicit decision;
 - `%AppData%\PureDS4`, so a later reinstall finds your settings again.
 
 If you have already removed the predecessor, reinstall it from its own

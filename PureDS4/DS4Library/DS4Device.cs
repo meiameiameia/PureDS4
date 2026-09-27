@@ -196,6 +196,9 @@ namespace DS4Windows
         internal const int USB_OUTPUT_CHANGE_LENGTH = 11;
         // Use large value for worst case scenario
         internal const int READ_STREAM_TIMEOUT = 3000;
+        // One missed read changes the visible state from Ready; three missed
+        // reads retire the stale controller through the normal removal path.
+        internal const int BLUETOOTH_INPUT_GRACE_MS = READ_STREAM_TIMEOUT * 3;
         // the measured transport's proven Sony sole-writer path limits ordinary effect
         // reports to roughly 30 Hz. A virtual DualSense produces haptics
         // feedback at about 94 Hz; forwarding every update while the physical
@@ -963,9 +966,25 @@ namespace DS4Windows
             if (conType == ConnectionType.BT)
             {
                 bool found = false;
-                for (int tries = 0; !found && tries < CALIBRATION_READ_ATTEMPTS; tries++)
+                bool readSucceeded = false;
+                int attemptsCompleted = 0;
+                for (; !found && attemptsCompleted < CALIBRATION_READ_ATTEMPTS;
+                    attemptsCompleted++)
                 {
-                    hDevice.readFeatureData(calibration);
+                    // HidD_GetFeature may leave the caller's buffer changed when
+                    // it fails. Restore the report ID before every request.
+                    Array.Clear(calibration, 0, calibration.Length);
+                    calibration[0] = 0x05;
+                    readSucceeded = hDevice.readFeatureData(calibration);
+                    if (!readSucceeded)
+                    {
+                        // One failed Windows control transfer can already take
+                        // several seconds. Repeating it delays the primary input
+                        // loop and can leave a still-enumerated controller looking
+                        // connected even though it has never delivered input.
+                        break;
+                    }
+
                     found = HasValidCalibrationChecksum(calibration);
                 }
 
@@ -974,10 +993,12 @@ namespace DS4Windows
                     // The old guard could never fire, so calibration that failed
                     // its own checksum was applied anyway. Motion falls back to
                     // uncalibrated values, which is honest and recoverable.
+                    string failure = readSucceeded
+                        ? $"the data failed its checksum {attemptsCompleted} times"
+                        : "Windows did not return the calibration feature report";
                     AppLogger.LogToGui("Gyro calibration could not be read from " +
-                        $"{Mac}: the data failed its checksum " +
-                        $"{CALIBRATION_READ_ATTEMPTS} times. Motion will use " +
-                        "uncalibrated values until the controller reconnects.", true);
+                        $"{Mac}: {failure}. Motion will use uncalibrated values " +
+                        "until the controller reconnects.", true);
                     return;
                 }
 
@@ -1498,7 +1519,15 @@ namespace DS4Windows
         /** Is the device alive and receiving valid sensor input reports? */
         public virtual bool IsAlive()
         {
-            return priorInputReport30 != 0xff;
+            if (priorInputReport30 == 0xff)
+            {
+                return false;
+            }
+
+            return conType != ConnectionType.BT ||
+                IsBluetoothInputFresh(Interlocked.Read(
+                    ref lastBluetoothInputReportTick),
+                    Environment.TickCount64);
         }
 
         private byte priorInputReport30 = 0xff;
@@ -1586,6 +1615,9 @@ namespace DS4Windows
                 // The sensor timestamp restarts with the physical connection.
                 // Never carry a clock fit or a wrap anchor across reconnects.
                 ResetBluetoothControllerClock();
+                Interlocked.Exchange(ref lastBluetoothInputReportTick, 0);
+                long inputLoopStartTick = Math.Max(1,
+                    Environment.TickCount64);
                 Debouncer = SetupDebouncer();
                 firstActive = DateTime.UtcNow;
                 // Preserve the HIDCLASS queue depth used by the verified clean
@@ -1673,7 +1705,12 @@ namespace DS4Windows
                                     AppLogger.LogToGui($"{Mac} failed CRC-32 checks {CRC32_NUM_ATTEMPTS} times. Disconnecting", false);
 
                                     readWaitEv.Reset();
-                                    sendOutputReport(true, true);
+                                    if (ShouldSendBluetoothDisconnectReport(
+                                            Interlocked.Read(ref
+                                                lastBluetoothInputReportTick) != 0))
+                                    {
+                                        sendOutputReport(true, true);
+                                    }
                                     StopOutputUpdate();
                                     isDisconnecting = true;
                                     ResetBluetoothControllerClock();
@@ -1688,8 +1725,6 @@ namespace DS4Windows
                             }
 
                             this.inputReportErrorCount = 0;
-                            Interlocked.Exchange(ref lastBluetoothInputReportTick,
-                                Environment.TickCount64);
                             if (BluetoothMicrophoneStreaming)
                             {
                                 DualShock4BluetoothAudioProtocol.ExtractMicrophoneSbcFrames(
@@ -1699,6 +1734,19 @@ namespace DS4Windows
 
                             if (!DualShock4BluetoothAudioProtocol.HasHidState(btInputReport))
                             {
+                                long lastStateTick = Interlocked.Read(
+                                    ref lastBluetoothInputReportTick);
+                                long nowTick = Environment.TickCount64;
+                                if (ShouldRetireBluetoothAudioOnlyStream(
+                                        inputLoopStartTick, lastStateTick,
+                                        nowTick))
+                                {
+                                    AppLogger.LogToGui(
+                                        $"{Mac} Bluetooth audio reports continued without controller state; retiring stale input.",
+                                        true);
+                                    RetireBluetoothInput();
+                                    return;
+                                }
                                 readWaitEv.Reset();
                                 continue;
                             }
@@ -1729,21 +1777,12 @@ namespace DS4Windows
                                     Math.Max(0, Environment.TickCount64 -
                                         lastInputTick);
 
-                                // A visible Game Bar can briefly take the
-                                // Windows gaming/HID stack through a discovery
-                                // transition. The physical DS4 remains a
-                                // present PnP device during that transition,
-                                // but no input IRP completes for one timeout
-                                // interval. Treating that recoverable drought
-                                // as removal tore down both VIIPER devices and
-                                // immediately rediscovered the same controller,
-                                // producing an unplug/replug loop and stranding
-                                // its persistent audio endpoint. Preserve the
-                                // existing owner and simply issue the next read
-                                // while Windows still reports the exact HID
-                                // interface as present. A real disconnect still
-                                // follows the original removal path as soon as
-                                // the interface leaves the present-device set.
+                                // Game Bar discovery can cause a short drought
+                                // while the physical HID interface stays present.
+                                // Retry for a bounded interval to avoid tearing
+                                // down a recoverable controller, but retire it if
+                                // valid state does not resume before the grace
+                                // deadline. Interface presence is not liveness.
                                 bool interfaceStillPresent = false;
                                 try
                                 {
@@ -1755,8 +1794,10 @@ namespace DS4Windows
                                     // disconnected device is still usable.
                                 }
 
+                                long nowTick = Environment.TickCount64;
                                 if (ShouldRetryBluetoothInputAfterTimeout(
-                                        interfaceStillPresent))
+                                        interfaceStillPresent,
+                                        lastInputTick, nowTick))
                                 {
                                     AppLogger.LogToGui(
                                         $"{Mac} Bluetooth input paused for {lastInputAge} ms while its HID interface remains present; preserving the controller and retrying the read.",
@@ -1781,12 +1822,7 @@ namespace DS4Windows
                                 //Log.LogToGui(Mac.ToString() + " disconnected due to read failure: " + winError, true);
                                 AppLogger.LogToGui(Mac.ToString() + " disconnected due to read failure: " + winError, true);
                             }
-                            readWaitEv.Reset();
-                            sendOutputReport(true, true); // Kick Windows into noticing the disconnection.
-                            StopOutputUpdate();
-                            isDisconnecting = true;
-                            ResetBluetoothControllerClock();
-                            NotifyRemovalFromInputThread();
+                            RetireBluetoothInput();
 
                             return;
                         }
@@ -1856,6 +1892,15 @@ namespace DS4Windows
                     {
                         //Received incorrect report, skip it
                         continue;
+                    }
+
+                    // Audio-only packets and bad CRCs do not refresh physical
+                    // input liveness. This shared point also covers compatible
+                    // Bluetooth devices using the 0x01 input-report layout.
+                    if (conType == ConnectionType.BT)
+                    {
+                        Interlocked.Exchange(ref lastBluetoothInputReportTick,
+                            Math.Max(1, Environment.TickCount64));
                     }
 
                     utcNow = DateTime.UtcNow; // timestamp with UTC in case system time zone changes
@@ -2712,10 +2757,54 @@ namespace DS4Windows
             }
         }
 
-        internal static bool ShouldRetryBluetoothInputAfterTimeout(
-            bool interfaceStillPresent)
+        internal static bool IsBluetoothInputFresh(long lastValidTick,
+            long nowTick) =>
+            lastValidTick > 0 && nowTick >= lastValidTick &&
+            nowTick - lastValidTick < READ_STREAM_TIMEOUT;
+
+        internal static bool ShouldRetireBluetoothAudioOnlyStream(
+            long inputLoopStartTick, long lastValidTick, long nowTick)
         {
-            return interfaceStillPresent;
+            long anchor = lastValidTick > 0 ? lastValidTick :
+                inputLoopStartTick;
+            int limit = lastValidTick > 0 ? BLUETOOTH_INPUT_GRACE_MS :
+                READ_STREAM_TIMEOUT;
+            return anchor <= 0 || nowTick < anchor ||
+                nowTick - anchor >= limit;
+        }
+
+        internal static bool ShouldRetryBluetoothInputAfterTimeout(
+            bool interfaceStillPresent, long lastValidTick, long nowTick)
+        {
+            // Presence alone is not proof of a live Bluetooth transport. A
+            // stale HID interface can remain enumerable indefinitely. Preserve
+            // an established controller through a short Game Bar/Alt-Tab
+            // drought, but retire it after a bounded grace period so the normal
+            // removal path releases synthetic state and the virtual output.
+            return interfaceStillPresent && lastValidTick > 0 &&
+                nowTick >= lastValidTick &&
+                nowTick - lastValidTick < BLUETOOTH_INPUT_GRACE_MS;
+        }
+
+        internal static bool ShouldSendBluetoothDisconnectReport(
+            bool receivedValidInput)
+        {
+            return receivedValidInput;
+        }
+
+        private void RetireBluetoothInput()
+        {
+            readWaitEv.Reset();
+            if (ShouldSendBluetoothDisconnectReport(Interlocked.Read(
+                    ref lastBluetoothInputReportTick) != 0))
+            {
+                // Do not write to a transport that never supplied input.
+                sendOutputReport(true, true);
+            }
+            StopOutputUpdate();
+            isDisconnecting = true;
+            ResetBluetoothControllerClock();
+            NotifyRemovalFromInputThread();
         }
 
         public void setRumble(byte rightLightFastMotor, byte leftHeavySlowMotor)

@@ -23,14 +23,6 @@ namespace DS4WinWPF.DS4Forms
             "HidHide_1.5.230_x64.exe";
         private const string HidHideInstallerSha256 =
             "F4BBBCB82E6258641B887C74BC81C4C5F66E4AA811808DFC304347687B7605F6";
-        private const string FakerInputX64FileName =
-            "FakerInput_0.1.0_x64.msi";
-        private const string FakerInputX64Sha256 =
-            "30CF218B624740A91BE4FCCA3ADFB4550BA8CC8F31AC9625FE39D238E64D13EA";
-        private const string FakerInputX86FileName =
-            "FakerInput_0.1.0_x86.msi";
-        private const string FakerInputX86Sha256 =
-            "0C0A01EEF8C57C9B3DB917131995A10ADB3599CC643D2F27AD28D9511B96DEC1";
 
         public WelcomeDialog(bool loadConfig = false)
         {
@@ -42,7 +34,6 @@ namespace DS4WinWPF.DS4Forms
 
             InitializeComponent();
             step4HidHidePanel.IsEnabled = IsHidHideCompatible();
-            step5FakerInputPanel.IsEnabled = DS4Windows.Global.IsWin8OrGreater();
 
             DS4Windows.ViiperPrerequisiteStatus status =
                 DS4Windows.ViiperSetupManager.GetStatus(tryStartServer: true);
@@ -75,17 +66,6 @@ namespace DS4WinWPF.DS4Forms
                 "Controller protection",
                 HidHideInstallerFileName,
                 HidHideInstallerSha256);
-        }
-
-        private async void FakerInputInstallBtn_Click(object sender, RoutedEventArgs e)
-        {
-            bool useX64 = Environment.Is64BitOperatingSystem;
-            string fileName = useX64 ? FakerInputX64FileName :
-                FakerInputX86FileName;
-            string sha256 = useX64 ? FakerInputX64Sha256 :
-                FakerInputX86Sha256;
-            await RunBundledInstallerAsync(fakerInputInstallBtn,
-                "FakerInput", "Keyboard and mouse support", fileName, sha256);
         }
 
         private async Task RunBundledInstallerAsync(
@@ -138,10 +118,6 @@ namespace DS4WinWPF.DS4Forms
                 {
                     DS4Windows.Global.RefreshHidHideInfo();
                 }
-                else if (componentName == "FakerInput")
-                {
-                    DS4Windows.Global.RefreshFakerInputInfo();
-                }
                 button.Content = restartRequired ?
                     $"{displayName} setup complete — restart required" :
                     $"{displayName} setup complete";
@@ -185,8 +161,6 @@ namespace DS4WinWPF.DS4Forms
         {
             viiperInstallBtn.IsEnabled = enabled;
             step4HidHidePanel.IsEnabled = enabled && IsHidHideCompatible();
-            step5FakerInputPanel.IsEnabled = enabled &&
-                DS4Windows.Global.IsWin8OrGreater();
         }
 
         private static bool IsHidHideCompatible() =>

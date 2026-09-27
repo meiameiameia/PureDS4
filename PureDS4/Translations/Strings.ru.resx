@@ -607,15 +607,6 @@
   <data name="Hours" xml:space="preserve">
     <value>Часов</value>
   </data>
-  <data name="Program" xml:space="preserve">
-    <value>Программу</value>
-  </data>
-  <data name="RunAs" xml:space="preserve">
-    <value>Запускать как</value>
-  </data>
-  <data name="Task" xml:space="preserve">
-    <value>Задачу</value>
-  </data>
   <data name="UseCustomSteamFolder" xml:space="preserve">
     <value>Использовать кастомную папку Steam</value>
   </data>
@@ -1124,10 +1115,10 @@
     <value>Батарея: 0%</value>
   </data>
   <data name="ReadingsControl.InputDelayNA" xml:space="preserve">
-    <value>Задержка вывода: N/A</value>
+    <value>Интервал отчётов: N/A</value>
   </data>
   <data name="ReadingsControl.SixAxisXText" xml:space="preserve">
-    <value>SixAxis: ось X перевернута, поэтому ее легче читать.</value>
+    <value>Ось X датчика движения показана в обратном направлении для удобства чтения.</value>
   </data>
   <data name="Requested" xml:space="preserve">
     <value>Запрошено</value>
@@ -1192,12 +1183,6 @@
   </data>
   <data name="Welcome.Step4Text" xml:space="preserve">
     <value>(Дополнительно) Шаг 4: Установите HidHide Driver</value>
-  </data>
-  <data name="Welcome.Step5HelpText" xml:space="preserve">
-    <value>Используйте драйвер FakerInput для создания системной виртуальной клавиатуры, относительной мыши и абсолютной мыши. Позволяет использовать виртуальные события клавиатуры и мыши в некоторых ситуациях, когда SendInput не работает. Такие ситуации включают в себя повышенный процесс и игры, запросы контроля учетных записей пользователей, и системы античита, блокирующие события SendInput. Использование FakerInput необходимо для работы DS4Windows с некоторыми играми, защищенными системами античита, такими как Valorant.</value>
-  </data>
-  <data name="Welcome.Step5Text" xml:space="preserve">
-    <value>(Дополнительно) Шаг 5: Установите FakerInput Driver</value>
   </data>
   <data name="Welcome.WinTitle" xml:space="preserve">
     <value>Добро пожаловать в DS4Windows</value>

@@ -1199,8 +1199,8 @@ namespace DS4Windows
             syncStateLock.ExitWriteLock();
             state.SaveToPrevious(true);
 
-            // Send possible virtual events to system. Only used for FakerInput atm.
-            // SendInput version does nothing
+            // Flush any batched virtual events. The SendInput handler
+            // sends as it goes, so this does nothing for it.
             outputKBMHandler.Sync();
         }
 

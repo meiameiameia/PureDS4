@@ -27,12 +27,23 @@ PureDS4 handles personal profiles and machine-wide components. Publication adds 
 
 ## Main task, routing, and context
 
-- Keep decisions/approvals/acceptance in the main task. Separate implementation tasks require owner authorization and tool support.
-- Brief workers with outcome, decisions, scope, authority, verified base, acceptance, and checks. Keep corrections with the worker; inspect actual changes and returned evidence/gaps against acceptance, not a summary alone.
+- Documentation lives in `docs/` by topic; keep the root `README.md` as the
+  public landing page, `AGENTS.md` as agent guidance, and `CLAUDE.md` as its
+  required bridge. Do not move those three merely to make the root empty.
+  Route identity, versions, and publication to
+  [release contract](docs/RELEASE_CONTRACT.md); setup, replacement, and
+  recovery to [install/rollback](docs/INSTALL_AND_ROLLBACK.md) and
+  [installer validation](docs/INSTALLER_VALIDATION_STRATEGY.md); manual DS4
+  proof to [hardware validation](docs/HARDWARE_VALIDATION.md); UI/UX to
+  [visual contract](docs/visual-contract.md); component licensing and hashes
+  to [provenance](docs/component-provenance.md). Read narrower `docs/` topics
+  on demand. Keep build commands near their code in `installer/README.md`.
+- Keep product decisions and release acceptance in the main task. For a substantial new runtime, installer, or UI workstream, propose one bounded implementation task; create it only when owner-authorized and supported. Small fixes may stay inline. Keep the current dirty candidate with its executor until a safe handoff, not a fresh task per minor repair.
+- Brief workers with outcome, decisions, scope, authority, actual checkout/base and uncommitted delta, acceptance, and checks. Do not assume a new worktree contains the dirty release candidate. Keep correction loops with the worker; inspect changes and evidence without replaying valid checks.
 - Verify task ID/status before replacement; preserve results before archiving. Isolate writers or serialize them.
 - Choose model/effort per task: stronger reasoning for difficult/high-risk work, faster tiers for routine work. Use authorized supported controls; advise only when inadequate.
 - Prefer event-based waits for completion, blockers, or decisions; no unchanged-status polling. Keep execution loops with the authorized executor.
-- Keep updates concise; no AI-specific task/context/plan/result/handoff/roadmap/metadata files.
+- Keep updates concise; no AI-specific task/context/plan/result/handoff/roadmap/metadata files. Update durable contracts in existing `docs/` files only when they change. At a task boundary return a compact candidate checkpoint (checkout, SHA/dirty delta, artifact, approval, evidence/gaps, next action); do not paste full logs.
 
 ## Product and ownership contract
 
@@ -49,7 +60,7 @@ PureDS4 handles personal profiles and machine-wide components. Publication adds 
 
 ## Architecture and stack
 
-- Keep .NET 8/WPF unless measured evidence of a material problem or owner-approved migration justifies change. `global.json` pins SDK `8.0.421`, no roll-forward.
+- Keep .NET 8/WPF unless measured evidence of a material problem or owner-approved migration justifies change. `global.json` pins SDK `8.0.425`, no roll-forward.
 - Prefer seams inside existing projects; new projects need dependency/compilation/ownership/testing benefit. Make ownership/dependencies explicit before DI/MVVM/frameworks.
 - Reuse solutions/local locks. Ask before production dependencies; assess maintenance/security/license/size/cost/lock-in.
 - Characterize behavior/threading before small tested slices; no broad rewrite of `Global`, `ControlService`, `Mapping`, protocols, or VIIPER.
@@ -74,7 +85,7 @@ git diff --check
 - Packaging: run relevant Release/publish/release-input/installer checks ([guide](installer/README.md)); respect `utils/post-build.py` layout. No public artifacts unless calculated `releaseReady` in `installer/release-inputs.json` is true.
 - Test intended behavior and failure/boundary/permission/regression cases; inherited wrong-behavior tests are defects.
 - Review final files/diff for secrets, unrelated edits, weakened checks, and stale docs. Rerun affected checks; reuse valid evidence. Retry only with a changed approach or transient-fault evidence.
-- Hardware proof names commit/artifact/process path/controller/transport/steps. Old results do not prove HEAD; DS4/DS3 and USB/Bluetooth are separate.
+- Hardware proof names commit/artifact/process path/controller/transport/steps. DS4/DS3 and USB/Bluetooth are separate. Batch owner hardware/visual acceptance on an identified candidate, not after every internal edit; repeat affected scenarios when later changes invalidate the evidence. Old results do not prove HEAD.
 - Virtual-output changes require the exact-build [hardware pass](docs/HARDWARE_VALIDATION.md): readings, VIIPER output, virtual pad, gameplay, disconnect/reconnect, restart/reconnect. CI/component checks are not hardware proof.
 - Prefer short disposable paths. After authorized first HidHide registration, restart the test app and prove enumeration; allow-list presence is insufficient. Long-path failures are observations, not a universal limit.
 - Verify GUI process/path; legacy copies may launch instead. Follow the [visual contract](docs/visual-contract.md); final visual acceptance is manual with numbered checks/expected results.

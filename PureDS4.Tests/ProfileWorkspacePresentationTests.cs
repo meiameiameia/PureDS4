@@ -198,12 +198,49 @@ public class ProfileWorkspacePresentationTests
         Assert.AreEqual("{Binding ActionTypeIndex}", (string)actions.Descendants().Single(e => (string)e.Attribute(X + "Name") == "actionTypeTabControl").Attribute("SelectedIndex"));
     }
 
+    [TestMethod]
+    public void ControllerReadingsRemainReachableAtCompactWindowHeights()
+    {
+        XElement readings = Source("ControllerReadingsControl");
+        XElement scroll = readings.Elements(Wpf + "ScrollViewer").Single();
+
+        Assert.AreEqual("readingsScroll", (string)scroll.Attribute(X + "Name"));
+        Assert.AreEqual("Auto", (string)scroll.Attribute("VerticalScrollBarVisibility"));
+        Assert.AreEqual("Disabled", (string)scroll.Attribute("HorizontalScrollBarVisibility"));
+        Assert.AreEqual("False", (string)scroll.Attribute("CanContentScroll"));
+        Assert.AreEqual("DockPanel", scroll.Elements().Single().Name.LocalName,
+            "All readings must remain inside the vertical viewport instead of being clipped below it.");
+    }
+
     // Two shell-level regressions this gate fixed, both invisible to a
     // screenshot of a single section:
     //  * every page sized itself to its own content and floated in the middle
     //    of the window, so the editor jumped sideways between sections;
     //  * the selected tab's content produced no automation peers at all, so a
     //    screen reader found nothing but the four navigation tabs.
+    [TestMethod]
+    public void MainNavigationHoverTracksOnlyTheVisibleHeader()
+    {
+        WpfTestHost.Run(() =>
+        {
+            foreach (bool dark in new[] { false, true })
+            {
+                Theme(dark);
+                var tab = new TabItem
+                {
+                    Header = "Tools",
+                    Style = (Style)Application.Current.FindResource("BridgeNavigationTabItemStyle"),
+                };
+                tab.ApplyTemplate();
+                var hover = tab.Template.Triggers.OfType<Trigger>()
+                    .Single(trigger => trigger.Property == UIElement.IsMouseOverProperty);
+                Assert.AreEqual("TabChrome", hover.SourceName,
+                    "The selected tab owns page content; hovering that content must not light up its header.");
+                Assert.IsInstanceOfType(tab.Template.FindName("TabChrome", tab), typeof(Border));
+            }
+        });
+    }
+
     [TestMethod]
     public void ShellTabsFillTheirHostAndPublishContentToAutomation()
     {

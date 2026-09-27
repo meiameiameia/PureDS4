@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using System;
+using System.Buffers.Binary;
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.IO;
@@ -42,6 +43,7 @@ namespace DS4WinWPF.DS4Control
     class HidHideAPIDevice : IDisposable, IHidHideBlacklistDevice,
         IHidHideWhitelistDevice
     {
+        private const int MaximumConfigurationListBytes = 1024 * 1024;
         private const uint IOCTL_GET_WHITELIST = 0x80016000;
         private const uint IOCTL_SET_WHITELIST = 0x80016004;
         private const uint IOCTL_GET_BLACKLIST = 0x80016008;
@@ -75,7 +77,11 @@ namespace DS4WinWPF.DS4Control
 
         public bool GetActiveState()
         {
-            TryGetActiveState(out bool result);
+            if (!TryGetActiveState(out bool result))
+            {
+                throw new InvalidDataException(
+                    "HidHide active state could not be read.");
+            }
             return result;
         }
 
@@ -125,66 +131,8 @@ namespace DS4WinWPF.DS4Control
 
         public List<string> GetBlacklist()
         {
-            List<string> instances = new List<string>();
-
-            int bytesReturned = 0;
-            bool result = NativeMethods.DeviceIoControl(hidHideHandle.DangerousGetHandle(),
-                HidHideAPIDevice.IOCTL_GET_BLACKLIST,
-                IntPtr.Zero,
-                0,
-                IntPtr.Zero,
-                0,
-                ref bytesReturned,
-                IntPtr.Zero);
-
-            if (!result && bytesReturned <= 0)
-            {
-                throw new Win32Exception(Marshal.GetLastWin32Error(),
-                    "HidHide persistent blacklist size query failed.");
-            }
-
-            if (bytesReturned > 0)
-            {
-                byte[] dataBuffer = new byte[bytesReturned];
-                int requiredBytes = bytesReturned;
-                bytesReturned = 0;
-
-                IntPtr buffer = Marshal.AllocHGlobal(requiredBytes);
-                try
-                {
-                    result = NativeMethods.DeviceIoControl(
-                        hidHideHandle.DangerousGetHandle(),
-                        HidHideAPIDevice.IOCTL_GET_BLACKLIST,
-                        IntPtr.Zero,
-                        0,
-                        buffer,
-                        requiredBytes,
-                        ref bytesReturned,
-                        IntPtr.Zero);
-                    if (!result)
-                    {
-                        throw new Win32Exception(Marshal.GetLastWin32Error(),
-                            "HidHide persistent blacklist read failed.");
-                    }
-                    if (bytesReturned < 0 || bytesReturned > requiredBytes ||
-                        bytesReturned % sizeof(char) != 0)
-                    {
-                        throw new InvalidDataException(
-                            "HidHide returned an invalid persistent blacklist payload.");
-                    }
-
-                    Marshal.Copy(buffer, dataBuffer, 0, bytesReturned);
-                    string tempstring = Encoding.Unicode.GetString(dataBuffer,
-                        0, bytesReturned).TrimEnd(char.MinValue);
-                    instances = tempstring.Split(char.MinValue).ToList();
-                }
-                finally
-                {
-                    Marshal.FreeHGlobal(buffer);
-                }
-            }
-
-            return instances;
+            return ReadMultiSzList(IOCTL_GET_BLACKLIST,
+                "persistent blacklist");
         }
 
         public bool SetBlacklist(List<string> instances)
@@ -252,44 +200,7 @@ namespace DS4WinWPF.DS4Control
 
         public List<string> GetWhitelist()
         {
-            List<string> instances = new List<string>();
-
-            int bytesReturned = 0;
-            bool result = NativeMethods.DeviceIoControl(hidHideHandle.DangerousGetHandle(),
-                IOCTL_GET_WHITELIST,
-                IntPtr.Zero,
-                0,
-                IntPtr.Zero,
-                0,
-                ref bytesReturned,
-                IntPtr.Zero);
-
-            if (bytesReturned > 0)
-            {
-                byte[] dataBuffer = new byte[bytesReturned];
-                int requiredBytes = bytesReturned;
-                bytesReturned = 0;
-
-                IntPtr buffer = Marshal.AllocHGlobal(requiredBytes);
-
-                result = NativeMethods.DeviceIoControl(hidHideHandle.DangerousGetHandle(),
-                    IOCTL_GET_WHITELIST,
-                    IntPtr.Zero,
-                    0,
-                    buffer,
-                    requiredBytes,
-                    ref bytesReturned,
-                    IntPtr.Zero);
-
-                //int error = Marshal.GetLastWin32Error();
-                Marshal.Copy(buffer, dataBuffer, 0, requiredBytes);
-                string tempstring = Encoding.Unicode.GetString(dataBuffer).TrimEnd(char.MinValue);
-                instances = tempstring.Split(char.MinValue).ToList();
-
-                Marshal.FreeHGlobal(buffer);
-            }
-
-            return instances;
+            return ReadMultiSzList(IOCTL_GET_WHITELIST, "whitelist");
         }
 
         public bool SetWhitelist(List<string> instances)
@@ -317,8 +228,106 @@ namespace DS4WinWPF.DS4Control
 
         public bool GetWhiteListInverseState()
         {
-            TryGetWhiteListInverseState(out bool result);
+            if (!TryGetWhiteListInverseState(out bool result))
+            {
+                throw new InvalidDataException(
+                    "HidHide inverse whitelist state could not be read.");
+            }
             return result;
+        }
+
+        private List<string> ReadMultiSzList(uint ioctl, string listName)
+        {
+            int requiredBytes = 0;
+            bool result = NativeMethods.DeviceIoControl(
+                hidHideHandle.DangerousGetHandle(), ioctl, IntPtr.Zero, 0,
+                IntPtr.Zero, 0, ref requiredBytes, IntPtr.Zero);
+            if (!result)
+            {
+                throw new Win32Exception(Marshal.GetLastWin32Error(),
+                    $"HidHide {listName} size query failed.");
+            }
+            if (requiredBytes < sizeof(char) ||
+                requiredBytes > MaximumConfigurationListBytes ||
+                requiredBytes % sizeof(char) != 0)
+            {
+                throw new InvalidDataException(
+                    $"HidHide returned an invalid {listName} size.");
+            }
+
+            IntPtr buffer = Marshal.AllocHGlobal(requiredBytes);
+            try
+            {
+                int bytesReturned = 0;
+                result = NativeMethods.DeviceIoControl(
+                    hidHideHandle.DangerousGetHandle(), ioctl, IntPtr.Zero, 0,
+                    buffer, requiredBytes, ref bytesReturned, IntPtr.Zero);
+                if (!result)
+                {
+                    throw new Win32Exception(Marshal.GetLastWin32Error(),
+                        $"HidHide {listName} read failed.");
+                }
+                if (bytesReturned <= 0 || bytesReturned > requiredBytes ||
+                    bytesReturned % sizeof(char) != 0)
+                {
+                    throw new InvalidDataException(
+                        $"HidHide returned an invalid {listName} payload.");
+                }
+
+                byte[] data = new byte[bytesReturned];
+                Marshal.Copy(buffer, data, 0, bytesReturned);
+                return ParseMultiSz(data);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(buffer);
+            }
+        }
+
+        internal static List<string> ParseMultiSz(byte[] data)
+        {
+            if (data == null || data.Length < sizeof(char) ||
+                data.Length > MaximumConfigurationListBytes ||
+                data.Length % sizeof(char) != 0)
+            {
+                throw new InvalidDataException(
+                    "HidHide returned an invalid string-list payload.");
+            }
+
+            char[] characters = new char[data.Length / sizeof(char)];
+            for (int index = 0; index < characters.Length; index++)
+            {
+                characters[index] = (char)BinaryPrimitives.ReadUInt16LittleEndian(
+                    data.AsSpan(index * sizeof(char), sizeof(char)));
+            }
+
+            if (characters[0] == '\0')
+            {
+                if (characters.Length == 1 || characters[1] == '\0')
+                {
+                    return new List<string>();
+                }
+                throw new InvalidDataException(
+                    "HidHide returned an invalid string-list entry.");
+            }
+
+            List<string> entries = new List<string>();
+            int start = 0;
+            for (int index = 0; index < characters.Length; index++)
+            {
+                if (characters[index] != '\0')
+                {
+                    continue;
+                }
+                if (index == start)
+                {
+                    return entries;
+                }
+                entries.Add(new string(characters, start, index - start));
+                start = index + 1;
+            }
+            throw new InvalidDataException(
+                "HidHide returned an unterminated string list.");
         }
 
         public bool TryGetWhiteListInverseState(out bool state)

@@ -100,23 +100,39 @@ clean-install, rollback, failure, and recovery matrix required for release.
 
 ## Version contract
 
-The version line the tree currently carries is `5.1.0-beta.1`. It records
-identity only. The owner has not chosen the first public PureDS4 version or a
-publication policy, and this table must not be read as one:
+The owner selected **`5.1.0` as the target for the first public release**.
+This is a version decision, not a readiness claim or permission to publish.
+The exact installer bearing this version must pass the remaining gates,
+including an authorized in-place upgrade from the installed
+`5.1.0-beta.2` dogfood build:
 
 | Surface | Value |
 | --- | --- |
-| Public/display version | `5.1.0-beta.1` |
-| Burn bundle version | `5.1.0-beta.1` |
+| Public/display version | `5.1.0` |
+| Burn bundle version | `5.1.0` |
 | MSI product version | `5.1.0` |
 | Assembly and file version | `5.1.0.0` |
 
-MSI ordering uses the three numeric fields. Burn carries the prerelease label
-so a future `5.1.0` stable bundle orders above `5.1.0-beta.1`. CI builds use a
-`5.1.0-ci.<run>` Burn version and a separate human-readable artifact label.
+Future public versions use `MAJOR.MINOR.PATCH`: increment PATCH for compatible
+fixes, MINOR for compatible features, and MAJOR for intentional incompatible
+changes. Public prereleases, if deliberately offered, append `-beta.N` or
+`-rc.N` to the target version; the stable version follows those prereleases.
+This is a product-release convention, not a claim of a stable programming API.
+Release-candidate validation builds retain the target version and are
+distinguished by their complete source SHA and artifact SHA-256, not by an
+invented public version or a filename such as `beta.3`.
 
-No release tag is defined. Choosing the first public version, and the tag that
-names it, is an owner decision that has not been made.
+MSI compares only the first three numeric version fields. The current
+`5.1.0-beta.2` MSI already uses `5.1.0`, so the stable transition relies on
+the existing same-version major-upgrade rule and must be proved with the
+actual final installer. The Burn bundle uses the prerelease-aware version for
+upgrade ordering; a separate test or CI label must not silently alter that
+ordering. Later public PATCH/MINOR/MAJOR releases must advance the MSI numeric
+version too. CI builds may use a `5.1.0-ci.<run>` Burn version and a separate
+human-readable artifact label, but CI labels are never public releases.
+
+No release tag has been created or authorized. The tag spelling and creation
+remain a separate owner-approved publication action.
 
 Public artifacts use the `PureDS4_<version>_<kind>_x64` naming family, and the
 installed executable is `PureDS4.exe`. The publish layout carries a
@@ -153,24 +169,38 @@ Creating a tag or GitHub Release does not authorize publication by itself.
 Public release automation must fail closed without complete provenance, tests,
 package validation, and explicit owner approval.
 
-**Code signing is an open owner decision.** The build supports Authenticode
-signing and `installer/build-installer.ps1 -RequireSigning` fails closed when
-signing material is missing, but whether a public PureDS4 artifact must be
-signed has not been decided. Nothing in this repository should be read as
-committing to signed releases, or as ruling them out.
+The owner accepts an **unsigned first public release**. Authenticode signing
+remains supported for a later release; `installer/build-installer.ps1
+-RequireSigning` fails closed when signing material is missing. An unsigned
+artifact must be identified by its exact version and published SHA-256, and
+its download instructions must say plainly that it has no verified publisher.
+This is not a promise that SmartScreen or Smart App Control will allow it:
+the exact downloaded candidate must be exercised with normal Windows
+protections enabled. Users must not be told to disable security controls.
+
+The self-contained .NET 8 payload makes runtime security servicing PureDS4's
+responsibility. Record the actual .NET and Windows Desktop runtime-pack patch
+versions from the candidate's restore assets, and check package advisories
+before approval. Microsoft's [.NET 8 support](https://dotnet.microsoft.com/en-us/platform/support/policy)
+ends November 10, 2026. The maintenance checkpoint is October 27, 2026:
+by then, validate a supported-runtime migration candidate or plan to stop
+distributing the .NET 8 build before end of support. Recheck the current
+servicing patch and advisories for every candidate; the 8.0.31 minimum in CI
+records the September 2026 baseline, not an evergreen latest-version claim.
+A pinned SDK version alone is not evidence of the candidate's embedded
+runtime patch.
 
 ## Release blockers outside this identity gate
 
 Component hashes, source revisions, notices, signers, and NuGet locks are now
 enforced by the release-input contract described in
-[`component-provenance.md`](component-provenance.md). Public composition still
-fails closed because the inherited FakerInput wrappers have unconfirmed
-license scope. The evidence supports their relationship to the MIT-licensed
-FakerInput family and GPL DS4Windows lineage, but it does not establish their
-precise standalone terms; that decision must be recorded before distribution.
+[`component-provenance.md`](component-provenance.md). Every component that
+contract still declares is verified. The one unresolved case, the inherited
+FakerInput wrapper binaries, was settled by removing that integration rather
+than by shipping binaries whose redistribution scope could not be established.
 
 The remaining release program must also implement the explicit replacement
 flow described above, enforce task ownership in installer and portable flows,
-settle the signing policy and implement whatever release workflow it implies,
+publish exact artifact hashes and implement the unsigned-release checks above,
 and validate an authorized in-place upgrade on a disposable or owner-approved
 Windows installation.

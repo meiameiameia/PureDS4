@@ -219,8 +219,16 @@ namespace DS4Windows
                 Normalize(entries), StringComparer.OrdinalIgnoreCase);
             if (targets.Count == 0)
             {
-                return new HidHideWhitelistMutationResult(true, false,
-                    Normalize(device.GetWhitelist()), string.Empty);
+                try
+                {
+                    return new HidHideWhitelistMutationResult(true, false,
+                        Normalize(ReadWhitelist(device)), string.Empty);
+                }
+                catch (Exception ex)
+                {
+                    return Failure("HidHide whitelist read failed: " +
+                        ex.Message);
+                }
             }
 
             lock (ProcessLock)
@@ -248,7 +256,7 @@ namespace DS4Windows
                         }
                     }
 
-                    List<string> before = Normalize(device.GetWhitelist());
+                    List<string> before = Normalize(ReadWhitelist(device));
                     List<string> desired = before
                         .Where(entry => !targets.Contains(entry)).ToList();
                     if (Equivalent(before, desired))
@@ -258,7 +266,7 @@ namespace DS4Windows
                     }
 
                     List<string> immediatelyBefore = Normalize(
-                        device.GetWhitelist());
+                        ReadWhitelist(device));
                     if (!Equivalent(before, immediatelyBefore))
                     {
                         return new HidHideWhitelistMutationResult(false, false,
@@ -268,11 +276,11 @@ namespace DS4Windows
                     if (!device.SetWhitelist(desired))
                     {
                         return new HidHideWhitelistMutationResult(false, false,
-                            Normalize(device.GetWhitelist()),
+                            Normalize(ReadWhitelist(device)),
                             "HidHide rejected the whitelist cleanup.");
                     }
 
-                    List<string> after = Normalize(device.GetWhitelist());
+                    List<string> after = Normalize(ReadWhitelist(device));
                     if (!Equivalent(desired, after))
                     {
                         return new HidHideWhitelistMutationResult(false, true,
@@ -299,6 +307,11 @@ namespace DS4Windows
                 }
             }
         }
+
+        private static List<string> ReadWhitelist(
+            IHidHideWhitelistDevice device) =>
+            device.GetWhitelist() ?? throw new InvalidOperationException(
+                "HidHide returned no whitelist configuration.");
 
         private static List<string> Normalize(IEnumerable<string> entries) =>
             (entries ?? Array.Empty<string>())

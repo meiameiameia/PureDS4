@@ -1241,10 +1241,10 @@ Disabled:
     <value>Battery: 0%</value>
   </data>
   <data name="ReadingsControl.InputDelayNA" xml:space="preserve">
-    <value>Input Delay: N/A</value>
+    <value>Report interval: N/A</value>
   </data>
   <data name="ReadingsControl.SixAxisXText" xml:space="preserve">
-    <value>SixAxis: X Axis is flipped so it is easier to read</value>
+    <value>Motion sensor X axis is shown in reverse for easier reading.</value>
   </data>
   <data name="Requested" xml:space="preserve">
     <value>Requested</value>
@@ -1311,12 +1311,6 @@ To setup Bluetooth (optional): Hold the PS Button and Share for 3 seconds. The l
   </data>
   <data name="Welcome.Step4Text" xml:space="preserve">
     <value>(Optional) Step 4: Install HidHide Driver</value>
-  </data>
-  <data name="Welcome.Step5HelpText" xml:space="preserve">
-    <value>Use FakerInput driver to expose system-wide virtual keyboard, relative mouse, and absolute mouse. Allows virtual KB+M events to be usable in some situations when SendInput fails. Such situations are elevated process and games, UAC prompts, and anti-cheat systems that block SendInput events. Use of FakerInput is necessary to allow DS4Windows to work with some games with anti-cheat protection like Valorant.</value>
-  </data>
-  <data name="Welcome.Step5Text" xml:space="preserve">
-    <value>(Optional) Step 5: Install FakerInput Driver</value>
   </data>
   <data name="Welcome.WinTitle" xml:space="preserve">
     <value>Welcome to DS4Windows</value>

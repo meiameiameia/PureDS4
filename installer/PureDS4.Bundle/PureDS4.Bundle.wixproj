@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>Bundle</OutputType>
     <Platform>x64</Platform>
-    <BundleVersion Condition="'$(BundleVersion)' == ''">5.1.0-beta.1</BundleVersion>
+    <BundleVersion Condition="'$(BundleVersion)' == ''">5.1.0</BundleVersion>
     <DisplayVersion Condition="'$(DisplayVersion)' == ''">$(BundleVersion)</DisplayVersion>
     <ExperimentalDS3 Condition="'$(ExperimentalDS3)' == ''">false</ExperimentalDS3>
     <!-- A DualShock 3 hardware-validation bundle is a distinct product with

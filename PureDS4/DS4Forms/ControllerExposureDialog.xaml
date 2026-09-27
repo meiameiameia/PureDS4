@@ -1,7 +1,7 @@
 ﻿<Window x:Class="DS4WinWPF.DS4Forms.ControllerExposureDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Use Native Physical"
+        Title="Use controller directly"
         Width="500"
         SizeToContent="Height"
         MaxHeight="{x:Static SystemParameters.MaximizedPrimaryScreenHeight}"
@@ -19,15 +19,16 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <StackPanel>
-            <TextBlock Text="Expose the physical controller?"
+            <TextBlock Text="Use the controller directly?"
                        Style="{StaticResource FoundationPageTitleStyle}" />
             <TextBlock Margin="0,8,0,0"
-                       Text="Native Physical temporarily stops game output and lets games access this controller directly."
+                       Text="PureDS4 will stop its virtual game output and let games see the original controller."
                        Style="{StaticResource FoundationBodyTextStyle}"
                        TextWrapping="Wrap" />
             <TextBlock Margin="0,6,0,0"
-                       Text="Return to Managed/Virtual to restore protected game output. PureDS4 also restores protection when it exits."
-                       Style="{StaticResource FoundationSecondaryTextStyle}" />
+                       Text="Choose Use game output later to restore PureDS4's protected virtual controller."
+                       Style="{StaticResource FoundationSecondaryTextStyle}"
+                       TextWrapping="Wrap" />
         </StackPanel>
         <Border Grid.Row="1"
                 Margin="0,14,0,0"
@@ -36,13 +37,17 @@
                 BorderBrush="{DynamicResource StateWarningBrush}"
                 BorderThickness="3,1,1,1"
                 CornerRadius="{StaticResource RadiusSmall}">
-            <StackPanel Orientation="Horizontal">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
                 <TextBlock Text="⚠" Margin="0,0,8,0"
                            Foreground="{DynamicResource StateWarningBrush}" />
-                <TextBlock Text="Virtual-controller features are unavailable while Native Physical is active."
+                <TextBlock Grid.Column="1" Text="Profile remapping and virtual-controller features are unavailable in direct mode. Launch the game after switching."
                            Foreground="{DynamicResource TextPrimaryBrush}"
                            TextWrapping="Wrap" />
-            </StackPanel>
+            </Grid>
         </Border>
         <StackPanel Grid.Row="2"
                     Margin="0,16,0,0"
@@ -53,7 +58,7 @@
                     Margin="0,0,8,0"
                     IsCancel="True"
                     Style="{StaticResource FoundationButtonStyle}" />
-            <Button Content="Use Native Physical"
+            <Button Content="Use controller directly"
                     MinWidth="150"
                     IsDefault="True"
                     Style="{StaticResource FoundationPrimaryButtonStyle}"

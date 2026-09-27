@@ -14,7 +14,7 @@
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         xml:lang="en-US"
         mc:Ignorable="d"
-        Title="PureDS4" Height="660" Width="1024" Closing="MainDS4Window_Closing" Closed="MainDS4Window_Closed" StateChanged="MainDS4Window_StateChanged" SizeChanged="MainDS4Window_SizeChanged" LocationChanged="MainDS4Window_LocationChanged" MinWidth="720" MinHeight="480"
+        Title="PureDS4" Icon="/PureDS4;component/Resources/DS4W.ico" Height="660" Width="1024" Closing="MainDS4Window_Closing" Closed="MainDS4Window_Closed" StateChanged="MainDS4Window_StateChanged" SizeChanged="MainDS4Window_SizeChanged" LocationChanged="MainDS4Window_LocationChanged" MinWidth="720" MinHeight="480"
         UseLayoutRounding="True" SnapsToDevicePixels="True"
         Style="{DynamicResource WindowStyle}">
     <Window.Resources>
@@ -59,7 +59,7 @@
                                 ActionLabel="Recover"
                                 ActionRequested="ExposureStatusBanner_ActionRequested" />
             <local:StatusBanner x:Name="elevationStatusBanner"
-                                State="Warning"
+                                State="Neutral"
                                 ShowAction="True"
                                 ActionRequested="ElevationStatusBanner_ActionRequested" />
         </StackPanel>
@@ -145,7 +145,7 @@
                                                Width="32" Height="28" Margin="0,0,6,0"
                                                Visibility="{Binding HasControllerArtwork, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                RenderOptions.BitmapScalingMode="HighQuality" />
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" ToolTip="{Binding IdText}">
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                             <TextBlock TextTrimming="CharacterEllipsis" FontWeight="SemiBold">
                                                 <Run Text="{Binding ControllerDisplayName, Mode=OneWay}" /><Run Text=" · " /><Run Text="{Binding DisplayDevIndex, Mode=OneWay}" />
                                             </TextBlock>
@@ -154,7 +154,6 @@
                                                        ToolTip="Right click to disconnect wireless"
                                                        MouseRightButtonUp="ContStatusImg_MouseRightButtonUp" Tag="{Binding DevIndex}" />
                                                 <TextBlock Text="{Binding ConnectionText}" FontSize="{StaticResource TypeSecondarySize}"
-                                                           ToolTip="{Binding TooltipIDText}" ToolTipOpening="IdColumnTxtB_ToolTipOpening" Tag="{Binding DevIndex}"
                                                            Foreground="{DynamicResource TextSecondaryBrush}" />
                                             </StackPanel>
                                         </StackPanel>
@@ -212,9 +211,12 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="{Binding SelectedController.IdText, TargetNullValue='No controller selected'}"
-                                           Margin="0,0,12,0" VerticalAlignment="Center" FontWeight="SemiBold"
-                                           TextTrimming="CharacterEllipsis" ToolTip="{Binding SelectedController.IdText}" />
+                                <TextBlock Margin="0,0,12,0" VerticalAlignment="Center" FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis">
+                                    <Run Text="{Binding SelectedController.ControllerDisplayName, Mode=OneWay}" />
+                                    <Run Text=" · " />
+                                    <Run Text="{Binding SelectedController.DisplayDevIndex, Mode=OneWay}" />
+                                </TextBlock>
                                 <local:StatusChip Grid.Column="1" Label="{Binding SelectedControllerStartupTitle}"
                                                   Detail="{Binding SelectedControllerStartupDetail}"
                                                   State="{Binding SelectedControllerStartupStage, Converter={StaticResource ControllerStartupStageVisualState}}" />
@@ -249,7 +251,8 @@
                                     </StackPanel>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <Button Content="Use Native Physical" Tag="{Binding DevIndex}" Click="HomeUseNativeBtn_Click"
+                                    <Button Content="Use controller directly" Tag="{Binding DevIndex}" Click="HomeUseNativeBtn_Click"
+                                            ToolTip="Stop virtual game output and let games see this controller directly."
                                             Visibility="{Binding PrimaryDevice, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                     <Button Content="Disconnect" Click="HomeDisconnectBtn_Click" Margin="8,0,0,0"
                                             Visibility="{Binding IsWireless, Converter={StaticResource BooleanToVisibilityConverter}}" />
@@ -285,9 +288,10 @@
                                                        Foreground="{DynamicResource MutedForegroundColor}"
                                                        TextWrapping="Wrap" />
                                         </StackPanel>
-                                        <Button Grid.Column="1" Content="Use Managed / Virtual"
+                                        <Button Grid.Column="1" Content="Use game output"
                                                 MinHeight="28" Margin="12,0,0,0"
                                                 VerticalAlignment="Center"
+                                                ToolTip="Protect the physical controller again and restore PureDS4 game output."
                                                 Tag="{Binding InstanceId}"
                                                 Visibility="{Binding CanReturnToManaged, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                 Click="HomeUseManagedBtn_Click" />
@@ -814,11 +818,11 @@
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
                                             <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
-                                                <TextBlock Text="Controller protection" Style="{StaticResource FoundationSettingTitleStyle}" />
-                                                    <TextBlock Text="Hide the physical controller from games so they only see game output. Prevents double input." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                                <TextBlock Text="Legacy exclusive access" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Optional exclusive device access. Game output protects the physical controller separately; turning this off does not expose it. Use controller directly for that." Style="{StaticResource FoundationSettingDescriptionStyle}" TextWrapping="Wrap" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                    <CheckBox x:Name="hideDS4ContCk" x:Uid="hideDS4Checkbox" Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Controller protection"
+                                                    <CheckBox x:Name="hideDS4ContCk" x:Uid="hideDS4Checkbox" Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Legacy exclusive access"
                                                               IsChecked="{Binding HideDS4Controller}" Click="HideDS4ContCk_Click" />
                                             </StackPanel>
                                         </Grid>
@@ -831,7 +835,7 @@
                                             </Grid.ColumnDefinitions>
                                             <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
                                                 <TextBlock Text="Reclaim from Steam Input" Style="{StaticResource FoundationSettingTitleStyle}" />
-                                                    <TextBlock Text="If Steam grabs the controller first, briefly protect it so Steam lets go. Game output stays available." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                                    <TextBlock Text="If Steam grabs the controller first, try to reclaim it. Enabling this also turns on legacy exclusive access." Style="{StaticResource FoundationSettingDescriptionStyle}" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                                     <CheckBox x:Name="reclaimSteamInputCk" Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Reclaim from Steam Input"
@@ -898,11 +902,11 @@
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
                                             <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
-                                                <TextBlock Text="Flash the lightbar on high latency" Style="{StaticResource FoundationSettingTitleStyle}" />
-                                                    <TextBlock Text="Warn with the lightbar when input from the controller is delayed." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                                <TextBlock Text="Flash the lightbar on long report intervals" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                    <TextBlock Text="Warn when the average time between controller reports exceeds the threshold; this is not game latency." Style="{StaticResource FoundationSettingDescriptionStyle}" TextWrapping="Wrap" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                    <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Flash the lightbar on high latency"
+                                                    <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Flash the lightbar on long report intervals"
                                                               IsChecked="{Binding FlashHighLatency}" />
                                             </StackPanel>
                                         </Grid>
@@ -913,9 +917,9 @@
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="Latency threshold" VerticalAlignment="Center" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                            <TextBlock Text="Report interval threshold" VerticalAlignment="Center" Style="{StaticResource FoundationSettingTitleStyle}" />
                                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                    <xctk:IntegerUpDown d:IsHidden="True" Width="80" Style="{StaticResource FoundationNumericInputStyle}" AutomationProperties.Name="Latency threshold in milliseconds"
+                                                    <xctk:IntegerUpDown d:IsHidden="True" Width="80" Style="{StaticResource FoundationNumericInputStyle}" AutomationProperties.Name="Report interval threshold in milliseconds"
                                                                         Value="{Binding FlashHighLatencyAt}" Increment="1" Maximum="100" Minimum="10" />
                                                     <TextBlock Text="ms" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource FoundationSecondaryTextStyle}" />
                                             </StackPanel>
@@ -1006,7 +1010,7 @@
                                             </Grid.ColumnDefinitions>
                                             <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
                                                 <TextBlock Text="Control server" Style="{StaticResource FoundationSettingTitleStyle}" />
-                                                    <TextBlock Text="Let OSC apps send commands to PureDS4." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                                    <TextBlock Text="May accept commands from other devices on your network. Enable only on trusted networks." TextWrapping="Wrap" Style="{StaticResource FoundationSettingDescriptionStyle}" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                                     <TextBlock Text="Port" Margin="0,0,8,0" VerticalAlignment="Center" Style="{StaticResource FoundationSecondaryTextStyle}" />
@@ -1382,53 +1386,63 @@
                     </StackPanel>
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                         <StackPanel MaxWidth="760" HorizontalAlignment="Left">
+                            <TextBlock Text="EVERYDAY TOOLS AND DIAGNOSTICS" Style="{StaticResource FoundationSectionHeadingStyle}" />
                             <Border Style="{StaticResource FoundationPropertyGroupStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                     <StackPanel><TextBlock Text="Auto Profiles" Style="{StaticResource FoundationGroupTitleStyle}" /><TextBlock Text="Associate profiles with games and applications." Style="{StaticResource FoundationSecondaryTextStyle}" /></StackPanel>
-                                    <Button Grid.Column="1" Content="Open" Tag="auto" Margin="12,0,0,0" Click="ToolsMenuItem_Click" Style="{StaticResource FoundationButtonStyle}" />
+                                    <Button Grid.Column="1" Content="Open" Tag="auto" Margin="12,0,0,0" Click="ToolsMenuItem_Click" Style="{StaticResource FoundationButtonStyle}" AutomationProperties.Name="Open Auto Profiles" />
                                 </Grid>
                             </Border>
                             <Border Style="{StaticResource FoundationPropertyGroupStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                     <StackPanel><TextBlock Text="Input diagnostics" Style="{StaticResource FoundationGroupTitleStyle}" /><TextBlock Text="Check report rate, worst gaps, and reports lost on the way from the controller." Style="{StaticResource FoundationSecondaryTextStyle}" /></StackPanel>
-                                    <Button Grid.Column="1" Content="Open" Tag="diagnostics" Margin="12,0,0,0" Click="ToolsMenuItem_Click" Style="{StaticResource FoundationButtonStyle}" />
+                                    <Button Grid.Column="1" Content="Open" Tag="diagnostics" Margin="12,0,0,0" Click="ToolsMenuItem_Click" Style="{StaticResource FoundationButtonStyle}" AutomationProperties.Name="Open input diagnostics" />
                                 </Grid>
                             </Border>
                             <Border Style="{StaticResource FoundationPropertyGroupStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                     <StackPanel><TextBlock Text="Output Slots" Style="{StaticResource FoundationGroupTitleStyle}" /><TextBlock Text="Inspect and reserve virtual game-output slots." Style="{StaticResource FoundationSecondaryTextStyle}" /></StackPanel>
-                                    <Button Grid.Column="1" Content="Open" Tag="slots" Margin="12,0,0,0" Click="ToolsMenuItem_Click" Style="{StaticResource FoundationButtonStyle}" />
+                                    <Button Grid.Column="1" Content="Open" Tag="slots" Margin="12,0,0,0" Click="ToolsMenuItem_Click" Style="{StaticResource FoundationButtonStyle}" AutomationProperties.Name="Open output slots" />
                                 </Grid>
                             </Border>
                             <Border Style="{StaticResource FoundationPropertyGroupStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                     <StackPanel><TextBlock Text="Log" Style="{StaticResource FoundationGroupTitleStyle}" /><TextBlock Text="Search, filter, and copy runtime events." Style="{StaticResource FoundationSecondaryTextStyle}" /></StackPanel>
-                                    <Button Grid.Column="1" Content="Open" Tag="log" Margin="12,0,0,0" Click="ToolsMenuItem_Click" Style="{StaticResource FoundationButtonStyle}" />
+                                    <Button Grid.Column="1" Content="Open" Tag="log" Margin="12,0,0,0" Click="ToolsMenuItem_Click" Style="{StaticResource FoundationButtonStyle}" AutomationProperties.Name="Open runtime log" />
+                                </Grid>
+                            </Border>
+                            <TextBlock Text="RECOVERY AND REFERENCE" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                            <Border Style="{StaticResource FoundationPropertyGroupStyle}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel><TextBlock Text="HidHide recovery" Style="{StaticResource FoundationGroupTitleStyle}" /><TextBlock Text="Inspect and release only controller rules left uncertain after an interrupted run. Stop controller handling first." TextWrapping="Wrap" Style="{StaticResource FoundationSecondaryTextStyle}" /></StackPanel>
+                                    <Button x:Name="recoverHidHideBtn" Grid.Column="1" Content="Inspect" Margin="12,0,0,0" Click="RecoverHidHideBtn_Click" Style="{StaticResource FoundationButtonStyle}" AutomationProperties.Name="Inspect HidHide recovery" />
                                 </Grid>
                             </Border>
                             <Border Style="{StaticResource FoundationPropertyGroupStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                     <StackPanel><TextBlock Text="Hotkeys and About" Style="{StaticResource FoundationGroupTitleStyle}" /><TextBlock Text="View application identity, version, links, and keyboard shortcuts." Style="{StaticResource FoundationSecondaryTextStyle}" /></StackPanel>
-                                    <Button Grid.Column="1" Content="Open" Margin="12,0,0,0" Click="AboutBtn_Click" Style="{StaticResource FoundationButtonStyle}" />
+                                    <Button Grid.Column="1" Content="Open" Margin="12,0,0,0" Click="AboutBtn_Click" Style="{StaticResource FoundationButtonStyle}" AutomationProperties.Name="Open hotkeys and About" />
+                                </Grid>
+                            </Border>
+                            <TextBlock Text="MOVING FROM DS4WINDOWS" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                            <Border Style="{StaticResource FoundationPropertyGroupStyle}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel><TextBlock Text="Import from DS4Windows" Style="{StaticResource FoundationGroupTitleStyle}" /><TextBlock Text="Copy game profiles from an existing DS4Windows installation into PureDS4. Your DS4Windows files are never changed or removed." Style="{StaticResource FoundationSecondaryTextStyle}" /></StackPanel>
+                                    <Button Grid.Column="1" Content="Open" Margin="12,0,0,0" Click="ImportLegacyProfilesBtn_Click" Style="{StaticResource FoundationButtonStyle}" AutomationProperties.Name="Import profiles from DS4Windows" />
                                 </Grid>
                             </Border>
                             <Border Style="{StaticResource FoundationPropertyGroupStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <StackPanel><TextBlock Text="Import from DS4Windows" Style="{StaticResource FoundationGroupTitleStyle}" /><TextBlock Text="Copy game profiles from an existing DS4Windows or DS4Windows Reworked installation into PureDS4. DS4Windows' own files are never changed or removed." Style="{StaticResource FoundationSecondaryTextStyle}" /></StackPanel>
-                                    <Button Grid.Column="1" Content="Open" Margin="12,0,0,0" Click="ImportLegacyProfilesBtn_Click" Style="{StaticResource FoundationButtonStyle}" />
-                                </Grid>
-                            </Border>
-                            <Border Style="{StaticResource FoundationPropertyGroupStyle}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <StackPanel><TextBlock Text="DS4Windows removal plan" Style="{StaticResource FoundationGroupTitleStyle}" /><TextBlock Text="See exactly what removing a detected DS4Windows or DS4Windows Reworked installation would involve. This only describes; it does not remove anything." Style="{StaticResource FoundationSecondaryTextStyle}" /></StackPanel>
-                                    <Button Grid.Column="1" Content="Open" Margin="12,0,0,0" Click="ShowLegacyRemovalPlanBtn_Click" Style="{StaticResource FoundationButtonStyle}" />
+                                    <StackPanel><TextBlock Text="DS4Windows removal plan" Style="{StaticResource FoundationGroupTitleStyle}" /><TextBlock Text="See exactly what removing a detected DS4Windows installation would involve. Opening the plan does not remove anything." Style="{StaticResource FoundationSecondaryTextStyle}" /></StackPanel>
+                                    <Button Grid.Column="1" Content="Open" Margin="12,0,0,0" Click="ShowLegacyRemovalPlanBtn_Click" Style="{StaticResource FoundationButtonStyle}" AutomationProperties.Name="Open DS4Windows removal plan" />
                                 </Grid>
                             </Border>
                         </StackPanel>
@@ -1558,6 +1572,10 @@
                         </StackPanel>
                         <Border Grid.Row="1" Style="{StaticResource FoundationToolbarBarStyle}">
                             <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
                                 <StackPanel Orientation="Horizontal">
                                     <Button Content="Copy selected" Click="CopySelectedLogBtn_Click"
                                             Style="{StaticResource FoundationToolbarButtonStyle}" />
@@ -1569,6 +1587,9 @@
                                 <Button x:Name="clearLogBtn" Content="Clear log" Click="ClearLogBtn_Click"
                                         HorizontalAlignment="Right"
                                         Style="{StaticResource FoundationToolbarButtonStyle}" />
+                                <TextBlock Grid.Row="1" Margin="0,6,0,0" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Text="Logs may contain controller IDs and file paths. Review before sharing." />
                             </Grid>
                         </Border>
                     </Grid>

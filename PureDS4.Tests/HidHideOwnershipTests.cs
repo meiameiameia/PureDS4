@@ -1,5 +1,6 @@
 using DS4Windows;
 using DS4WinWPF.DS4Control;
+using System.Text;
 
 namespace DS4WindowsTests
 {
@@ -136,6 +137,321 @@ namespace DS4WindowsTests
                 Assert.IsTrue(journal.CompleteTransientRun(
                     new[] { @"HID\CLEAN" }, activeStateRestored: true));
                 Assert.IsFalse(File.Exists(path));
+            }
+            finally
+            {
+                Directory.Delete(root, true);
+            }
+        }
+
+        [TestMethod]
+        public void InterruptedRunCanRecoverExactIdWithoutTouchingForeignRules()
+        {
+            string root = CreateTemporaryRoot();
+            string path = Path.Combine(root, HidHideOwnershipJournal.FileName);
+            try
+            {
+                HidHideOwnershipJournal first = new(path);
+                Assert.IsTrue(first.BeginTransientRun());
+                Assert.IsTrue(first.RecordPersistentBlacklistEntry(
+                    @"HID\OWNED"));
+                Assert.IsTrue(first.RecordActiveStateEnabled());
+
+                HidHideOwnershipJournal recovered = new(path);
+                Assert.IsTrue(recovered.Load());
+                FakeBlacklistDevice device = new(
+                    new[] { @"HID\OWNED", @"HID\FOREIGN" });
+                HidHideRecoveryPreview preview =
+                    HidHidePersistentRecovery.Inspect(device, recovered);
+
+                Assert.IsTrue(preview.CanRecover, preview.Error);
+                CollectionAssert.AreEqual(new[] { @"HID\OWNED" },
+                    preview.Present.ToArray());
+                Assert.IsTrue(preview.ActiveStateUncertain);
+                Assert.AreEqual(string.Empty,
+                    HidHidePersistentRecovery.Complete(device, recovered,
+                        preview, useMachineMutex: false));
+                CollectionAssert.AreEqual(new[] { @"HID\FOREIGN" },
+                    device.GetBlacklist());
+                Assert.IsFalse(recovered.RecoveryRequired);
+
+                HidHideOwnershipJournal reopened = new(path);
+                Assert.IsTrue(reopened.Load());
+                Assert.IsFalse(reopened.RecoveryRequired);
+            }
+            finally
+            {
+                Directory.Delete(root, true);
+            }
+        }
+
+        [TestMethod]
+        public void IntentOnlyCrashAcknowledgesAlreadyAbsentIdWithoutWriting()
+        {
+            string root = CreateTemporaryRoot();
+            string path = Path.Combine(root, HidHideOwnershipJournal.FileName);
+            try
+            {
+                HidHideOwnershipJournal first = new(path);
+                Assert.IsTrue(first.BeginTransientRun());
+                Assert.IsTrue(first.RecordPersistentBlacklistEntry(
+                    @"HID\NEVER_WRITTEN"));
+                HidHideOwnershipJournal recovered = new(path);
+                Assert.IsTrue(recovered.Load());
+                FakeBlacklistDevice device = new(new[] { @"HID\FOREIGN" });
+
+                HidHideRecoveryPreview preview =
+                    HidHidePersistentRecovery.Inspect(device, recovered);
+                Assert.IsTrue(preview.CanRecover, preview.Error);
+                Assert.AreEqual(0, preview.Present.Count);
+                Assert.AreEqual(string.Empty,
+                    HidHidePersistentRecovery.Complete(device, recovered,
+                        preview, useMachineMutex: false));
+                Assert.AreEqual(0, device.WriteCount);
+                CollectionAssert.AreEqual(new[] { @"HID\FOREIGN" },
+                    device.GetBlacklist());
+                Assert.IsFalse(recovered.RecoveryRequired);
+            }
+            finally
+            {
+                Directory.Delete(root, true);
+            }
+        }
+
+        [TestMethod]
+        public void RecoveryHandlesPresentBluetoothAndAbsentUsbIdsIndividually()
+        {
+            string root = CreateTemporaryRoot();
+            string path = Path.Combine(root, HidHideOwnershipJournal.FileName);
+            try
+            {
+                HidHideOwnershipJournal first = new(path);
+                Assert.IsTrue(first.BeginTransientRun());
+                Assert.IsTrue(first.RecordPersistentBlacklistEntry(
+                    @"HID\DS4_USB_OLD"));
+                Assert.IsTrue(first.RecordPersistentBlacklistEntry(
+                    @"HID\DS4_BT_CURRENT"));
+                HidHideOwnershipJournal recovered = new(path);
+                Assert.IsTrue(recovered.Load());
+                FakeBlacklistDevice device = new(new[]
+                {
+                    @"HID\DS4_BT_CURRENT", @"HID\OTHER_CONTROLLER",
+                });
+
+                HidHideRecoveryPreview preview =
+                    HidHidePersistentRecovery.Inspect(device, recovered);
+                Assert.IsTrue(preview.CanRecover, preview.Error);
+                CollectionAssert.AreEqual(new[] { @"HID\DS4_BT_CURRENT" },
+                    preview.Present.ToArray());
+                Assert.AreEqual(string.Empty,
+                    HidHidePersistentRecovery.Complete(device, recovered,
+                        preview, useMachineMutex: false));
+                CollectionAssert.AreEqual(new[] { @"HID\OTHER_CONTROLLER" },
+                    device.GetBlacklist());
+                Assert.IsFalse(recovered.RecoveryRequired);
+            }
+            finally
+            {
+                Directory.Delete(root, true);
+            }
+        }
+
+        [TestMethod]
+        public void RecoveryInspectionFailureCannotWriteOrClearRecord()
+        {
+            string root = CreateTemporaryRoot();
+            string path = Path.Combine(root, HidHideOwnershipJournal.FileName);
+            try
+            {
+                HidHideOwnershipJournal first = new(path);
+                Assert.IsTrue(first.BeginTransientRun());
+                Assert.IsTrue(first.RecordPersistentBlacklistEntry(
+                    @"HID\OWNED"));
+                HidHideOwnershipJournal recovered = new(path);
+                Assert.IsTrue(recovered.Load());
+                FakeBlacklistDevice device = new(new[] { @"HID\OWNED" })
+                {
+                    ThrowOnReadNumber = 1,
+                };
+
+                HidHideRecoveryPreview preview =
+                    HidHidePersistentRecovery.Inspect(device, recovered);
+                Assert.IsFalse(preview.CanRecover);
+                Assert.AreNotEqual(string.Empty,
+                    HidHidePersistentRecovery.Complete(device, recovered,
+                        preview, useMachineMutex: false));
+                Assert.AreEqual(0, device.WriteCount);
+                Assert.IsTrue(recovered.RecoveryRequired);
+            }
+            finally
+            {
+                Directory.Delete(root, true);
+            }
+        }
+
+        [TestMethod]
+        public void ActiveStateOnlyRecoveryAcknowledgesWithoutDriverWrite()
+        {
+            string root = CreateTemporaryRoot();
+            string path = Path.Combine(root, HidHideOwnershipJournal.FileName);
+            try
+            {
+                HidHideOwnershipJournal first = new(path);
+                Assert.IsTrue(first.BeginTransientRun());
+                Assert.IsTrue(first.RecordActiveStateEnabled());
+                HidHideOwnershipJournal recovered = new(path);
+                Assert.IsTrue(recovered.Load());
+                FakeBlacklistDevice device = new(new[] { @"HID\FOREIGN" });
+
+                HidHideRecoveryPreview preview =
+                    HidHidePersistentRecovery.Inspect(device, recovered);
+                Assert.IsTrue(preview.CanRecover, preview.Error);
+                Assert.IsTrue(preview.ActiveStateUncertain);
+                Assert.AreEqual(0, preview.Pending.Count);
+                Assert.AreEqual(string.Empty,
+                    HidHidePersistentRecovery.Complete(device, recovered,
+                        preview, useMachineMutex: false));
+                Assert.AreEqual(0, device.WriteCount);
+                Assert.IsFalse(recovered.RecoveryRequired);
+            }
+            finally
+            {
+                Directory.Delete(root, true);
+            }
+        }
+
+        [TestMethod]
+        public void ActiveStateChangeAfterPreviewRefusesRecovery()
+        {
+            string root = CreateTemporaryRoot();
+            string path = Path.Combine(root, HidHideOwnershipJournal.FileName);
+            try
+            {
+                HidHideOwnershipJournal first = new(path);
+                Assert.IsTrue(first.BeginTransientRun());
+                Assert.IsTrue(first.RecordPersistentBlacklistEntry(
+                    @"HID\OWNED"));
+                HidHideOwnershipJournal recovered = new(path);
+                Assert.IsTrue(recovered.Load());
+                FakeBlacklistDevice device = new(new[] { @"HID\OWNED" });
+                bool active = true;
+                HidHideRecoveryPreview preview =
+                    HidHidePersistentRecovery.Inspect(device, recovered,
+                        () => active);
+                active = false;
+
+                StringAssert.Contains(
+                    HidHidePersistentRecovery.Complete(device, recovered,
+                        preview, useMachineMutex: false,
+                        readActiveState: () => active),
+                    "active setting changed");
+                Assert.AreEqual(0, device.WriteCount);
+                Assert.IsTrue(recovered.RecoveryRequired);
+            }
+            finally
+            {
+                Directory.Delete(root, true);
+            }
+        }
+
+        [TestMethod]
+        public void ChangedBlacklistAfterPreviewRefusesRecoveryAndKeepsJournal()
+        {
+            string root = CreateTemporaryRoot();
+            string path = Path.Combine(root, HidHideOwnershipJournal.FileName);
+            try
+            {
+                HidHideOwnershipJournal first = new(path);
+                Assert.IsTrue(first.BeginTransientRun());
+                Assert.IsTrue(first.RecordPersistentBlacklistEntry(
+                    @"HID\OWNED"));
+                HidHideOwnershipJournal recovered = new(path);
+                Assert.IsTrue(recovered.Load());
+                FakeBlacklistDevice device = new(new[] { @"HID\OWNED" });
+                HidHideRecoveryPreview preview =
+                    HidHidePersistentRecovery.Inspect(device, recovered);
+                device.AddEntry(@"HID\FOREIGN");
+
+                StringAssert.Contains(
+                    HidHidePersistentRecovery.Complete(device, recovered,
+                        preview, useMachineMutex: false),
+                    "changed after inspection");
+                Assert.AreEqual(0, device.WriteCount);
+                Assert.IsTrue(recovered.RecoveryRequired);
+                CollectionAssert.AreEquivalent(
+                    new[] { @"HID\OWNED", @"HID\FOREIGN" },
+                    device.GetBlacklist());
+            }
+            finally
+            {
+                Directory.Delete(root, true);
+            }
+        }
+
+        [TestMethod]
+        public void UncertainRecoveryWriteCanBeRetriedAfterFreshInspection()
+        {
+            string root = CreateTemporaryRoot();
+            string path = Path.Combine(root, HidHideOwnershipJournal.FileName);
+            try
+            {
+                HidHideOwnershipJournal first = new(path);
+                Assert.IsTrue(first.BeginTransientRun());
+                Assert.IsTrue(first.RecordPersistentBlacklistEntry(
+                    @"HID\OWNED"));
+                HidHideOwnershipJournal recovered = new(path);
+                Assert.IsTrue(recovered.Load());
+                FakeBlacklistDevice uncertain = new(new[] { @"HID\OWNED" })
+                {
+                    ThrowAfterWrite = true,
+                };
+                HidHideRecoveryPreview preview =
+                    HidHidePersistentRecovery.Inspect(uncertain, recovered);
+
+                Assert.AreNotEqual(string.Empty,
+                    HidHidePersistentRecovery.Complete(uncertain, recovered,
+                        preview, useMachineMutex: false));
+                Assert.IsTrue(recovered.RecoveryRequired);
+
+                FakeBlacklistDevice nowAbsent = new(
+                    uncertain.GetBlacklist());
+                HidHideRecoveryPreview retry =
+                    HidHidePersistentRecovery.Inspect(nowAbsent, recovered);
+                Assert.AreEqual(0, retry.Present.Count);
+                Assert.AreEqual(string.Empty,
+                    HidHidePersistentRecovery.Complete(nowAbsent, recovered,
+                        retry, useMachineMutex: false));
+                Assert.AreEqual(0, nowAbsent.WriteCount);
+                Assert.IsFalse(recovered.RecoveryRequired);
+            }
+            finally
+            {
+                Directory.Delete(root, true);
+            }
+        }
+
+        [TestMethod]
+        public void StoppedIncompleteRunBecomesPersistentRecoveryObligation()
+        {
+            string root = CreateTemporaryRoot();
+            string path = Path.Combine(root, HidHideOwnershipJournal.FileName);
+            try
+            {
+                HidHideOwnershipJournal journal = new(path);
+                Assert.IsTrue(journal.BeginTransientRun());
+                Assert.IsTrue(journal.RecordPersistentBlacklistEntry(
+                    @"HID\STOP_FAILED"));
+                Assert.IsTrue(journal.RecordActiveStateEnabled());
+                Assert.IsTrue(journal.MarkStoppedRunRecoveryRequired());
+                Assert.IsFalse(journal.IsTransientRunInProgress);
+                Assert.IsTrue(journal.RecoveryRequired);
+
+                HidHideOwnershipJournal reopened = new(path);
+                Assert.IsTrue(reopened.Load());
+                CollectionAssert.Contains(reopened.
+                    UnresolvedPersistentBlacklistEntries.ToList(),
+                    @"HID\STOP_FAILED");
+                Assert.IsTrue(reopened.ActiveStateRecoveryRequired);
             }
             finally
             {
@@ -530,6 +846,244 @@ namespace DS4WindowsTests
         }
 
         [TestMethod]
+        public void UnreadableInitialBlacklistDoesNotCreateIntentOrWrite()
+        {
+            FakeBlacklistDevice device = new(new[] { @"HID\BASELINE" })
+            {
+                ThrowOnReadNumber = 1,
+            };
+            bool intentRecorded = false;
+
+            HidHideBlacklistMutationResult result =
+                HidHideBlacklistMutationGateway.Mutate(device,
+                    current => HidHideBlacklistMutationGateway.AddExact(
+                        current, @"HID\NEW"),
+                    () => intentRecorded = true, useMachineMutex: false);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsFalse(result.WriteAttempted);
+            Assert.IsFalse(result.AfterKnown);
+            Assert.IsFalse(intentRecorded);
+            Assert.AreEqual(0, device.WriteCount);
+        }
+
+        [TestMethod]
+        public void NullBlacklistOrDesiredConfigurationNeverWrites()
+        {
+            FakeBlacklistDevice device = new(new[] { @"HID\BASELINE" })
+            {
+                ReturnNullOnReadNumber = 1,
+            };
+
+            HidHideBlacklistMutationResult unreadable =
+                HidHideBlacklistMutationGateway.Mutate(device,
+                    current => new[] { @"HID\NEW" },
+                    useMachineMutex: false);
+            Assert.IsFalse(unreadable.Succeeded);
+            Assert.IsFalse(unreadable.WriteAttempted);
+            Assert.AreEqual(0, device.WriteCount);
+
+            FakeBlacklistDevice second = new(new[] { @"HID\BASELINE" });
+            HidHideBlacklistMutationResult noDesired =
+                HidHideBlacklistMutationGateway.Mutate(second,
+                    _ => null, useMachineMutex: false);
+            Assert.IsFalse(noDesired.Succeeded);
+            Assert.IsFalse(noDesired.WriteAttempted);
+            Assert.AreEqual(0, second.WriteCount);
+        }
+
+        [TestMethod]
+        public void UnreadablePreWriteBlacklistDoesNotWrite()
+        {
+            FakeBlacklistDevice device = new(new[] { @"HID\BASELINE" })
+            {
+                ThrowOnReadNumber = 2,
+            };
+            bool intentRecorded = false;
+
+            HidHideBlacklistMutationResult result =
+                HidHideBlacklistMutationGateway.Mutate(device,
+                    current => HidHideBlacklistMutationGateway.AddExact(
+                        current, @"HID\NEW"),
+                    () => intentRecorded = true, useMachineMutex: false);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsFalse(result.WriteAttempted);
+            Assert.IsTrue(intentRecorded);
+            CollectionAssert.AreEqual(new[] { @"HID\BASELINE" },
+                result.Before.ToArray());
+            Assert.AreEqual(0, device.WriteCount);
+        }
+
+        [TestMethod]
+        public void FailedIntentWritePreventsBlacklistMutation()
+        {
+            FakeBlacklistDevice device = new(new[] { @"HID\BASELINE" });
+
+            HidHideBlacklistMutationResult result =
+                HidHideBlacklistMutationGateway.Mutate(device,
+                    current => HidHideBlacklistMutationGateway.AddExact(
+                        current, @"HID\NEW"),
+                    () => false, useMachineMutex: false);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsFalse(result.WriteAttempted);
+            Assert.IsTrue(result.AfterKnown);
+            Assert.AreEqual(0, device.WriteCount);
+        }
+
+        [TestMethod]
+        public void SetterThatAppliesThenThrowsKeepsDurableRecoveryIntent()
+        {
+            string root = CreateTemporaryRoot();
+            try
+            {
+                string path = Path.Combine(root,
+                    HidHideOwnershipJournal.FileName);
+                HidHideOwnershipJournal journal = new(path);
+                Assert.IsTrue(journal.BeginTransientRun());
+                FakeBlacklistDevice device = new(new[] { @"HID\BASELINE" })
+                {
+                    ThrowAfterWrite = true,
+                };
+                bool intentRecorded = false;
+
+                HidHideBlacklistMutationResult result =
+                    HidHideBlacklistMutationGateway.Mutate(device,
+                        current => HidHideBlacklistMutationGateway.AddExact(
+                            current, @"HID\NEW"),
+                        () => intentRecorded =
+                            journal.RecordPersistentBlacklistEntry(@"HID\NEW"),
+                        useMachineMutex: false);
+                if (intentRecorded && !result.WriteAttempted)
+                {
+                    Assert.IsTrue(journal.CompleteTransientRun(
+                        new[] { @"HID\NEW" }, false));
+                }
+
+                Assert.IsFalse(result.Succeeded);
+                Assert.IsTrue(result.WriteAttempted);
+                Assert.IsFalse(result.AfterKnown);
+                Assert.AreEqual(1, device.WriteCount);
+                CollectionAssert.Contains(device.GetBlacklist(), @"HID\NEW");
+                CollectionAssert.AreEqual(new[] { @"HID\BASELINE" },
+                    result.Before.ToArray());
+
+                HidHideOwnershipJournal recovered = new(path);
+                Assert.IsTrue(recovered.Load());
+                Assert.IsTrue(recovered.RecoveryRequired);
+                CollectionAssert.Contains(recovered.
+                    UnresolvedPersistentBlacklistEntries.ToList(),
+                    @"HID\NEW");
+            }
+            finally
+            {
+                Directory.Delete(root, true);
+            }
+        }
+
+        [TestMethod]
+        public void PostWriteReadFailurePreservesWriteAttemptAndBaseline()
+        {
+            FakeBlacklistDevice device = new(new[] { @"HID\BASELINE" })
+            {
+                ThrowOnReadNumber = 3,
+            };
+
+            HidHideBlacklistMutationResult result =
+                HidHideBlacklistMutationGateway.Mutate(device,
+                    current => HidHideBlacklistMutationGateway.AddExact(
+                        current, @"HID\NEW"),
+                    () => true, useMachineMutex: false);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.WriteAttempted);
+            Assert.IsFalse(result.AfterKnown);
+            Assert.AreEqual(1, device.WriteCount);
+            CollectionAssert.AreEqual(new[] { @"HID\BASELINE" },
+                result.Before.ToArray());
+        }
+
+        [TestMethod]
+        public void RejectedSetterWithUnreadableOutcomeStillReportsAttempt()
+        {
+            FakeBlacklistDevice device = new(new[] { @"HID\BASELINE" })
+            {
+                ReturnFalseAfterWrite = true,
+                ThrowOnReadNumber = 3,
+            };
+
+            HidHideBlacklistMutationResult result =
+                HidHideBlacklistMutationGateway.Mutate(device,
+                    current => HidHideBlacklistMutationGateway.AddExact(
+                        current, @"HID\NEW"),
+                    () => true, useMachineMutex: false);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.WriteAttempted);
+            Assert.IsFalse(result.AfterKnown);
+            Assert.AreEqual(1, device.WriteCount);
+        }
+
+        [TestMethod]
+        public void UnreadableWhitelistDoesNotTriggerCleanupWrite()
+        {
+            foreach (int failedRead in new[] { 1, 2 })
+            {
+                FakeWhitelistDevice device = new(
+                    new[] { @"\Device\HarddiskVolume1\pureds4.exe" })
+                {
+                    ThrowOnReadNumber = failedRead,
+                };
+
+                HidHideWhitelistMutationResult result =
+                    HidHideWhitelistMutationGateway.RemoveExact(device,
+                        new[] { @"\Device\HarddiskVolume1\pureds4.exe" },
+                        useMachineMutex: false);
+
+                Assert.IsFalse(result.Succeeded);
+                Assert.AreEqual(0, device.WriteCount);
+            }
+
+            FakeWhitelistDevice nullDevice = new(
+                new[] { @"\Device\HarddiskVolume1\pureds4.exe" })
+            {
+                ReturnNullOnReadNumber = 1,
+            };
+            HidHideWhitelistMutationResult nullResult =
+                HidHideWhitelistMutationGateway.RemoveExact(nullDevice,
+                    new[] { @"\Device\HarddiskVolume1\pureds4.exe" },
+                    useMachineMutex: false);
+            Assert.IsFalse(nullResult.Succeeded);
+            Assert.AreEqual(0, nullDevice.WriteCount);
+        }
+
+        [TestMethod]
+        public void HidHideStringListRejectsPartialOrUnterminatedReads()
+        {
+            CollectionAssert.AreEqual(Array.Empty<string>(),
+                HidHideAPIDevice.ParseMultiSz(
+                    Encoding.Unicode.GetBytes("\0")));
+            CollectionAssert.AreEqual(Array.Empty<string>(),
+                HidHideAPIDevice.ParseMultiSz(
+                    Encoding.Unicode.GetBytes("\0\0")));
+            CollectionAssert.AreEqual(new[] { "one", "two" },
+                HidHideAPIDevice.ParseMultiSz(
+                    Encoding.Unicode.GetBytes("one\0two\0\0")));
+            Assert.ThrowsException<InvalidDataException>(() =>
+                HidHideAPIDevice.ParseMultiSz(
+                    Encoding.Unicode.GetBytes("one\0")));
+            CollectionAssert.AreEqual(new[] { "one" },
+                HidHideAPIDevice.ParseMultiSz(
+                    Encoding.Unicode.GetBytes("one\0\0unused tail")));
+            Assert.ThrowsException<InvalidDataException>(() =>
+                HidHideAPIDevice.ParseMultiSz(
+                    Encoding.Unicode.GetBytes("\0not empty")));
+            Assert.ThrowsException<InvalidDataException>(() =>
+                HidHideAPIDevice.ParseMultiSz(new byte[] { 1, 0, 0 }));
+        }
+
+        [TestMethod]
         public void RecoveryAddsOnlyExactExternalEntryToFreshState()
         {
             FakeBlacklistDevice device = new(
@@ -568,13 +1122,27 @@ namespace DS4WindowsTests
 
             internal bool ChangeBeforeSecondRead { get; init; }
             internal bool AddUnexpectedEntryAfterWrite { get; init; }
+            internal int ThrowOnReadNumber { get; init; }
+            internal int ReturnNullOnReadNumber { get; init; }
+            internal bool ThrowAfterWrite { get; init; }
+            internal bool ReturnFalseAfterWrite { get; init; }
             internal int WriteCount { get; private set; }
             internal List<string> Events { get; } = new();
+
+            internal void AddEntry(string instanceId) => entries.Add(instanceId);
 
             public List<string> GetBlacklist()
             {
                 readCount++;
                 Events.Add("read");
+                if (readCount == ThrowOnReadNumber)
+                {
+                    throw new IOException("Simulated HidHide read failure.");
+                }
+                if (readCount == ReturnNullOnReadNumber)
+                {
+                    return null;
+                }
                 if (ChangeBeforeSecondRead && readCount == 2)
                 {
                     entries.Add(@"HID\FOREIGN");
@@ -591,7 +1159,11 @@ namespace DS4WindowsTests
                 {
                     entries.Add(@"HID\FOREIGN");
                 }
-                return true;
+                if (ThrowAfterWrite)
+                {
+                    throw new IOException("Simulated post-write failure.");
+                }
+                return !ReturnFalseAfterWrite;
             }
         }
 
@@ -607,11 +1179,21 @@ namespace DS4WindowsTests
 
             internal bool ChangeBeforeSecondRead { get; init; }
             internal bool AddUnexpectedEntryAfterWrite { get; init; }
+            internal int ThrowOnReadNumber { get; init; }
+            internal int ReturnNullOnReadNumber { get; init; }
             internal int WriteCount { get; private set; }
 
             public List<string> GetWhitelist()
             {
                 readCount++;
+                if (readCount == ThrowOnReadNumber)
+                {
+                    throw new IOException("Simulated HidHide read failure.");
+                }
+                if (readCount == ReturnNullOnReadNumber)
+                {
+                    return null;
+                }
                 if (ChangeBeforeSecondRead && readCount == 2)
                 {
                     entries.Add(

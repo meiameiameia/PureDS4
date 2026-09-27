@@ -3,8 +3,8 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$PublishRoot,
     [string]$ProductVersion = "5.1.0",
-    [string]$DisplayVersion = "5.1.0-beta.1",
-    [string]$BundleVersion = "5.1.0-beta.1",
+    [string]$DisplayVersion = "5.1.0",
+    [string]$BundleVersion = "5.1.0",
     [string]$OutputDirectory,
     [switch]$SkipApplicationPublish,
     [switch]$RequireSigning,
@@ -67,8 +67,8 @@ $signingEnabled = -not [string]::IsNullOrWhiteSpace(
     $env:DS4W_SIGN_CERT_PATH)
 if ($RequireSigning -and -not $signingEnabled) {
     throw (
-        "Release signing is required, but DS4W_SIGN_CERT_PATH is not set. " +
-        "Unsigned public installers are intentionally blocked."
+        "Signing was explicitly required for this build, but " +
+        "DS4W_SIGN_CERT_PATH is not set."
     )
 }
 $signtool = $null

@@ -138,14 +138,14 @@ namespace DS4WinWPF.DS4Forms
         {
             if (!plan.HasDetectedState)
             {
-                return "No DS4Windows or DS4Windows Reworked installation " +
+                return "No DS4Windows installation " +
                     "was detected on this machine. There is nothing to " +
                     "remove.";
             }
 
             if (plan.HasResidualState)
             {
-                return "No active DS4Windows or DS4Windows Reworked " +
+                return "No active DS4Windows " +
                     "runtime was detected. Preserved profiles, settings, " +
                     "or a historical registry record remain, but they " +
                     "cannot start the old application and do not block " +

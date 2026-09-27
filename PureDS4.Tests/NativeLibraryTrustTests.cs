@@ -24,15 +24,9 @@ namespace DS4WindowsTests
         {
             string rnnoisePath = NativeLibraryTrust.GetApplicationOwnedPath(
                 "rnnoise.dll");
-            string fakerInputPath = NativeLibraryTrust.GetApplicationOwnedPath(
-                "FakerInputDll.dll");
 
             Assert.IsTrue(NativeLibraryTrust.HasExpectedSha256(rnnoisePath,
                 NativeLibraryTrust.RnnoiseSha256), rnnoisePath);
-            Assert.IsTrue(NativeLibraryTrust.HasExpectedSha256(fakerInputPath,
-                Environment.Is64BitProcess ?
-                    NativeLibraryTrust.FakerInputX64Sha256 :
-                    NativeLibraryTrust.FakerInputX86Sha256), fakerInputPath);
         }
 
         [TestMethod]

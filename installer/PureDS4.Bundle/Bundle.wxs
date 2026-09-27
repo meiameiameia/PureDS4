@@ -16,7 +16,6 @@
 
     <Variable Name="CreateDesktopShortcut" Type="numeric" Value="1" />
     <Variable Name="InstallHidHide" Type="numeric" Value="1" />
-    <Variable Name="InstallFakerInput" Type="numeric" Value="0" />
     <Variable Name="SetupCorrelationId" Type="string" Value="" Persisted="yes" />
     <Variable Name="TargetUserSid" Type="string" Value="" Persisted="yes" />
     <Variable Name="TargetUserName" Type="string" Value="" Persisted="yes" />
@@ -125,14 +124,6 @@
         <ExitCode Value="3010" Behavior="scheduleReboot" />
         <ExitCode Behavior="error" />
       </ExePackage>
-
-      <MsiPackage
-          Id="FakerInput"
-          SourceFile="$(var.ExtrasRoot)\FakerInput_0.1.0_x64.msi"
-          Permanent="yes"
-          Vital="no"
-          InstallCondition="InstallFakerInput"
-          Visible="no" />
 
       <!-- VIIPER/USB-IP is shared machine infrastructure. Keep the normal
            setup package permanent so an outgoing related bundle cannot tear

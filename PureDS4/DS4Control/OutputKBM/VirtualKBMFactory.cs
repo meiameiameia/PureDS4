@@ -1,4 +1,4 @@
-﻿/*
+/*
 DS4Windows
 Copyright (C) 2023  Travis Nickles
 
@@ -16,10 +16,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-using System;
-
 namespace DS4Windows.DS4Control
 {
+    /// <summary>
+    /// Chooses how mapped keyboard and mouse output reaches Windows.
+    ///
+    /// PureDS4 sends that output through SendInput, which needs no driver and
+    /// no install step. The upstream alternative, a FakerInput virtual device,
+    /// was removed: it required a separate kernel driver whose wrapper
+    /// binaries carried an unresolved license, and it bought only the narrow
+    /// case of reaching windows that refuse simulated input.
+    /// </summary>
     public static class VirtualKBMFactory
     {
         public const string DEFAULT_IDENTIFIER = "default";
@@ -27,58 +34,13 @@ namespace DS4Windows.DS4Control
         public static VirtualKBMBase DetermineHandler(string identifier =
             SendInputHandler.IDENTIFIER)
         {
-            VirtualKBMBase handler = null;
-            if (identifier == DEFAULT_IDENTIFIER)
-            {
-                // Run through event handler discovery routine
-                if (Global.fakerInputInstalled)
-                {
-                    handler = new FakerInputHandler();
-                }
-                else
-                {
-                    // Virtual KB+M driver not found. Use fallback system instead
-                    handler = GetFallbackHandler();
-                }
-            }
-            else if (identifier == SendInputHandler.IDENTIFIER)
-            {
-                handler = new SendInputHandler();
-            }
-            else if (identifier == FakerInputHandler.IDENTIFIER)
-            {
-                handler = new FakerInputHandler();
-            }
-            else
-            {
-                handler = GetFallbackHandler();
-            }
-
-            return handler;
-            //return new SendInputHandler();
-            //return new FakerInputMapping();
+            return GetFallbackHandler();
         }
 
         public static VirtualKBMMapping GetMappingInstance(string identifier =
             SendInputHandler.IDENTIFIER)
         {
-            VirtualKBMMapping temp = null;
-            if (identifier == SendInputHandler.IDENTIFIER)
-            {
-                temp = new SendInputMapping();
-            }
-            else if (identifier == FakerInputHandler.IDENTIFIER)
-            {
-                temp = new FakerInputMapping();
-            }
-            else
-            {
-                temp = GetFallbackMapping();
-            }
-
-            //VirtualKBMMapping temp = new VMultiMapping();
-            //temp.PopulateConstants();
-            return temp;
+            return GetFallbackMapping();
         }
 
         public static VirtualKBMBase GetFallbackHandler()
@@ -103,20 +65,7 @@ namespace DS4Windows.DS4Control
 
         public static bool IsValidHandler(string identifier)
         {
-            bool result = false;
-            switch (identifier)
-            {
-                case SendInputHandler.IDENTIFIER:
-                    result = true;
-                    break;
-                case FakerInputHandler.IDENTIFIER:
-                    result = true;
-                    break;
-                default:
-                    break;
-            }
-
-            return result;
+            return identifier == SendInputHandler.IDENTIFIER;
         }
     }
 }

@@ -11,12 +11,13 @@
 		     satellite language folders, which made it impossible to tell product
 		     content from framework payload. Bundling the managed assemblies and
 		     satellites leaves only the executable, its configuration, real native
-		     libraries, and genuine content directories. Native libraries are
-		     deliberately not extracted: they stay beside the executable where the
-		     native-dependency trust check expects to verify them. -->
+		     libraries, and genuine content directories. Framework-owned native
+		     libraries are bundled and extracted by .NET. The application-owned
+		     rnnoise.dll remains beside the executable so its pinned hash can be
+		     verified before loading. -->
 		<PublishSingleFile>true</PublishSingleFile>
 		<SelfContained>false</SelfContained>
-		<IncludeNativeLibrariesForSelfExtract>false</IncludeNativeLibrariesForSelfExtract>
+		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
 		<EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
 		<RootNamespace>DS4WinWPF</RootNamespace>
 		<AssemblyName>PureDS4</AssemblyName>
@@ -36,8 +37,8 @@
 		<ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
 		<AssemblyVersion>5.1.0.0</AssemblyVersion>
 		<FileVersion>5.1.0.0</FileVersion>
-		<Version>5.1.0-beta.1</Version>
-		<InformationalVersion>5.1.0-beta.1</InformationalVersion>
+		<Version>5.1.0</Version>
+		<InformationalVersion>5.1.0</InformationalVersion>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 		<Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
 		<!-- DualShock 3 hardware-validation switch. Off unless a build explicitly
@@ -152,7 +153,7 @@
 	</Target>
 
 	<Target Name="GenerateManagedFileManifest" AfterTargets="Publish"
-		DependsOnTargets="GenerateReleaseChannelMarker;GenerateViiperPackageChecksum">
+		DependsOnTargets="GenerateReleaseChannelMarker;GenerateViiperPackageChecksum;ValidateManagedDependencyNotices">
 		<ItemGroup>
 			<_ManagedPackageFile Include="$(PublishDir)**\*"
 				Exclude="$(PublishDir).pureds4-managed-files.txt" />
@@ -165,12 +166,26 @@
 			Encoding="UTF-8" />
 	</Target>
 
+	<!-- The self-contained executable embeds NuGet and .NET assemblies. Match
+	     the published runtime graph to a reviewed notice list, and include the
+	     exact .NET and System.Management notices in every publish. -->
+	<Target Name="ValidateManagedDependencyNotices" AfterTargets="Publish"
+		BeforeTargets="GenerateManagedFileManifest"
+		Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' == 'win-x64'">
+		<Exec Command="python &quot;$(MSBuildProjectDirectory)\..\utils\validate-managed-notices.py&quot; --deps-json &quot;$(ProjectDepsFilePath)&quot; --packages &quot;$(NuGetPackageRoot).&quot; --notice &quot;$(MSBuildProjectDirectory)\ThirdParty\ManagedDependencies.NOTICE.txt&quot; --publish-root &quot;$(PublishDir).&quot;" />
+	</Target>
+
 	<ItemGroup>
 		<Content Include="BezierCurveEditor\build.js">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="BezierCurveEditor\index.html">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\COPYING">
+			<Link>COPYING</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 		</Content>
 		<Content Include="..\extras\install-viiper-backend.ps1">
 			<Link>extras\install-viiper-backend.ps1</Link>
@@ -184,6 +199,7 @@
 			<Link>extras\VIIPER-0.1.0-x64.exe</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</Content>
 		<Content Include="..\extras\VIIPER-0.1.0-LICENSES.txt">
 			<Link>extras\VIIPER-0.1.0-LICENSES.txt</Link>
@@ -194,6 +210,7 @@
 			<Link>extras\USBip-0.9.7.7-x64.exe</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</Content>
 		<Content Include="..\extras\USBip-0.9.7.7-LICENSE.txt">
 			<Link>extras\USBip-0.9.7.7-LICENSE.txt</Link>
@@ -204,24 +221,10 @@
 			<Link>extras\HidHide_1.5.230_x64.exe</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</Content>
 		<Content Include="..\extras\HidHide-1.5.230-LICENSE.txt">
 			<Link>extras\HidHide-1.5.230-LICENSE.txt</Link>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</Content>
-		<Content Include="..\extras\FakerInput_0.1.0_x64.msi">
-			<Link>extras\FakerInput_0.1.0_x64.msi</Link>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</Content>
-		<Content Include="..\extras\FakerInput_0.1.0_x86.msi">
-			<Link>extras\FakerInput_0.1.0_x86.msi</Link>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</Content>
-		<Content Include="..\extras\FakerInput-0.1.0-LICENSE.txt">
-			<Link>extras\FakerInput-0.1.0-LICENSE.txt</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 		</Content>
@@ -233,6 +236,7 @@
 			<Link>rnnoise.dll</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</Content>
 	</ItemGroup>
 
@@ -254,10 +258,6 @@
 		<PackageReference Include="TaskScheduler" Version="2.10.1" />
 		<PackageReference Include="WPFLocalizeExtension" Version="3.9.4" />
 		<PackageReference Include="WpfScreenHelper" Version="2.1.0" />
-
-		<Reference Include="FakerInputWrapper">
-			<HintPath>..\libs\$(Platform)\FakerInputWrapper\FakerInputWrapper.dll</HintPath>
-		</Reference>
 
 		<Reference Include="SharpOSC">
 			<HintPath>..\libs\$(Platform)\SharpOSC\SharpOSC.dll</HintPath>
@@ -596,10 +596,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Update="libs\$(Platform)\FakerInputWrapper\FakerInputDll.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>FakerInputDll.dll</Link>
-		</None>
 		<None Update="NLog.config">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
@@ -616,6 +612,10 @@
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 		</None>
 		<None Update="ThirdParty\SharpOSC-LICENSE.txt">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</None>
+		<None Update="ThirdParty\ManagedDependencies.NOTICE.txt">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 		</None>

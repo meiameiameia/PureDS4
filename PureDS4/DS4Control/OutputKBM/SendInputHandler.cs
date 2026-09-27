@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using System;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Threading;
 
 namespace DS4Windows.DS4Control
 {
@@ -28,9 +29,25 @@ namespace DS4Windows.DS4Control
         public const string DISPLAY_NAME = "SendInput";
         public const string IDENTIFIER = "sendinput";
         private const double ABSOLUTE_MOUSE_COOR_MAX = 65535.0;
+        private readonly Func<uint, INPUT[], int, uint> sendMouseWheelInput;
+        private readonly Action<uint, uint> reportMouseWheelFailure;
+        private int mouseWheelFailureReported;
 
-        public SendInputHandler()
+        public SendInputHandler() : this(SendInput, (requested, sent) =>
+            AppLogger.LogToGui(
+                $"Mouse wheel output inserted {sent} of {requested} events. " +
+                "Windows may have blocked keyboard/mouse injection; this " +
+                "does not determine virtual gamepad readiness.", true))
         {
+        }
+
+        internal SendInputHandler(Func<uint, INPUT[], int, uint> sender,
+            Action<uint, uint> failureReporter)
+        {
+            sendMouseWheelInput = sender ?? throw new ArgumentNullException(
+                nameof(sender));
+            reportMouseWheelFailure = failureReporter ??
+                throw new ArgumentNullException(nameof(failureReporter));
             fakeKeyRepeat = true;
         }
 
@@ -96,35 +113,55 @@ namespace DS4Windows.DS4Control
 
         public override void PerformMouseWheelEvent(int vertical, int horizontal)
         {
-            INPUT[] tempInput = new INPUT[2];
-            uint inputs = 0;
-            ref INPUT temp = ref tempInput[inputs];
+            uint inputs = (uint)((vertical != 0 ? 1 : 0) +
+                (horizontal != 0 ? 1 : 0));
+            if (inputs == 0)
+            {
+                return;
+            }
+
+            INPUT[] tempInput = new INPUT[inputs];
+            int next = 0;
             if (vertical != 0)
             {
+                ref INPUT temp = ref tempInput[next++];
                 temp.Type = INPUT_MOUSE;
                 temp.Data.Mouse.ExtraInfo = IntPtr.Zero;
                 temp.Data.Mouse.Flags = MOUSEEVENTF_WHEEL;
-                temp.Data.Mouse.MouseData = (uint)vertical;
+                temp.Data.Mouse.MouseData = unchecked((uint)vertical);
                 temp.Data.Mouse.Time = 0;
                 temp.Data.Mouse.X = 0;
                 temp.Data.Mouse.Y = 0;
-                inputs++;
             }
 
             if (horizontal != 0)
             {
-                temp = ref tempInput[inputs];
+                ref INPUT temp = ref tempInput[next];
                 temp.Type = INPUT_MOUSE;
                 temp.Data.Mouse.ExtraInfo = IntPtr.Zero;
                 temp.Data.Mouse.Flags = MOUSEEVENTF_HWHEEL;
-                temp.Data.Mouse.MouseData = (uint)horizontal;
+                temp.Data.Mouse.MouseData = unchecked((uint)horizontal);
                 temp.Data.Mouse.Time = 0;
                 temp.Data.Mouse.X = 0;
                 temp.Data.Mouse.Y = 0;
-                inputs++;
             }
 
-            SendInput(inputs, tempInput, (int)inputs * Marshal.SizeOf(tempInput[0]));
+            // cbSize is one INPUT, not the byte length of the array.
+            uint sent = sendMouseWheelInput(inputs, tempInput,
+                Marshal.SizeOf<INPUT>());
+            if (sent != inputs)
+            {
+                // A blocked target can produce repeated failures every frame.
+                // Report once until a complete send succeeds again.
+                if (Interlocked.Exchange(ref mouseWheelFailureReported, 1) == 0)
+                {
+                    reportMouseWheelFailure(inputs, sent);
+                }
+            }
+            else
+            {
+                Interlocked.Exchange(ref mouseWheelFailureReported, 0);
+            }
         }
 
         public override void PerformMouseButtonEventAlt(uint mouseButton, int type)

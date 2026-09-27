@@ -527,12 +527,12 @@ namespace DS4Windows
             string title = status.NeedsRecovery
                 ? "RECOVERY REQUIRED"
                 : status.Mode == ControllerExposureMode.NativePhysical
-                    ? "NATIVE PHYSICAL"
-                    : "MANAGED / VIRTUAL";
+                    ? "USING CONTROLLER DIRECTLY"
+                    : "USING GAME OUTPUT";
             string detail = status.NeedsRecovery
                 ? status.Detail + " Select Recover controller to safely " +
                     "restart controller handling for all connected " +
-                    "controllers and restore Managed / Virtual."
+                    "controllers and restore game output."
                 : status.Detail;
             return new ControllerExposureSessionInfo(session.InstanceId,
                 session.DisplayName, session.Connection,

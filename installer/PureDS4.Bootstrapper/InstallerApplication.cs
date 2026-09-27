@@ -27,6 +27,7 @@ namespace PureDS4.Bootstrapper
         private string lastError;
         private bool infrastructureHealthy;
         private bool infrastructureFailed;
+        private bool hidHideFailed;
         private bool closingProgrammatically;
         private bool applyCompleted;
         private bool failureShown;
@@ -109,8 +110,9 @@ namespace PureDS4.Bootstrapper
                     Environment.SpecialFolder.ApplicationData), true);
         }
 
-        internal void Begin(LaunchAction action, bool desktopShortcut, bool hidHide, bool fakerInput)
+        internal void Begin(LaunchAction action, bool desktopShortcut, bool hidHide)
         {
+            hidHideFailed = false;
             // The incoming Burn engine owns the transaction mutex for its
             // complete package chain, including related-bundle removal. An
             // outgoing bundle launched by that engine must not compete with
@@ -133,7 +135,6 @@ namespace PureDS4.Bootstrapper
                 }
                 engine.SetVariableNumeric("CreateDesktopShortcut", desktopShortcut ? 1 : 0);
                 engine.SetVariableNumeric("InstallHidHide", hidHide ? 1 : 0);
-                engine.SetVariableNumeric("InstallFakerInput", fakerInput ? 1 : 0);
             });
         }
 
@@ -505,9 +506,22 @@ namespace PureDS4.Bootstrapper
                 {
                     installerBusyRetries.Remove(e.PackageId ?? string.Empty);
                 }
+                if (string.Equals(e.PackageId, "HidHide",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    packageStates["HidHide"] = PackageState.Present;
+                    hidHideFailed = false;
+                }
                 return;
             }
 
+            if (string.Equals(e.PackageId, "HidHide",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                hidHideFailed = true;
+                engine.Log(LogLevel.Error,
+                    "Optional HidHide installation failed. Managed virtual output cannot be considered ready.");
+            }
             if (string.Equals(e.PackageId, "ViiperUsbipSetup",
                     StringComparison.OrdinalIgnoreCase))
             {
@@ -604,7 +618,7 @@ namespace PureDS4.Bootstrapper
                         : command.LayoutDirectory;
                     engine.SetVariableString("WixBundleLayoutDirectory", layoutDirectory, false);
                 }
-                Begin(action, true, false, false);
+                Begin(action, true, false);
             }
         }
 
@@ -822,11 +836,15 @@ namespace PureDS4.Bootstrapper
             {
                 if (restartRequired)
                 {
-                    window.ShowRestart();
+                    window.ShowRestart(hidHideFailed);
                 }
                 else
                 {
-                    window.ShowComplete(plannedAction);
+                    var hidHideAvailable = packageStates.TryGetValue(
+                        "HidHide", out var hidHideState) &&
+                        hidHideState == PackageState.Present && !hidHideFailed;
+                    window.ShowComplete(plannedAction, hidHideAvailable,
+                        hidHideFailed);
                 }
             });
         }
@@ -856,14 +874,13 @@ namespace PureDS4.Bootstrapper
             return (exitCode & unchecked((int)0xFFFF0000)) == unchecked((int)0x80070000) ? exitCode & 0xFFFF : exitCode;
         }
 
-        internal static bool IsRelatedBundleNewer(string relatedVersion,
+        private bool IsRelatedBundleNewer(string relatedVersion,
             string currentVersion)
         {
-            Version related;
-            Version current;
-            return Version.TryParse(relatedVersion, out related) &&
-                   Version.TryParse(currentVersion, out current) &&
-                   related > current;
+            // Burn understands prerelease labels; System.Version does not.
+            // Comparing beta/rc/stable with Version.TryParse silently treated
+            // a newer installed bundle as not newer, permitting a downgrade.
+            return engine.CompareVersions(relatedVersion, currentVersion) > 0;
         }
 
         private static string InstallerActionLogPath => Path.Combine(

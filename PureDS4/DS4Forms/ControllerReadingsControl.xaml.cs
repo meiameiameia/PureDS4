@@ -420,7 +420,7 @@ namespace DS4WinWPF.DS4Forms
                     double latency = ds.Latency;
                     int warnInterval = ds.getWarnInterval();
                     inputDelayLb.Content = string.Format(Properties.Resources.InputDelay,
-                        latency.ToString());
+                        latency);
 
                     if (latency > warnInterval)
                     {

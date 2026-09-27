@@ -193,6 +193,24 @@ namespace DS4WinWPF
                 return;
             }
 
+            if (parser.RelaunchPredecessorProcessId > 0 &&
+                !DS4Windows.ElevationRelaunch.WaitForPredecessor(
+                    parser.RelaunchPredecessorProcessId,
+                    DS4Windows.ElevationRelaunch.
+                        PredecessorExitTimeoutMilliseconds,
+                    DS4Windows.ElevationRelaunch.WaitForProcessExit))
+            {
+                MessageBox.Show(
+                    $"{DS4Windows.ProductIdentity.Name} could not finish " +
+                    "restarting because the previous instance did not exit. " +
+                    "Close it and try Restart as administrator again.",
+                    DS4Windows.ProductIdentity.Name, MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                runShutdown = false;
+                Current.Shutdown(1);
+                return;
+            }
+
             try
             {
                 Process.GetCurrentProcess().PriorityClass =
@@ -263,7 +281,8 @@ namespace DS4WinWPF
             // software automatically when hardware acceleration is unavailable.
             RenderOptions.ProcessRenderMode = RenderMode.Default;
 
-            DS4Windows.Global.FindConfigLocation();
+            DS4Windows.Global.FindConfigLocation(
+                parser.RelaunchStorageLocation);
             bool firstRun = DS4Windows.Global.firstRun;
 
             // Could not find unique profile location; does not exist or multiple places.

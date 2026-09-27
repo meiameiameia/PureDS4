@@ -503,6 +503,11 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 return;
             }
 
+            if (Global.UseIconChoice != TrayIconChoice.Battery)
+            {
+                return;
+            }
+
             if (PrimaryDs4HasNonNumericBatteryPresentation())
             {
                 IconSource = $"{Global.RESOURCES_PREFIX}/50.ico";
@@ -548,9 +553,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             if (Global.UseIconChoice != TrayIconChoice.Default)
                 return Global.iconChoiceResources[Global.UseIconChoice];
 
-            return DS4Windows.Util.SystemAppsUsingDarkTheme()
-                ? $"{Global.RESOURCES_PREFIX}/DS4W - White.ico"
-                : $"{Global.RESOURCES_PREFIX}/DS4W - Black.ico";
+            return $"{Global.RESOURCES_PREFIX}/DS4W.ico";
         }
 
         private bool PrimaryDs4HasNonNumericBatteryPresentation()

@@ -3953,24 +3953,6 @@ namespace DS4WinWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Use FakerInput driver to expose system-wide virtual keyboard, relative mouse, and absolute mouse. Allows virtual KB+M events to be usable in some situations when SendInput fails. Such situations are elevated process and games, UAC prompts, and anti-cheat systems that block SendInput events. Use of FakerInput is necessary to allow DS4Windows to work with some games with anti-cheat protection like Valorant..
-        /// </summary>
-        public static string Welcome_Step5HelpText {
-            get {
-                return ResourceManager.GetString("Welcome.Step5HelpText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to (Optional) Step 5: Install FakerInput Driver.
-        /// </summary>
-        public static string Welcome_Step5Text {
-            get {
-                return ResourceManager.GetString("Welcome.Step5Text", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Welcome to DS4Windows.
         /// </summary>
         public static string Welcome_WinTitle {

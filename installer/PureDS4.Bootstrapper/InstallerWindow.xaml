@@ -116,9 +116,7 @@
                 <TextBlock Text="Options" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,7" />
                 <CheckBox x:Name="DesktopShortcutCheckBox" IsChecked="True" Content="Create a desktop shortcut" />
                 <CheckBox x:Name="HidHideCheckBox" IsChecked="True" Content="Install HidHide (recommended — prevents double input)" />
-                <TextBlock Text="Optional system driver. Existing healthy installations are left unchanged." Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="24,-2,0,5" />
-                <CheckBox x:Name="FakerInputCheckBox" IsChecked="False" Content="Install FakerInput (virtual keyboard and mouse)" />
-                <TextBlock Text="Useful for profiles that send keyboard or mouse input to elevated games." Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="24,-2,0,0" />
+                <TextBlock Text="Optional system driver. Existing healthy installations are left unchanged." Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="24,-2,0,0" />
                 <StackPanel x:Name="Ds3Section" Visibility="Collapsed" Margin="0,12,0,0">
                   <TextBlock Text="DualShock 3 (experimental)" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5" />
                   <CheckBox x:Name="Ds3SupportCheckBox" IsChecked="False" Content="Enable DualShock 3 support" />
@@ -162,9 +160,10 @@
 
       <Grid x:Name="CompletePage" Visibility="Collapsed">
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Stretch">
-          <Border Width="64" Height="64" CornerRadius="32" Background="{DynamicResource CardBrush}" BorderBrush="{StaticResource SuccessBrush}" BorderThickness="1" HorizontalAlignment="Center"><TextBlock Text="✓" FontSize="34" Foreground="{StaticResource SuccessBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+          <Border x:Name="CompleteStatusBorder" Width="64" Height="64" CornerRadius="32" Background="{DynamicResource CardBrush}" BorderBrush="{StaticResource SuccessBrush}" BorderThickness="1" HorizontalAlignment="Center"><TextBlock x:Name="CompleteStatusGlyph" Text="✓" FontSize="34" Foreground="{StaticResource SuccessBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
           <TextBlock x:Name="CompleteTitle" Text="PureDS4 is ready" FontSize="25" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,20,0,0" />
-          <TextBlock x:Name="CompleteDescription" Text="Installation and verification completed successfully." TextAlignment="Center" Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Center" Margin="0,8,0,22" />
+          <TextBlock x:Name="CompleteDescription" Text="Installation completed." TextAlignment="Center" TextWrapping="Wrap" MaxWidth="600" Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Center" Margin="0,8,0,22" />
+          <Button x:Name="OpenCompleteLogButton" Style="{StaticResource SecondaryButton}" Content="Open setup log" Visibility="Collapsed" HorizontalAlignment="Center" Margin="0,0,0,12" Click="OpenLog_Click" />
           <CheckBox x:Name="LaunchCheckBox" IsChecked="True" Content="Launch PureDS4" HorizontalAlignment="Center" />
           <Button Style="{StaticResource PrimaryButton}" Content="Finish" Width="130" HorizontalAlignment="Center" Margin="0,20,0,0" Click="Finish_Click" />
         </StackPanel>

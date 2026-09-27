@@ -32,24 +32,30 @@ if not target_dir.is_dir() or is_reparse_point(target_dir):
 # composition if any required runtime or installer payload is absent instead
 # of producing an archive that later needs a network recovery path.
 #
-# The self-contained single-file publish bundles the runtime, including
-# coreclr and hostfxr, inside PureDS4.exe. Only the native libraries that
-# cannot be bundled stay beside it, so those are what this check can see.
+# The self-contained single-file publish bundles the .NET/WPF runtime,
+# including its native libraries, inside PureDS4.exe. Application-owned
+# rnnoise.dll remains beside it and is verified by NativeLibraryTrust.
 required_offline_files = (
     "PureDS4.exe",
-    "D3DCompiler_47_cor3.dll",
-    "PenImc_cor3.dll",
-    "PresentationNative_cor3.dll",
-    "vcruntime140_cor3.dll",
-    "wpfgfx_cor3.dll",
+    "rnnoise.dll",
+    "COPYING",
     "extras/install-viiper-backend.ps1",
     "extras/VIIPER-0.1.0-x64.exe",
     "extras/VIIPER-0.1.0-LICENSES.txt",
     "extras/USBip-0.9.7.7-x64.exe",
+    "extras/USBip-0.9.7.7-LICENSE.txt",
     "extras/HidHide_1.5.230_x64.exe",
-    "extras/FakerInput_0.1.0_x64.msi",
+    "extras/HidHide-1.5.230-LICENSE.txt",
+    "Resources/ControllerArtwork.NOTICE.txt",
     "ThirdParty/RNNoise.NET-LICENSE.txt",
     "ThirdParty/SharpOSC-LICENSE.txt",
+    "ThirdParty/ManagedDependencies.NOTICE.txt",
+    "ThirdParty/DotNet-LICENSE.txt",
+    "ThirdParty/DotNet-THIRD-PARTY-NOTICES.txt",
+    "ThirdParty/DotNet-RuntimePack-THIRD-PARTY-NOTICES.txt",
+    "ThirdParty/System.Management-THIRD-PARTY-NOTICES.txt",
+    "ThirdParty/SbcSharp/LICENSE.txt",
+    "ThirdParty/SbcSharp/NOTICE.md",
 )
 missing_offline_files = [
     relative_path
@@ -85,6 +91,24 @@ viiper_hash_path.write_text(
 # assembly rather than guessing, so a multi-file publish still gets both
 # steps and still fails loudly when a payload is genuinely missing.
 is_single_file_publish = not (target_dir / "PureDS4.dll").is_file()
+
+framework_native_sidecars = (
+    "D3DCompiler_47_cor3.dll",
+    "PenImc_cor3.dll",
+    "PresentationNative_cor3.dll",
+    "vcruntime140_cor3.dll",
+    "wpfgfx_cor3.dll",
+)
+if is_single_file_publish:
+    loose_framework_native_files = [
+        name for name in framework_native_sidecars
+        if (target_dir / name).is_file()
+    ]
+    if loose_framework_native_files:
+        raise SystemExit(
+            "Single-file publish left framework-native sidecars in the root: "
+            + ", ".join(loose_framework_native_files)
+        )
 
 # "idn" and "se" were inherited mistakes: "idn" is not a culture at all, and
 # "se" is Northern Sami while the file it named held Swedish. The translations

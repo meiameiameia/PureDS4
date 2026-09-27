@@ -7,11 +7,15 @@ same component geometry and interaction model.
 
 ## Product identity
 
-The product mark is **Mapped Pad**: a split white/blue controller on a deep
-blue tile, joined by an amber mapping seam. The canonical source is
-`branding/mapped-pad/mapped-pad-concept.svg`; generated ICO assets must include
-small Windows sizes as well as 256 px. Battery tray variants add a separate
-semantic badge and never replace the mark with a number.
+The product mark is a white controller with a light-blue center bridge on a
+muted slate-blue rounded tile with a transparent exterior.
+`PureDS4/Resources/AppIcon.png` is
+the 1024 px master. `utils/generate-app-icon.py` composes the multi-size
+`PureDS4/DS4W.ico` and `PureDS4/Resources/DS4W.ico` from that same mark;
+the 16-24 px frames must remain recognizable at native size on both light
+and dark Windows surfaces.
+The default tray icon uses the mark; the optional battery and monochrome tray
+choices remain separate user-selected variants.
 
 Product-facing names use **PureDS4**, maintained by **meiameiameia**. The
 executable, storage, IPC, task, shortcut, and installer upgrade identities are

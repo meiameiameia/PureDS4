@@ -23,7 +23,7 @@
             </Grid.ColumnDefinitions>
             <Image Source="/PureDS4;component/Resources/AppIcon.png"
                    Width="48" Height="48" Margin="0,0,12,0"
-                   AutomationProperties.Name="PureDS4 Mapped Pad icon" />
+                   AutomationProperties.Name="PureDS4 controller icon" />
             <StackPanel Grid.Column="1">
                 <TextBlock Text="PureDS4" FontSize="22" FontWeight="SemiBold" />
                 <TextBlock Text="A focused Windows tool for the DualShock 4"
@@ -110,10 +110,10 @@
                                    Text="PureDS4 is a modified DS4Windows derivative. Original authors and contributors retain their respective copyrights." />
                         <TextBlock Text="Bundled components" Style="{StaticResource FoundationGroupTitleStyle}" />
                         <TextBlock Margin="0,5,0,14" TextWrapping="Wrap"
-                                   Text="VIIPER, USB/IP, HidHide, FakerInput, H.NotifyIcon, CRC32, SBCSharp, RNNoise.NET, and other bundled or linked components remain governed by their own license terms. Their notices ship with the application and source tree." />
+                                   Text="Bundled and linked components remain governed by their own license terms. Driver, codec, and artwork notices ship with the application; pinned third-party binary provenance is maintained in the repository." />
                         <TextBlock Text="Required notices" Style="{StaticResource FoundationGroupTitleStyle}" />
                         <TextBlock Margin="0,5,0,14" TextWrapping="Wrap"
-                                   Text="The complete GPL text, copyright notices, component versions, source locations, and third-party license files are included with the distribution. No warranty is provided." />
+                                   Text="The complete GPL text and bundled third-party license notices are included with the distribution. Component versions and source locations are documented in the repository. No warranty is provided." />
                         <Button Content="Open repository notices" HorizontalAlignment="Left"
                                 Click="NoticesLink_Click" Style="{StaticResource FoundationToolbarButtonStyle}" />
                     </StackPanel>

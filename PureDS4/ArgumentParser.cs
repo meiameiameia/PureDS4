@@ -17,6 +17,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using System.Collections.Generic;
+using System.Globalization;
+using DS4Windows;
 using DS4Windows.DS4Control;
 
 namespace DS4WinWPF
@@ -32,6 +34,8 @@ namespace DS4WinWPF
         private bool command;
         private string commandArgs;
         private string virtualkbmHandler = VirtualKBMFactory.DEFAULT_IDENTIFIER;
+        private int relaunchPredecessorProcessId;
+        private RelaunchStorageLocation relaunchStorageLocation;
 
         private Dictionary<string, string> errors =
             new Dictionary<string, string>();
@@ -45,6 +49,8 @@ namespace DS4WinWPF
         public string DeviceInstanceId { get => deviceInstanceId; }
         public string CommandArgs { get => commandArgs; }
         public string VirtualkbmHandler { get => virtualkbmHandler; }
+        public int RelaunchPredecessorProcessId => relaunchPredecessorProcessId;
+        public RelaunchStorageLocation RelaunchStorageLocation => relaunchStorageLocation;
         public Dictionary<string, string> Errors { get => errors; }
 
         public bool HasErrors => errors.Count > 0;
@@ -122,8 +128,47 @@ namespace DS4WinWPF
 
                         break;
 
+                    case "-wait-for-process":
+                        if (i + 1 < args.Length &&
+                            int.TryParse(args[++i], NumberStyles.None,
+                                CultureInfo.InvariantCulture,
+                                out int predecessorProcessId) &&
+                            predecessorProcessId > 0)
+                        {
+                            relaunchPredecessorProcessId = predecessorProcessId;
+                        }
+                        else
+                        {
+                            errors["RelaunchPredecessor"] =
+                                "Relaunch predecessor process ID is invalid";
+                        }
+                        break;
+
+                    case "-storage":
+                        if (i + 1 < args.Length &&
+                            ElevationRelaunch.TryParseStorageArgument(
+                                args[++i], out RelaunchStorageLocation storageLocation))
+                        {
+                            relaunchStorageLocation = storageLocation;
+                        }
+                        else
+                        {
+                            errors["RelaunchStorage"] =
+                                "Relaunch storage location is invalid";
+                        }
+                        break;
+
                     default: break;
                 }
+            }
+
+            bool hasPredecessor = relaunchPredecessorProcessId > 0;
+            bool hasStorage = relaunchStorageLocation !=
+                RelaunchStorageLocation.Unspecified;
+            if (hasPredecessor != hasStorage)
+            {
+                errors["Relaunch"] =
+                    "Relaunch process and storage arguments must be used together";
             }
         }
     }

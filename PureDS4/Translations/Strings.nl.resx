@@ -555,9 +555,6 @@ Verbind gewoon je DualShock 4 en PC met een micro-USB kabel.
   <data name="Welcome.WinTitle" xml:space="preserve">
     <value>Welkom bij DS4Windows</value>
   </data>
-  <data name="Welcome.Step5Text" xml:space="preserve">
-    <value>(Optioneel) Stap 5: Installeer FakerInput Stuurprogramma</value>
-  </data>
   <data name="Welcome.Step4Text" xml:space="preserve">
     <value>(Optioneel) Stap 4: Installeer HidHide Stuurprogramma</value>
   </data>
@@ -644,10 +641,10 @@ Verbind gewoon je DualShock 4 en PC met een micro-USB kabel.
     <value>Batterij: 0%</value>
   </data>
   <data name="ReadingsControl.InputDelayNA" xml:space="preserve">
-    <value>Invoervertraging: N.V.T.</value>
+    <value>Rapportinterval: N.V.T.</value>
   </data>
   <data name="ReadingsControl.SixAxisXText" xml:space="preserve">
-    <value>Sixaxis: X-as is omgekeerd zodat het makkelijker te lezen is</value>
+    <value>De X-as van de bewegingssensor wordt omgekeerd weergegeven voor betere leesbaarheid.</value>
   </data>
   <data name="Requested" xml:space="preserve">
     <value>Verzocht</value>
@@ -703,9 +700,6 @@ Let op: deze optie werkt niet in een admin map zonder gebruikersaccountbeheer</v
   </data>
   <data name="Welcome.Step4HelpText" xml:space="preserve">
     <value>Gebruik HidHide om controllers in te stellen en te verbergen van andere apps op je systeem. Sommige games vertonen afwijkend gedrag wanneer meerdere controllers tegelijk verbonden zijn.</value>
-  </data>
-  <data name="Welcome.Step5HelpText" xml:space="preserve">
-    <value>Gebruik FakerInput om voor het hele systeem het virtuele toetsenbord, relatieve muis en absolute muis beschikbaar te maken. Staat toe om virtuele toetsenbord en muis acties uit te voeren wanneer SendInput niet werkt. Bijvoorbeeld bij processen en games die hogere bevoegdheid nodig hebben, gebruikersaccountbeheer en anti-cheat systemen die SendInput blokkeren. Gebruik van FakerInput is nodig om DS4Windows te laten werken met bepaalde games , zoals Valorant.</value>
   </data>
   <data name="SpecialActionEdit.RunTriggerRelease" xml:space="preserve">
     <value>Voer uit bij loslaten trigger</value>

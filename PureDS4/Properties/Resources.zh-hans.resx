@@ -204,7 +204,7 @@
         <value>如果要删除DS4Windows，你可以删除这些文件夹中的设置</value>
     </data>
     <data name="InputDelay" xml:space="preserve">
-        <value>输入延迟： {0:0.##} ms</value>
+        <value>报告间隔：{0:0.00} ms</value>
     </data>
     <data name="InstallComplete" xml:space="preserve">
         <value>安装完成</value>

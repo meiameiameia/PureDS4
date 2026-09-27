@@ -206,7 +206,6 @@ namespace PureDS4.Bootstrapper
                 case "DS4WindowsMsi": ProgressDetail.Text = "Installing PureDS4"; break;
                 case "ViiperUsbipSetup": ProgressDetail.Text = "Verifying VIIPER and USB-IP"; break;
                 case "HidHide": ProgressDetail.Text = "Installing optional HidHide"; break;
-                case "FakerInput": ProgressDetail.Text = "Installing optional FakerInput"; break;
                 default: ProgressDetail.Text = "Verifying installation"; break;
             }
         }
@@ -223,11 +222,20 @@ namespace PureDS4.Bootstrapper
             ProgressPercent.Text = percent + "%";
         }
 
-        internal void ShowComplete(LaunchAction action)
+        internal void ShowComplete(LaunchAction action, bool hidHideAvailable,
+            bool hidHideFailed)
         {
             HidePages();
             CompletePage.Visibility = Visibility.Visible;
             LaunchCheckBox.Visibility = Visibility.Visible;
+            OpenCompleteLogButton.Visibility = hidHideFailed
+                ? Visibility.Visible : Visibility.Collapsed;
+            bool managedOutputNeedsAttention = action != LaunchAction.Uninstall &&
+                !hidHideAvailable;
+            CompleteStatusBorder.BorderBrush = (Brush)FindResource(
+                managedOutputNeedsAttention ? "WarningBrush" : "SuccessBrush");
+            CompleteStatusGlyph.Foreground = CompleteStatusBorder.BorderBrush;
+            CompleteStatusGlyph.Text = managedOutputNeedsAttention ? "!" : "✓";
             applying = false;
             if (action == LaunchAction.Uninstall)
             {
@@ -235,13 +243,28 @@ namespace PureDS4.Bootstrapper
                 CompleteDescription.Text = "Profiles, settings, and shared system drivers were preserved.";
                 LaunchCheckBox.Visibility = Visibility.Collapsed;
             }
+            else
+            {
+                CompleteTitle.Text = managedOutputNeedsAttention
+                    ? "PureDS4 installed — setup needs attention"
+                    : "PureDS4 was installed";
+                CompleteDescription.Text = hidHideFailed
+                    ? "The app and VIIPER/USB-IP were installed, but HidHide failed. Managed virtual output is not ready. Review the setup log and run setup again to repair HidHide."
+                    : hidHideAvailable
+                        ? "The app and VIIPER/USB-IP were installed. HidHide is present; PureDS4 checks controller protection when it connects."
+                        : "The app and VIIPER/USB-IP were installed without confirmed HidHide protection. Managed virtual output is not ready until HidHide is installed and verified.";
+            }
         }
 
-        internal void ShowRestart()
+        internal void ShowRestart(bool hidHideFailed)
         {
             HidePages();
             RestartPage.Visibility = Visibility.Visible;
             RestartDescription.Text = "Windows must restart before setup can safely continue. Setup will resume after you sign in.";
+            if (hidHideFailed)
+            {
+                RestartDescription.Text += " HidHide also failed to install; managed virtual output is not ready until it is repaired.";
+            }
             RestartNowButton.IsEnabled = true;
             applying = false;
         }
@@ -259,7 +282,7 @@ namespace PureDS4.Bootstrapper
             var action = mode == InstallerMode.Uninstall ? LaunchAction.Uninstall :
                          mode == InstallerMode.Repair ? LaunchAction.Repair : LaunchAction.Install;
             application.Begin(action, DesktopShortcutCheckBox.IsChecked == true,
-                HidHideCheckBox.IsChecked == true, FakerInputCheckBox.IsChecked == true);
+                HidHideCheckBox.IsChecked == true);
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e) => application.Close(1223);

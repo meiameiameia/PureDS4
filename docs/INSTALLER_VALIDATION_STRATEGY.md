@@ -98,6 +98,8 @@ build host.
   uninstall, downgrade, cancellation, concurrency, failure, and reboot/resume.
 - Atomic publication of the completed installer only after every gate passes.
   The verified manifest is committed first and the installer EXE last.
-- Mandatory Authenticode verification for public release artifacts; release
-  composition is blocked when signing material or a first-party signature is
-  missing.
+- Authenticode verification when signing is explicitly requested; that path
+  fails closed if signing material or a first-party signature is missing. The
+  owner-approved unsigned first release instead requires exact artifact
+  hashes, a plain unsigned-status notice, and downloaded-candidate checks
+  with normal Windows protections enabled.

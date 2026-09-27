@@ -29,6 +29,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PureDS4\PureDS4.csproj" />
+    <Reference Include="SharpOSC">
+      <HintPath>..\PureDS4\libs\$(Platform)\SharpOSC\SharpOSC.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

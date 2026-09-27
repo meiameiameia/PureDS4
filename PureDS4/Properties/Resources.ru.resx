@@ -314,7 +314,7 @@
     <value>При удалении DS4Windows, вы можете удалить параметры настройки в папке профиля программы</value>
   </data>
   <data name="InputDelay" xml:space="preserve">
-    <value>Задержка ввода: {0} мс</value>
+    <value>Интервал отчётов: {0:0.00} мс</value>
   </data>
   <data name="InstallComplete" xml:space="preserve">
     <value>Установка завершена</value>

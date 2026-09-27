@@ -1,6 +1,6 @@
 ﻿# PureDS4
 
-![PureDS4 Mapped Pad icon](branding/mapped-pad/mapped-pad-512.png)
+![PureDS4 controller icon](PureDS4/Resources/AppIcon.png)
 
 PureDS4 is a deliberately narrow DualShock 4 tool for Windows. It exists
 because [`hbashton/DS4Windows`](https://github.com/hbashton/DS4Windows) is a
@@ -18,15 +18,17 @@ release neither claims nor offers it. The DS3 implementation is kept dormant in
 the tree rather than deleted, because the work will be picked up when genuine
 hardware can be validated — but nothing in the first release turns it on.
 
-PureDS4 is meant to **replace** DS4Windows or an earlier DS4Windows Reworked
-installation on a machine, not to run beside one. Running both is not a
-supported outcome. PureDS4 nevertheless owns its own executable, install and
-registry roots, configuration and log paths, scheduled tasks, Startup shortcut,
-IPC identities, and installer upgrade codes, so that a package can never
-silently upgrade over another product and so that what PureDS4 owns can be
-audited and removed cleanly. The explicit replacement flow that detects and
-removes an older installation is **not implemented yet**; until it is, remove
-the old product yourself before installing this one.
+PureDS4 is meant to **replace** DS4Windows on a machine, not to run beside it.
+Running both is not a supported outcome. PureDS4 nevertheless owns its own
+executable, install and registry roots, configuration and log paths, scheduled
+tasks, Startup shortcut, IPC identities, and installer upgrade codes, so that
+a package can never silently upgrade over another product and so that what
+PureDS4 owns can be
+audited and removed cleanly. The replacement flow detects an older
+installation and gates activation while it can compete with PureDS4. It can
+hand off removal to the predecessor's own uninstaller after confirmation; it
+does not silently remove another product. The complete real-machine upgrade
+and recovery matrix is still pending.
 
 Removal of DualSense, DualSense Edge, Switch Pro and Joy-Con support is
 **in progress, not finished**. Physical detection, the profile output selector,
@@ -57,9 +59,10 @@ Nothing in this repository is a hardware, runtime, or release claim.
   working. That gate does not block the first release.
 - Installer replacement, upgrade, uninstall, reboot, and recovery behavior has
   not been owner-validated.
-- `installer/release-inputs.json` currently calculates `releaseReady: false`
-  because the redistribution scope of the inherited FakerInput wrappers is
-  unresolved. No public artifact may be produced while that is true.
+- `installer/release-inputs.json` now calculates `releaseReady: true`: every
+  bundled component's provenance is verified. That gate covers component
+  licensing and hashes only. The hardware, installer, and owner-approval gates
+  above are separate, and none of them is met.
 
 [`docs/HARDWARE_VALIDATION.md`](docs/HARDWARE_VALIDATION.md) describes the
 manual pass that a hardware claim requires.
@@ -82,10 +85,10 @@ Upstream history, the `upstream` remote, the annotated `upstream-baseline` tag,
 the original copyright notices, and the GPL notices are all preserved.
 
 Publication is intended but not scheduled, and no readiness claim should be
-inferred from this repository. The version identifiers in the tree
-(`5.1.0-beta.1` and friends) record identity only; the owner has not chosen a
-first public PureDS4 version or a publication policy. If you want a controller
-mapper to install and use today, go upstream.
+inferred from this repository. The owner selected `5.1.0` as the first public
+version target, subject to the remaining hardware, installer, and release
+gates. No release or tag has been authorized. If you want a controller mapper
+to install and use today, go upstream.
 
 See [`docs/RELEASE_CONTRACT.md`](docs/RELEASE_CONTRACT.md) for the version,
 upgrade, compatibility, and artifact contract those identifiers follow.
