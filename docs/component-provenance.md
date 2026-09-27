@@ -15,12 +15,21 @@ while any blocker exists.
 
 | Component | Source and binary evidence | License / notice |
 | --- | --- | --- |
-| Custom VIIPER backend 0.1.0 | `hbashton/VIIPER` tag `v0.1.0`, commit `fd298a04d7d229293be15b2af664405c9e68114c`; the official ZIP is SHA-256 `07BEB53FDB6856AFA6E0F31EDF210A8618CBC2304AB59AC23FB017B11082ADD7`, and its `viiper.exe` exactly matches `extras/VIIPER-0.1.0-x64.exe` (`AD14F2C9048D61B3447F2F79D7A122EDEA81E5DB52A1AC803D294E5BC9CD2324`). The executable is upstream-unsigned, so the archive and inner-file hashes are the identity proof. | The official release's complete `licenses.txt` is packaged as `extras/VIIPER-0.1.0-LICENSES.txt`. |
+| PureDS4 VIIPER backend 0.1.0-pureds4.1 | [PureDS4-VIIPER](https://github.com/meiameiameia/PureDS4-VIIPER) commit `c472717d2eed950d8aab3eab80edc87400a75ae8`, descended from `hbashton/VIIPER` v0.1.0. Its clean-tree Windows build is `extras/VIIPER-0.1.0-pureds4.1-x64.exe` (SHA-256 `67559205427F18849E16B0A8329E6270D9A42E4AA155ACA9FD5EA8574A8A01C8`), with embedded Go revision and Windows product version. The binary is unsigned; the pinned source revision, build procedure, and local hash are the identity proof. | The build-generated dependency notices are packaged as `extras/VIIPER-0.1.0-pureds4.1-LICENSES.txt`; the GPL program license remains in the source fork and PureDS4's `COPYING`. |
 | usbip-win2 0.9.7.7 | `vadimgrn/usbip-win2` tag `v.0.9.7.7`, commit `7c219953101cc5d0ec9a0bcb3eb87259cf72bedd`; the official release asset exactly matches `extras/USBip-0.9.7.7-x64.exe` (`51620FA5F9F8BE5932BC9D786DEEE557CE06D5407A99CAB490DCFAC71F185FEA`) and has the pinned valid Cloudyne Systems signer. | BSD-2-Clause text in `extras/USBip-0.9.7.7-LICENSE.txt`. |
 | HidHide 1.5.230 | `nefarius/HidHide` tag `v1.5.230.0`, commit `722d997ce75db58f5aa36e40ca920f99022c020a`; the official release asset exactly matches `extras/HidHide_1.5.230_x64.exe` (`F4BBBCB82E6258641B887C74BC81C4C5F66E4AA811808DFC304347687B7605F6`) and has the pinned valid Nefarius signer. | MIT text in `extras/HidHide-1.5.230-LICENSE.txt`. |
 | RNNoise.NET 0.1.9 | NuGet content hash `2lqIr0648oA0qiUlbcTshFe4dm010Lyv+BaP2GGKfN+CI5DOrR7tV3X0kwgYvf/V3DDHllflWiQXhWT7+LTsEg==`; source tag/commit `0.1.9` / `73189a685823d2db25a6c94edd7b69265309c0db`; published `rnnoise.dll` SHA-256 `12E19BF7A18D13E092A5FBE5A7C5B2081F5E7B56F6D77AEAB5837335F44CEEDF`. | MIT text in `PureDS4/ThirdParty/RNNoise.NET-LICENSE.txt`, copied to output and publish. |
 | SharpOSC 0.2.0 | Both tracked binaries embed source commit `6cd3eb265e64d62a92679290a44083ebad1ea579`; x64 SHA-256 `6419A701CE8EF5BAAD072FF14C232A3557525BF8BB4E3FD6DED09B2D3F22F07E`, x86 `2BA7A8C0D6459F16A05725159903A2725955A3AF6D69018CBC1F15DEFF87F1CE`. | Upstream MIT text in `PureDS4/ThirdParty/SharpOSC-LICENSE.txt`, copied to output and publish. |
 | SbcSharp codec | Vendored source revision and modifications are recorded in `PureDS4/ThirdParty/SbcSharp/NOTICE.md`; compiled bytes are part of the application assembly. | `PureDS4/ThirdParty/SbcSharp/LICENSE.txt` and `NOTICE.md`, both copied to output and publish. |
+
+The previously bundled hbashton VIIPER 0.1.0 bytes remain in the repository
+for existing-candidate reproducibility but are no longer referenced by the
+project or included in new packages. Its own update channel was incompatible
+with PureDS4-owned replacement. The source-pinned fork removes that channel,
+the tray UI, inherited configuration loaders, and unrelated virtual devices.
+The release manifest remains blocked until package/upgrade checks and exact-
+artifact USB/Bluetooth gameplay and reconnection pass. These source changes
+have not replaced the backend on the owner's machine.
 
 The exact asset URLs, all individual artifact hashes, and signer certificate
 thumbprints are kept in the machine-readable contract rather than duplicated

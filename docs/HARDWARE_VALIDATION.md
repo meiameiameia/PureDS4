@@ -100,6 +100,13 @@ Then, still with the game running:
   without restarting the application.
 - Close and relaunch the application. The controller should come back.
 
+For the installed candidate, also check the VIIPER process lifecycle: with
+PureDS4 closed before login and app startup disabled, Windows must not launch
+VIIPER on its own; opening PureDS4 and requesting game output must start the
+backend and restore the virtual pad. No VIIPER tray icon should appear. If app
+startup is enabled, PureDS4 may start at login and then request the backend;
+the backend still must not have its own logon trigger.
+
 ## Part 3 — the awkward two
 
 ### Headset microphone

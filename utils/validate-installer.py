@@ -16,9 +16,9 @@ REQUIRED_PUBLISH_FILES = {
     "PureDS4.release",
     "COPYING",
     "extras/install-viiper-backend.ps1",
-    "extras/VIIPER-0.1.0-x64.exe",
-    "extras/VIIPER-0.1.0-x64.exe.sha256",
-    "extras/VIIPER-0.1.0-LICENSES.txt",
+    "extras/VIIPER-0.1.0-pureds4.1-x64.exe",
+    "extras/VIIPER-0.1.0-pureds4.1-x64.exe.sha256",
+    "extras/VIIPER-0.1.0-pureds4.1-LICENSES.txt",
     "extras/USBip-0.9.7.7-x64.exe",
     "extras/USBip-0.9.7.7-LICENSE.txt",
     "extras/HidHide_1.5.230_x64.exe",
@@ -113,6 +113,20 @@ def main() -> int:
     manifest_paths = [entry.get("path") for entry in manifest["files"]]
     if any(not isinstance(path, str) or not path for path in manifest_paths):
         raise SystemExit("Package manifest contains an invalid path.")
+    expected_viiper_payloads = {
+        path.casefold()
+        for path in REQUIRED_PUBLISH_FILES
+        if path.startswith("extras/VIIPER-")
+    }
+    packaged_viiper_payloads = {
+        path.casefold()
+        for path in manifest_paths
+        if path.casefold().startswith("extras/viiper-")
+    }
+    if packaged_viiper_payloads != expected_viiper_payloads:
+        raise SystemExit(
+            "Package contains a stale or incomplete VIIPER payload family."
+        )
     if len({path.casefold() for path in manifest_paths}) != len(manifest_paths):
         raise SystemExit("Package manifest contains duplicate Windows paths.")
     publish_resolved = args.publish_root.resolve()
@@ -186,8 +200,9 @@ def main() -> int:
 
     bundle = args.bundle_source.read_text(encoding="utf-8")
     required_contracts = [
+        'Compressed="yes"',
         'Name="CreateDesktopShortcut"',
-        'Name="InstallHidHide"',
+        'Name="InstallHidHide" Type="numeric" Value="1"',
         'Id="ViiperUsbipSetup"',
         'Id="PureDS4Msi"',
         'Id="PostUninstallCleanup"',
@@ -204,6 +219,7 @@ def main() -> int:
         'CacheId="PureDS4SetupActionsUninstallPreflight-$(var.SetupActionsHash)"',
         'CacheId="PureDS4SetupActionsInfrastructure-$(var.SetupActionsHash)"',
         'Id="HidHide"',
+        'SourceFile="$(var.ExtrasRoot)\\HidHide_1.5.230_x64.exe"',
         'Vital="yes"',
     ]
     for contract in required_contracts:
@@ -274,6 +290,7 @@ def main() -> int:
         'does not match the completed',
         '-p:Version=$ProductVersion -p:InformationalVersion=$DisplayVersion',
         'test-viiper-reboot-boundary.ps1',
+        'test-viiper-launch-task.ps1',
         'test-installer-state-machine.py',
         '[switch]$RequireSigning',
         'Signing was explicitly required for this build',
@@ -346,6 +363,31 @@ def main() -> int:
         / "PureDS4.Bootstrapper"
         / "InstallerApplication.cs"
     ).read_text(encoding="utf-8")
+    installer_xaml = (
+        installer_root / "PureDS4.Bootstrapper" / "InstallerWindow.xaml"
+    ).read_text(encoding="utf-8")
+    installer_window = (
+        installer_root / "PureDS4.Bootstrapper" / "InstallerWindow.xaml.cs"
+    ).read_text(encoding="utf-8")
+    for contract in [
+        'x:Name="HidHideCheckBox" IsChecked="True"',
+        'Included in this setup;',
+    ]:
+        if contract not in installer_xaml:
+            raise SystemExit("Single-setup UI contract missing: " + contract)
+    for contract in [
+        'PackageStatus(packages, "PureDS4Msi")',
+        'case "PureDS4Msi":',
+        'No separate downloads are needed',
+        'InstallerMode.Update => "Updating PureDS4',
+        'InstallerMode.Repair => "Repairing PureDS4',
+        'PureDS4 setup completed',
+    ]:
+        if contract not in installer_window:
+            raise SystemExit("Single-setup status contract missing: " + contract)
+    if ('PackageStatus(packages, "DS4WindowsMsi")' in installer_window or
+            'A managed DS4Windows installation was found' in installer_window):
+        raise SystemExit("Installer UI contains stale predecessor status copy.")
     for contract in [
         'e.PackageId, "PostUninstallCleanup"',
         'e.PackageId, "CloseRunningApplications"',
@@ -415,7 +457,7 @@ def main() -> int:
         "Commit-InfrastructureReadiness",
         "Test-RecognizedProductExecutable",
         '$script:InstallerLogRoot = Assert-SafeManagedDirectory',
-        '"VIIPER-0.1.0-x64.exe"',
+        '"VIIPER-0.1.0-pureds4.1-x64.exe"',
         '[Version]"0.9.7.7"',
         '"USBip-0.9.7.7-x64.exe"',
         'Start-AndVerifyViiper',
@@ -427,6 +469,7 @@ def main() -> int:
         'registration attempt " +',
         'retrying the same packaged executable directly',
         'New-ScheduledTaskTrigger -AtLogOn',
+        'if (-not $onDemand)',
         'infrastructure-actions.log',
         '[string]::IsNullOrWhiteSpace($triggerUser)',
         "sourceInfo.Length -eq $destinationInfo.Length",
@@ -491,6 +534,7 @@ def main() -> int:
         'BeginErrorReadLine()',
         'RegistryView.Registry64',
         'ViiperApiReady()',
+        '!requireRunningServer || ViiperApiReady()',
         'ExpectedUsbipHash',
         'IsCompatibleUsbipProbe',
     ]:
@@ -500,10 +544,10 @@ def main() -> int:
         r'ExpectedViiperHash\s*=\s*"([0-9A-F]{64})"', probe
     )
     actual_viiper_hash = sha256(
-        args.publish_root / "extras" / "VIIPER-0.1.0-x64.exe"
+        args.publish_root / "extras" / "VIIPER-0.1.0-pureds4.1-x64.exe"
     )
     sidecar_hash = (
-        args.publish_root / "extras" / "VIIPER-0.1.0-x64.exe.sha256"
+        args.publish_root / "extras" / "VIIPER-0.1.0-pureds4.1-x64.exe.sha256"
     ).read_text(encoding="utf-8").split()[0].upper()
     if sidecar_hash != actual_viiper_hash:
         raise SystemExit("Packaged VIIPER hash sidecar is stale.")
@@ -563,7 +607,7 @@ def main() -> int:
         "GetInfrastructureActionsLogPath()",
         "viiper-setup-host.log",
         'startInfo.ArgumentList.Add("-Yes")',
-        "definition.Triggers[0] is not LogonTrigger trigger",
+        "definition.Triggers.Count != 0",
         "definition.Actions[0] is not ExecAction action",
         "IsViiperStartupTaskValid(",
         "progress = new DS4WinWPF.DS4Forms.ViiperSetupProgress(",

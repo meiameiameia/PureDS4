@@ -18,8 +18,8 @@ API contract must be verified first.
    elevation and persisted by Burn across a reboot resume.
 5. The readiness marker is cleared before mutation. It is restored only after
    all pinned identities and runtime probes pass.
-6. A failed transaction stops VIIPER, disables only startup tasks whose full
-   executable/action/principal contract still belongs to this package, and
+6. A failed transaction stops VIIPER, disables only launcher/startup tasks whose full
+   executable/action/principal/trigger contract still belongs to this package, and
    records a failed state.
 7. A newer related bundle blocks an older installer with error 1638 before any
    package is planned.
@@ -38,13 +38,16 @@ API contract must be verified first.
     a LocalAppData VIIPER executable.
 12. Start-menu and optional desktop shortcuts are all-users shell integration
     owned by the infrastructure host, not per-user MSI components.
-13. Program Files ACL normalization is a required safety gate for both the
+13. The VIIPER task has no logon trigger. It is an elevated on-demand launcher
+    invoked by PureDS4 when game output needs the backend; only the PureDS4
+    application task may start at login when the owner enables that option.
+14. Program Files ACL normalization is a required safety gate for both the
     managed application and VIIPER backend; setup never registers an elevated
     task against a directory it could not protect.
 
 ## Pinned runtime contract
 
-- VIIPER must match the SHA-256 of the bundled 0.1.0 executable.
+- VIIPER must match the SHA-256 of the bundled 0.1.0-pureds4.1 executable.
 - `usbip.exe` must report version 0.9.7.7 and match the pinned executable
   SHA-256.
 - The active `usbip2_ude` and `usbip2_filter` driver files must match the two
@@ -53,13 +56,17 @@ API contract must be verified first.
   mismatch diagnostic.
 - The VIIPER API must answer its local readiness probe.
 - The machine readiness marker must be
-  `VIIPER-0.1.0+USBIP-0.9.7.7 / Ready` in the 64-bit registry view.
+  `VIIPER-0.1.0-pureds4.1+USBIP-0.9.7.7 / Ready` in the 64-bit registry view.
 
 PureDS4 repeats these identity and ABI checks at startup. Missing or
 mismatched prerequisites open an offline repair prompt; suppressing a location
 recommendation never suppresses a verification failure. The main UI remains
 available in degraded mode for Settings and diagnostics, while virtual output
 continues to fail closed until a fresh readiness check passes.
+Installer detection accepts a stopped but exact backend because VIIPER no
+longer starts independently at login. The post-install check still requires
+setup to start VIIPER and receive its live API response before reporting a
+completed transaction.
 
 ## USB-IP 0.9.7.8 downgrade
 
@@ -68,12 +75,12 @@ The downgrade is intentionally split across boots:
 1. Verify the exact 0.9.7.8 uninstall record, quiesce PureDS4/VIIPER, detach
    imports, remove 0.9.7.8, and persist the source/target versions plus the
    current boot identity.
-2. Leave 0.9.7.7 uninstalled in that boot, disable the two verified startup
-   tasks, and return 3010.
+2. Leave 0.9.7.7 uninstalled in that boot, disable the verified VIIPER
+   on-demand launcher and PureDS4 startup task, and return 3010.
 3. After reboot, prove the boot identity changed and the old root device,
    running services, and DriverStore packages are gone.
 4. Install the bundled 0.9.7.7 package, validate executable and driver hashes,
-   validate ABI and VIIPER API, enable the owned startup tasks, then atomically
+   validate ABI and VIIPER API, enable the owned launcher/startup tasks, then atomically
    publish Ready.
 
 The release gate runs a no-driver-mutation simulation of same-boot rejection,
@@ -83,6 +90,12 @@ build host.
 
 ## Release gates
 
+- One offline setup includes the app, pinned VIIPER/USB-IP components, and
+  HidHide by default; interactive setup must not require separate downloads.
+  Windows elevation or a driver-related restart may still be required.
+- Install/update/repair UI must name the PureDS4 package and show its actual
+  detected state. Declining or failing HidHide must not report protected
+  virtual output as ready.
 - PowerShell parser validation for the backend installer.
 - WPF clean-configuration construction tests, including mandatory repair UI.
 - Full unit/regression suite.

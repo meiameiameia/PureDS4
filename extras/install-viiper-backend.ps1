@@ -91,7 +91,7 @@ $script:UsbipUdeDriverSha256 =
 $script:UsbipFilterDriverSha256 =
     "c290299ff4d0f6a597db5ce03e15b29a5349cdce7c587ebfbd9ecaeca04f73ed"
 $script:BundledViiperPath = Join-Path $script:PackageExtrasRoot `
-    "VIIPER-0.1.0-x64.exe"
+    "VIIPER-0.1.0-pureds4.1-x64.exe"
 $script:BundledViiperSha256Path = $script:BundledViiperPath + ".sha256"
 $script:BundledUsbipInstallerPath = Join-Path $script:PackageExtrasRoot `
     "USBip-0.9.7.7-x64.exe"
@@ -138,7 +138,7 @@ $script:UsbipReplacementStatePath = Join-Path $script:InstallDir `
 $script:UsbipUninstallKeyName = `
     "{199505b0-b93d-4521-a8c7-897818e0205a}_is1"
 $script:InfrastructureRegistryPath = "HKLM:\SOFTWARE\PureDS4"
-$script:InfrastructureVersion = "VIIPER-0.1.0+USBIP-0.9.7.7"
+$script:InfrastructureVersion = "VIIPER-0.1.0-pureds4.1+USBIP-0.9.7.7"
 $script:System32 = [Environment]::SystemDirectory
 $script:PnPUtilPath = Join-Path $script:System32 "pnputil.exe"
 $script:TaskKillPath = Join-Path $script:System32 "taskkill.exe"
@@ -947,7 +947,7 @@ function Disable-ViiperStartup {
     }
     catch { }
     Write-SetupLog (
-        "Disabled existing VIIPER startup until setup verifies the driver ABI."
+        "Removed existing VIIPER launch rules until setup verifies the driver ABI."
     ) Green
 }
 
@@ -1750,11 +1750,16 @@ function Convert-AccountToSid([string]$identity) {
 
 function Test-HighestLogonTask([string]$taskName,
         [string]$executablePath, [string]$arguments,
-        [string]$workingDirectory, [bool]$requireEnabled = $true) {
+        [string]$workingDirectory, [bool]$requireEnabled = $true,
+        [bool]$expectLogonTrigger = $true) {
     $registered = Get-ScheduledTask -TaskPath "\" -TaskName $taskName `
         -ErrorAction Stop
+    $expectedTriggerCount = if ($expectLogonTrigger) { 1 } else { 0 }
+    $registeredTriggers = @($registered.Triggers | Where-Object {
+        $null -ne $_
+    })
     if (@($registered.Actions).Count -ne 1 -or
-            @($registered.Triggers).Count -ne 1) {
+            $registeredTriggers.Count -ne $expectedTriggerCount) {
         return $false
     }
     $registeredAction = $registered.Actions | Select-Object -First 1
@@ -1776,7 +1781,7 @@ function Test-HighestLogonTask([string]$taskName,
         }
     $principalSid = Convert-AccountToSid `
         ([string]$registered.Principal.UserId)
-    $matchingTrigger = @($registered.Triggers | Where-Object {
+    $matchingTrigger = -not $expectLogonTrigger -or @($registeredTriggers | Where-Object {
         if ($_.CimClass.CimClassName -ne 'MSFT_TaskLogonTrigger') {
             return $false
         }
@@ -1805,7 +1810,7 @@ function Test-HighestLogonTask([string]$taskName,
 
 function Register-HighestLogonTask([string]$taskName,
         [string]$executablePath, [string]$arguments,
-        [string]$workingDirectory) {
+        [string]$workingDirectory, [bool]$onDemand = $false) {
     for ($attempt = 1; $attempt -le 3; $attempt++) {
       try {
         $taskActionParameters = @{
@@ -1816,7 +1821,9 @@ function Register-HighestLogonTask([string]$taskName,
             $taskActionParameters.WorkingDirectory = $workingDirectory
         }
         $taskAction = New-ScheduledTaskAction @taskActionParameters
-        $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
+        $taskTrigger = if ($onDemand) { $null } else {
+            New-ScheduledTaskTrigger -AtLogOn
+        }
         $taskPrincipal = New-ScheduledTaskPrincipal `
             -UserId $script:TargetUserSid `
             -RunLevel Highest -LogonType Interactive
@@ -1825,25 +1832,34 @@ function Register-HighestLogonTask([string]$taskName,
             -DontStopIfGoingOnBatteries -ExecutionTimeLimit ([TimeSpan]::Zero) `
             -MultipleInstances IgnoreNew
 
-        Register-ScheduledTask -TaskPath "\" -TaskName $taskName `
-            -Action $taskAction -Trigger $taskTrigger `
-            -Principal $taskPrincipal -Settings $taskSettings -Force | Out-Null
+        $registerParameters = @{
+            TaskPath = "\"
+            TaskName = $taskName
+            Action = $taskAction
+            Principal = $taskPrincipal
+            Settings = $taskSettings
+            Force = $true
+        }
+        if (-not $onDemand) {
+            $registerParameters.Trigger = $taskTrigger
+        }
+        Register-ScheduledTask @registerParameters | Out-Null
         Enable-ScheduledTask -TaskPath "\" -TaskName $taskName `
             -ErrorAction Stop | Out-Null
 
         if (-not (Test-HighestLogonTask $taskName $executablePath `
-                $arguments $workingDirectory)) {
+                $arguments $workingDirectory $true (-not $onDemand))) {
             throw "Task registration verification failed."
         }
         Write-SetupLog (
-            "Verified startup task '$taskName' on registration attempt " +
+            "Verified elevated task '$taskName' on registration attempt " +
             "$attempt."
         ) Green
         return $true
       }
       catch {
         Write-SetupLog (
-            "Startup task '$taskName' registration attempt $attempt of 3 " +
+            "Elevated task '$taskName' registration attempt $attempt of 3 " +
             "failed: $($_.Exception.Message)"
         ) Yellow
         try {
@@ -1862,7 +1878,7 @@ function Register-HighestLogonTask([string]$taskName,
 
 function Register-ViiperRunTask([string]$viiperPath, [string]$taskName) {
     return Register-HighestLogonTask $taskName $viiperPath "server" `
-        (Split-Path -Parent $viiperPath)
+        (Split-Path -Parent $viiperPath) $true
 }
 
 function Register-Ds4WindowsRunTask([string]$ds4WindowsPath) {
@@ -1874,9 +1890,9 @@ function Suspend-StartupTasksUntilInfrastructureReady(
         [string]$viiperPath, [string]$ds4WindowsPath) {
     $contracts = @(
         @("RunPureDS4VIIPER", $viiperPath, "server",
-            (Split-Path -Parent $viiperPath)),
+            (Split-Path -Parent $viiperPath), $false),
         @("RunPureDS4", $ds4WindowsPath, "-m",
-            (Split-Path -Parent $ds4WindowsPath))
+            (Split-Path -Parent $ds4WindowsPath), $true)
     )
 
     # Validate the complete ownership set before mutating either task. This
@@ -1885,8 +1901,8 @@ function Suspend-StartupTasksUntilInfrastructureReady(
         $taskName = [string]$contract[0]
         if (-not (Test-HighestLogonTask $taskName `
                 ([string]$contract[1]) ([string]$contract[2]) `
-                ([string]$contract[3]))) {
-            throw "Refusing to suspend an unverified startup task: $taskName"
+                ([string]$contract[3]) $true ([bool]$contract[4]))) {
+            throw "Refusing to suspend an unverified owned task: $taskName"
         }
     }
 
@@ -1903,13 +1919,13 @@ function Suspend-StartupTasksUntilInfrastructureReady(
         if ($disabled.Settings.Enabled -or
                 -not (Test-HighestLogonTask $taskName `
                     ([string]$contract[1]) ([string]$contract[2]) `
-                    ([string]$contract[3]) $false)) {
-            throw "Startup task '$taskName' did not enter the verified disabled state."
+                    ([string]$contract[3]) $false ([bool]$contract[4]))) {
+            throw "Owned task '$taskName' did not enter the verified disabled state."
         }
     }
 
     Write-SetupLog (
-        "Verified startup tasks are registered but disabled until the " +
+        "Verified launcher and app startup tasks are disabled until the " +
         "pinned USB-IP package and runtime ABI pass after reboot."
     ) Green
 }
@@ -1918,9 +1934,9 @@ function Set-InfrastructureStartupFailClosed(
         [string]$viiperPath, [string]$ds4WindowsPath) {
     $contracts = @(
         @("RunPureDS4VIIPER", $viiperPath, "server",
-            (Split-Path -Parent $viiperPath)),
+            (Split-Path -Parent $viiperPath), $false),
         @("RunPureDS4", $ds4WindowsPath, "-m",
-            (Split-Path -Parent $ds4WindowsPath))
+            (Split-Path -Parent $ds4WindowsPath), $true)
     )
 
     foreach ($contract in $contracts) {
@@ -1928,7 +1944,7 @@ function Set-InfrastructureStartupFailClosed(
         try {
             if (Test-HighestLogonTask $taskName `
                     ([string]$contract[1]) ([string]$contract[2]) `
-                    ([string]$contract[3]) $false) {
+                    ([string]$contract[3]) $false ([bool]$contract[4])) {
                 Disable-ScheduledTask -TaskPath "\" -TaskName $taskName `
                     -ErrorAction Stop | Out-Null
                 $observed = Get-ScheduledTask -TaskPath "\" `
@@ -2268,11 +2284,11 @@ try {
     }
     Write-Host $installationMode -ForegroundColor Cyan
     Write-Host "Planned order:" -ForegroundColor Cyan
-    Write-Host "  1. Install VIIPER and register both elevated startup tasks." `
+    Write-Host "  1. Install VIIPER and register the on-demand launcher and app startup task." `
         -ForegroundColor Cyan
     Write-Host "  2. Verify or install packaged usbip-win2 0.9.7.7." `
         -ForegroundColor Cyan
-    Write-Host "  3. Verify the startup tasks remain exact and enabled." `
+    Write-Host "  3. Verify the owned tasks remain exact and enabled." `
         -ForegroundColor Cyan
     Write-Host "  4. Start and verify the local VIIPER API." `
         -ForegroundColor Cyan
@@ -2325,7 +2341,7 @@ try {
     }
     Resolve-UsbipReplacementBoundary
 
-    Write-Step "Step 1 of 4 - Installing VIIPER 0.1.0"
+    Write-Step "Step 1 of 4 - Installing PureDS4 VIIPER 0.1.0-pureds4.1"
     Remove-ForeignViiperInstallations
     $viiperPath = Join-Path $script:InstallDir "viiper.exe"
     $candidatePath = Join-Path $script:TempDir "viiper.exe"
@@ -2337,7 +2353,7 @@ try {
     $bundledViiperSha256 = Read-PackagedSha256 `
         $script:BundledViiperSha256Path `
         (Split-Path -Leaf $script:BundledViiperPath)
-    Write-SetupLog "Using packaged VIIPER 0.1.0 x64 binary." Green
+    Write-SetupLog "Using packaged PureDS4 VIIPER 0.1.0-pureds4.1 x64 binary." Green
     Assert-ViiperFileSha256 $script:BundledViiperPath $bundledViiperSha256
     Copy-Item -LiteralPath $script:BundledViiperPath `
         -Destination $candidatePath -Force
@@ -2443,7 +2459,7 @@ try {
     # does not pass -SkipStartupTasks.
     if ($script:RunAtStartupEnabled) {
         if (-not (Register-ViiperRunTask $viiperPath "RunPureDS4VIIPER")) {
-            throw "Could not create the elevated RunPureDS4VIIPER startup task."
+            throw "Could not create the elevated RunPureDS4VIIPER on-demand launcher."
         }
         if (-not (Register-Ds4WindowsRunTask `
                 $script:Ds4WindowsRestartPath)) {
@@ -2453,8 +2469,8 @@ try {
             throw "Could not register the elevated RunPureDS4 startup task."
         }
         Write-SetupLog (
-            "Registered and verified enabled elevated RunPureDS4VIIPER and " +
-            "RunPureDS4 tasks for $script:TargetUserName before driver setup."
+            "Registered the elevated VIIPER on-demand launcher and PureDS4 " +
+            "logon task for $script:TargetUserName before driver setup."
         ) Green
     }
     else {
@@ -2687,13 +2703,13 @@ try {
 
         if ($script:RunAtStartupEnabled) {
             if (-not (Test-HighestLogonTask "RunPureDS4VIIPER" $viiperPath `
-                        "server" (Split-Path -Parent $viiperPath)) -or
+                        "server" (Split-Path -Parent $viiperPath) $true $false) -or
                     -not (Test-HighestLogonTask "RunPureDS4" `
                         $script:Ds4WindowsRestartPath "-m" `
                         (Split-Path -Parent $script:Ds4WindowsRestartPath))) {
-                throw "A verified startup task changed during setup."
+                throw "A verified owned task changed during setup."
             }
-            Write-SetupLog "Both elevated startup tasks remain verified." Green
+            Write-SetupLog "VIIPER launcher and PureDS4 startup task remain verified." Green
         }
         else {
             $unexpectedTasks = @(
@@ -2715,7 +2731,7 @@ try {
             Suspend-StartupTasksUntilInfrastructureReady $viiperPath `
                 $script:Ds4WindowsRestartPath
             Write-SetupLog (
-                "Both startup tasks are preserved but disabled across the " +
+                "VIIPER launcher and app startup task are disabled across the " +
                 "reboot boundary. Repair will re-enable them only after " +
                 "usbip-win2 passes its runtime ABI check."
             ) Yellow
@@ -2735,7 +2751,7 @@ try {
             $startedFromTask = Start-AndVerifyViiper "RunPureDS4VIIPER"
             if (-not $startedFromTask) {
                 Write-SetupLog (
-                    "The verified startup task did not start VIIPER in this " +
+                    "The verified on-demand task did not start VIIPER in this " +
                     "session; retrying the same packaged executable directly."
                 ) Yellow
                 Start-AndVerifyViiperDirectly $viiperPath

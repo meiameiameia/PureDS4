@@ -19,9 +19,9 @@ namespace DS4Windows.SetupActions
     {
         private const string RegistryKeyPath = @"SOFTWARE\PureDS4";
         private const string InfrastructureVersion =
-            "VIIPER-0.1.0+USBIP-0.9.7.7";
+            "VIIPER-0.1.0-pureds4.1+USBIP-0.9.7.7";
         private const string CurrentBundledViiperName =
-            "VIIPER-0.1.0-x64.exe";
+            "VIIPER-0.1.0-pureds4.1-x64.exe";
         private static string CorrelationId =
             Guid.NewGuid().ToString("N");
         private static readonly string InstallerLogRoot = Path.Combine(
@@ -134,11 +134,12 @@ namespace DS4Windows.SetupActions
                 // per-machine install, but Windows cannot register a
                 // highest-interactive task for a different standard user
                 // without storing credentials. Install everything and defer
-                // those two optional startup tasks instead of failing Burn.
+                // the optional app logon task and backend launcher instead
+                // of failing Burn.
                 arguments.Append(" -SkipStartupTasks");
                 WriteFallbackLog("Setup is elevated as " +
                     (WindowsIdentity.GetCurrent().Name ?? elevatedSid) +
-                    "; startup task registration for " + targetUser.Name +
+                    "; owned task registration for " + targetUser.Name +
                     " is deferred.");
             }
 

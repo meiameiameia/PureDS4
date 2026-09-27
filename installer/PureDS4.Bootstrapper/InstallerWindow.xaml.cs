@@ -138,7 +138,7 @@ namespace PureDS4.Bootstrapper
             {
                 case InstallerMode.Update:
                     ModeTitle.Text = "Update PureDS4";
-                    ModeDescription.Text = "A managed DS4Windows installation was found. It will be upgraded in place while profiles and settings are preserved.";
+                    ModeDescription.Text = "An existing PureDS4 installation was found. It will be updated in place while profiles and settings are preserved.";
                     ActionButton.Content = "Update";
                     break;
                 case InstallerMode.Repair:
@@ -154,12 +154,12 @@ namespace PureDS4.Bootstrapper
                     break;
                 default:
                     ModeTitle.Text = "Install PureDS4";
-                    ModeDescription.Text = "Everything needed for a standard x64 installation is included and works offline.";
+                    ModeDescription.Text = "Game output and controller protection are included in this offline setup. No separate downloads are needed; Windows may request administrator permission or a restart.";
                     ActionButton.Content = "Install";
                     break;
             }
 
-            SetStatus(Ds4Status, PackageStatus(packages, "DS4WindowsMsi"));
+            SetStatus(Ds4Status, PackageStatus(packages, "PureDS4Msi"));
             SetStatus(ViiperStatus,
                 infrastructureHealthy ? "Ready" : "Will install or repair");
             SetStatus(UsbipStatus,
@@ -194,7 +194,13 @@ namespace PureDS4.Bootstrapper
         internal void ShowApplying()
         {
             OverallProgress.IsIndeterminate = false;
-            ProgressTitle.Text = mode == InstallerMode.Uninstall ? "Removing PureDS4…" : "Installing PureDS4…";
+            ProgressTitle.Text = mode switch
+            {
+                InstallerMode.Uninstall => "Removing PureDS4…",
+                InstallerMode.Update => "Updating PureDS4…",
+                InstallerMode.Repair => "Repairing PureDS4…",
+                _ => "Installing PureDS4…",
+            };
             ProgressDetail.Text = "Administrator permission is requested once";
         }
 
@@ -202,10 +208,10 @@ namespace PureDS4.Bootstrapper
         {
             switch (packageId)
             {
-                case "CloseRunningApplications": ProgressDetail.Text = "Closing running DS4Windows and VIIPER processes"; break;
-                case "DS4WindowsMsi": ProgressDetail.Text = "Installing PureDS4"; break;
-                case "ViiperUsbipSetup": ProgressDetail.Text = "Verifying VIIPER and USB-IP"; break;
-                case "HidHide": ProgressDetail.Text = "Installing optional HidHide"; break;
+                case "CloseRunningApplications": ProgressDetail.Text = "Checking running controller software"; break;
+                case "PureDS4Msi": ProgressDetail.Text = "Installing PureDS4"; break;
+                case "ViiperUsbipSetup": ProgressDetail.Text = "Installing or verifying game output"; break;
+                case "HidHide": ProgressDetail.Text = "Installing controller protection"; break;
                 default: ProgressDetail.Text = "Verifying installation"; break;
             }
         }
@@ -246,13 +252,13 @@ namespace PureDS4.Bootstrapper
             else
             {
                 CompleteTitle.Text = managedOutputNeedsAttention
-                    ? "PureDS4 installed — setup needs attention"
-                    : "PureDS4 was installed";
+                    ? "PureDS4 setup needs attention"
+                    : "PureDS4 setup completed";
                 CompleteDescription.Text = hidHideFailed
-                    ? "The app and VIIPER/USB-IP were installed, but HidHide failed. Managed virtual output is not ready. Review the setup log and run setup again to repair HidHide."
+                    ? "The app and game-output components are present, but HidHide failed. Protected virtual output is not ready. Review the setup log and run setup again to repair HidHide."
                     : hidHideAvailable
-                        ? "The app and VIIPER/USB-IP were installed. HidHide is present; PureDS4 checks controller protection when it connects."
-                        : "The app and VIIPER/USB-IP were installed without confirmed HidHide protection. Managed virtual output is not ready until HidHide is installed and verified.";
+                        ? "The app and game-output components are present. HidHide is available; PureDS4 checks controller protection when it connects."
+                        : "The app and game-output components are present without confirmed HidHide protection. Protected virtual output is not ready until HidHide is installed and verified.";
             }
         }
 

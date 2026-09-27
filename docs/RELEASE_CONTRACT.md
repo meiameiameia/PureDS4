@@ -149,6 +149,10 @@ installed application and therefore requires explicit owner authorization
 during validation.
 
 `RunPureDS4` and `RunPureDS4VIIPER` are persistent host infrastructure.
+The latter is an elevated, triggerless launcher: Windows must not start VIIPER
+independently at login. PureDS4 runs the verified task during its own
+readiness/output flow. `RunPureDS4` alone may have a logon trigger when the owner
+enables app startup.
 Runtime, portable packages, dogfood promotion, cleanup, and release automation
 must not create or retarget them. A fresh, explicitly initiated standard
 installation may create canonical installer-owned tasks. An upgrade must

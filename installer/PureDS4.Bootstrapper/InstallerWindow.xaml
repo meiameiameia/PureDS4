@@ -90,7 +90,7 @@
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
           <ProgressBar IsIndeterminate="True" Width="300" Height="5" Foreground="{StaticResource AccentBrush}" />
           <TextBlock Text="Checking this PC…" FontSize="17" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,20,0,0" />
-          <TextBlock Text="PureDS4, VIIPER, and USB-IP are being inspected." Foreground="{DynamicResource MutedBrush}" Margin="0,7,0,0" />
+          <TextBlock Text="Checking PureDS4 and its included game-output components." Foreground="{DynamicResource MutedBrush}" Margin="0,7,0,0" />
         </StackPanel>
       </Grid>
 
@@ -106,8 +106,8 @@
               <StackPanel>
                 <TextBlock Text="Installation status" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,11" />
                 <Grid Margin="0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="PureDS4" FontWeight="SemiBold"/><TextBlock x:Name="Ds4Status" Grid.Column="1" Foreground="{StaticResource AccentBrush}"/></Grid>
-                <Grid Margin="0,7,0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="VIIPER 0.1.0" FontWeight="SemiBold"/><TextBlock x:Name="ViiperStatus" Grid.Column="1" Foreground="{StaticResource AccentBrush}"/></Grid>
-                <Grid Margin="0,7,0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="USB-IP 0.9.7.7" FontWeight="SemiBold"/><TextBlock x:Name="UsbipStatus" Grid.Column="1" Foreground="{StaticResource AccentBrush}"/></Grid>
+                <Grid Margin="0,7,0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Game output (VIIPER)" FontWeight="SemiBold"/><TextBlock x:Name="ViiperStatus" Grid.Column="1" Foreground="{StaticResource AccentBrush}"/></Grid>
+                <Grid Margin="0,7,0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Virtual USB driver (USB-IP)" FontWeight="SemiBold"/><TextBlock x:Name="UsbipStatus" Grid.Column="1" Foreground="{StaticResource AccentBrush}"/></Grid>
               </StackPanel>
             </Border>
 
@@ -115,8 +115,8 @@
               <StackPanel>
                 <TextBlock Text="Options" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,7" />
                 <CheckBox x:Name="DesktopShortcutCheckBox" IsChecked="True" Content="Create a desktop shortcut" />
-                <CheckBox x:Name="HidHideCheckBox" IsChecked="True" Content="Install HidHide (recommended — prevents double input)" />
-                <TextBlock Text="Optional system driver. Existing healthy installations are left unchanged." Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="24,-2,0,0" />
+                <CheckBox x:Name="HidHideCheckBox" IsChecked="True" Content="Install controller protection (HidHide, recommended)" />
+                <TextBlock Text="Included in this setup; prevents games from seeing both controllers. Existing healthy installations are left unchanged." TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="24,-2,0,0" />
                 <StackPanel x:Name="Ds3Section" Visibility="Collapsed" Margin="0,12,0,0">
                   <TextBlock Text="DualShock 3 (experimental)" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5" />
                   <CheckBox x:Name="Ds3SupportCheckBox" IsChecked="False" Content="Enable DualShock 3 support" />

@@ -562,7 +562,8 @@ namespace PureDS4.Bootstrapper
                 return;
             }
 
-            infrastructureHealthy = InfrastructureProbe.IsHealthy();
+            infrastructureHealthy = InfrastructureProbe.IsHealthy(
+                requireRunningServer: false);
 
             // Burn removes related bundles after it executes this bundle's
             // package chain. Older PureDS4 bundles own older infrastructure

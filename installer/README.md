@@ -2,7 +2,7 @@
 
 `build-installer.ps1` composes the standard x64 distribution as a WiX 5 Burn
 bundle with a custom WPF interface. It contains the managed PureDS4 MSI,
-VIIPER 0.1.0, USB-IP 0.9.7.7, and an optional HidHide package.
+PureDS4 VIIPER 0.1.0-pureds4.1, USB-IP 0.9.7.7, and an optional HidHide package.
 
 The installer intentionally has no portable mode or destination selector. The
 portable ZIP remains a separate CI artifact. The standard installer places
@@ -11,6 +11,10 @@ may use a VIIPER executable only when it exactly matches the SHA-256 identity
 pinned by that PureDS4 build. Portable and release artifacts must never
 create or retarget the persistent `RunPureDS4` or `RunPureDS4VIIPER` tasks;
 installer gate must enforce that boundary before public distribution.
+The installed VIIPER task is an elevated on-demand launcher without a Windows
+logon trigger. If PureDS4 is configured to start with Windows, its own task
+starts the app, which launches VIIPER during its own readiness/output flow. The fork
+has no tray icon or independent update/autostart channel.
 
 ```powershell
 .\installer\build-installer.ps1 `

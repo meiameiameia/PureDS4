@@ -159,10 +159,12 @@ decision.
   PureDS4 pins a specific version by hash, so a self-updated shared copy can
   stop being trusted.
 - **Startup**: a standard installation may create the canonical
-  `RunPureDS4` and `RunPureDS4VIIPER` tasks. An upgrade preserves tasks that
-  already match the installer-owned paths and actions. PureDS4's startup
-  preference controls only its own verified task; it must not adopt a task
-  belonging to another installation.
+  `RunPureDS4` logon task and `RunPureDS4VIIPER` elevated on-demand task.
+  The VIIPER task has no logon trigger; PureDS4 runs it during its own
+  readiness/output flow. An upgrade replaces the old VIIPER logon-task shape with
+  this verified launcher while preserving the installer-owned target and
+  account. PureDS4's startup preference controls only its own verified task;
+  it must not adopt a task belonging to another installation.
 
 ### 7. Verify
 

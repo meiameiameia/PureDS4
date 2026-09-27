@@ -92,7 +92,7 @@ namespace DS4Windows.Tests
         }
 
         [TestMethod]
-        public void ReadyRequiresRuntimeProbeButNotStartupTaskMaintenance()
+        public void ReadyRequiresRuntimeProbeButNotLauncherTaskMaintenance()
         {
             ViiperPrerequisiteStatus status = new ViiperPrerequisiteStatus
             {
@@ -114,9 +114,9 @@ namespace DS4Windows.Tests
 
             status.ViiperStartupTaskReady = false;
             Assert.IsTrue(status.Ready,
-                "A stale startup task must not block an already healthy portable VIIPER runtime.");
+                "A stale launcher task must not block an already healthy portable VIIPER runtime.");
             StringAssert.Contains(status.DisplayText,
-                "startup task needs repair");
+                "elevated launcher needs repair");
             status.ViiperStartupTaskReady = true;
 
             status.ViiperPackageCurrent = false;

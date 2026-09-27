@@ -189,7 +189,7 @@ if (-not (Test-Path -LiteralPath (Join-Path $publishPath "PureDS4.exe") -PathTyp
     throw "PureDS4 publish output is incomplete: $publishPath"
 }
 Invoke-SignAndVerify (Join-Path $publishPath "PureDS4.exe")
-# VIIPER is an immutable upstream release payload. Its compiled-in SHA-256
+# VIIPER is a source-pinned PureDS4 fork payload. Its compiled-in SHA-256
 # and generated package sidecar are validated below; signing it here would
 # mutate the executable after PureDS4 has pinned that identity.
 $releaseMarker = Join-Path $publishPath "PureDS4.release"
@@ -290,10 +290,13 @@ try {
     Copy-Item -LiteralPath $builtInstaller -Destination $pendingInstaller
     Copy-Item -LiteralPath $manifestPath -Destination $pendingManifest
 
-& (Join-Path $env:SystemRoot `
-    "System32\WindowsPowerShell\v1.0\powershell.exe") `
-    -NoLogo -NoProfile -ExecutionPolicy Bypass `
-    -File (Join-Path $repoRoot "utils\test-viiper-reboot-boundary.ps1") `
+& (Join-Path $repoRoot "utils\test-viiper-launch-task.ps1") `
+    -BackendScript (Join-Path $repoRoot "extras\install-viiper-backend.ps1")
+if ($LASTEXITCODE -ne 0) {
+    throw "VIIPER on-demand launcher simulation failed."
+}
+
+& (Join-Path $repoRoot "utils\test-viiper-reboot-boundary.ps1") `
     -BackendScript (Join-Path $repoRoot "extras\install-viiper-backend.ps1")
 if ($LASTEXITCODE -ne 0) {
     throw "USB-IP reboot-boundary simulation failed."

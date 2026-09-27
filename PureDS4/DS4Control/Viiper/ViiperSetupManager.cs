@@ -74,7 +74,7 @@ namespace DS4Windows
                 {
                     return ViiperStartupTaskReady
                         ? "VIIPER ready"
-                        : "VIIPER ready; startup task needs repair";
+                        : "VIIPER ready; elevated launcher needs repair";
                 }
 
                 if (CitrixUsbMonitorConflict)
@@ -135,7 +135,7 @@ namespace DS4Windows
 
                 if (!ViiperStartupTaskReady)
                 {
-                    return "VIIPER elevated startup task needs repair";
+                    return "VIIPER elevated launcher needs repair";
                 }
 
                 return ServerRunning ? "VIIPER status unknown" : "VIIPER server not running";
@@ -150,7 +150,7 @@ namespace DS4Windows
                 {
                     return ViiperStartupTaskReady
                         ? "Ready"
-                        : "Ready; background startup needs attention";
+                        : "Ready; game-output launcher needs attention";
                 }
 
                 if (CitrixUsbMonitorConflict)
@@ -177,7 +177,7 @@ namespace DS4Windows
 
                 if (!ViiperStartupTaskReady)
                 {
-                    return "Background startup needs repair";
+                    return "Game-output launcher needs repair";
                 }
 
                 return "The game-output service is not running";
@@ -196,11 +196,11 @@ namespace DS4Windows
             "--run-embedded-viiper-installer";
         private const string InstallerResourceName =
             "DS4Windows.install-viiper-backend.ps1";
-        private const string BundledViiperName = "VIIPER-0.1.0-x64.exe";
+        private const string BundledViiperName = "VIIPER-0.1.0-pureds4.1-x64.exe";
         private const string BundledViiperHashName =
             BundledViiperName + ".sha256";
         internal const string SupportedViiperSha256 =
-            "AD14F2C9048D61B3447F2F79D7A122EDEA81E5DB52A1AC803D294E5BC9CD2324";
+            "67559205427F18849E16B0A8329E6270D9A42E4AA155ACA9FD5EA8574A8A01C8";
         private const string BundledUsbipName = "USBip-0.9.7.7-x64.exe";
         private const string BundledHidHideName =
             "HidHide_1.5.230_x64.exe";
@@ -1474,17 +1474,16 @@ namespace DS4Windows
                 {
                     TaskDefinition definition = task.Definition;
                     if (!task.Enabled || definition.Actions.Count != 1 ||
-                        definition.Triggers.Count != 1 ||
+                        definition.Triggers.Count != 0 ||
                         definition.Principal.RunLevel != TaskRunLevel.Highest ||
                         definition.Principal.LogonType !=
                             TaskLogonType.InteractiveToken ||
                         definition.Settings.Priority !=
                             ProcessPriorityClass.High ||
-                        definition.Actions[0] is not ExecAction action ||
-                        definition.Triggers[0] is not LogonTrigger trigger)
+                        definition.Actions[0] is not ExecAction action)
                     {
                         failureMessage = "RunPureDS4VIIPER does not have the exact " +
-                            "enabled, elevated logon-task shape.";
+                            "enabled, elevated on-demand task shape.";
                         return false;
                     }
 
@@ -1500,10 +1499,7 @@ namespace DS4Windows
                                 "viiper.exe"), viiperPath) &&
                         string.Equals(TryResolveAccountSid(
                                 definition.Principal.UserId), currentSid,
-                            StringComparison.OrdinalIgnoreCase) &&
-                        (string.IsNullOrWhiteSpace(trigger.UserId) ||
-                         string.Equals(TryResolveAccountSid(trigger.UserId),
-                            currentSid, StringComparison.OrdinalIgnoreCase));
+                            StringComparison.OrdinalIgnoreCase);
                     if (!valid)
                     {
                         failureMessage = "RunPureDS4VIIPER does not target the " +
@@ -2404,9 +2400,9 @@ namespace DS4Windows
         {
             try
             {
-                // When startup is enabled, use its verified elevated task.
-                // With startup explicitly disabled, launch the already hash-
-                // verified selected backend once for this interactive session.
+                // The verified task has no logon trigger. PureDS4 starts it
+                // only when game output needs the backend. With app startup
+                // disabled, a direct elevated launch remains the fallback.
                 bool taskReady = IsViiperStartupTaskValid(viiperPath,
                     out _);
                 if (!taskReady && DS4WinWPF.StartupMethods.

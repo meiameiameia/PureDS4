@@ -35,7 +35,8 @@ foreach ($functionName in @(
         "Remove-MismatchedUsbipPackage",
         "Resolve-UsbipReplacementBoundary",
         "Suspend-StartupTasksUntilInfrastructureReady",
-        "Set-InfrastructureStartupFailClosed")) {
+        "Set-InfrastructureStartupFailClosed",
+        "Register-ViiperRunTask")) {
     Invoke-Expression (Get-BackendFunctionDefinition $functionName)
 }
 
@@ -73,17 +74,37 @@ try {
         RunPureDS4VIIPER = $true
         RunPureDS4 = $true
     }
+    $script:FakeLogonTriggers = @{
+        RunPureDS4VIIPER = $false
+        RunPureDS4 = $true
+    }
     function Test-HighestLogonTask {
         param(
             [string]$taskName,
             [string]$executablePath,
             [string]$arguments,
             [string]$workingDirectory,
-            [bool]$requireEnabled = $true
+            [bool]$requireEnabled = $true,
+            [bool]$expectLogonTrigger = $true
         )
         return $script:FakeStartupTasks.ContainsKey($taskName) -and
+            $script:FakeLogonTriggers[$taskName] -eq $expectLogonTrigger -and
             (-not $requireEnabled -or
              $script:FakeStartupTasks[$taskName])
+    }
+    function Register-HighestLogonTask {
+        param(
+            [string]$taskName,
+            [string]$executablePath,
+            [string]$arguments,
+            [string]$workingDirectory,
+            [bool]$onDemand = $false
+        )
+        if ($taskName -ne 'RunPureDS4VIIPER' -or
+                $arguments -ne 'server' -or -not $onDemand) {
+            throw 'VIIPER must register an on-demand launcher, not autostart.'
+        }
+        return $true
     }
     function Disable-ScheduledTask {
         param(
@@ -131,6 +152,10 @@ try {
         DisplayVersion = "0.9.7.8"
         QuietUninstallString = '"' + $uninstaller + '"'
         UninstallString = $null
+    }
+    if (-not (Register-ViiperRunTask `
+            (Join-Path $testRoot 'viiper.exe') 'RunPureDS4VIIPER')) {
+        throw 'VIIPER on-demand registration contract was rejected.'
     }
     $removed = Remove-MismatchedUsbipPackage $entry `
         ([Version]"0.9.7.8") ([Version]"0.9.7.7")

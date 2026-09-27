@@ -1,23 +1,23 @@
 {
   "schemaVersion": 1,
-  "releaseReady": true,
-  "releaseBlockers": [],
+  "releaseReady": false,
+  "releaseBlockers": ["viiper"],
   "components": [
     {
       "id": "viiper",
-      "version": "0.1.0",
-      "status": "verified",
-      "sourceRepository": "https://github.com/hbashton/VIIPER",
-      "sourceCommit": "fd298a04d7d229293be15b2af664405c9e68114c",
-      "sourceTag": "v0.1.0",
-      "licensePath": "extras/VIIPER-0.1.0-LICENSES.txt",
+      "version": "0.1.0-pureds4.1",
+      "status": "blocked",
+      "blocker": "PureDS4-specific VIIPER source and binary are pinned, but the installer upgrade and USB/Bluetooth virtual-output hardware gates are not yet complete.",
+      "sourceRepository": "https://github.com/meiameiameia/PureDS4-VIIPER",
+      "sourceCommit": "c472717d2eed950d8aab3eab80edc87400a75ae8",
+      "licensePath": "extras/VIIPER-0.1.0-pureds4.1-LICENSES.txt",
       "artifacts": [
         {
           "kind": "repository",
-          "path": "extras/VIIPER-0.1.0-x64.exe",
-          "sha256": "AD14F2C9048D61B3447F2F79D7A122EDEA81E5DB52A1AC803D294E5BC9CD2324",
-          "originUrl": "https://github.com/hbashton/VIIPER/releases/download/v0.1.0/viiper-windows-amd64.zip",
-          "originSha256": "07BEB53FDB6856AFA6E0F31EDF210A8618CBC2304AB59AC23FB017B11082ADD7"
+          "path": "extras/VIIPER-0.1.0-pureds4.1-x64.exe",
+          "sha256": "67559205427F18849E16B0A8329E6270D9A42E4AA155ACA9FD5EA8574A8A01C8",
+          "buildScript": "scripts/build-pureds4-backend.ps1",
+          "buildCommand": ".\\scripts\\build-pureds4-backend.ps1 -OutputDir .\\dist -RequireClean"
         }
       ]
     },

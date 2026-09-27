@@ -10,15 +10,15 @@ namespace PureDS4.Bootstrapper
 {
     internal static class InfrastructureProbe
     {
-        private const string ExpectedMarker = "VIIPER-0.1.0+USBIP-0.9.7.7";
-        private const string ExpectedViiperVersion = "0.1.0";
-        private const string ExpectedViiperHash = "AD14F2C9048D61B3447F2F79D7A122EDEA81E5DB52A1AC803D294E5BC9CD2324";
+        private const string ExpectedMarker = "VIIPER-0.1.0-pureds4.1+USBIP-0.9.7.7";
+        private const string ExpectedViiperVersion = "0.1.0-pureds4.1";
+        private const string ExpectedViiperHash = "67559205427F18849E16B0A8329E6270D9A42E4AA155ACA9FD5EA8574A8A01C8";
         private const string ExpectedUsbipVersion = "0.9.7.7";
         private const string ExpectedUsbipHash = "FC1660E3759D8AF4CEDE48DBE194285A5A1DE85CE6E3216724499AFD32BE92E8";
         private const string ExpectedUdeHash = "51DB440065393E588A6B2585508C50EB3E1510B7B06D9AFA6C5BDE583751EA7D";
         private const string ExpectedFilterHash = "C290299FF4D0F6A597DB5CE03E15B29A5349CDCE7C587EBFBD9ECAECA04F73ED";
 
-        internal static bool IsHealthy()
+        internal static bool IsHealthy(bool requireRunningServer = true)
         {
             try
             {
@@ -94,7 +94,11 @@ namespace PureDS4.Bootstrapper
                         return false;
                     }
                 }
-                return ViiperApiReady();
+                // The backend is intentionally launched by PureDS4, not by
+                // Windows at login. Detection must not call a stopped but
+                // correctly installed backend "broken". The post-install
+                // check still requires its live API after setup starts it.
+                return !requireRunningServer || ViiperApiReady();
             }
             catch { return false; }
         }
