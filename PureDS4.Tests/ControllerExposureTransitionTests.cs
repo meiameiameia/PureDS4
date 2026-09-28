@@ -5,6 +5,27 @@ namespace DS4WindowsTests
     [TestClass]
     public class ControllerExposureTransitionTests
     {
+        [DataTestMethod]
+        [DataRow(true, false, true,
+            VirtualOutputBlockReason.OutputBindingFailed, true)]
+        [DataRow(true, true, false,
+            VirtualOutputBlockReason.None, true)]
+        [DataRow(true, false, true,
+            VirtualOutputBlockReason.None, false)]
+        [DataRow(true, false, false,
+            VirtualOutputBlockReason.OutputBindingFailed, false)]
+        [DataRow(false, false, true,
+            VirtualOutputBlockReason.OutputBindingFailed, false)]
+        public void NativeExposurePreflightAllowsOnlyProvenLiveOrFailedOutput(
+            bool profileRequestsVirtualOutput, bool liveVirtualOutput,
+            bool noPrimaryOutput, VirtualOutputBlockReason blockReason,
+            bool expected)
+        {
+            Assert.AreEqual(expected, ControllerExposureEntryPolicy.
+                CanAttemptNativePhysical(profileRequestsVirtualOutput,
+                    liveVirtualOutput, noPrimaryOutput, blockReason));
+        }
+
         [TestMethod]
         public void DefaultsToManagedVirtualReady()
         {

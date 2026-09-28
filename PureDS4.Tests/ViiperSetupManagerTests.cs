@@ -8,6 +8,39 @@ namespace DS4Windows.Tests
     public class ViiperSetupManagerTests
     {
         [TestMethod]
+        public void RunningServerProbeRetriesTransientFailureAndStopsOnSuccess()
+        {
+            int probes = 0;
+            int delays = 0;
+            bool ready = ViiperSetupManager.ProbeServerWithRetry(
+                () => ++probes == 3,
+                milliseconds =>
+                {
+                    Assert.AreEqual(250, milliseconds);
+                    delays++;
+                },
+                attempts: 4, delayMilliseconds: 250);
+
+            Assert.IsTrue(ready);
+            Assert.AreEqual(3, probes);
+            Assert.AreEqual(2, delays);
+        }
+
+        [TestMethod]
+        public void RunningServerProbeStopsAfterBoundedFailure()
+        {
+            int probes = 0;
+            int delays = 0;
+            bool ready = ViiperSetupManager.ProbeServerWithRetry(
+                () => { probes++; return false; },
+                _ => delays++, attempts: 4, delayMilliseconds: 250);
+
+            Assert.IsFalse(ready);
+            Assert.AreEqual(4, probes);
+            Assert.AreEqual(3, delays);
+        }
+
+        [TestMethod]
         public void UsbipVersionRequiresPinnedSafe0977()
         {
             Assert.IsFalse(ViiperSetupManager.IsSupportedUsbipVersion(null));

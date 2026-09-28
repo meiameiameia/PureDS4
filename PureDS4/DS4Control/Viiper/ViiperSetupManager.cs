@@ -337,8 +337,15 @@ namespace DS4Windows
                 }
             }
 
+            // The VIIPER API may be temporarily unresponsive during a
+            // controller/USB-IP teardown. A single timed-out ping must not
+            // strand the newly reconnected controller without output.
             bool viiperServerRunning = viiperProcessOwnershipReady &&
-                canonicalViiperRunning && CanPingServer();
+                canonicalViiperRunning &&
+                (tryStartServer && viiperPackageCurrent && usbipRuntimeReady
+                    ? ProbeServerWithRetry(CanPingServer, Thread.Sleep,
+                        attempts: 4, delayMilliseconds: 250)
+                    : CanPingServer());
 
             ViiperPrerequisiteStatus status = new ViiperPrerequisiteStatus
             {
@@ -2516,6 +2523,23 @@ namespace DS4Windows
             {
                 return false;
             }
+        }
+
+        internal static bool ProbeServerWithRetry(Func<bool> probe,
+            Action<int> delay, int attempts, int delayMilliseconds)
+        {
+            if (probe == null) throw new ArgumentNullException(nameof(probe));
+            if (delay == null) throw new ArgumentNullException(nameof(delay));
+            if (attempts < 1) throw new ArgumentOutOfRangeException(nameof(attempts));
+            if (delayMilliseconds < 0) throw new ArgumentOutOfRangeException(nameof(delayMilliseconds));
+
+            for (int attempt = 0; attempt < attempts; attempt++)
+            {
+                if (probe()) return true;
+                if (attempt + 1 < attempts) delay(delayMilliseconds);
+            }
+
+            return false;
         }
 
     }

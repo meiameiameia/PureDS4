@@ -108,6 +108,17 @@ namespace DS4Windows
         internal string Detail { get; }
     }
 
+    internal static class ControllerExposureEntryPolicy
+    {
+        internal static bool CanAttemptNativePhysical(
+            bool profileRequestsVirtualOutput, bool liveVirtualOutput,
+            bool noPrimaryOutput, VirtualOutputBlockReason blockReason) =>
+            profileRequestsVirtualOutput &&
+            (liveVirtualOutput ||
+             (noPrimaryOutput &&
+              blockReason == VirtualOutputBlockReason.OutputBindingFailed));
+    }
+
     internal interface IControllerExposureRecoveryOperations
     {
         ControllerExposureOperationResult StopAndReset();

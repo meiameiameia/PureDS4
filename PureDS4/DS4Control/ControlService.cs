@@ -87,6 +87,13 @@ namespace DS4Windows
         public OutputDevice[] outputDevices = new OutputDevice[MAX_DS4_CONTROLLER_COUNT] { null, null, null, null, null, null, null, null };
         private readonly VirtualOutputBlockReason[] virtualOutputBlockReasons =
             new VirtualOutputBlockReason[MAX_DS4_CONTROLLER_COUNT];
+        private static readonly int[] outputBindingRetryDelaysMs =
+            { 2000, 4000, 8000, 16000 };
+        private readonly object outputBindingRetryLock = new object();
+        private readonly CancellationTokenSource[] outputBindingRetryTokens =
+            new CancellationTokenSource[MAX_DS4_CONTROLLER_COUNT];
+        private readonly DS4Device[] outputBindingRetryDevices =
+            new DS4Device[MAX_DS4_CONTROLLER_COUNT];
         private OneEuroFilter3D[] udpEuroPairAccel = new OneEuroFilter3D[UdpServer.NUMBER_SLOTS]
         {
             new OneEuroFilter3D(), new OneEuroFilter3D(),
@@ -1670,6 +1677,7 @@ namespace DS4Windows
 
                 if (success && slotDevice.OutputDevice != null)
                 {
+                    CancelOutputBindingRetry(index);
                     virtualOutputBlockReasons[index] =
                         VirtualOutputBlockReason.None;
                     LogDebug($"Associated input controller #{index + 1} ({device.DisplayName}) to virtual {slotDevice.CurrentType.ToDisplayName()} Controller in{(slotDevice.PermanentType != OutContType.None ? " permanent" : "")} output slot #{slotDevice.Index + 1}");
@@ -1678,16 +1686,126 @@ namespace DS4Windows
                 }
                 else
                 {
+                    activeOutDevType[index] = OutContType.None;
                     virtualOutputBlockReasons[index] = candidateSlot == null
                         ? VirtualOutputBlockReason.NoAvailableOutputSlot
                         : VirtualOutputBlockReason.OutputBindingFailed;
                     LogDebug("Failed. No output device was associated");
                     StartupDiag($"PluginOutDev failed index={index} success={success} slotNull={candidateSlot == null} slotOutputNull={candidateSlot?.OutputDevice == null}");
+                    if (virtualOutputBlockReasons[index] ==
+                        VirtualOutputBlockReason.OutputBindingFailed)
+                    {
+                        ScheduleOutputBindingRetry(index, device);
+                    }
                 }
             }
             else
             {
                 StartupDiag($"PluginOutDev skipped index={index} useDInputOnly=false");
+            }
+        }
+
+        private void ScheduleOutputBindingRetry(int index, DS4Device device)
+        {
+            CancellationTokenSource retryToken;
+            lock (outputBindingRetryLock)
+            {
+                CancellationTokenSource current =
+                    outputBindingRetryTokens[index];
+                if (current != null &&
+                    ReferenceEquals(outputBindingRetryDevices[index], device) &&
+                    !current.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                current?.Cancel();
+                retryToken = new CancellationTokenSource();
+                outputBindingRetryTokens[index] = retryToken;
+                outputBindingRetryDevices[index] = device;
+            }
+
+            _ = RetryOutputBindingAsync(index, device, retryToken);
+        }
+
+        private async Task RetryOutputBindingAsync(int index, DS4Device device,
+            CancellationTokenSource retryToken)
+        {
+            try
+            {
+                foreach (int delayMs in outputBindingRetryDelaysMs)
+                {
+                    await Task.Delay(delayMs, retryToken.Token).
+                        ConfigureAwait(false);
+                    lock (serviceLifecycleLock)
+                    {
+                        if (retryToken.IsCancellationRequested ||
+                            !ReferenceEquals(DS4Controllers[index], device) ||
+                            device.IsRemoving || !device.isSynced() ||
+                            getDInputOnly(index) || !useDInputOnly[index] ||
+                            outputDevices[index] != null ||
+                            virtualOutputBlockReasons[index] !=
+                                VirtualOutputBlockReason.OutputBindingFailed ||
+                            controllerExposureTransitions[index].Status.Mode !=
+                                ControllerExposureMode.ManagedVirtual ||
+                            !controllerExposureTransitions[index].Status.IsReady)
+                        {
+                            return;
+                        }
+
+                        if (!running || inServiceTask)
+                        {
+                            continue;
+                        }
+
+                        StartupDiag($"Retrying virtual output after transient binding failure index={index}");
+                        PluginOutDev(index, device);
+                    }
+                }
+
+                if (!retryToken.IsCancellationRequested)
+                {
+                    StartupDiag($"Virtual output recovery attempts exhausted index={index}");
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                StartupDiag($"Virtual output retry failed index={index}: {ex.GetType().Name}: {ex.Message}");
+            }
+            finally
+            {
+                lock (outputBindingRetryLock)
+                {
+                    if (ReferenceEquals(outputBindingRetryTokens[index],
+                            retryToken))
+                    {
+                        outputBindingRetryTokens[index] = null;
+                        outputBindingRetryDevices[index] = null;
+                    }
+                }
+                retryToken.Dispose();
+            }
+        }
+
+        private void CancelOutputBindingRetry(int index)
+        {
+            lock (outputBindingRetryLock)
+            {
+                outputBindingRetryTokens[index]?.Cancel();
+                outputBindingRetryTokens[index] = null;
+                outputBindingRetryDevices[index] = null;
+            }
+        }
+
+        private void CancelAllOutputBindingRetries()
+        {
+            for (int index = 0; index < outputBindingRetryTokens.Length;
+                index++)
+            {
+                CancelOutputBindingRetry(index);
             }
         }
 
@@ -1981,6 +2099,7 @@ namespace DS4Windows
         private bool StopCore(bool showlog, bool immediateUnplug)
         {
             StartupDiag($"ControlService.Stop enter showlog={showlog} immediate={immediateUnplug} running={running}");
+            CancelAllOutputBindingRetries();
             if (running)
             {
                 if (OpenRGBServer.Instance.IsRunning)
@@ -2951,6 +3070,7 @@ namespace DS4Windows
 
                 if (removingStatus)
                 {
+                    CancelOutputBindingRetry(ind);
                     bool exposureRelease =
                         controllerExposureTransitions[ind].Status.Stage ==
                         ControllerExposureStage.ReleasingPhysicalHandle;

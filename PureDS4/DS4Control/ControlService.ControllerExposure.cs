@@ -365,12 +365,16 @@ namespace DS4Windows
                     "The selected primary controller is no longer available.");
             }
 
-            if (Global.getDInputOnly(controllerIndex) ||
-                outputDevices[controllerIndex] is not ViiperOutDevice viiper ||
-                !viiper.IsRuntimeConnected)
+            OutputDevice primaryOutput = outputDevices[controllerIndex];
+            bool liveVirtualOutput = primaryOutput is ViiperOutDevice viiper &&
+                viiper.IsRuntimeConnected;
+            if (!ControllerExposureEntryPolicy.CanAttemptNativePhysical(
+                    !Global.getDInputOnly(controllerIndex),
+                    liveVirtualOutput, primaryOutput == null,
+                    virtualOutputBlockReasons[controllerIndex]))
             {
                 return ExposureRequestFailure(controllerIndex,
-                    "Native Physical requires an active Managed / Virtual controller to retire safely.");
+                    "The controller cannot be released until its virtual-output state can be verified.");
             }
 
             string devicePath = device.HidDevice?.DevicePath ?? string.Empty;
@@ -389,6 +393,8 @@ namespace DS4Windows
                         "An exposure transition is already active for this controller.");
                 }
             }
+
+            CancelOutputBindingRetry(controllerIndex);
 
             ControllerExposureRuntimeSession session = new()
             {
