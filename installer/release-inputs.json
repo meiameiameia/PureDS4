@@ -7,7 +7,7 @@
       "id": "viiper",
       "version": "0.1.0-pureds4.1",
       "status": "blocked",
-      "blocker": "PureDS4-specific VIIPER source and binary are pinned, but the installer upgrade and USB/Bluetooth virtual-output hardware gates are not yet complete.",
+      "blocker": "The pinned PureDS4 VIIPER passed installed-candidate upgrade and normal USB/Bluetooth virtual-output tests, but transient API-unresponsive recovery has not been exercised on hardware.",
       "sourceRepository": "https://github.com/meiameiameia/PureDS4-VIIPER",
       "sourceCommit": "c472717d2eed950d8aab3eab80edc87400a75ae8",
       "licensePath": "extras/VIIPER-0.1.0-pureds4.1-LICENSES.txt",

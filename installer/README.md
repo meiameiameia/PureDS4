@@ -38,9 +38,11 @@ guesswork.
 
 The output is named `PureDS4_5.1.0_Setup_x64.exe` and the installed
 executable is `PureDS4.exe`. `5.1.0` is the owner-selected first public version
-target, not a release-readiness or publication claim. The exact final bundle
-must upgrade the existing `5.1.0-beta.2` dogfood installation and pass the
-recovery checks before publication is considered.
+target, not a release-readiness or publication claim. An internal `5.1.0`
+bundle upgraded the owner's former `5.1.0-beta.2` installation, and a later
+bundle passed a same-version replacement. The eventual published file must
+match the exact accepted candidate; clean-install and failure/recovery checks
+remain before publication can be considered.
 
 The owner accepts an unsigned first public release. Its official download
 must state that there is no verified publisher and include the exact artifact

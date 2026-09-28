@@ -45,24 +45,25 @@ The two game outputs PureDS4 offers are **Xbox 360** and **DualShock 4**.
 
 ## Validation status
 
-Nothing in this repository is a hardware, runtime, or release claim.
+An internal installed `5.1.0` candidate from commit `a48e467` has passed an
+owner-observed, one-machine DualShock 4 USB and Bluetooth pass: virtual output,
+gameplay, disconnect/reconnect, app restart, and managed/direct round trips.
+The exact artifact and limits of that evidence are recorded in
+[`docs/HARDWARE_VALIDATION.md`](docs/HARDWARE_VALIDATION.md). This is not a
+public-release or broad hardware-compatibility claim.
 
-- No owner hardware validation has been completed against the current tree.
-  Earlier validation records described builds that predate the controller-family
-  removals and the PureDS4 rename, so they are not carried forward here.
-- DualShock 4 is the reference hardware. Bluetooth and USB are separate claims
-  and neither is currently claimed for this tree.
 - DualShock 3 is **not supported and not claimed**. It is a planned milestone
   with its own gate: DsHidMini setup, existing ScpToolkit/ScpTools driver
   state, genuine hardware, installation, runtime, gameplay and uninstall all
   have to be exercised on the target machine before any release mentions it as
   working. That gate does not block the first release.
-- Installer replacement, upgrade, uninstall, reboot, and recovery behavior has
-  not been owner-validated.
-- `installer/release-inputs.json` now calculates `releaseReady: true`: every
-  bundled component's provenance is verified. That gate covers component
-  licensing and hashes only. The hardware, installer, and owner-approval gates
-  above are separate, and none of them is met.
+- The beta-to-`5.1.0` upgrade and a later same-version replacement passed on
+  the owner's machine. Clean installation, failure/recovery, reboot, uninstall,
+  and the exact downloaded unsigned-candidate check remain separate gates.
+- `installer/release-inputs.json` still calculates `releaseReady: false`:
+  pinned component identities pass, but VIIPER recovery under a transient
+  backend failure remains unproven. That field is a component-input gate,
+  not authorization to publish even when it eventually becomes true.
 
 [`docs/HARDWARE_VALIDATION.md`](docs/HARDWARE_VALIDATION.md) describes the
 manual pass that a hardware claim requires.
@@ -70,16 +71,16 @@ manual pass that a hardware claim requires.
 ## Build and test
 
 ```powershell
-dotnet restore PureDS4.sln
+dotnet restore PureDS4.sln --locked-mode
 dotnet build PureDS4.sln -c Debug -p:Platform=x64
-dotnet test PureDS4.sln -c Debug -p:Platform=x64
+dotnet test PureDS4.sln -c Debug -p:Platform=x64 --filter "FullyQualifiedName!~LiveProcessCapture"
 ```
 
 ## Relationship to DS4Windows
 
 [`hbashton/DS4Windows`](https://github.com/hbashton/DS4Windows) is the
 maintained DS4Windows and keeps that identity. PureDS4 is a derivative of it,
-narrowed to two controllers, and credits that lineage openly.
+focused publicly on the DualShock 4, and credits that lineage openly.
 
 Upstream history, the `upstream` remote, the annotated `upstream-baseline` tag,
 the original copyright notices, and the GPL notices are all preserved.

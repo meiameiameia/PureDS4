@@ -2,17 +2,28 @@
 
 ## Upgrading an existing PureDS4 installation
 
-The first public-version target is `5.1.0`. The owner's current dogfood
-installation is `5.1.0-beta.2`; this is an **in-place PureDS4 upgrade**, not
-the DS4Windows-to-PureDS4 replacement described below. The bundle and MSI
-share PureDS4's upgrade codes, and the existing beta MSI already has numeric
-version `5.1.0`. The same-version MSI upgrade rule and Burn's beta-to-stable
-ordering therefore need an actual-machine test; a successful build or MSI-only
-CI run is insufficient.
+The first public-version target is `5.1.0`. The owner's installed test build
+is now the `5.1.0` candidate from commit `a48e467`, not `5.1.0-beta.2`.
+The beta-to-stable upgrade first passed with candidate `9c17446`; the later
+`a48e467` installer replaced that same-version installation successfully.
+Both are **in-place PureDS4 upgrades**, not the DS4Windows-to-PureDS4
+replacement described below. The bundle and MSI share PureDS4's upgrade
+codes, and the beta MSI already used numeric version `5.1.0`. These observed
+passes are limited to one Windows machine and do not prove the remaining
+clean-install or failure/recovery matrix.
+
+The `a48e467` installer SHA-256 is
+`AC7A39A3C311CB415C8716091766DC7FF1FFEC2596094C8A8B35B2994F97C99C`.
+Before its installation, all 15 files under the owner's PureDS4 roaming-data
+directory were copied to a separate backup. The installed executable matched
+the candidate's SHA-256, all 15 data files remained hash-identical, the old
+installer registrations were removed, and the canonical tasks and backend
+readiness were verified. The previous installer was retained for recovery;
+no rollback was performed.
 
 Use the **exact, source-identified installer intended for distribution**, not
 an earlier disposable build. Before running it, record its SHA-256 and the
-installed beta version, verify the cached beta installer is recoverable,
+installed version, verify the outgoing installer is recoverable,
 preserve a copy of PureDS4's settings/profiles and ownership journal, inspect
 running processes and canonical startup tasks, and check for a pending
 infrastructure reboot. Close the app and obtain normal elevation; do not
@@ -22,9 +33,9 @@ readiness, controller visibility, virtual and native modes, and a restart.
 Exercise repair and failure/recovery scenarios on a separate disposable
 Windows installation; do not deliberately break the owner's daily-driver PC.
 
-Do not treat the old beta installer as an automatic downgrade: after `5.1.0`
-is installed, rolling back may require uninstalling the new version and then
-reinstalling the preserved beta package. That is a separate, owner-approved
+Do not treat a previous installer as an automatic downgrade: rolling back
+may require uninstalling the current version and then reinstalling the
+preserved package. That is a separate, owner-approved
 host change, followed by restoring only the backed-up PureDS4 data that the
 rollback needs. If any identity or recovery prerequisite is missing, stop
 before the in-place upgrade rather than experimenting on the current install.

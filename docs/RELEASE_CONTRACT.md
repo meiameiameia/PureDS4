@@ -102,9 +102,10 @@ clean-install, rollback, failure, and recovery matrix required for release.
 
 The owner selected **`5.1.0` as the target for the first public release**.
 This is a version decision, not a readiness claim or permission to publish.
-The exact installer bearing this version must pass the remaining gates,
-including an authorized in-place upgrade from the installed
-`5.1.0-beta.2` dogfood build:
+The exact installer bearing this version must pass the remaining gates.
+An internal `5.1.0` candidate has already upgraded the owner's former
+`5.1.0-beta.2` dogfood installation, and a later candidate replaced it at
+the same version. Neither observation authorizes publication.
 
 | Surface | Value |
 | --- | --- |
@@ -122,10 +123,11 @@ Release-candidate validation builds retain the target version and are
 distinguished by their complete source SHA and artifact SHA-256, not by an
 invented public version or a filename such as `beta.3`.
 
-MSI compares only the first three numeric version fields. The current
-`5.1.0-beta.2` MSI already uses `5.1.0`, so the stable transition relies on
-the existing same-version major-upgrade rule and must be proved with the
-actual final installer. The Burn bundle uses the prerelease-aware version for
+MSI compares only the first three numeric version fields. The former
+`5.1.0-beta.2` MSI already used `5.1.0`; its upgrade to an internal stable
+candidate and the later same-version replacement both passed on the owner's
+machine. The eventual published installer must be the exact bytes finally
+accepted. The Burn bundle uses the prerelease-aware version for
 upgrade ordering; a separate test or CI label must not silently alter that
 ordering. Later public PATCH/MINOR/MAJOR releases must advance the MSI numeric
 version too. CI builds may use a `5.1.0-ci.<run>` Burn version and a separate

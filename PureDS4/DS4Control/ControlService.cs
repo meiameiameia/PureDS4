@@ -1733,10 +1733,9 @@ namespace DS4Windows
         {
             try
             {
-                foreach (int delayMs in outputBindingRetryDelaysMs)
+                bool exhausted = await OutputBindingRetrySequence.RunAsync(
+                    outputBindingRetryDelaysMs, Task.Delay, () =>
                 {
-                    await Task.Delay(delayMs, retryToken.Token).
-                        ConfigureAwait(false);
                     lock (serviceLifecycleLock)
                     {
                         if (retryToken.IsCancellationRequested ||
@@ -1750,20 +1749,21 @@ namespace DS4Windows
                                 ControllerExposureMode.ManagedVirtual ||
                             !controllerExposureTransitions[index].Status.IsReady)
                         {
-                            return;
+                            return false;
                         }
 
                         if (!running || inServiceTask)
                         {
-                            continue;
+                            return true;
                         }
 
                         StartupDiag($"Retrying virtual output after transient binding failure index={index}");
                         PluginOutDev(index, device);
+                        return !retryToken.IsCancellationRequested;
                     }
-                }
+                }, retryToken.Token).ConfigureAwait(false);
 
-                if (!retryToken.IsCancellationRequested)
+                if (exhausted && !retryToken.IsCancellationRequested)
                 {
                     StartupDiag($"Virtual output recovery attempts exhausted index={index}");
                 }

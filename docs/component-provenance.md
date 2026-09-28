@@ -11,7 +11,7 @@ official asset or source revision. The normal validator allows a known blocked
 component to remain in internal builds; `--require-release-ready` fails closed
 while any blocker exists.
 
-## Verified release inputs
+## Pinned release inputs
 
 | Component | Source and binary evidence | License / notice |
 | --- | --- | --- |
@@ -27,9 +27,13 @@ for existing-candidate reproducibility but are no longer referenced by the
 project or included in new packages. Its own update channel was incompatible
 with PureDS4-owned replacement. The source-pinned fork removes that channel,
 the tray UI, inherited configuration loaders, and unrelated virtual devices.
-The release manifest remains blocked until package/upgrade checks and exact-
-artifact USB/Bluetooth gameplay and reconnection pass. These source changes
-have not replaced the backend on the owner's machine.
+The fork is installed on the owner's machine. Package replacement and normal
+exact-artifact USB/Bluetooth gameplay and reconnection passed with the
+`a48e467` candidate. The release manifest remains blocked because the
+transient VIIPER API-unresponsive recovery path has not been exercised on
+hardware; normal reconnection did not trigger that failure. The remaining
+clean-install and failure/recovery matrix is also not established by this
+one-machine pass.
 
 The exact asset URLs, all individual artifact hashes, and signer certificate
 thumbprints are kept in the machine-readable contract rather than duplicated

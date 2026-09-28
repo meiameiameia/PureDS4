@@ -9,6 +9,31 @@ and two built-in Windows tools cover sticks, triggers, gyro, touchpad, rumble,
 lightbar and the virtual pad. Only the controller speaker and the headset
 microphone need a trick, and both are described at the end.
 
+## Current internal candidate evidence
+
+On the owner's Windows machine, the installed `5.1.0` candidate from commit
+`a48e467c6cdaea7eb23475d7d8103fa85d9e4b6c` was identified by its
+installer SHA-256
+`AC7A39A3C311CB415C8716091766DC7FF1FFEC2596094C8A8B35B2994F97C99C`
+and installed-app SHA-256
+`B7A0369C5AB1BF4A4529FE4D0C970FC306BB56A243CE0542D724F6CEB838F0AB`.
+The running process path was `C:\Program Files\PureDS4\PureDS4.exe`.
+
+The owner reported successful virtual-pad input, gameplay, disconnect and
+reconnect without restarting PureDS4, managed/direct round trips, and app
+restart with the controller connected, separately over Bluetooth and USB.
+Bluetooth gameplay was observed in Stardew Valley; the USB game was not
+named. Application logs confirmed virtual-output association after each
+observed reconnection. This is one-machine acceptance of those specific
+flows, not a claim that every controller or Windows configuration works.
+
+No VIIPER API timeout or output-binding failure occurred during this pass.
+Therefore it confirms normal reconnection, but does not prove that the new
+bounded retry handles the original transient failure in vivo. Controlled
+backend loss, sleep/wake, two simultaneous DS4 controllers, and the broader
+installation/recovery matrix are not covered by this evidence. Do not force
+a backend outage on the owner's daily-driver PC merely to fill that gap.
+
 ## Before starting
 
 1. Confirm which build is running. This matters more than it sounds: an
