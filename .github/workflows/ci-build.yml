@@ -13,6 +13,12 @@ on:
   pull_request:
     branches: [ "**" ]
   workflow_dispatch:
+    inputs:
+      release_candidate:
+        description: 'Build a target-version validation candidate (does not publish a release)'
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -116,17 +122,17 @@ jobs:
 
       - name: Compute version
         id: ver
-        shell: bash
+        shell: pwsh
+        env:
+          RELEASE_CANDIDATE: ${{ github.event_name == 'workflow_dispatch' && inputs.release_candidate }}
         run: |
-          VERSION="$(date +%Y.%m.%d)-ci-${GITHUB_SHA::7}"
-          ASSEMBLY_VERSION="$(python -c "import xml.etree.ElementTree as ET; print(ET.parse('PureDS4/PureDS4.csproj').find('.//AssemblyVersion').text)")"
-          PRODUCT_VERSION="$(echo "$ASSEMBLY_VERSION" | awk -F. '{print $1"."$2"."$3}')"
-          BUNDLE_BASE="$PRODUCT_VERSION"
-          BUNDLE_VERSION="${BUNDLE_BASE}-ci.${GITHUB_RUN_NUMBER}"
-          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
-          echo "PRODUCT_VERSION=$PRODUCT_VERSION" >> "$GITHUB_ENV"
-          echo "BUNDLE_VERSION=$BUNDLE_VERSION" >> "$GITHUB_ENV"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          $identity = .\utils\get-build-identity.ps1 `
+            -ReleaseCandidate:($env:RELEASE_CANDIDATE -eq 'true')
+          "VERSION=$($identity.DisplayVersion)" | Add-Content -LiteralPath $env:GITHUB_ENV
+          "PRODUCT_VERSION=$($identity.ProductVersion)" | Add-Content -LiteralPath $env:GITHUB_ENV
+          "BUNDLE_VERSION=$($identity.BundleVersion)" | Add-Content -LiteralPath $env:GITHUB_ENV
+          "BUILD_KIND=$($identity.Kind)" | Add-Content -LiteralPath $env:GITHUB_ENV
+          "version=$($identity.DisplayVersion)" | Add-Content -LiteralPath $env:GITHUB_OUTPUT
 
       - name: Build ${{ matrix.platform }}
         run: dotnet publish .\PureDS4\PureDS4.csproj -c Release /p:platform=${{ matrix.platform }} -r win-${{ matrix.platform }} --self-contained true --no-restore -o .\bin\${{ matrix.platform }}\Release\output
@@ -235,6 +241,7 @@ jobs:
           $identity = [ordered]@{
             product = 'PureDS4'
             version = '${{ env.VERSION }}'
+            kind = $env:BUILD_KIND
             sourceCommit = (git rev-parse HEAD).Trim()
             runtimePacks = $runtimePacks
             installerSignatureStatus = (Get-AuthenticodeSignature -LiteralPath $installer).Status.ToString()

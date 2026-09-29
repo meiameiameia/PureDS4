@@ -67,6 +67,14 @@ that restore. Compare the hashes with the downloaded inner files; GitHub's
 artifact wrapper has its own identity. These records do not replace the
 downloaded-candidate security check or owner approval to publish.
 
+To prepare the exact target-version validation artifact, manually dispatch
+`CI Build` with `release_candidate` checked. `utils/get-build-identity.ps1`
+then keeps display, Burn, and MSI versions at the application's target
+(`5.1.0` for the first release), with no CI suffix. Normal push/PR and manual
+CI builds keep their CI labels. The candidate identity also records whether
+the artifact is a `release-candidate` or `ci` build. This option does not
+create a release/tag, remove release blockers, or authorize publication.
+
 The PowerShell infrastructure backend is the sole VIIPER/USB-IP mutation
 engine. Burn and the in-app repair surface only validate, stage, elevate, and
 report that same engine. HidHide is an optional non-vital package: its failure

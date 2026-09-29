@@ -90,6 +90,18 @@ build host.
 
 ## Release gates
 
+The hosted `windows-2022` runner is
+[Windows Server 2022](https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md).
+Its MSI lifecycle pass proves the application package's install/repair/uninstall
+behavior on that runner; it does not prove the complete driver bundle on a
+supported consumer OS. HidHide declares support for
+[Windows 10/11](https://docs.nefarius.at/projects/HidHide/FAQ/).
+The owner's in-place upgrade and hardware checks remain separate evidence.
+Clean full-bundle installation, real failure/recovery and reboot/resume on
+Windows 10/11 are still unobserved. Do not manufacture that evidence by
+deliberately damaging the daily-driver installation or by counting a model
+simulation as a driver installation.
+
 - One offline setup includes the app, pinned VIIPER/USB-IP components, and
   HidHide by default; interactive setup must not require separate downloads.
   Windows elevation or a driver-related restart may still be required.

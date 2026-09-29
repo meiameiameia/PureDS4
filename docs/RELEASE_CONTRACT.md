@@ -133,6 +133,13 @@ ordering. Later public PATCH/MINOR/MAJOR releases must advance the MSI numeric
 version too. CI builds may use a `5.1.0-ci.<run>` Burn version and a separate
 human-readable artifact label, but CI labels are never public releases.
 
+The manual `CI Build` input `release_candidate` selects the target-version
+packaging path. It retains `5.1.0` for the first release's display, Burn,
+and MSI identity, and records `kind: release-candidate` alongside the full
+source SHA and file hashes in `candidate-identity.json`. Ordinary runs retain
+CI labels. A manual candidate is for validation; it neither clears
+`releaseReady: false` nor creates or authorizes a public release/tag.
+
 No release tag has been created or authorized. The tag spelling and creation
 remain a separate owner-approved publication action.
 
