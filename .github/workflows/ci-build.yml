@@ -228,7 +228,7 @@ jobs:
               $runtimePacks += [ordered]@{ component = $component; name = $name; version = $version }
             }
           }
-          if (@($runtimePacks | Select-Object -ExpandProperty version -Unique).Count -ne 1) {
+          if (@($runtimePacks | ForEach-Object { $_.version } | Select-Object -Unique).Count -ne 1) {
             throw "Application and installer helpers contain different .NET runtime patches."
           }
           $zip = ".\bin\${{ matrix.platform }}\Release\PureDS4_${{ env.VERSION }}_${{ matrix.platform }}.zip"
