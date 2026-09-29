@@ -164,6 +164,12 @@ namespace PureDS4.Bootstrapper
                 infrastructureHealthy ? "Ready" : "Will install or repair");
             SetStatus(UsbipStatus,
                 infrastructureHealthy ? "Ready" : "Will verify before changing");
+            bool hidHideInstalled = packages.TryGetValue("HidHide", out var hidHideState)
+                && hidHideState == PackageState.Present;
+            SetStatus(HidHideStatus, hidHideInstalled ? "Installed" : "Not installed");
+            HidHideInstallOption.Visibility = hidHideInstalled
+                ? Visibility.Collapsed
+                : Visibility.Visible;
         }
 
         /// <summary>
@@ -178,7 +184,7 @@ namespace PureDS4.Bootstrapper
             target.Text = ready ? "✓ " + state : state;
             target.Foreground = (Brush)(ready
                 ? FindResource("SuccessBrush")
-                : FindResource("AccentBrush"));
+                : FindResource("PendingStatusBrush"));
         }
 
         internal void ShowPlanning()
@@ -355,6 +361,8 @@ namespace PureDS4.Bootstrapper
             Resources["BorderBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(light ? "#65727C" : "#71808C"));
             Resources["TextBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(light ? "#20272C" : "#F1F4F6"));
             Resources["MutedBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(light ? "#515E67" : "#B7C1C8"));
+            Resources["SuccessBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(light ? "#1F6B3A" : "#62C88B"));
+            Resources["PendingStatusBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(light ? "#2E647F" : "#8FB5D1"));
         }
     }
 }

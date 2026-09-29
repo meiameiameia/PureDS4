@@ -76,6 +76,12 @@ VIIPER's legacy Windows network installer is developer-only and fail-closed by
 default. It cannot silently create a second LocalAppData/HKCU owner beside this
 managed infrastructure transaction.
 
+Setup lists HidHide as `Installed` when Burn detects its installation and
+offers the recommended install checkbox only when it is absent. This detected
+package state does not prove that a particular controller is protected; the
+application checks protection when the controller connects. Existing HidHide
+installations and the package-planning policy remain unchanged.
+
 The transaction state machine, failure containment, pinned identities, reboot
 boundary, and release gates are documented in
 [`docs/INSTALLER_VALIDATION_STRATEGY.md`](../docs/INSTALLER_VALIDATION_STRATEGY.md).

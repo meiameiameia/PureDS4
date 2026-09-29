@@ -108,6 +108,7 @@
                 <Grid Margin="0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="PureDS4" FontWeight="SemiBold"/><TextBlock x:Name="Ds4Status" Grid.Column="1" Foreground="{StaticResource AccentBrush}"/></Grid>
                 <Grid Margin="0,7,0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Game output (VIIPER)" FontWeight="SemiBold"/><TextBlock x:Name="ViiperStatus" Grid.Column="1" Foreground="{StaticResource AccentBrush}"/></Grid>
                 <Grid Margin="0,7,0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Virtual USB driver (USB-IP)" FontWeight="SemiBold"/><TextBlock x:Name="UsbipStatus" Grid.Column="1" Foreground="{StaticResource AccentBrush}"/></Grid>
+                <Grid Margin="0,7,0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Controller protection (HidHide)" FontWeight="SemiBold"/><TextBlock x:Name="HidHideStatus" Grid.Column="1" Foreground="{StaticResource AccentBrush}"/></Grid>
               </StackPanel>
             </Border>
 
@@ -115,8 +116,10 @@
               <StackPanel>
                 <TextBlock Text="Options" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,7" />
                 <CheckBox x:Name="DesktopShortcutCheckBox" IsChecked="True" Content="Create a desktop shortcut" />
-                <CheckBox x:Name="HidHideCheckBox" IsChecked="True" Content="Install controller protection (HidHide, recommended)" />
-                <TextBlock Text="Included in this setup; prevents games from seeing both controllers. Existing healthy installations are left unchanged." TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="24,-2,0,0" />
+                <StackPanel x:Name="HidHideInstallOption">
+                  <CheckBox x:Name="HidHideCheckBox" IsChecked="True" Content="Install controller protection (HidHide, recommended)" />
+                  <TextBlock Text="Included in this setup; prevents games from seeing both controllers. PureDS4 checks controller protection when the controller connects." TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="24,-2,0,0" />
+                </StackPanel>
                 <StackPanel x:Name="Ds3Section" Visibility="Collapsed" Margin="0,12,0,0">
                   <TextBlock Text="DualShock 3 (experimental)" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5" />
                   <CheckBox x:Name="Ds3SupportCheckBox" IsChecked="False" Content="Enable DualShock 3 support" />

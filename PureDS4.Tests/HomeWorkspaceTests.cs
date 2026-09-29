@@ -120,6 +120,38 @@ public class HomeWorkspaceTests
     }
 
     [TestMethod]
+    public void HomeKeepsTheSelectedControllerNearItsRowOnWideWindows()
+    {
+        WpfTestHost.Run(() =>
+        {
+            LoadTheme(false);
+            var state = new HomeFixture(1);
+            Grid home = LoadHome();
+            var host = new Grid();
+            host.Children.Add(home);
+            var owner = new Window { DataContext = state, Content = host, WindowState = WindowState.Maximized };
+            Measure(host, new Size(1900, 800));
+
+            Assert.IsTrue(home.ActualWidth <= 1180, "Profile and actions should not stretch across the whole monitor.");
+            Assert.IsTrue(home.ActualHeight <= 360, "The detail panel should stay near the controller list.");
+            Rect homeBounds = home.TransformToAncestor(host).TransformBounds(new Rect(home.RenderSize));
+            Assert.AreEqual((host.ActualWidth - home.ActualWidth) / 2, homeBounds.Left, 2,
+                "The bounded Home workspace should be centered on a wide monitor.");
+            Assert.IsTrue(homeBounds.Top <= 16,
+                "The maximized Home workspace should start beneath the navigation, not halfway down the screen.");
+            var list = (ListView)home.FindName("controllerLV");
+            var row = Descendants<ListViewItem>(list).Single();
+            var inspector = (Border)home.FindName("homeInspector");
+            Rect rowBounds = row.TransformToAncestor(home).TransformBounds(new Rect(row.RenderSize));
+            Rect inspectorBounds = inspector.TransformToAncestor(home).TransformBounds(new Rect(inspector.RenderSize));
+            Assert.IsTrue(inspectorBounds.Top - rowBounds.Bottom < 180,
+                "The selected controller details should not be stranded at the bottom of a maximized window.");
+            SavePreviewIfRequested(home, false, "pureds4-home-wide-wpf.png");
+            owner.Content = null;
+        });
+    }
+
+    [TestMethod]
     public void ActionGroupsWrapAsUnitsAndReturnToOneLineWhenSpaceReturns()
     {
         WpfTestHost.Run(() =>

@@ -45,9 +45,10 @@ The two game outputs PureDS4 offers are **Xbox 360** and **DualShock 4**.
 
 ## Validation status
 
-An internal installed `5.1.0` candidate from commit `a48e467` has passed an
+An internal installed `5.1.0` candidate from commit `49ba5d2` has passed an
 owner-observed, one-machine DualShock 4 USB and Bluetooth pass: virtual output,
-gameplay, disconnect/reconnect, app restart, and managed/direct round trips.
+gameplay, disconnect/reconnect, and app restart. Managed/direct round trips
+passed on the preceding candidate and were not repeated on this build.
 The exact artifact and limits of that evidence are recorded in
 [`docs/HARDWARE_VALIDATION.md`](docs/HARDWARE_VALIDATION.md). This is not a
 public-release or broad hardware-compatibility claim.
@@ -57,7 +58,7 @@ public-release or broad hardware-compatibility claim.
   state, genuine hardware, installation, runtime, gameplay and uninstall all
   have to be exercised on the target machine before any release mentions it as
   working. That gate does not block the first release.
-- The beta-to-`5.1.0` upgrade and a later same-version replacement passed on
+- The beta-to-`5.1.0` upgrade and later same-version replacements passed on
   the owner's machine. Clean installation, failure/recovery, reboot, uninstall,
   and the exact downloaded unsigned-candidate check remain separate gates.
 - `installer/release-inputs.json` still calculates `releaseReady: false`:

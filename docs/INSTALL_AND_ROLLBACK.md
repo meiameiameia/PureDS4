@@ -2,24 +2,49 @@
 
 ## Upgrading an existing PureDS4 installation
 
-The first public-version target is `5.1.0`. The owner's installed test build
-is now the `5.1.0` candidate from commit `a48e467`, not `5.1.0-beta.2`.
+The first public-version target is `5.1.0`. The last full USB/Bluetooth gameplay
+baseline was the `5.1.0` candidate from commit `49ba5d2`, not `5.1.0-beta.2`.
 The beta-to-stable upgrade first passed with candidate `9c17446`; the later
-`a48e467` installer replaced that same-version installation successfully.
-Both are **in-place PureDS4 upgrades**, not the DS4Windows-to-PureDS4
+`a48e467` and `49ba5d2` installers each replaced a same-version installation
+successfully.
+These are **in-place PureDS4 upgrades**, not the DS4Windows-to-PureDS4
 replacement described below. The bundle and MSI share PureDS4's upgrade
 codes, and the beta MSI already used numeric version `5.1.0`. These observed
 passes are limited to one Windows machine and do not prove the remaining
 clean-install or failure/recovery matrix.
 
-The `a48e467` installer SHA-256 is
-`AC7A39A3C311CB415C8716091766DC7FF1FFEC2596094C8A8B35B2994F97C99C`.
-Before its installation, all 15 files under the owner's PureDS4 roaming-data
-directory were copied to a separate backup. The installed executable matched
-the candidate's SHA-256, all 15 data files remained hash-identical, the old
-installer registrations were removed, and the canonical tasks and backend
-readiness were verified. The previous installer was retained for recovery;
-no rollback was performed.
+The `49ba5d2` installer SHA-256 is
+`BB64543954ED38F1EEDC36C3A744C16B6053B5FC629D0EDCF6636482C37A7D49`.
+The installed executable matched the candidate's SHA-256, and the owner's
+current `Default.xml` profile remained hash-identical to its existing backup.
+That backup was created before the `a48e467` installation; no new full-data
+backup was made for `49ba5d2` because the owner only required protection of
+the current Default profile. The old installer registrations were removed,
+and the canonical tasks and backend readiness were verified. The previous
+installer was retained for recovery; no rollback was performed.
+
+On 2026-09-29, a later internal UI/startup candidate replaced that installation
+with installer SHA-256
+`EC23692C0FFB69FE374588ACA9F9DAEABA75191673760F5580E88D53C6885288`
+and installed-app SHA-256
+`C478BE946670C2E4E7A3F9D83FE4215B9A9FB572564DE1B0B8C3A058F11C6061`.
+It was built from the same full source baseline plus uncommitted UI changes;
+it is not a new committed release milestone. Setup completed successfully,
+the canonical task actions remained under Program Files, and the current
+Default profile still matched its existing backup. Burn detected HidHide
+1.5.230 and planned no HidHide installation or repair. The owner accepted a
+focused Bluetooth startup/reopen and maximized Home check; see
+[hardware validation](HARDWARE_VALIDATION.md) for the evidence limits.
+
+The subsequent installer-only HidHide presentation update also completed on
+2026-09-29. Its installer SHA-256 was
+`62B6009E86822C62A5F07A38E6DF3E512A674473A3020EB06A5AC5D1D6312235`.
+The application executable and Default profile were unchanged, both canonical
+task actions remained correct, and the infrastructure/API check completed
+successfully. Burn again planned no HidHide installation or repair. The
+update's UI lists an existing HidHide installation rather than showing its
+install checkbox. This is a same-version replacement on the owner's PC,
+not evidence for clean-install or failure/recovery behavior.
 
 Use the **exact, source-identified installer intended for distribution**, not
 an earlier disposable build. Before running it, record its SHA-256 and the

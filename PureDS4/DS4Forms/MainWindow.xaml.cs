@@ -96,6 +96,7 @@ namespace DS4WinWPF.DS4Forms
         private DispatcherTimer overviewProfileSaveTimer;
         private DispatcherTimer overviewStatusRefreshTimer;
         private bool contextclose;
+        private bool startupStatusCheckComplete;
         private bool startMinimized;
         private string exposureRecoveryInstanceId = string.Empty;
 
@@ -254,6 +255,7 @@ namespace DS4WinWPF.DS4Forms
                         ViiperSetupManager.EnsureReadyWithPrompt(this));
                     if (!repaired)
                     {
+                        QueueGameOutputStatusAfterStartup();
                         ControlService.StartupDiag(
                             "MainWindow.CheckDrivers blocked service startup");
                         return;
@@ -267,9 +269,22 @@ namespace DS4WinWPF.DS4Forms
                     }));
                     Thread.Sleep(1000);
                     ControlService.StartupDiag("rootHub.Start begin from LateChecks");
-                    App.rootHub.Start();
-                    ControlService.StartupDiag("rootHub.Start end from LateChecks");
+                    try
+                    {
+                        App.rootHub.Start();
+                        ControlService.StartupDiag("rootHub.Start end from LateChecks");
+                    }
+                    finally
+                    {
+                        // The service-started event covers success. Also complete
+                        // the status check if startup exits early or throws.
+                        QueueGameOutputStatusAfterStartup();
+                    }
                     //root.rootHubtest.Start();
+                }
+                else
+                {
+                    QueueGameOutputStatusAfterStartup();
                 }
                 ControlService.StartupDiag("MainWindow.LateChecks task end");
             });
@@ -468,6 +483,8 @@ Suspend support not enabled.", true);
 
         private void ControlServiceStarted(object sender, EventArgs e)
         {
+            QueueGameOutputStatusAfterStartup();
+
             if (Global.SwipeProfiles)
             {
                 ChangeHotkeysStatus(true);
@@ -2721,12 +2738,28 @@ Suspend support not enabled.", true);
 
             gameOutputStatusBanner.Title = "Game output is unavailable";
             gameOutputStatusBanner.Message = status.UserFacingDisplayText;
-            gameOutputStatusBanner.IsOpen = !status.Ready;
+            gameOutputStatusBanner.IsOpen = ShouldShowGameOutputWarning(
+                startupStatusCheckComplete, status.Ready);
             viiperStatusText.Text = $"{status.DisplayText}. " +
                 $"VIIPER helper: {(status.ViiperInstalled ? "installed" : "missing")}; " +
                 $"usbip-win2: {(status.UsbipInstalled ? "installed" : "missing")}; " +
                 $"server: {(status.ServerRunning ? "running" : "not running")}.";
         }
+
+        private void QueueGameOutputStatusAfterStartup()
+        {
+            if (Dispatcher.HasShutdownStarted) return;
+
+            Dispatcher.BeginInvoke((Action)(() =>
+            {
+                if (!IsLoaded) return;
+                startupStatusCheckComplete = true;
+                RefreshViiperStatusText();
+            }));
+        }
+
+        internal static bool ShouldShowGameOutputWarning(bool startupCheckComplete,
+            bool gameOutputReady) => startupCheckComplete && !gameOutputReady;
 
         private void CheckUpdatesBtn_Click(object sender, RoutedEventArgs e)
         {

@@ -212,6 +212,65 @@ public class ProfileWorkspacePresentationTests
             "All readings must remain inside the vertical viewport instead of being clipped below it.");
     }
 
+    [TestMethod]
+    public void ControllerReadingsKeepChartsAndValuesSeparatedAcrossWidths()
+    {
+        WpfTestHost.Run(() =>
+        {
+            foreach (bool dark in new[] { false, true })
+            foreach (double width in new[] { 480d, 640d, 1600d })
+            {
+                Theme(dark);
+                UserControl view = PresentationHarness.LoadControl("ControllerReadingsControl");
+                var owner = new Window { Content = view };
+                Layout(view, new Size(width, width == 1600 ? 600 : 240));
+
+                var left = (Canvas)view.FindName("lsCanvas");
+                var right = (Canvas)view.FindName("rsCanvas");
+                var motion = (Canvas)view.FindName("sixaxisCanvas");
+                Rect Bounds(FrameworkElement element) =>
+                    element.TransformToAncestor(view).TransformBounds(new Rect(element.RenderSize));
+
+                Assert.IsTrue(Bounds(left).Right + 8 <= Bounds(right).Left,
+                    $"Left and right charts overlap at {width} DIP: {Bounds(left)}, {Bounds(right)}.");
+                Assert.IsTrue(Bounds(right).Right + 8 <= Bounds(motion).Left,
+                    $"Right and motion charts overlap at {width} DIP: {Bounds(right)}, {Bounds(motion)}.");
+                Assert.AreEqual(Bounds(left).Top, Bounds(right).Top, 1);
+                Assert.AreEqual(Bounds(right).Top, Bounds(motion).Top, 1);
+
+                foreach (var pair in new[]
+                {
+                    ("lxOutValLb", "rxInValLb"), ("lyOutValLb", "ryInValLb"),
+                    ("rxOutValLb", "sixAxisXInValLb"), ("ryOutValLb", "sixAxisZInValLb")
+                })
+                    Assert.IsTrue(Bounds((FrameworkElement)view.FindName(pair.Item1)).Right + 2 <=
+                        Bounds((FrameworkElement)view.FindName(pair.Item2)).Left,
+                        $"{pair.Item1} and {pair.Item2} overlap at {width} DIP.");
+
+                var chartGrid = PresentationHarness.Descendants<Grid>(view)
+                    .Single(grid => grid.MaxWidth == 660);
+                var sensorGrid = PresentationHarness.Descendants<Grid>(view)
+                    .Single(grid => grid.MaxWidth == 700);
+                Assert.IsTrue(chartGrid.ActualWidth <= 660);
+                Assert.IsTrue(sensorGrid.ActualWidth <= 700);
+                if (width == 1600)
+                {
+                    double viewportWidth = ((ScrollViewer)view.FindName("readingsScroll")).ViewportWidth;
+                    Assert.AreEqual((viewportWidth - chartGrid.ActualWidth) / 2, Bounds(chartGrid).Left, 2,
+                        "The bounded charts should remain centered on wide windows.");
+                    Assert.AreEqual((viewportWidth - sensorGrid.ActualWidth) / 2, Bounds(sensorGrid).Left, 2,
+                        "The lower readings should remain centered on wide windows.");
+                }
+                if (width == 480)
+                    Assert.IsTrue(((ScrollViewer)view.FindName("readingsScroll")).ScrollableHeight > 0,
+                        "Small windows must scroll to the lower readings.");
+                if (width == 480 || width == 1600)
+                    PresentationHarness.Preview(view, $"readings-{width}", dark);
+                owner.Content = null;
+            }
+        });
+    }
+
     // Two shell-level regressions this gate fixed, both invisible to a
     // screenshot of a single section:
     //  * every page sized itself to its own content and floated in the middle

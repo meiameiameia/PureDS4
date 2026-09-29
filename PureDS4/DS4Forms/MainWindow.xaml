@@ -74,10 +74,21 @@
             </TabItem>
 
             <TabItem x:Name="controllersTab" Header="Home" Tag="&#xE7FC;" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
-                <Grid x:Name="homeWorkspace" Margin="16,8"
+                <Grid x:Name="homeWorkspace" Margin="16,8" MaxWidth="1180" MaxHeight="360"
                       TextElement.FontFamily="{StaticResource TypeUiFontFamily}"
                       TextElement.FontSize="{StaticResource TypeBodySize}"
                       TextElement.Foreground="{DynamicResource TextPrimaryBrush}">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}"
+                                             Value="Maximized">
+                                    <Setter Property="Height" Value="360" />
+                                    <Setter Property="VerticalAlignment" Value="Top" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
                     <Grid.Resources>
                         <Style x:Key="HomeRowStyle" TargetType="ListViewItem"
                                BasedOn="{StaticResource FoundationControllerRowStyle}">

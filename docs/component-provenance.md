@@ -29,7 +29,7 @@ with PureDS4-owned replacement. The source-pinned fork removes that channel,
 the tray UI, inherited configuration loaders, and unrelated virtual devices.
 The fork is installed on the owner's machine. Package replacement and normal
 exact-artifact USB/Bluetooth gameplay and reconnection passed with the
-`a48e467` candidate. The release manifest remains blocked because the
+`49ba5d2` candidate. The release manifest remains blocked because the
 transient VIIPER API-unresponsive recovery path has not been exercised on
 hardware; normal reconnection did not trigger that failure. The remaining
 clean-install and failure/recovery matrix is also not established by this
@@ -88,6 +88,15 @@ third-party notices into every portable or MSI payload. These notices cover
 the self-contained single-file executable, whose embedded assemblies are not
 visible as separate files in the install directory. A new runtime dependency
 or changed package license fails publication until the notice is reviewed.
+
+For the `49ba5d2` candidate, the restore assets select .NET and Windows
+Desktop runtime packs `8.0.31`. On 2026-09-28,
+`dotnet list PureDS4.sln package --vulnerable --include-transitive` reported
+no vulnerable packages from NuGet's current advisory source. Microsoft listed
+`8.0.31` as the current .NET 8 security patch on its
+[download page](https://dotnet.microsoft.com/en-us/download/dotnet/8.0).
+These are dated checks, not a guarantee against later advisories; repeat them
+for the final publication decision.
 
 Microsoft's Windows-specific .NET license breakdown and Windows SDK terms are
 linked from the shipped notice. The Windows SDK projection's redistribution

@@ -10,6 +10,17 @@ namespace DS4WindowsTests
     public class StatusVisualStateConverterTests
     {
         [TestMethod]
+        public void GameOutputWarningWaitsForStartupAndClearsWhenReady()
+        {
+            Assert.IsFalse(MainWindow.ShouldShowGameOutputWarning(false, false),
+                "A backend still starting is not yet an actionable setup failure.");
+            Assert.IsTrue(MainWindow.ShouldShowGameOutputWarning(true, false),
+                "A failed probe after startup must remain visible.");
+            Assert.IsFalse(MainWindow.ShouldShowGameOutputWarning(true, true),
+                "A recovered backend must clear the stale warning.");
+        }
+
+        [TestMethod]
         public void ControllerStagesPreserveReadyAttentionAndProgressMeaning()
         {
             var converter = new ControllerStartupStageVisualStateConverter();
