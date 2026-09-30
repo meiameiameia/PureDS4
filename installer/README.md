@@ -90,6 +90,32 @@ package state does not prove that a particular controller is protected; the
 application checks protection when the controller connects. Existing HidHide
 installations and the package-planning policy remain unchanged.
 
+## Offline terms and acceptance
+
+Standard setup includes the full .NET Library and Windows SDK agreements,
+plus PureDS4's GPL, in its executable. They can be read without a browser,
+Office, or a network connection. The Microsoft checkbox starts unchecked;
+install/update/repair cannot plan any changes until it is accepted. The GPL
+is presented separately, not as a PureDS4 EULA or an additional restriction
+on GPL-covered code. Uninstall and `/layout /quiet` do not require agreement.
+
+An unattended install/repair requires the exact reviewed terms argument
+`--accept-microsoft-terms=microsoft-20260929` in addition to its normal action
+and display arguments. Pass it only after reading and accepting the shipped
+texts. Missing, stale, duplicate or conflicting acceptance is rejected before
+planning. A reboot resume retains the current transaction's accepted terms
+identifier; a new setup invocation does not inherit an earlier run's consent.
+The internal infrastructure recovery pass uses the same consent gate.
+
+The portable ZIP contains `PORTABLE-TERMS.txt`, `COPYING`, and both full
+Microsoft agreements under `ThirdParty/`. Its read-before-use notice points
+to the Microsoft agreements' acceptance-by-use provisions; it does **not**
+record explicit checkbox consent or introduce a new first-run controller
+startup gate. The MSI is an internal bundle payload, not a separately offered
+public distribution. Builds fail if vendor terms differ from reviewed hashes
+or the installed .NET build license differs from the text presented by setup.
+No driver/runtime binary was modified by this terms change.
+
 The transaction state machine, failure containment, pinned identities, reboot
 boundary, and release gates are documented in
 [`docs/INSTALLER_VALIDATION_STRATEGY.md`](../docs/INSTALLER_VALIDATION_STRATEGY.md).

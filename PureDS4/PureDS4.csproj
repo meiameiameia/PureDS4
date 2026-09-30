@@ -187,6 +187,10 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 		</Content>
+		<None Update="PORTABLE-TERMS.txt;ThirdParty\DotNet-LICENSE.txt;ThirdParty\WindowsSdk-LICENSE.rtf;ThirdParty\WindowsSdk-LICENSE.txt">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</None>
 		<Content Include="..\extras\install-viiper-backend.ps1">
 			<Link>extras\install-viiper-backend.ps1</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

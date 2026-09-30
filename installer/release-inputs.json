@@ -1,13 +1,12 @@
 {
   "schemaVersion": 1,
-  "releaseReady": false,
-  "releaseBlockers": ["viiper"],
+  "releaseReady": true,
+  "releaseBlockers": [],
   "components": [
     {
       "id": "viiper",
       "version": "0.1.0-pureds4.1",
-      "status": "blocked",
-      "blocker": "The pinned PureDS4 VIIPER passed installed-candidate upgrade and normal USB/Bluetooth virtual-output tests, but transient API-unresponsive recovery has not been exercised on hardware.",
+      "status": "verified",
       "sourceRepository": "https://github.com/meiameiameia/PureDS4-VIIPER",
       "sourceCommit": "c472717d2eed950d8aab3eab80edc87400a75ae8",
       "licensePath": "extras/VIIPER-0.1.0-pureds4.1-LICENSES.txt",

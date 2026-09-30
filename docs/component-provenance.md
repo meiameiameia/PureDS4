@@ -29,11 +29,16 @@ with PureDS4-owned replacement. The source-pinned fork removes that channel,
 the tray UI, inherited configuration loaders, and unrelated virtual devices.
 The fork is installed on the owner's machine. Package replacement and normal
 exact-artifact USB/Bluetooth gameplay and reconnection passed with the
-`49ba5d2` candidate. The release manifest remains blocked because the
-transient VIIPER API-unresponsive recovery path has not been exercised on
-hardware; normal reconnection did not trigger that failure. The remaining
-clean-install and failure/recovery matrix is also not established by this
-one-machine pass.
+`49ba5d2` candidate. Its source, binary hash and packaged notices are verified.
+On 2026-09-29 the owner approved deterministic backend-failure acceptance,
+documented with its passing tests and limitations in
+[hardware validation](HARDWARE_VALIDATION.md#backend-failure-acceptance-criterion).
+Physical reproduction of the intermittent failure remains unobserved, not a
+claimed pass or a component-input blocker. The manifest therefore calculates
+`releaseReady: true` for its five component inputs. This does not establish
+overall product readiness, legal clearance for the separate Windows SDK
+projection, the remaining clean-install/failure/recovery matrix, final artifact
+acceptance, or permission to publish.
 
 The exact asset URLs, all individual artifact hashes, and signer certificate
 thumbprints are kept in the machine-readable contract rather than duplicated
@@ -98,10 +103,114 @@ no vulnerable packages from NuGet's current advisory source. Microsoft listed
 These are dated checks, not a guarantee against later advisories; repeat them
 for the final publication decision.
 
-Microsoft's Windows-specific .NET license breakdown and Windows SDK terms are
-linked from the shipped notice. The Windows SDK projection's redistribution
-scope still needs a deliberate release-level legal review; a package build
-passing does not establish legal clearance.
+### Windows SDK distribution review — 2026-09-29
+
+The actual Release win-x64 dependency graph contains
+`runtimepack.Microsoft.Windows.SDK.NET.Ref/10.0.19041.56`, supplying
+`Microsoft.Windows.SDK.NET.dll` and `WinRT.Runtime.dll`. It also contains WPF's
+`D3DCompiler_47_cor3.dll`; these are embedded in the self-contained executable,
+not merely build-time references. `GameBarIntegration.cs` uses Windows WinRT APIs.
+
+Microsoft's [redistribution list](https://learn.microsoft.com/en-us/legal/windows-sdk/redist#microsoftwindowssdknetref)
+explicitly includes both targeting-pack assemblies for unmodified distribution
+with applications calling WinRT APIs. Its classic-Windows list also includes
+the D3D compiler. The [.NET Windows license breakdown](https://github.com/dotnet/core/blob/main/license-information-windows.md)
+identifies the WPF compiler's SDK terms. This resolves the file-list uncertainty;
+it does not mean all Microsoft components are MIT-licensed.
+
+The [package's license link](https://aka.ms/WinSDKLicenseURL) resolves to
+Microsoft's SDK agreement, which conditions distribution on preserving notices,
+keeping the code unmodified, adding application functionality and obtaining
+protective terms from distributors and end users. The shipped .NET Library
+agreement also requires protective terms. Keeping URLs/notices alone does not
+prove that requirement is met. The bootstrapper now presents both complete
+agreements offline, separately from the GPL. Install/update/repair require an
+unchecked-by-default Microsoft-only checkbox or the exact unattended terms
+argument. Its planning gate also protects internal recovery and reboot resume;
+uninstall/layout are exempt. The portable package includes a read-before-use
+notice and the full agreements, relying on their acceptance-by-use language,
+not a claimed recorded click. No new startup gate or GPL restriction is added.
+
+PureDS4 remains GPL-3.0-or-later. Microsoft's binaries retain their separate
+terms, not a PureDS4 relicensing grant. The [GPLv3 system-library explanation](https://www.gnu.org/licenses/quick-guide-gplv3.html)
+is relevant to bundled runtime libraries; applying it to this exact combination
+is a licensing assessment, not something a test or owner approval proves.
+No copyright-holder exception, license change or unconditional legal clearance
+is inferred here.
+
+The unmodified SDK agreement was downloaded from Microsoft's official
+`https://download.microsoft.com/download/0/F/F/0FF2B061-47DD-4F55-89B6-FD1D8C44F14D/sdk_license.rtf`
+on 2026-09-29 into `PureDS4/ThirdParty/WindowsSdk-LICENSE.rtf` (SHA-256
+`DD07EB178E00C6BBA4148457FC00FF77CD4887EB521D504186FE59C9EC8BBE62`).
+The .NET Library text was copied unmodified from the pinned build installation's
+`C:\Program Files\dotnet\LICENSE.txt` into `PureDS4/ThirdParty/DotNet-LICENSE.txt`
+(SHA-256 `7F6839A61CE892B79C6549E2DC5A81FDBD240A0B260F8881216B45B7FDA8B45D`).
+Setup's `microsoft-20260929` identifier refers to those exact texts, not the
+PureDS4 release version. Both setup resources and packaged documents are
+hash-checked. A terms update requires reviewing the new texts and changing
+the consent identifier. These are presentation/integrity safeguards, not a
+legal opinion about GPL compatibility or proof of an end user's understanding.
+
+`WindowsSdk-LICENSE.txt` is the complete plain-text extraction of that RTF
+using WPF `TextRange` (SHA-256
+`5D27A78A64D3CB74DDB7556B625E119B05D12ABEFF5909A9EE8B171A0BE7DC75`).
+It lets portable users read the SDK terms offline in Notepad without Office;
+the original RTF remains authoritative for formatting and is also shipped.
+Git must preserve all pinned vendor documents without line-ending conversion.
+
+`utils/validate-managed-notices.py` now checks the targeting-pack version,
+runtime assembly inventory, package license URL and shipped notice against the
+actual dependency graph. Its fixture tests reject missing/replaced packs,
+unexpected assemblies and changed/missing terms references. Those checks and
+the real Release graph passed locally. The notice now uses the working
+Microsoft license/redistribution links. No Microsoft runtime bytes were changed.
+
+## Distribution footprint — 2026-09-29
+
+Logical file sizes, in decimal MB (1 MB = 1,000,000 bytes); not allocated disk
+space or memory use. ZIP entry lengths measure the exact unpacked package
+without launching any software. The local legacy directory was enumerated
+read-only, without reading personal profiles or logs.
+
+| Distribution | ZIP download | Unpacked portable files |
+| --- | ---: | ---: |
+| Locally composed PureDS4 5.1.0 candidate | 119.210 MB | 247.359 MB |
+| [hbashton VIIPERRC4.6.6 / application 5.0.12.0](https://github.com/hbashton/DS4Windows/releases/tag/VIIPERRC4.6.6) | 134.621 MB | 279.389 MB |
+| Owner's schmaldeo 3.9.9 portable directory | Not measured; existing directory | 11.750 MB total; 11.718 MB excluding personal settings/profiles/logs |
+
+The PureDS4 ZIP was composed from the dirty candidate based on
+`f9d3b5e9aed55ff4cbfe34c09d87e6d5a882247e`, not a committed or published
+release. It is `artifacts/disposable/terms-final-20260929/x64/Release/PureDS4_5.1.0_x64.zip`,
+SHA-256 `6781F7EA899AB87748F1AE2046D65A52CBB9D1765DA5393C6B778DC3F766D398`.
+It contains 29 files including the runtime, pinned backend/driver installers,
+and licenses. Its unpacked size is 11.46% smaller than the hbashton ZIP.
+The matching local standard setup is 191,372,404 bytes (191.372 MB), SHA-256
+`50B038623602EAF73D3AC323D2A0E079C16E6E7A299EC375F15E7C94DF2F5CF6`,
+at `artifacts/disposable/terms-final-20260929/installer/PureDS4_5.1.0_Setup_x64.exe`.
+The hbashton release lists its setup at 201,242,471 bytes (201.242 MB); that
+setup was not downloaded or executed for this comparison.
+
+The hbashton ZIP was downloaded from that release and matched its published
+checksum `B97DAA4C605C778AFAA64FCC8283E2218597A1B8BCF6B55CD2443302346BA4AF`.
+Its 555 files total 279,389,324 bytes. It includes VIIPER twice (root and
+`extras`, 9,445,376 bytes each). PureDS4 includes one pinned VIIPER executable
+(5,919,232 bytes, 37.33% smaller than one upstream copy); this does not establish
+performance, latency or memory improvements.
+
+The legacy directory `E:\70_Programs\DS4Windows` contains 71 files totaling
+11,750,260 bytes, of which 32,540 bytes are personal settings/profiles/logs.
+`DS4Windows.dll` identifies itself as
+`3.9.9+722c561c3d7aa65dcf063e716c04ca69e4ca33bd`. Its runtime configuration
+requires external Microsoft.NETCore.App and Microsoft.WindowsDesktop.App 8.0;
+its ViGEm driver is also external. Those installed dependencies are not part
+of the 11.750 MB directory. PureDS4 and hbashton's package include the runtime
+and offline driver installers, so their much larger totals are not a like-for-like
+application-only regression. Future release changes require a fresh measurement.
+
+The owner accepted this footprint for 5.1.0 on 2026-09-29: retain the offline,
+self-contained distribution without additional size optimization for this
+release. This size acceptance does not waive installation/security validation
+or authorize a public binary release.
 
 ## Repository cleanup and external components
 

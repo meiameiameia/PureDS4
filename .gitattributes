@@ -3,6 +3,12 @@
 ###############################################################################
 * text=auto
 
+# Vendor license bytes are pinned and embedded in setup. Preserve their original
+# line endings and whitespace; integrity is checked by the license hash gate.
+PureDS4/ThirdParty/DotNet-LICENSE.txt -text -whitespace
+PureDS4/ThirdParty/WindowsSdk-LICENSE.rtf -text -whitespace
+PureDS4/ThirdParty/WindowsSdk-LICENSE.txt -text -whitespace
+
 ###############################################################################
 # Set default behavior for command prompt diff.
 #

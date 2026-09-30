@@ -1,8 +1,10 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Media;
 using WixToolset.BootstrapperApplicationApi;
 
@@ -133,6 +135,8 @@ namespace PureDS4.Bootstrapper
             OptionsCard.Visibility = Visibility.Visible;
             applying = false;
             ConfigureExperimentalDS3Section();
+            TermsCard.Visibility = mode == InstallerMode.Uninstall ? Visibility.Collapsed : Visibility.Visible;
+            UpdateTermsAction();
 
             switch (mode)
             {
@@ -291,10 +295,65 @@ namespace PureDS4.Bootstrapper
 
         private void Action_Click(object sender, RoutedEventArgs e)
         {
+            if (mode != InstallerMode.Uninstall && MicrosoftTermsCheckBox.IsChecked != true) return;
             var action = mode == InstallerMode.Uninstall ? LaunchAction.Uninstall :
                          mode == InstallerMode.Repair ? LaunchAction.Repair : LaunchAction.Install;
             application.Begin(action, DesktopShortcutCheckBox.IsChecked == true,
-                HidHideCheckBox.IsChecked == true);
+                HidHideCheckBox.IsChecked == true, MicrosoftTermsCheckBox.IsChecked == true);
+        }
+
+        private void MicrosoftTerms_Changed(object sender, RoutedEventArgs e) => UpdateTermsAction();
+
+        private void UpdateTermsAction()
+        {
+            // Checked events can run before InitializeComponent finishes.
+            if (ActionButton != null)
+                ActionButton.IsEnabled = mode == InstallerMode.Uninstall || MicrosoftTermsCheckBox.IsChecked == true;
+            if (TermsHint != null)
+                TermsHint.Visibility = mode == InstallerMode.Uninstall || MicrosoftTermsCheckBox.IsChecked == true
+                    ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        internal static FlowDocument LoadTermsDocument(string name)
+        {
+            using var source = InstallerTerms.OpenDocument(name);
+            var document = new FlowDocument { FontFamily = new FontFamily("Segoe UI"), FontSize = 14 };
+            if (name.EndsWith(".rtf", StringComparison.OrdinalIgnoreCase))
+                new TextRange(document.ContentStart, document.ContentEnd).Load(source, DataFormats.Rtf);
+            else
+            {
+                using var reader = new StreamReader(source);
+                document.Blocks.Add(new Paragraph(new Run(reader.ReadToEnd())));
+            }
+            return document;
+        }
+
+        private void ReadTerms_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                InstallerTerms.VerifyDocuments();
+                var button = (Button)sender;
+                var viewer = new FlowDocumentScrollViewer
+                {
+                    Document = LoadTermsDocument((string)button.Tag),
+                    IsToolBarVisible = true, Margin = new Thickness(16),
+                    Background = Brushes.White, Foreground = Brushes.Black
+                };
+                // Read-only and offline: do not shell-open a vendor RTF or require Office/browser.
+                new Window
+                {
+                    Owner = this, Title = (string)button.Content, Content = viewer,
+                    Width = 720, Height = 580, MinWidth = 480, MinHeight = 360,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner
+                }.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MicrosoftTermsCheckBox.IsChecked = false;
+                TermsError.Text = "Could not read the offline license document: " + ex.Message;
+                TermsError.Visibility = Visibility.Visible;
+            }
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e) => application.Close(1223);

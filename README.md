@@ -61,10 +61,13 @@ public-release or broad hardware-compatibility claim.
 - The beta-to-`5.1.0` upgrade and later same-version replacements passed on
   the owner's machine. Clean installation, failure/recovery, reboot, uninstall,
   and the exact downloaded unsigned-candidate check remain separate gates.
-- `installer/release-inputs.json` still calculates `releaseReady: false`:
-  pinned component identities pass, but VIIPER recovery under a transient
-  backend failure remains unproven. That field is a component-input gate,
-  not authorization to publish even when it eventually becomes true.
+- `installer/release-inputs.json` calculates `releaseReady: true` for its
+  pinned component inputs, not for the complete product. The owner-approved
+  [backend-failure criterion](docs/HARDWARE_VALIDATION.md#backend-failure-acceptance-criterion)
+  uses deterministic software checks; physical interruption remains unobserved.
+  Overall release gates remain open. The [component review](docs/component-provenance.md)
+  records the separately presented offline Microsoft terms and the limits of
+  that licensing assessment. This field never authorizes publication.
 
 [`docs/HARDWARE_VALIDATION.md`](docs/HARDWARE_VALIDATION.md) describes the
 manual pass that a hardware claim requires.
@@ -104,4 +107,10 @@ point. The `main` branch is the derivative working line at
 <https://github.com/meiameiameia/pureds4>; `AGENTS.md` contains the
 canonical project guidance.
 
-The project is licensed under GPLv3. See [`COPYING`](COPYING).
+The project is licensed under GPL-3.0-or-later. See [`COPYING`](COPYING).
+Included Microsoft runtime/Windows SDK components retain their separate
+terms. Standard setup presents the complete terms offline and requires a
+Microsoft-only acceptance before install/update/repair. Portable users must
+read `PORTABLE-TERMS.txt` and the full agreements under `ThirdParty/` before
+using those components. These terms do not add restrictions to PureDS4's
+GPL-covered code. See [component provenance](docs/component-provenance.md).

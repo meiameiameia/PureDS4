@@ -139,13 +139,29 @@
               </StackPanel>
             </Border>
 
+            <Border x:Name="TermsCard" Style="{StaticResource Card}">
+              <StackPanel>
+                <TextBlock Text="Licenses" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,7" />
+                <TextBlock Text="PureDS4 is free software under GPL-3.0-or-later. Microsoft components keep their separate terms; accepting those terms does not restrict your GPL rights to PureDS4." TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" FontSize="12" />
+                <WrapPanel Margin="0,10,0,6">
+                  <Button Content=".NET Library terms" Tag="DotNet-LICENSE.txt" Style="{StaticResource SecondaryButton}" Padding="10,6" Margin="0,0,8,6" Click="ReadTerms_Click" />
+                  <Button Content="Windows SDK terms" Tag="WindowsSdk-LICENSE.rtf" Style="{StaticResource SecondaryButton}" Padding="10,6" Margin="0,0,8,6" Click="ReadTerms_Click" />
+                  <Button Content="PureDS4 GPL license" Tag="COPYING" Style="{StaticResource SecondaryButton}" Padding="10,6" Margin="0,0,0,6" Click="ReadTerms_Click" />
+                </WrapPanel>
+                <CheckBox x:Name="MicrosoftTermsCheckBox" IsChecked="False" Checked="MicrosoftTerms_Changed" Unchecked="MicrosoftTerms_Changed">
+                  <TextBlock Text="I accept the separate Microsoft .NET Library and Windows SDK terms for the included Microsoft components." TextWrapping="Wrap" />
+                </CheckBox>
+                <TextBlock x:Name="TermsError" Visibility="Collapsed" TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" FontSize="12" />
+              </StackPanel>
+            </Border>
             <TextBlock Text="Installs to C:\Program Files\PureDS4. Profiles, settings, logs, and user-created files are preserved during updates and repairs." TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" FontSize="12" />
           </StackPanel>
         </ScrollViewer>
         <Grid Grid.Row="1" Margin="0,20,0,0">
           <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+          <TextBlock x:Name="TermsHint" Text="Read and accept the Microsoft component terms above to continue." TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" FontSize="12" VerticalAlignment="Center" Margin="0,0,14,0" />
           <Button x:Name="CancelButton" Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="Cancel" Margin="0,0,10,0" Click="Cancel_Click" />
-          <Button x:Name="ActionButton" Grid.Column="2" Style="{StaticResource PrimaryButton}" Content="Install" Click="Action_Click" />
+          <Button x:Name="ActionButton" Grid.Column="2" Style="{StaticResource PrimaryButton}" Content="Install" IsEnabled="False" Click="Action_Click" />
         </Grid>
       </Grid>
 

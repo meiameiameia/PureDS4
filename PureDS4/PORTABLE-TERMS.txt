@@ -1,0 +1,31 @@
+PureDS4 portable package - read before first use
+
+PureDS4 is GPL-3.0-or-later free software. Read COPYING for your rights to
+use, study, modify and redistribute PureDS4. No PureDS4 EULA is added here.
+Copyright and upstream credits are retained in the application and notices.
+
+The unmodified Microsoft components included in this self-contained Windows
+package are provided under their own licenses, not PureDS4's GPL license:
+
+  ThirdParty/DotNet-LICENSE.txt        Microsoft .NET Library terms
+  ThirdParty/WindowsSdk-LICENSE.txt    Microsoft Windows SDK terms (plain text)
+  ThirdParty/WindowsSdk-LICENSE.rtf    Original Microsoft Windows SDK agreement
+  ThirdParty/ManagedDependencies.NOTICE.txt    component inventory and notices
+
+Before running PureDS4.exe, read the full Microsoft terms above. Those terms
+describe acceptance by use of Microsoft's software. If you do not agree to
+them, do not use the included Microsoft components. This portable archive
+does not record checkbox consent; standard setup offers explicit acceptance.
+Nothing in those terms is intended to restrict your GPL rights to PureDS4's
+own covered code, or to grant Microsoft rights to relicense that code.
+
+The plain-text agreements can be read offline in Notepad; no Office or
+browser is required. The SDK text is a full text extraction of the original
+RTF, which is also retained with its original formatting.
+Official reference: https://aka.ms/WinSDKLicenseURL
+.NET reference: https://github.com/dotnet/core/blob/main/license-information-windows.md
+These links are references, not substitutes for the included full terms.
+
+Read the additional licenses/notices under ThirdParty, Resources and extras.
+The portable package includes the pinned game-output components and driver
+installers. Merely extracting it does not install drivers or configure tasks.

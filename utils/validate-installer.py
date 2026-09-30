@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import re
 import xml.etree.ElementTree as ET
@@ -28,6 +29,9 @@ REQUIRED_PUBLISH_FILES = {
     "ThirdParty/SharpOSC-LICENSE.txt",
     "ThirdParty/ManagedDependencies.NOTICE.txt",
     "ThirdParty/DotNet-LICENSE.txt",
+    "ThirdParty/WindowsSdk-LICENSE.rtf",
+    "ThirdParty/WindowsSdk-LICENSE.txt",
+    "PORTABLE-TERMS.txt",
     "ThirdParty/DotNet-THIRD-PARTY-NOTICES.txt",
     "ThirdParty/DotNet-RuntimePack-THIRD-PARTY-NOTICES.txt",
     "ThirdParty/System.Management-THIRD-PARTY-NOTICES.txt",
@@ -89,6 +93,17 @@ def main() -> int:
 
     source_root = Path(__file__).resolve().parent.parent
     validate_named_xaml_resources(source_root)
+
+    # SkipApplicationPublish must not pair newly embedded setup terms with
+    # an older payload's agreements. Reuse the publish guard on actual files.
+    terms_spec = importlib.util.spec_from_file_location(
+        "managed_notices", source_root / "utils" / "validate-managed-notices.py")
+    terms_module = importlib.util.module_from_spec(terms_spec)
+    terms_spec.loader.exec_module(terms_module)
+    try:
+        terms_module.validate_microsoft_terms(args.publish_root / "ThirdParty")
+    except ValueError as error:
+        raise SystemExit(str(error)) from error
 
     missing = sorted(path for path in REQUIRED_PUBLISH_FILES if not (args.publish_root / path).is_file())
     if missing:
@@ -363,6 +378,17 @@ def main() -> int:
         / "PureDS4.Bootstrapper"
         / "InstallerApplication.cs"
     ).read_text(encoding="utf-8")
+    for contract in [
+        "InstallerTerms.VerifyDocuments()",
+        "InstallerTerms.CanProceed(true, engine.GetVariableString(InstallerTerms.Variable))",
+        "InstallerTerms.HasExplicitConsent(command.ParseCommandLine().UnknownCommandLineArgs)",
+        "consent ? InstallerTerms.Version : string.Empty",
+        "action != LaunchAction.Uninstall && action != LaunchAction.Layout",
+    ]:
+        if contract not in bootstrapper:
+            raise SystemExit("Microsoft terms planning boundary missing: " + contract)
+    if 'Name="MicrosoftTermsAcceptedVersion" Type="string" Value="" Persisted="yes"' not in bundle:
+        raise SystemExit("Current-transaction Microsoft consent must persist across reboot resume.")
     installer_xaml = (
         installer_root / "PureDS4.Bootstrapper" / "InstallerWindow.xaml"
     ).read_text(encoding="utf-8")

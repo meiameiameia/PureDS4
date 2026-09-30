@@ -14,6 +14,9 @@
       <Component Id="cmp_0efbcdb7f09f39f78078af41" Guid="A648497B-6BA8-5C10-B3C8-31D195E7049E">
         <File Id="fil_0efbcdb7f09f39f78078af41" Source="$(var.PublishRoot)\package-manifest.json" KeyPath="yes" />
       </Component>
+      <Component Id="cmp_1f760eccb074994f9a9dde31" Guid="C1920D81-21D1-5F83-8C0A-58CF90B2279E">
+        <File Id="fil_1f760eccb074994f9a9dde31" Source="$(var.PublishRoot)\PORTABLE-TERMS.txt" KeyPath="yes" />
+      </Component>
       <Component Id="cmp_f87ef34b2abdfbc39c634a3d" Guid="58075299-3FE6-5D39-A634-2199AC56C259">
         <File Id="fil_PureDS4_exe" Source="$(var.PublishRoot)\PureDS4.exe" KeyPath="yes" />
       </Component>
@@ -84,6 +87,12 @@
         <Component Id="cmp_9f356243bc7d9a24bcc00c59" Guid="49FA9F7B-3800-5B63-9CA0-5B8B29C48343">
           <File Id="fil_9f356243bc7d9a24bcc00c59" Source="$(var.PublishRoot)\ThirdParty\System.Management-THIRD-PARTY-NOTICES.txt" KeyPath="yes" />
         </Component>
+        <Component Id="cmp_2d92531bc0e2b736ff8b3a61" Guid="3B9D85B8-A650-5CD6-B953-4111F2ED2C8F">
+          <File Id="fil_2d92531bc0e2b736ff8b3a61" Source="$(var.PublishRoot)\ThirdParty\WindowsSdk-LICENSE.rtf" KeyPath="yes" />
+        </Component>
+        <Component Id="cmp_a536f956db5b7c855e8c7e85" Guid="1CF0AF70-5AD1-5084-8389-EDA47FD2A064">
+          <File Id="fil_a536f956db5b7c855e8c7e85" Source="$(var.PublishRoot)\ThirdParty\WindowsSdk-LICENSE.txt" KeyPath="yes" />
+        </Component>
         <Directory Id="dir_378ae05690ab0b6f7761b91d" Name="SbcSharp">
           <Component Id="cmp_0271bf3b2642ab575b71aef6" Guid="B723B7E3-E8B4-5504-A4F1-AEF148C07A01">
             <File Id="fil_0271bf3b2642ab575b71aef6" Source="$(var.PublishRoot)\ThirdParty\SbcSharp\LICENSE.txt" KeyPath="yes" />
@@ -101,6 +110,7 @@
       <ComponentRef Id="cmp_400d38e5cfee181230373a8b" />
       <ComponentRef Id="cmp_728d7b5c9f85933d02e831f6" />
       <ComponentRef Id="cmp_0efbcdb7f09f39f78078af41" />
+      <ComponentRef Id="cmp_1f760eccb074994f9a9dde31" />
       <ComponentRef Id="cmp_f87ef34b2abdfbc39c634a3d" />
       <ComponentRef Id="cmp_e4732d24ff40d47bab253966" />
       <ComponentRef Id="cmp_a1b5aa110d9ba29b3625d1ef" />
@@ -122,6 +132,8 @@
       <ComponentRef Id="cmp_f5838352b43f2800a076b940" />
       <ComponentRef Id="cmp_44726c0b6cb42e9298c6af38" />
       <ComponentRef Id="cmp_9f356243bc7d9a24bcc00c59" />
+      <ComponentRef Id="cmp_2d92531bc0e2b736ff8b3a61" />
+      <ComponentRef Id="cmp_a536f956db5b7c855e8c7e85" />
       <ComponentRef Id="cmp_0271bf3b2642ab575b71aef6" />
       <ComponentRef Id="cmp_de98bbab3d377537ce8b91d3" />
     </ComponentGroup>

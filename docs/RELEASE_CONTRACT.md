@@ -137,8 +137,16 @@ The manual `CI Build` input `release_candidate` selects the target-version
 packaging path. It retains `5.1.0` for the first release's display, Burn,
 and MSI identity, and records `kind: release-candidate` alongside the full
 source SHA and file hashes in `candidate-identity.json`. Ordinary runs retain
-CI labels. A manual candidate is for validation; it neither clears
-`releaseReady: false` nor creates or authorizes a public release/tag.
+CI labels. A manual candidate is for validation; it neither changes the
+component-input readiness decision nor creates or authorizes a public release/tag.
+
+`releaseReady` in `installer/release-inputs.json` covers only the pinned
+component inputs. It is necessary, not sufficient, for publication. Runtime
+backend-failure acceptance follows the owner-approved deterministic criterion
+in [hardware validation](HARDWARE_VALIDATION.md#backend-failure-acceptance-criterion);
+physical interruption remains an explicit evidence gap. The installation/recovery
+matrix, licensing review, exact final-artifact acceptance and publication
+authority remain separate requirements even when the input manifest is ready.
 
 No release tag has been created or authorized. The tag spelling and creation
 remain a separate owner-approved publication action.

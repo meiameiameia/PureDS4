@@ -53,12 +53,47 @@ round trips and additional DS4 features were exercised on the preceding
 
 No VIIPER API timeout or output-binding failure occurred during this pass.
 Therefore it confirms normal reconnection, but does not prove that the
-bounded retry handles the original transient failure in vivo. Isolated tests
-cover temporary binding failure, later success, cancellation and exhaustion;
-they do not replace an actual backend interruption. Controlled
+bounded retry handles the original transient failure in vivo. Deterministic
+tests cover temporary binding failure, later success, cancellation and exhaustion;
+they do not establish an actual backend interruption. Controlled
 backend loss, sleep/wake, two simultaneous DS4 controllers, and the broader
 installation/recovery matrix are not covered by this evidence. Do not force
 a backend outage on the owner's daily-driver PC merely to fill that gap.
+
+### Backend-failure acceptance criterion
+
+On 2026-09-29 the owner approved replacing mandatory physical reproduction of
+the intermittent VIIPER failure with deterministic software checks, while
+retaining the missing physical evidence explicitly. This is a bounded exception
+for that runtime failure, not a waiver of normal exact-artifact USB/Bluetooth
+acceptance or the installer's Windows installation/recovery matrix.
+
+The required software checks are:
+
+- Transient backend failure followed by success publishes one connected output,
+  never a failed or partially attached slot.
+- Persistent failure stops after the configured retry schedule. With a known
+  binding failure and no primary output, the direct-mode entry policy permits
+  releasing the physical controller in the required teardown order.
+- A pending retry is cancelled before switching to direct mode and cannot
+  recreate a virtual output afterwards. If returning to managed mode fails,
+  successful rollback preserves direct mode; later backend availability allows
+  managed output to be established again.
+- If transition and rollback both fail, readiness is withheld and another
+  transition is refused until recovery. Cleanup failure prevents restart;
+  recovery success requires the original controller and its connected requested
+  output, not merely successful service startup.
+
+`PureDS4.Tests/VirtualOutputRecoveryScenarioTests.cs` composes the production
+retry sequence, output-slot manager, exposure coordinator, entry policy and
+recovery postcondition with simulated backend and physical operations. Its four
+scenarios and the existing retry, exposure/recovery and backend-probe tests
+passed locally (85 focused tests). No runtime code or backend binary was changed.
+These checks do not run the complete `ControlService` with Windows drivers,
+prove HidHide permissions, or guarantee Bluetooth/Steam re-enumeration. The
+physical interruption remains **not observed**, rather than passed or an
+indefinite component-input blocker. A future observed failure must still be
+investigated; this exception never excuses a known unresolved safety defect.
 
 ## Before starting
 

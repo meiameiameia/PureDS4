@@ -102,6 +102,26 @@ Windows 10/11 are still unobserved. Do not manufacture that evidence by
 deliberately damaging the daily-driver installation or by counting a model
 simulation as a driver installation.
 
+### Evidence checkpoint — 2026-09-29
+
+| Scenario | Evidence and remaining scope |
+| --- | --- |
+| Existing-install upgrade / same-version replacement | Owner-observed internal 5.1.0 setup passes; exact artifact records are in [hardware validation](HARDWARE_VALIDATION.md). Not proof of a newly composed final installer. |
+| Application MSI install / repair / uninstall | Windows Server 2022 CI lifecycle passed in run `36647329427`; artifact upload failed on storage quota after build/validation completed. This was not the full driver bundle on consumer Windows. |
+| Setup planning / cancellation / concurrency / core and optional failures | `utils/test-installer-state-machine.py` passed locally on the current source. This is a model with source-contract checks, not actual Burn/driver failure injection. |
+| USB-IP reboot boundary / failed removal | `utils/test-viiper-reboot-boundary.ps1` passed locally using extracted backend functions and fake boot/task/process operations. No real reboot or driver mutation. |
+| Backend on-demand launch / task ownership | `utils/test-viiper-launch-task.ps1` passed locally with fake tasks. Existing installed-task observations remain separate. |
+| Microsoft terms presentation / planning gate | Seven actual policy/resource tests passed. Offscreen WPF checks rendered full .NET/SDK/GPL documents and exercised checked/unchecked/withdrawn consent in all setup modes. The actual `StartPlan` method, with a fake engine, rejected missing/stale consent and permitted accepted install/repair plus consent-free uninstall/layout. No real Burn transaction or reboot consent resume was executed. |
+| Local terms-enabled candidate composition | Release publish, MSI ICE/Burn compilation and package integrity checks passed. The composed setup completed actual `/layout /quiet` with exit 0 and no restart or package execution; this proves extraction without acceptance, not installation. Footprint/artifact identities are recorded in [provenance](component-provenance.md#distribution-footprint--2026-09-29). The full x64 software suite passed 902 tests; live-process audio capture remained excluded. |
+| Clean full bundle / real failure rollback / reboot-resume on Windows 10/11 | Unobserved. The owner has no second Windows available; do not uninstall or damage the daily-driver stack to substitute for an isolated test. Changing this publication requirement needs an explicit bounded risk decision, not a synthetic pass. |
+| Exact downloaded unsigned final installer | Still pending composition, traceability and acceptance with normal Windows protections. |
+
+These are distinct gates. The backend-failure exception in
+[hardware validation](HARDWARE_VALIDATION.md#backend-failure-acceptance-criterion)
+does not waive the full-bundle installation matrix. Reuse unaffected hardware
+evidence; do not request the entire USB/Bluetooth gameplay pass for notice-only
+or test-only changes.
+
 - One offline setup includes the app, pinned VIIPER/USB-IP components, and
   HidHide by default; interactive setup must not require separate downloads.
   Windows elevation or a driver-related restart may still be required.

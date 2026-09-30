@@ -27,6 +27,9 @@
     <PackageReference Include="WixToolset.BootstrapperApplicationApi" Version="5.0.2" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="..\..\PureDS4\ThirdParty\DotNet-LICENSE.txt" LogicalName="PureDS4.Terms.DotNet-LICENSE.txt" />
+    <EmbeddedResource Include="..\..\PureDS4\ThirdParty\WindowsSdk-LICENSE.rtf" LogicalName="PureDS4.Terms.WindowsSdk-LICENSE.rtf" />
+    <EmbeddedResource Include="..\..\COPYING" LogicalName="PureDS4.Terms.COPYING" />
     <Resource Include="..\..\PureDS4\DS4W.ico" Link="DS4W.ico" />
     <!-- The .ico stores every frame as PNG, which the WPF ICO decoder
          renders poorly at display sizes. Ship the real PNG for on-screen

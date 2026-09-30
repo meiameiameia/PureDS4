@@ -4,12 +4,28 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import re
 import shutil
 import sys
 import xml.etree.ElementTree as ET
+
+
+MICROSOFT_TERMS_HASHES = {
+    "DotNet-LICENSE.txt": "7f6839a61ce892b79c6549e2dc5a81fdbd240a0b260f8881216b45b7fda8b45d",
+    "WindowsSdk-LICENSE.rtf": "dd07eb178e00c6bba4148457fc00ff77cd4887eb521d504186fe59c9ec8bbe62",
+    "WindowsSdk-LICENSE.txt": "5d27a78a64d3cb74ddb7556b625e119b05d12abeff5909a9ee8b171a0be7dc75",
+}
+
+
+def validate_microsoft_terms(terms: Path) -> None:
+    for name, expected in MICROSOFT_TERMS_HASHES.items():
+        source = terms / name
+        require(source.is_file(), f"Offline Microsoft terms are missing: {name}")
+        require(hashlib.sha256(source.read_bytes()).hexdigest() == expected,
+                f"Offline Microsoft terms changed without review: {name}")
 
 
 # Build-only packages and the vendored SharpOSC assembly are deliberately
@@ -42,6 +58,33 @@ COPYRIGHT_NOTICE_FILES = {
     "System.Management-THIRD-PARTY-NOTICES.txt":
         ("system.management", "7.0.2", "THIRD-PARTY-NOTICES.TXT"),
 }
+
+WINDOWS_SDK_PACK = "runtimepack.Microsoft.Windows.SDK.NET.Ref/10.0.19041.56"
+WINDOWS_SDK_ASSETS = {"Microsoft.Windows.SDK.NET.dll", "WinRT.Runtime.dll"}
+WINDOWS_SDK_LICENSE_URL = "https://aka.ms/WinSDKLicenseURL"
+
+
+def validate_windows_sdk(deps: dict, packages: Path, notice: str) -> None:
+    target = next(value for name, value in deps["targets"].items()
+                  if name.endswith("/win-x64"))
+    sdk_packs = [name for name in target
+                 if name.startswith("runtimepack.Microsoft.Windows.SDK.NET.Ref/")]
+    require(sdk_packs == [WINDOWS_SDK_PACK],
+            "Windows SDK targeting-pack identity changed or is missing")
+    assets = target[WINDOWS_SDK_PACK]
+    require(set(assets.get("runtime", {})) == WINDOWS_SDK_ASSETS
+            and not assets.get("native") and not assets.get("runtimeTargets"),
+            "Windows SDK runtime asset inventory changed")
+    package = WINDOWS_SDK_PACK.removeprefix("runtimepack.")
+    nuspec = package_root(packages, package) / "microsoft.windows.sdk.net.ref.nuspec"
+    metadata = ET.parse(nuspec).getroot()
+    license_urls = [element.text for element in metadata.iter()
+                    if element.tag.rsplit("}", 1)[-1] == "licenseUrl"]
+    require(license_urls == [WINDOWS_SDK_LICENSE_URL],
+            "Windows SDK license URL changed")
+    require(package in notice and WINDOWS_SDK_LICENSE_URL in notice
+            and "https://learn.microsoft.com/en-us/legal/windows-sdk/redist" in notice,
+            "Managed notice is missing the Windows SDK identity or terms")
 
 
 def require(condition: bool, message: str) -> None:
@@ -76,6 +119,7 @@ def runtime_packages(deps: dict) -> tuple[set[str], str]:
 
 def validate(deps: dict, packages: Path, notice: str) -> str:
     actual, runtime_version = runtime_packages(deps)
+    validate_windows_sdk(deps, packages, notice)
     if actual != set(LICENSES):
         missing = sorted(set(LICENSES) - actual)
         unexpected = sorted(actual - set(LICENSES))
@@ -139,8 +183,14 @@ def distribute_notices(packages: Path, runtime_version: str, publish: Path) -> N
     dotnet = shutil.which("dotnet")
     require(dotnet is not None, "dotnet executable is unavailable")
     dotnet_root = Path(dotnet).resolve().parent
+    terms = Path(__file__).resolve().parent.parent / "PureDS4" / "ThirdParty"
+    validate_microsoft_terms(terms)
+    require((dotnet_root / "LICENSE.txt").read_bytes() == (terms / "DotNet-LICENSE.txt").read_bytes(),
+            "Build .NET license differs from the Microsoft terms presented by setup")
     sources = {
-        "DotNet-LICENSE.txt": dotnet_root / "LICENSE.txt",
+        "DotNet-LICENSE.txt": terms / "DotNet-LICENSE.txt",
+        "WindowsSdk-LICENSE.rtf": terms / "WindowsSdk-LICENSE.rtf",
+        "WindowsSdk-LICENSE.txt": terms / "WindowsSdk-LICENSE.txt",
         "DotNet-THIRD-PARTY-NOTICES.txt": dotnet_root / "ThirdPartyNotices.txt",
         "DotNet-RuntimePack-THIRD-PARTY-NOTICES.txt":
             packages / "microsoft.netcore.app.runtime.win-x64"

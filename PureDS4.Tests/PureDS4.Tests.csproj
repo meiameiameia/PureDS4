@@ -28,6 +28,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\installer\PureDS4.Bootstrapper\InstallerTerms.cs" Link="InstallerTerms.cs" />
+    <EmbeddedResource Include="..\PureDS4\ThirdParty\DotNet-LICENSE.txt" LogicalName="PureDS4.Terms.DotNet-LICENSE.txt" />
+    <EmbeddedResource Include="..\PureDS4\ThirdParty\WindowsSdk-LICENSE.rtf" LogicalName="PureDS4.Terms.WindowsSdk-LICENSE.rtf" />
+    <EmbeddedResource Include="..\COPYING" LogicalName="PureDS4.Terms.COPYING" />
     <ProjectReference Include="..\PureDS4\PureDS4.csproj" />
     <Reference Include="SharpOSC">
       <HintPath>..\PureDS4\libs\$(Platform)\SharpOSC\SharpOSC.dll</HintPath>

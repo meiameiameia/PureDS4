@@ -44,8 +44,19 @@ The exact .NET runtime pack's notices are also in
 ThirdParty/DotNet-RuntimePack-THIRD-PARTY-NOTICES.txt.
 Microsoft's Windows-specific license breakdown is at
 https://github.com/dotnet/core/blob/main/license-information-windows.md .
-The Windows SDK projection included by the target framework uses the Windows
-SDK terms at https://learn.microsoft.com/legal/windows-sdk/license .
+Microsoft.Windows.SDK.NET.Ref/10.0.19041.56 supplies the unmodified
+Microsoft.Windows.SDK.NET.dll and WinRT.Runtime.dll embedded in the application.
+These Microsoft components retain their own Windows SDK terms; PureDS4's GPL
+license does not relicense them. Terms: https://aka.ms/WinSDKLicenseURL .
+The full offline agreement is ThirdParty/WindowsSdk-LICENSE.rtf. Standard
+setup presents both Microsoft agreements separately from COPYING; portable
+users must read PORTABLE-TERMS.txt before using the included components.
+Their redistribution listing is at
+https://learn.microsoft.com/en-us/legal/windows-sdk/redist#microsoftwindowssdknetref .
+The WPF D3DCompiler_47_cor3.dll component also uses the Windows SDK terms,
+as explained in Microsoft's Windows-specific .NET license breakdown above.
+This notice identifies the applicable terms, not a claim that notice delivery
+alone satisfies every distribution obligation.
 
 MIT License
 -----------

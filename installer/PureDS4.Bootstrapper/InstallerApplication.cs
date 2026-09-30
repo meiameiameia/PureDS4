@@ -60,6 +60,13 @@ namespace PureDS4.Bootstrapper
                     // account happens to sign in first after Windows restarts.
                     if (command.Resume != ResumeType.Reboot)
                     {
+                        // Registration from an earlier run is not new consent.
+                        // Only an explicit unattended argument may accept here;
+                        // the full UI always starts with an unchecked checkbox.
+                        var consent = command.Display != Display.Full &&
+                            InstallerTerms.HasExplicitConsent(command.ParseCommandLine().UnknownCommandLineArgs);
+                        engine.SetVariableString(InstallerTerms.Variable,
+                            consent ? InstallerTerms.Version : string.Empty, true);
                         SetInteractiveUserVariables();
                         engine.SetVariableString("SetupCorrelationId",
                             Guid.NewGuid().ToString("N"), true);
@@ -110,8 +117,11 @@ namespace PureDS4.Bootstrapper
                     Environment.SpecialFolder.ApplicationData), true);
         }
 
-        internal void Begin(LaunchAction action, bool desktopShortcut, bool hidHide)
+        internal void Begin(LaunchAction action, bool desktopShortcut, bool hidHide,
+            bool microsoftTermsAccepted = false)
         {
+            if (microsoftTermsAccepted && action != LaunchAction.Uninstall)
+                engine.SetVariableString(InstallerTerms.Variable, InstallerTerms.Version, true);
             hidHideFailed = false;
             // The incoming Burn engine owns the transaction mutex for its
             // complete package chain, including related-bundle removal. An
@@ -140,6 +150,24 @@ namespace PureDS4.Bootstrapper
 
         private bool StartPlan(LaunchAction action, Action configure = null)
         {
+            bool installsComponents = action != LaunchAction.Uninstall && action != LaunchAction.Layout;
+            if (installsComponents)
+            {
+                try
+                {
+                    InstallerTerms.VerifyDocuments();
+                    if (!InstallerTerms.CanProceed(true, engine.GetVariableString(InstallerTerms.Variable)))
+                    {
+                        ShowFailure(1223, "Microsoft component terms were not accepted. Read the offline .NET Library and Windows SDK terms in setup. Unattended installs require " + InstallerTerms.Argument + ". No installation plan was started.");
+                        return false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ShowFailure(1, "Setup could not verify its offline license documents: " + ex.Message);
+                    return false;
+                }
+            }
             if (Interlocked.CompareExchange(ref planStarted, 1, 0) != 0)
             {
                 engine.Log(LogLevel.Standard,
