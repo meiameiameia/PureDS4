@@ -11,6 +11,29 @@ microphone need a trick, and both are described at the end.
 
 ## Current internal candidate evidence
 
+The current packaged candidate is `5.1.0` from clean commit
+`8999108763aa09c5478c8713f7fd62d99cf7ebb5`. On 2026-09-30 the owner completed
+an in-place same-version update using installer SHA-256
+`75B3F8516870A9473AF8E1684C00AFE1446067327AA642497C22EBBB68AE58F5`.
+All 29 installed application payload files matched its manifest; the installed
+`C:\Program Files\PureDS4\PureDS4.exe` SHA-256 was
+`605592D61617E0D6A1276823120F4C781997C5AE4DFF46D7D691B0B263B4016D`.
+The owner's Default profile remained byte-identical, and installed infrastructure,
+VIIPER API response and canonical task actions were verified. The submitted
+Home capture showed DS4 v2.1 over Bluetooth, Protected, Default, Xbox 360 output,
+Ready and Service running. That capture does not independently prove gameplay.
+
+The earlier USB/Bluetooth gameplay evidence below is retained for the unchanged
+controller/output behavior; it is not relabelled as a new full hardware pass.
+The later changes concerned setup terms/notices, test coverage and previously
+accepted UI/startup status, not a new backend binary or mapping implementation.
+The installer/download identities and SmartScreen observation are recorded in
+the [installer evidence checkpoint](INSTALLER_VALIDATION_STRATEGY.md#evidence-checkpoint--2026-10-03).
+On 2026-10-03 the installed app and Default hashes still matched those recorded
+above. No new hardware test or installation was performed for that check.
+
+### Earlier UI and setup observations
+
 On 2026-09-29, the owner accepted the installed internal UI candidate built
 from `49ba5d244ad975d823299489114216fb02cfb7b3` plus the uncommitted
 Home/readings layout and startup-status changes. The installer SHA-256 was

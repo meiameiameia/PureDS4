@@ -41,15 +41,20 @@ executable is `PureDS4.exe`. `5.1.0` is the owner-selected first public version
 target, not a release-readiness or publication claim. An internal `5.1.0`
 bundle upgraded the owner's former `5.1.0-beta.2` installation, and a later
 bundle passed a same-version replacement. The eventual published file must
-match the exact accepted candidate; clean-install and failure/recovery checks
-remain before publication can be considered.
+match the exact accepted candidate. Clean full-bundle installation, real
+failure/rollback and reboot/resume on Windows 10/11 remain unobserved; the owner
+accepted this bounded gap for the first 5.1.0 on 2026-10-03. See the dated
+installer strategy for the evidence and exception limits, not a claim of passed
+testing. Publication and repository-visibility changes need separate approval.
 
 The owner accepts an unsigned first public release. Its official download
 must state that there is no verified publisher and include the exact artifact
 version and SHA-256. SmartScreen or Smart App Control may warn or block it;
 users should verify the download source and hash, not disable Windows
 protections. A test of the exact downloaded candidate with normal protections
-enabled is still required before public distribution.
+enabled was performed on 2026-10-03: the browser download matched the exact
+candidate and showed SmartScreen's unverified-publisher warning before launch.
+This is observed warning behavior, not a warning-free launch or malware verdict.
 
 Set `DS4W_SIGN_CERT_PATH`, `DS4W_SIGN_CERT_PASSWORD`, and optionally
 `DS4W_SIGN_TIMESTAMP_URL` to sign the application, setup hosts, MSI, and final

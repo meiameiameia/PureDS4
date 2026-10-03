@@ -102,23 +102,89 @@ Windows 10/11 are still unobserved. Do not manufacture that evidence by
 deliberately damaging the daily-driver installation or by counting a model
 simulation as a driver installation.
 
-### Evidence checkpoint — 2026-09-29
+### Evidence checkpoint — 2026-10-03
+
+The current distribution candidate is `5.1.0` from the clean source commit
+`8999108763aa09c5478c8713f7fd62d99cf7ebb5`. It was composed on local Windows,
+not downloaded from CI: run `36663057406` passed its test job and packaging/MSI
+checks, but the build job failed at artifact upload because of the Actions
+storage quota. The local candidate's identity records `ciArtifactAvailable: false`
+and .NET/Windows Desktop runtime packs `8.0.31` for the application and both
+installer hosts. Do not rebuild it and treat different bytes as accepted.
+
+| Exact candidate file | Bytes | SHA-256 |
+| --- | ---: | --- |
+| `PureDS4_5.1.0_Setup_x64.exe` | 191,378,182 | `75B3F8516870A9473AF8E1684C00AFE1446067327AA642497C22EBBB68AE58F5` |
+| `PureDS4_5.1.0_x64.zip` | 119,209,741 | `FBD02D7EE9FFE0A184BC0E10AB7CCF2670E1B2ED2DE916ACDAB1BAC5F0A98AEE` |
+
+The files are retained under
+`artifacts/disposable/candidate-ci-36663057406/`, alongside the installer
+manifest, `candidate-identity.json` and `SHA256SUMS.txt`. On 2026-10-02 the owner
+authorized uploading these exact files to GitHub draft release `402225081` in
+`meiameiameia/PureDS4`. The remote asset sizes and SHA-256 digests match.
+Before the final publication sequence on 2026-10-03, the release had
+`draft: true`, `published_at: null` and
+target commit `8999108763aa09c5478c8713f7fd62d99cf7ebb5`; no public `v5.1.0`
+Git tag existed. Draft creation/upload is not publication authority.
 
 | Scenario | Evidence and remaining scope |
 | --- | --- |
-| Existing-install upgrade / same-version replacement | Owner-observed internal 5.1.0 setup passes; exact artifact records are in [hardware validation](HARDWARE_VALIDATION.md). Not proof of a newly composed final installer. |
-| Application MSI install / repair / uninstall | Windows Server 2022 CI lifecycle passed in run `36647329427`; artifact upload failed on storage quota after build/validation completed. This was not the full driver bundle on consumer Windows. |
+| Existing-install upgrade / same-version replacement | The owner completed the exact candidate's update on 2026-09-30 after the Microsoft terms presentation. All 29 installed application payload files matched its manifest; Default was preserved. Installed backend/API and canonical task observations passed. See [hardware validation](HARDWARE_VALIDATION.md#current-internal-candidate-evidence). This is not a clean install. |
+| Application MSI install / repair / uninstall | Windows Server 2022 CI lifecycle passed in run `36663057406` at the candidate source SHA; artifact upload failed on storage quota after build/validation completed. This was not the full driver bundle on consumer Windows. |
 | Setup planning / cancellation / concurrency / core and optional failures | `utils/test-installer-state-machine.py` passed locally on the current source. This is a model with source-contract checks, not actual Burn/driver failure injection. |
 | USB-IP reboot boundary / failed removal | `utils/test-viiper-reboot-boundary.ps1` passed locally using extracted backend functions and fake boot/task/process operations. No real reboot or driver mutation. |
 | Backend on-demand launch / task ownership | `utils/test-viiper-launch-task.ps1` passed locally with fake tasks. Existing installed-task observations remain separate. |
-| Microsoft terms presentation / planning gate | Seven actual policy/resource tests passed. Offscreen WPF checks rendered full .NET/SDK/GPL documents and exercised checked/unchecked/withdrawn consent in all setup modes. The actual `StartPlan` method, with a fake engine, rejected missing/stale consent and permitted accepted install/repair plus consent-free uninstall/layout. No real Burn transaction or reboot consent resume was executed. |
-| Local terms-enabled candidate composition | Release publish, MSI ICE/Burn compilation and package integrity checks passed. The composed setup completed actual `/layout /quiet` with exit 0 and no restart or package execution; this proves extraction without acceptance, not installation. Footprint/artifact identities are recorded in [provenance](component-provenance.md#distribution-footprint--2026-09-29). The full x64 software suite passed 902 tests; live-process audio capture remained excluded. |
-| Clean full bundle / real failure rollback / reboot-resume on Windows 10/11 | Unobserved. The owner has no second Windows available; do not uninstall or damage the daily-driver stack to substitute for an isolated test. Changing this publication requirement needs an explicit bounded risk decision, not a synthetic pass. |
-| Exact downloaded unsigned final installer | Still pending composition, traceability and acceptance with normal Windows protections. |
+| Microsoft terms presentation / planning gate | Seven actual policy/resource tests passed. Offscreen WPF checks rendered full .NET/SDK/GPL documents and exercised checked/unchecked/withdrawn consent in all setup modes. The actual `StartPlan` method, with a fake engine, rejected missing/stale consent and permitted accepted install/repair plus consent-free uninstall/layout. Those software checks did not execute a real Burn transaction; the later owner-observed update is recorded separately above. Real reboot consent resume remains unobserved. |
+| Local terms-enabled candidate composition | Release publish, MSI ICE/Burn compilation and package integrity checks passed. The composed setup completed actual `/layout /quiet` with exit 0 and no restart or package execution; this proves extraction without acceptance, not installation. Exact current artifact identities are listed above; [provenance](component-provenance.md#distribution-footprint--2026-09-29) retains the earlier footprint comparison rather than identifying this candidate. The full x64 software suite passed 902 tests; live-process audio capture remained excluded. |
+| Clean full bundle / real failure rollback / reboot-resume on Windows 10/11 | Unobserved. On 2026-10-03 the owner approved the bounded first-5.1.0 exception below. This is accepted residual risk, not a synthetic or real-machine pass. Do not uninstall or damage the daily-driver stack to substitute for an isolated test. |
+| Exact downloaded unsigned final installer | Browser download from the draft on 2026-10-03 retained its Internet-zone marker (`ZoneId=3`) and matched the candidate installer hash/size. Authenticode status was `NotSigned`. Owner screenshots showed SmartScreen's "Windows protected your PC", app `PureDS4_5.1.0_Setup_x64.exe`, and "Unknown publisher" before setup launched. Integrity passed; the security warning was observed. This is not warning-free launch acceptance or proof that every Windows policy permits execution. No bypass, security-setting change or second installation was performed by the agent. |
+
+The SmartScreen result is consistent with the owner-approved unsigned first
+release, not evidence of malware detection or an assurance of safety. Microsoft's
+[application reputation guidance](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation)
+explains that publisher and file reputation influence these warnings. Release
+instructions must disclose the unverified publisher and possible warnings/blocks;
+never advise disabling protections or promise acceptance under Smart App Control
+or enterprise policy.
+
+### Owner-approved first-release exception — 2026-10-03
+
+The owner approved proceeding with preparation of the first `5.1.0` while
+accepting the unobserved clean full-bundle installation, real failure/rollback
+and reboot/resume scenarios on Windows 10/11. The stated risk is that an
+installation failure can require manual repair. This applies only to this
+first release and the exact candidate identified above; it is not a standing
+waiver for later installers or a claim of complete Windows 10/11 validation.
+Source/package checks and the successful existing-install update remain valid
+but do not fill the missing evidence.
+
+The exception does not authorize public release/tag creation, repository
+visibility changes, another installation, weakening Windows protections, or
+ignoring a known defect. If a concrete safety or integrity defect is found,
+hold distribution and investigate it. New runtime/installer changes require
+reassessing affected evidence; documentation-only updates do not require
+replaying unaffected gameplay checks.
+
+On 2026-10-03 the release-input gate reverified all five component inputs and
+six artifacts, including the required third-party signatures. NuGet advisory
+queries for the solution, bootstrapper and setup-actions projects completed
+successfully against NuGet.org and reported no known vulnerable packages.
+Microsoft's official .NET 8 metadata still listed runtime `8.0.31`, SDK
+`8.0.425` and end of support `2026-11-10`. These are dated results, not future
+security guarantees. See the prepared publication text and remaining authority
+requirements in [release contract](RELEASE_CONTRACT.md).
+
+Before the final publication sequence on 2026-10-03, PureDS4 was private and
+PureDS4-VIIPER was public. The owner separately authorized making PureDS4's
+tracked code/history public and publishing the exact draft assets; see the
+[release contract](RELEASE_CONTRACT.md#version-contract). Public distribution
+still requires accessible corresponding source and downloads. The bounded
+installation-risk exception alone does not grant that authority.
 
 These are distinct gates. The backend-failure exception in
 [hardware validation](HARDWARE_VALIDATION.md#backend-failure-acceptance-criterion)
-does not waive the full-bundle installation matrix. Reuse unaffected hardware
+does not itself waive the full-bundle installation matrix; the distinct,
+limited first-release exception is recorded above. Reuse unaffected hardware
 evidence; do not request the entire USB/Bluetooth gameplay pass for notice-only
 or test-only changes.
 

@@ -103,6 +103,17 @@ no vulnerable packages from NuGet's current advisory source. Microsoft listed
 These are dated checks, not a guarantee against later advisories; repeat them
 for the final publication decision.
 
+On 2026-10-03, the solution and the separate bootstrapper/setup-actions
+projects were queried again with transitive dependencies against NuGet.org;
+all queries completed successfully and reported no known vulnerable packages.
+The release-input validator reverified five components/six artifacts with
+signature checks and `--require-release-ready`. Microsoft's
+[official .NET 8 metadata](https://builds.dotnet.microsoft.com/dotnet/release-metadata/8.0/releases.json)
+still listed runtime `8.0.31`, SDK `8.0.425` and end of support `2026-11-10`.
+The exact candidate's identity records `8.0.31` for both runtime packs in the
+application and two setup hosts. These checks do not prove absence of unknown
+vulnerabilities or replace the dated maintenance/publication decisions.
+
 ### Windows SDK distribution review — 2026-09-29
 
 The actual Release win-x64 dependency graph contains

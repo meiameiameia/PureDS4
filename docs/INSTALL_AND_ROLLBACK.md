@@ -1,5 +1,11 @@
 # Installing, upgrading, and rolling back PureDS4
 
+The exact current candidate and first-release installation-evidence exception
+are recorded in the
+[installer checkpoint](INSTALLER_VALIDATION_STRATEGY.md#evidence-checkpoint--2026-10-03).
+The exception accepts specific unobserved failure scenarios; it does not make
+repair, rollback or driver removal safe without checking the affected machine.
+
 ## Upgrading an existing PureDS4 installation
 
 The first public-version target is `5.1.0`. The last full USB/Bluetooth gameplay
@@ -169,6 +175,14 @@ remain importable after removal.
 
 ### 5. Remove the predecessor
 
+For a portable DS4Windows copy, there may be no registered uninstaller.
+Preserve profiles and settings stored alongside the application before
+removing its program files and startup entries separately. This includes
+older Ryochan7/schmaldeo distributions. Do not remove shared drivers or
+delete saved configuration as part of application cleanup. The detection
+survey lists what it found; it is not proof that every portable copy on every
+drive was discovered.
+
 **Tools → DS4Windows removal plan.** This lists exactly what removal
 involves — the installed program files, registry key, scheduled tasks, and
 each Add/Remove Programs entry with its own registered command — and can
@@ -265,3 +279,67 @@ rather than an application fault:
   own. This is enforced in code.
 - Modify or delete its profiles. Import copies; it never writes back.
 - Close it automatically. PureDS4 asks you to close it and re-checks.
+
+## Support and distribution recovery
+
+### Reporting a problem
+
+Use [PureDS4 issues](https://github.com/meiameiameia/PureDS4/issues). Include
+the PureDS4 version, whether standard setup or the portable ZIP was used, Windows version,
+DS4 model and USB/Bluetooth transport, selected game output, the error text,
+and the shortest reproducible steps. Say whether the problem occurs during
+setup, physical input, virtual output, switching modes or reconnection.
+
+For setup failures, relevant diagnostics are under
+`%ProgramData%\PureDS4\Installer`: `setup-actions.log`,
+`infrastructure-actions.log` and, for in-app repair,
+`viiper-setup-host.log`. Include the transaction/correlation ID when present.
+For runtime failures, use `%AppData%\PureDS4\Logs`, including
+`startup_failure.log` when relevant. Burn also writes its own setup log;
+provide its location/error excerpt if available rather than assuming every
+machine uses the same temporary path.
+
+Review excerpts before posting. Redact personal paths/usernames, device
+serials/MAC addresses, unrelated application data and any credentials. Keep
+complete logs locally; do not upload personal profiles or whole data folders
+unless a specific need and private handling have been agreed. No support
+response time or automatic monitoring is promised.
+
+### A failed installation or update
+
+Do not keep retrying different installer versions or removing shared drivers.
+Preserve the error and logs first, and check whether setup explicitly requested
+a restart. Follow that request before deciding the transaction failed. Retain
+the original trusted installer and back up PureDS4's settings/profiles before
+repair or reinstall. Close competing controller applications deliberately.
+
+If repair is needed, use the intended PureDS4 installer or its in-app repair
+flow, with normal elevation and reviewed component terms. If the installer
+cannot complete or reports an unresolved infrastructure state, stop and report
+it instead of forcing virtual output to appear ready. A previous package is
+not a guaranteed downgrade; use the rollback rules above only after verifying
+compatibility and recovery on the affected machine. Shared HidHide/USB-IP
+removal is not a general cleanup step.
+
+### If a distributed build needs withdrawal
+
+This is an owner procedure, not authorization to change GitHub or users' PCs.
+For a confirmed safety, integrity, data-loss or severe installation defect:
+
+1. Preserve the exact version, source SHA, artifact hashes and sanitized
+   evidence; stop recommending installation while the problem is assessed.
+2. Obtain owner authority for the precise distribution change. Mark the
+   affected release clearly and stop distributing its binaries if required;
+   do not rewrite Git history, erase evidence or silently replace same-version
+   assets with rebuilt files.
+3. Keep corresponding source and notices accessible. State the affected
+   versions, known symptoms and recovery limits. Offer a previous public
+   version only when its compatibility/recovery is verified; the first
+   release has no earlier public PureDS4 release to promise as a fallback.
+4. Publish a fix with a new product version and new hashes after affected
+   checks and explicit approval. PureDS4 5.1.0 has no automatic updater, so
+   recovery/upgrade instructions must be visible to users.
+
+After any authorized public release, an owner review of reported installation
+and runtime problems during the first 72 hours is recommended. No watcher,
+scheduled task, reminder or automatic withdrawal is created by this guidance.
