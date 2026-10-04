@@ -80,6 +80,28 @@ DS4Windows update channel. Version 5.1.0 bundles .NET 8.0.31, and .NET 8
 an updated PureDS4 package; see the
 [runtime maintenance plan](docs/RELEASE_CONTRACT.md#update-and-release-authority).
 
+## Screenshots
+
+Home with a DS4 connected over Bluetooth, controller protection, and Xbox 360
+game output.
+
+<a href="docs/images/screenshots/home.png">
+  <img src="docs/images/screenshots/home.png" alt="PureDS4 Home showing a DS4 connected over Bluetooth, Protected status, and Xbox 360 game output" width="800">
+</a>
+
+<details>
+<summary>Profile editor: live controller readings</summary>
+
+Inspect sticks, triggers and motion sensors while editing a profile.
+
+<a href="docs/images/screenshots/controller-readings.png">
+  <img src="docs/images/screenshots/controller-readings.png" alt="PureDS4 profile editor showing live stick, trigger, gyro and accelerometer readings" width="800">
+</a>
+
+</details>
+
+Click either screenshot to open the full-size image.
+
 ## Switching from DS4Windows
 
 PureDS4 replaces DS4Windows. Keeping both installed for ongoing use, or
