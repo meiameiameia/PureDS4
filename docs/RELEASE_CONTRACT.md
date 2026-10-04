@@ -167,6 +167,16 @@ owner's editorial README review and then explicitly resumed. Later
 documentation commits must not relabel these binaries as built from a
 different source revision.
 
+On 2026-10-04 the owner completed the repository visibility change, and
+[PureDS4 5.1.0](https://github.com/meiameiameia/PureDS4/releases/tag/v5.1.0)
+was published from release `402225081` at `2026-10-04T14:07:03Z` as the latest
+stable release. The annotated tag resolves to the application source above;
+the editorial documentation was committed separately as
+`4305d0b35e40a88fdf3223d33c7e85b58cafa7f1`. All four public downloads were
+verified without authentication against the accepted sizes and SHA-256 hashes.
+No binary was rebuilt or replaced. See the
+[publication verification](INSTALLER_VALIDATION_STRATEGY.md#public-distribution-verification--2026-10-04).
+
 Public artifacts use the `PureDS4_<version>_<kind>_x64` naming family, and the
 installed executable is `PureDS4.exe`. The publish layout carries a
 `PureDS4.release` marker that `utils/validate-installer.py` checks against the
@@ -251,19 +261,18 @@ failure/rollback and reboot/resume matrix. On 2026-10-03 the owner accepted
 that specific residual risk for preparation of the first `5.1.0`; the bounded
 exception is recorded in the installer strategy, not as passed testing.
 Current runtime/advisory and component-input checks completed on that date.
-Prepared public notes and support/recovery/withdrawal guidance follow below
+Public notes and support/recovery/withdrawal guidance follow below
 and in [install/rollback](INSTALL_AND_ROLLBACK.md#support-and-distribution-recovery).
 The separate distribution/visibility decision was approved on 2026-10-03:
 commit/push the final documentation, expose the tracked repository/history,
 and publish the unchanged accepted assets under the source-accurate tag.
 Those actions are not authorized by the installation-risk exception alone.
 
-## Prepared 5.1.0 publication text
+## 5.1.0 publication text
 
-This is proposed publication content, not an announcement that publication has
-occurred. Preserve the exact candidate files and their source SHA when transferring
-it to the GitHub release. Do not rebuild, replace assets or silently retarget the
-release to a documentation-only commit.
+The text below was published on 2026-10-04 with the exact accepted candidate.
+Preserve its source and artifact identities. Do not rebuild, replace assets or
+silently retarget the release to a documentation-only commit.
 
 ### PureDS4 5.1.0
 

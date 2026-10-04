@@ -147,6 +147,26 @@ instructions must disclose the unverified publisher and possible warnings/blocks
 never advise disabling protections or promise acceptance under Smart App Control
 or enterprise policy.
 
+### Public distribution verification — 2026-10-04
+
+The owner made `meiameiameia/PureDS4` public. Anonymous checks returned HTTP
+200 for the repository, the exact application and VIIPER source revisions,
+the migration/recovery guide and the issues page. Release `402225081` was
+published at `2026-10-04T14:07:03Z` as
+[v5.1.0](https://github.com/meiameiameia/PureDS4/releases/tag/v5.1.0), with
+`draft: false`, `prerelease: false`, and latest-release status. Its annotated
+tag resolves to `8999108763aa09c5478c8713f7fd62d99cf7ebb5`; the documentation
+commit does not relabel the binary source.
+
+All four existing assets retained their IDs, bytes and SHA-256 digests.
+Unauthenticated downloads of the installer, portable ZIP, `SHA256SUMS.txt`
+and `candidate-identity.json` matched their accepted hashes and sizes. The
+downloaded identity still records version `5.1.0`, the exact application source
+and a local Windows build. The publicly rendered README preserves the icon's
+explicit 80-by-80 dimensions. No executable was run, installed or rebuilt
+for this distribution verification. It does not fill the hardware or
+installation-evidence gaps listed above.
+
 ### Owner-approved first-release exception — 2026-10-03
 
 The owner approved proceeding with preparation of the first `5.1.0` while
