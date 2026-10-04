@@ -59,7 +59,7 @@ COPYRIGHT_NOTICE_FILES = {
         ("system.management", "7.0.2", "THIRD-PARTY-NOTICES.TXT"),
 }
 
-WINDOWS_SDK_PACK = "runtimepack.Microsoft.Windows.SDK.NET.Ref/10.0.19041.56"
+WINDOWS_SDK_PACK = "runtimepack.Microsoft.Windows.SDK.NET.Ref/10.0.19041.57"
 WINDOWS_SDK_ASSETS = {"Microsoft.Windows.SDK.NET.dll", "WinRT.Runtime.dll"}
 WINDOWS_SDK_LICENSE_URL = "https://aka.ms/WinSDKLicenseURL"
 

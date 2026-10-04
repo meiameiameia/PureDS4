@@ -471,7 +471,8 @@ namespace DS4WindowsTests
             runtimeOutputs[0] = output;
             Assert.IsFalse(manager.TryUnbindInput(null, 0, runtimeOutputs));
 
-            Assert.IsNull(runtimeOutputs[0]);
+            // A missing caller identity cannot erase an existing projection.
+            Assert.AreSame(output, runtimeOutputs[0]);
             Assert.AreEqual(1, output.DisconnectCount);
         }
 
@@ -500,6 +501,76 @@ namespace DS4WindowsTests
             return new OutputDevice[manager.OutputSlots.Length];
         }
 
+        [TestMethod]
+        public void FailedDisconnectRetainsSlotAndInputProjectionUntilRetrySucceeds()
+        {
+            OutputSlotManager manager = new();
+            OutputDevice[] outputs = NewRuntimeOutputs(manager);
+            RecordingOutputDevice output = new(OutContType.ViiperX360)
+            {
+                DisconnectException = new System.IO.IOException("unconfirmed removal")
+            };
+            manager.DeferredPlugin(output, 0, "DS4", outputs, OutContType.ViiperX360);
+            int unassigned = 0;
+            manager.SlotUnassigned += (_, _, _) => unassigned++;
+            Assert.ThrowsException<System.IO.IOException>(() => manager.TryUnbindInput(output, 0, outputs, force: true));
+            Assert.AreSame(output, outputs[0]);
+            Assert.IsNotNull(manager.GetOutSlotDevice(output));
+            Assert.AreEqual(0, unassigned);
+            output.DisconnectException = null;
+            Assert.IsTrue(manager.TryUnbindInput(output, 0, outputs, force: true));
+            Assert.IsNull(outputs[0]);
+            Assert.IsNull(manager.GetOutSlotDevice(output));
+            Assert.AreEqual(1, unassigned);
+        }
+
+        [TestMethod]
+        public void StopPreservesUnfinishedOutputAfterPartialSuccessAndCanBeRetried()
+        {
+            OutputSlotManager manager = new();
+            OutputDevice[] outputs = NewRuntimeOutputs(manager);
+            RecordingOutputDevice first = new(OutContType.ViiperX360);
+            RecordingOutputDevice second = new(OutContType.ViiperDS4)
+            {
+                DisconnectException = new System.IO.IOException("detach failed")
+            };
+            manager.DeferredPlugin(first, -1, "first", outputs, OutContType.ViiperX360);
+            manager.DeferredPlugin(second, -1, "second", outputs, OutContType.ViiperDS4);
+            Assert.ThrowsException<System.IO.IOException>(() => manager.Stop(true));
+            Assert.IsNull(manager.GetOutSlotDevice(first));
+            Assert.IsNotNull(manager.GetOutSlotDevice(second));
+            Assert.AreEqual(1, manager.NumAttachedDevices);
+
+            second.DisconnectException = null;
+            manager.Stop(true);
+            Assert.AreEqual(1, first.DisconnectCount);
+            Assert.AreEqual(2, second.DisconnectCount);
+            Assert.AreEqual(0, manager.NumAttachedDevices);
+            manager.Stop(true);
+            Assert.AreEqual(2, second.DisconnectCount);
+        }
+
+        [TestMethod]
+        public void PermanentSlotResetFailureCannotAnnounceAnUnboundInput()
+        {
+            OutputSlotManager manager = new();
+            OutputDevice[] outputs = NewRuntimeOutputs(manager);
+            RecordingOutputDevice output = new(OutContType.ViiperDS4)
+            {
+                ResetException = new System.IO.IOException("neutral report failed")
+            };
+            manager.DeferredPlugin(output, 0, "DS4", outputs, OutContType.ViiperDS4);
+            OutSlotDevice slot = manager.GetOutSlotDevice(output);
+            slot.CurrentReserveStatus = OutSlotDevice.ReserveStatus.Permanent;
+            Assert.ThrowsException<System.IO.IOException>(() => manager.TryUnbindInput(output, 0, outputs));
+            Assert.AreSame(output, outputs[0]);
+            Assert.AreEqual(OutSlotDevice.InputBound.Bound, slot.CurrentInputBound);
+            output.ResetException = null;
+            Assert.IsTrue(manager.TryUnbindInput(output, 0, outputs));
+            Assert.IsNull(outputs[0]);
+            Assert.AreEqual(OutSlotDevice.InputBound.Unbound, slot.CurrentInputBound);
+        }
+
         private sealed class RecordingOutputDevice : OutputDevice
         {
             private readonly List<string> calls;
@@ -512,6 +583,8 @@ namespace DS4WindowsTests
             }
 
             public Exception ConnectException { get; init; }
+            public Exception DisconnectException { get; set; }
+            public Exception ResetException { get; set; }
             public int ConnectCount { get; private set; }
             public int DisconnectCount { get; private set; }
             public int RemoveFeedbacksCount { get; private set; }
@@ -534,11 +607,13 @@ namespace DS4WindowsTests
             {
                 DisconnectCount++;
                 calls?.Add("disconnect");
+                if (DisconnectException != null) throw DisconnectException;
             }
 
             public override void ResetState(bool submit = true)
             {
                 calls?.Add("reset");
+                if (ResetException != null) throw ResetException;
             }
 
             public override string GetDeviceType()

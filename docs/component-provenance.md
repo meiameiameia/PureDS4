@@ -11,7 +11,32 @@ official asset or source revision. The normal validator allows a known blocked
 component to remain in internal builds; `--require-release-ready` fails closed
 while any blocker exists.
 
-## Pinned release inputs
+## 5.1.1 pinned inputs (2026-10-04)
+
+The active manifest now selects `0.1.0-pureds4.2`. Its clean-source binary is
+`extras/VIIPER-0.1.0-pureds4.2-x64.exe`, SHA-256
+`13E591AFFBFEEAD3E721E57CC4B1E2E10A170C312F19527129BACE17F1FCB2D9`,
+with generated notices in `extras/VIIPER-0.1.0-pureds4.2-LICENSES.txt`.
+It was rebuilt after the owner-authorized backend commit
+`04c10b1e0b5439b649730389673a64918a43578e`; embedded Go metadata records
+that exact revision, Go `1.26.5`, and `vcs.modified=false`. Go tests and vet
+passed before the commit. The packaged notice SHA-256 is
+`0B957386EF206893F91B8ADBAFED6EC56296EE0E8F4DA6D9851750B2A2BAA2E2`;
+line endings were normalized to LF and surplus empty lines at EOF removed,
+without changing license text. Git attributes preserve that packaged identity.
+The notices retain the upstream license and dependency attribution. Inputs
+calculate `releaseReady: true`; this does not establish final package/hardware
+acceptance or authorize installation. Earlier dirty-tree outputs are superseded.
+
+The 5.1.1 .NET migration pins SDK `10.0.302`, Core/Desktop runtime packs and
+apphost `10.0.12`. The Windows SDK projection is `10.0.19041.57`; its shipped
+terms and acceptance identifier are unchanged. The SDK's own shared runtime
+is not the payload identity: verify restore assets for all managed hosts and
+the candidate records. [.NET 10 is LTS through November 14, 2028](https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core);
+recheck patch/advisory status before release. Other driver/component inputs
+remain unchanged. No host component was installed or reconfigured by these checks.
+
+## 5.1.0 pinned release inputs (historical)
 
 | Component | Source and binary evidence | License / notice |
 | --- | --- | --- |
@@ -34,7 +59,7 @@ On 2026-09-29 the owner approved deterministic backend-failure acceptance,
 documented with its passing tests and limitations in
 [hardware validation](HARDWARE_VALIDATION.md#backend-failure-acceptance-criterion).
 Physical reproduction of the intermittent failure remains unobserved, not a
-claimed pass or a component-input blocker. The manifest therefore calculates
+claimed pass or a component-input blocker. The 5.1.0 manifest therefore calculated
 `releaseReady: true` for its five component inputs. This does not establish
 overall product readiness, legal clearance for the separate Windows SDK
 projection, the remaining clean-install/failure/recovery matrix, final artifact

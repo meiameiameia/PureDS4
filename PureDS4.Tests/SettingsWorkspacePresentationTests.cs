@@ -82,6 +82,31 @@ public class SettingsWorkspacePresentationTests
         });
     }
 
+    [TestMethod]
+    public void ReleaseNotificationSwitchUpdatesTheExistingPreferenceBinding()
+    {
+        WpfTestHost.Run(() =>
+        {
+            Theme(dark: true);
+            UserControl view = LoadTabWorkspace("settingsTab");
+            var fixture = new SettingsFixture { CheckForUpdates = true };
+            var owner = new Window { Content = view, DataContext = fixture };
+            ((TabControl)view.FindName("settingsCategoryTabs")).SelectedIndex = 0;
+            Layout(view, Viewports[0]);
+            CheckBox toggle = Descendants<CheckBox>(view).Single(box =>
+                System.Windows.Automation.AutomationProperties.GetName(box) == "New release notifications");
+            Assert.IsTrue(toggle.IsEnabled);
+            Assert.IsTrue(toggle.IsChecked == true);
+            toggle.SetCurrentValue(System.Windows.Controls.Primitives.ToggleButton.IsCheckedProperty, false);
+            toggle.GetBindingExpression(System.Windows.Controls.Primitives.ToggleButton.IsCheckedProperty).UpdateSource();
+            Assert.IsFalse(fixture.CheckForUpdates);
+            toggle.SetCurrentValue(System.Windows.Controls.Primitives.ToggleButton.IsCheckedProperty, true);
+            toggle.GetBindingExpression(System.Windows.Controls.Primitives.ToggleButton.IsCheckedProperty).UpdateSource();
+            Assert.IsTrue(fixture.CheckForUpdates);
+            owner.Content = null;
+        });
+    }
+
     /// <summary>
     /// Settings, Tools and Auto Profiles must share Home's workspace inset. Home
     /// is the accepted reference; content never sits flush against the window.

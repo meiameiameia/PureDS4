@@ -5,16 +5,17 @@
   "components": [
     {
       "id": "viiper",
-      "version": "0.1.0-pureds4.1",
+      "version": "0.1.0-pureds4.2",
       "status": "verified",
+      "sourceDirty": false,
       "sourceRepository": "https://github.com/meiameiameia/PureDS4-VIIPER",
-      "sourceCommit": "c472717d2eed950d8aab3eab80edc87400a75ae8",
-      "licensePath": "extras/VIIPER-0.1.0-pureds4.1-LICENSES.txt",
+      "sourceCommit": "04c10b1e0b5439b649730389673a64918a43578e",
+      "licensePath": "extras/VIIPER-0.1.0-pureds4.2-LICENSES.txt",
       "artifacts": [
         {
           "kind": "repository",
-          "path": "extras/VIIPER-0.1.0-pureds4.1-x64.exe",
-          "sha256": "67559205427F18849E16B0A8329E6270D9A42E4AA155ACA9FD5EA8574A8A01C8",
+          "path": "extras/VIIPER-0.1.0-pureds4.2-x64.exe",
+          "sha256": "13E591AFFBFEEAD3E721E57CC4B1E2E10A170C312F19527129BACE17F1FCB2D9",
           "buildScript": "scripts/build-pureds4-backend.ps1",
           "buildCommand": ".\\scripts\\build-pureds4-backend.ps1 -OutputDir .\\dist -RequireClean"
         }

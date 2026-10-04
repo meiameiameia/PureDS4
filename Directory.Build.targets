@@ -1,0 +1,19 @@
+<Project>
+  <!-- Pin the .NET runtime, not the unrelated Windows SDK reference pack.
+       RuntimeFrameworkVersion as a global property also overrides that pack.
+       Run after implicit WPF/WinForms references have been established. -->
+  <Target Name="PinPureDS4Runtime" BeforeTargets="ProcessFrameworkReferences"
+          Condition="'$(TargetFrameworkVersion)' == 'v10.0'">
+    <ItemGroup>
+      <!-- WPF's profile selects the shared WindowsDesktop runtime pack from
+           the base known reference, even without a direct base reference. -->
+      <KnownFrameworkReference Update="@(KnownFrameworkReference)"
+                               Condition="'%(KnownFrameworkReference.TargetFramework)' == 'net10.0' And ('%(KnownFrameworkReference.Identity)' == 'Microsoft.NETCore.App' Or $([System.String]::Copy('%(KnownFrameworkReference.Identity)').StartsWith('Microsoft.WindowsDesktop.App')))"
+                               DefaultRuntimeFrameworkVersion="$(PureDS4RuntimeVersion)"
+                               LatestRuntimeFrameworkVersion="$(PureDS4RuntimeVersion)" />
+      <KnownAppHostPack Update="@(KnownAppHostPack)"
+                        Condition="'%(KnownAppHostPack.TargetFramework)' == 'net10.0'"
+                        AppHostPackVersion="$(PureDS4RuntimeVersion)" />
+    </ItemGroup>
+  </Target>
+</Project>

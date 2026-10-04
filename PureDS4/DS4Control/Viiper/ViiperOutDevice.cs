@@ -13,6 +13,7 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -852,11 +853,17 @@ namespace DS4Windows
                 pendingMicrophoneFrames.Clear();
             }
 
+            Exception retirementError = null;
             lock (streamRecoveryLock)
             {
-                ViiperDeviceStream stream = Interlocked.Exchange(ref deviceStream, null);
+                ViiperDeviceStream stream = deviceStream;
                 Interlocked.Increment(ref streamGeneration);
-                stream?.Dispose();
+                try
+                {
+                    stream?.Dispose();
+                    deviceStream = null;
+                }
+                catch (Exception ex) { retirementError = ex; }
             }
 
             Thread writerThread;
@@ -891,6 +898,8 @@ namespace DS4Windows
             StopFeedbackReader();
             StopFeedbackDispatchWorkers();
             feedbackDispatchBuffer.ClearPending();
+            if (retirementError != null)
+                throw new IOException("VIIPER output retirement is not confirmed; its identity was retained for retry.", retirementError);
         }
 
         private void StopFeedbackReader()
@@ -4193,6 +4202,7 @@ namespace DS4Windows
 
         private readonly string host;
         private readonly int port;
+        private static readonly ViiperCreationCleanupRegistry failedCreations = new();
 
         public ViiperClient(string host, int port)
         {
@@ -4208,11 +4218,13 @@ namespace DS4Windows
         public ViiperDeviceStream CreateDeviceAndOpenStream(string deviceName,
             ushort? idProduct = null)
         {
+            failedCreations.RetirePending();
             ViiperUsbipPortManager.DetachStaleLocalViiperPorts();
 
             ViiperBusCreateResponse bus = SendRequest<ViiperBusCreateResponse>("bus/create", "0");
             ViiperDeviceResponse device = null;
             int usbipPort = -1;
+            ViiperVirtualDeviceLifetime lifetime = null;
             try
             {
                 string payload = JsonSerializer.Serialize(new ViiperDeviceCreateRequest
@@ -4230,21 +4242,32 @@ namespace DS4Windows
                         $"VIIPER created {bus.BusId}-{device.DevId}, but its native usbip-win2 attach response did not contain a positive port and supported ownership metadata.");
                 }
 
-                ViiperUsbipPortManager.DetachDuplicateLocalViiperPorts(bus.BusId, device.DevId, usbipPort);
                 ViiperUsbipPortManager.RegisterActivePort(usbipPort,
                     $"{bus.BusId}-{device.DevId}");
-                return OpenStream(bus.BusId, device.DevId, usbipPort);
+                lifetime = new ViiperVirtualDeviceLifetime(bus.BusId,
+                    device.DevId, usbipPort, RemoveDevice);
+                ViiperUsbipPortManager.DetachDuplicateLocalViiperPorts(bus.BusId, device.DevId, usbipPort);
+                return OpenStream(bus.BusId, device.DevId, usbipPort, lifetime);
             }
-            catch
+            catch (Exception creationError)
             {
-                ViiperUsbipPortManager.UnregisterActivePort(usbipPort);
-
-                if (device != null && !string.IsNullOrEmpty(device.DevId))
+                // A failed stream open must not forget the created bus/device
+                // or unregister its port before retirement is confirmed.
+                lifetime ??= new ViiperVirtualDeviceLifetime(bus.BusId,
+                    device?.DevId ?? string.Empty, -1,
+                    (busId, devId) =>
+                    {
+                        if (!string.IsNullOrEmpty(devId)) TryRemoveDevice(busId, devId);
+                        TryRemoveBus(busId);
+                    }, (_, _) => { }, _ => { });
+                failedCreations.Add(lifetime);
+                try { failedCreations.RetirePending(); }
+                catch (Exception cleanupError)
                 {
-                    TryRemoveDevice(bus.BusId, device.DevId);
+                    throw new IOException("VIIPER creation failed and cleanup remains pending; " +
+                        "the resource identity was retained for retry.",
+                        new AggregateException(creationError, cleanupError));
                 }
-
-                TryRemoveBus(bus.BusId);
                 throw;
             }
         }
@@ -4357,7 +4380,7 @@ namespace DS4Windows
             }
         }
 
-        private void RemoveDevice(uint busId, string devId)
+        internal void RemoveDevice(uint busId, string devId)
         {
             TryRemoveDevice(busId, devId);
             TryRemoveBus(busId);
@@ -4365,23 +4388,34 @@ namespace DS4Windows
 
         private void TryRemoveDevice(uint busId, string devId)
         {
-            try
-            {
-                SendRequestRaw($"bus/{busId}/remove", devId);
-            }
-            catch
-            {
-            }
+            VerifyRemovalResponse(SendRequestRaw($"bus/{busId}/remove", devId), busId, devId);
         }
 
         private void TryRemoveBus(uint busId)
         {
+            VerifyRemovalResponse(SendRequestRaw("bus/remove", busId.ToString()), busId);
+        }
+
+        internal static void VerifyRemovalResponse(string raw, uint busId, string devId = null)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                throw new IOException("VIIPER did not confirm resource removal.");
             try
             {
-                SendRequestRaw("bus/remove", busId.ToString());
+                using var response = JsonDocument.Parse(raw);
+                JsonElement root = response.RootElement;
+                if (root.TryGetProperty("status", out JsonElement status) && status.GetInt32() != 0)
+                {
+                    if (status.GetInt32() == 404) return; // already absent
+                    throw new IOException("VIIPER refused resource removal: " + raw);
+                }
+                if (!root.TryGetProperty("busId", out JsonElement bus) || bus.GetUInt32() != busId ||
+                    (devId != null && (!root.TryGetProperty("devId", out JsonElement dev) || dev.GetString() != devId)))
+                    throw new IOException("VIIPER removal response did not identify the requested resource.");
             }
-            catch
+            catch (Exception ex) when (ex is JsonException || ex is InvalidOperationException || ex is FormatException)
             {
+                throw new IOException("VIIPER returned an invalid removal response.", ex);
             }
         }
 
@@ -4655,17 +4689,18 @@ namespace DS4Windows
         }
 
         internal static void DetachRegisteredPort(int port, string reason)
+            => DetachRegisteredPort(port, reason, TryRunUsbip);
+
+        internal static void DetachRegisteredPort(int port, string reason, UsbipCommandRunner runner)
         {
             string remoteBusId;
+            bool registered;
             lock (ActivePortsLock)
             {
-                if (!ActivePorts.TryGetValue(port, out remoteBusId))
-                {
-                    return;
-                }
+                registered = ActivePorts.TryGetValue(port, out remoteBusId);
             }
 
-            if (!TryGetImportedPorts(out IReadOnlyList<UsbipPortBlock> ports,
+            if (!TryGetImportedPorts(runner, out IReadOnlyList<UsbipPortBlock> ports,
                 out string queryError))
             {
                 throw CreatePortQueryException(
@@ -4690,15 +4725,21 @@ namespace DS4Windows
                 return;
             }
 
-            if (!IsDs4WindowsOwnedLocalPort(ownedPort, remoteBusId))
+            if (!registered || !IsDs4WindowsOwnedLocalPort(ownedPort, remoteBusId))
             {
-                AppLogger.LogToGui(
-                    $"VIIPER refused to detach usbip port {port} ({reason}) because its {ProductIdentity.Name} ownership token or device identity no longer matches.",
-                    true);
-                return;
+                throw new IOException($"VIIPER cannot confirm retirement of port {port}: its registered ownership or device identity no longer matches.");
             }
 
-            DetachPort(port, reason);
+            if (!runner(new[] { "detach", "-p", port.ToString() }, out _, out string detachError))
+                throw new IOException($"VIIPER could not detach port {port} ({reason}): {detachError}");
+            for (int attempt = 0; attempt < 3; attempt++)
+            {
+                if (!TryGetImportedPorts(runner, out ports, out queryError))
+                    throw CreatePortQueryException("confirm VIIPER port removal", queryError);
+                if (!ports.Any(candidate => candidate.Port == port)) return;
+                if (attempt < 2) Thread.Sleep(100);
+            }
+            throw new IOException($"VIIPER port {port} remained imported after detach.");
         }
 
         private static void DetachPort(int port, string reason)
@@ -4710,8 +4751,7 @@ namespace DS4Windows
 
             if (!TryRunUsbip(new[] { "detach", "-p", port.ToString() }, out _, out string error))
             {
-                AppLogger.LogToGui($"VIIPER could not detach usbip port {port} ({reason}): {error}", true);
-                return;
+                throw new IOException($"VIIPER could not detach usbip port {port} ({reason}): {error}");
             }
 
             AppLogger.LogToGui($"VIIPER detached usbip port {port} ({reason}).", false);
@@ -5057,6 +5097,29 @@ namespace DS4Windows
         }
     }
 
+    internal sealed class ViiperCreationCleanupRegistry
+    {
+        private readonly object gate = new();
+        private readonly List<ViiperVirtualDeviceLifetime> pending = new();
+
+        internal void Add(ViiperVirtualDeviceLifetime lifetime)
+        {
+            lock (gate) pending.Add(lifetime);
+        }
+
+        internal void RetirePending()
+        {
+            lock (gate)
+            {
+                foreach (var lifetime in pending.ToArray())
+                {
+                    lifetime.Dispose();
+                    pending.Remove(lifetime);
+                }
+            }
+        }
+    }
+
     internal sealed class ViiperVirtualDeviceLifetime : IDisposable
     {
         private readonly uint busId;
@@ -5066,6 +5129,10 @@ namespace DS4Windows
         private readonly Action<int> unregisterPort;
         private readonly Action<uint, string> removeDevice;
         private readonly Action detachStalePorts;
+        private readonly object retirementLock = new object();
+        private bool portDetached;
+        private bool deviceRemoved;
+        private bool portUnregistered;
         private int disposed;
 
         internal ViiperVirtualDeviceLifetime(uint busId, string devId,
@@ -5082,8 +5149,9 @@ namespace DS4Windows
                 ViiperUsbipPortManager.DetachRegisteredPort;
             this.unregisterPort = unregisterPort ??
                 ViiperUsbipPortManager.UnregisterActivePort;
-            this.detachStalePorts = detachStalePorts ??
-                ViiperUsbipPortManager.DetachStaleLocalViiperPorts;
+            // Retiring one output must not sweep unrelated imports. Startup
+            // recovery owns the broader stale-port scan.
+            this.detachStalePorts = detachStalePorts;
         }
 
         internal uint BusId => busId;
@@ -5096,42 +5164,26 @@ namespace DS4Windows
 
         public void Dispose()
         {
-            if (Interlocked.Exchange(ref disposed, 1) == 1)
+            lock (retirementLock)
             {
-                return;
-            }
-
-            try
-            {
-                detachPort?.Invoke(usbipPort,
-                    $"{ProductIdentity.Name} VIIPER device stopped");
-            }
-            catch
-            {
-            }
-
-            try
-            {
-                unregisterPort?.Invoke(usbipPort);
-            }
-            catch
-            {
-            }
-
-            try
-            {
-                removeDevice?.Invoke(busId, devId);
-            }
-            catch
-            {
-            }
-
-            try
-            {
+                if (IsDisposed) return;
+                if (!portDetached)
+                {
+                    detachPort?.Invoke(usbipPort, $"{ProductIdentity.Name} VIIPER device stopped");
+                    portDetached = true;
+                }
+                if (!deviceRemoved)
+                {
+                    removeDevice?.Invoke(busId, devId);
+                    deviceRemoved = true;
+                }
+                if (!portUnregistered)
+                {
+                    unregisterPort?.Invoke(usbipPort);
+                    portUnregistered = true;
+                }
                 detachStalePorts?.Invoke();
-            }
-            catch
-            {
+                Volatile.Write(ref disposed, 1);
             }
         }
 

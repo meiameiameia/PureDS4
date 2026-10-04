@@ -11,6 +11,7 @@ namespace DS4WindowsTests
         [TestMethod]
         public void IndependentProductUpdateAuthorityIsDisabled()
         {
+            Assert.IsTrue(UpdateAuthorityPolicy.ReleaseNotificationsEnabled);
             Assert.IsFalse(UpdateAuthorityPolicy.ProductUpdatesEnabled);
             Assert.IsFalse(Changelog.CheckNewerReleaseExists(
                 out string releaseTag, allowCached: false));

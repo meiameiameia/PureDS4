@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+		<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
 		<UseWPF>true</UseWPF>
 		<Platforms>x64;x86</Platforms>
 		<RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
@@ -35,10 +35,10 @@
 		     a SustainedLowLatency lease in the process. -->
 		<ServerGarbageCollection>false</ServerGarbageCollection>
 		<ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
-		<AssemblyVersion>5.1.0.0</AssemblyVersion>
-		<FileVersion>5.1.0.0</FileVersion>
-		<Version>5.1.0</Version>
-		<InformationalVersion>5.1.0</InformationalVersion>
+		<AssemblyVersion>5.1.1.0</AssemblyVersion>
+		<FileVersion>5.1.1.0</FileVersion>
+		<Version>5.1.1</Version>
+		<InformationalVersion>5.1.1</InformationalVersion>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 		<Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
 		<!-- DualShock 3 hardware-validation switch. Off unless a build explicitly
@@ -53,7 +53,7 @@
 		<Title>PureDS4</Title>
 		<AssemblyTitle>PureDS4</AssemblyTitle>
 		<Copyright>Copyright © Scarlet.Crush Productions 2012, 2013; InhexSTER, HecticSeptic, electrobrains 2013, 2014; Jays2Kings 2013, 2014, 2015, 2016; Ryochan7 2017-2023; schmaldeo 2024; hbashton 2026; meiameiameia 2026</Copyright>
-		<Description>A focused Windows tool for DualShock 4 and DualShock 3 controller mapping and virtual game output</Description>
+		<Description>A focused Windows tool for DualShock 4 controller mapping and virtual game output</Description>
 		<Authors>meiameiameia</Authors>
 		<Company>meiameiameia</Company>
 		<PackageProjectUrl>https://github.com/meiameiameia/pureds4</PackageProjectUrl>
@@ -136,7 +136,7 @@
 		AfterTargets="Publish"
 		BeforeTargets="GenerateManagedFileManifest">
 		<PropertyGroup>
-			<_BundledViiperName>VIIPER-0.1.0-pureds4.1-x64.exe</_BundledViiperName>
+			<_BundledViiperName>VIIPER-0.1.0-pureds4.2-x64.exe</_BundledViiperName>
 			<_BundledViiperPath>$(PublishDir)extras\$(_BundledViiperName)</_BundledViiperPath>
 			<_BundledViiperHashPath>$(_BundledViiperPath).sha256</_BundledViiperHashPath>
 		</PropertyGroup>
@@ -199,14 +199,14 @@
 		<EmbeddedResource Include="..\extras\install-viiper-backend.ps1">
 			<LogicalName>DS4Windows.install-viiper-backend.ps1</LogicalName>
 		</EmbeddedResource>
-		<Content Include="..\extras\VIIPER-0.1.0-pureds4.1-x64.exe">
-			<Link>extras\VIIPER-0.1.0-pureds4.1-x64.exe</Link>
+		<Content Include="..\extras\VIIPER-0.1.0-pureds4.2-x64.exe">
+			<Link>extras\VIIPER-0.1.0-pureds4.2-x64.exe</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</Content>
-		<Content Include="..\extras\VIIPER-0.1.0-pureds4.1-LICENSES.txt">
-			<Link>extras\VIIPER-0.1.0-pureds4.1-LICENSES.txt</Link>
+		<Content Include="..\extras\VIIPER-0.1.0-pureds4.2-LICENSES.txt">
+			<Link>extras\VIIPER-0.1.0-pureds4.2-LICENSES.txt</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 		</Content>
@@ -258,7 +258,6 @@
 		<PackageReference Include="YellowDogMan.RRNoise.NET" Version="0.1.9" GeneratePathProperty="true" PrivateAssets="all" ExcludeAssets="all" />
 		<PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
 		<PackageReference Include="System.Management" Version="7.0.2" />
-		<PackageReference Include="System.Memory" Version="4.5.5" />
 		<PackageReference Include="TaskScheduler" Version="2.10.1" />
 		<PackageReference Include="WPFLocalizeExtension" Version="3.9.4" />
 		<PackageReference Include="WpfScreenHelper" Version="2.1.0" />

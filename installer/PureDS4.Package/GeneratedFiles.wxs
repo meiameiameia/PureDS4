@@ -50,14 +50,14 @@
         <Component Id="cmp_5de46db45d70b6b94cf6c974" Guid="54766352-C23A-54C8-99D3-293CCCB268C4">
           <File Id="fil_5de46db45d70b6b94cf6c974" Source="$(var.PublishRoot)\extras\USBip-0.9.7.7-x64.exe" KeyPath="yes" />
         </Component>
-        <Component Id="cmp_f784d5b1f77104e7c899f737" Guid="55CA0A1A-C7E0-51F4-A69D-796015F931A1">
-          <File Id="fil_f784d5b1f77104e7c899f737" Source="$(var.PublishRoot)\extras\VIIPER-0.1.0-pureds4.1-LICENSES.txt" KeyPath="yes" />
+        <Component Id="cmp_0a5306d40f0245f360501d0d" Guid="B83EDB4B-0DE3-5A64-87B0-C25458B39769">
+          <File Id="fil_0a5306d40f0245f360501d0d" Source="$(var.PublishRoot)\extras\VIIPER-0.1.0-pureds4.2-LICENSES.txt" KeyPath="yes" />
         </Component>
-        <Component Id="cmp_14a93ea14df6f35d1de40990" Guid="1A60FC24-3D0F-5232-A435-40018398CCF1">
-          <File Id="fil_14a93ea14df6f35d1de40990" Source="$(var.PublishRoot)\extras\VIIPER-0.1.0-pureds4.1-x64.exe" KeyPath="yes" />
+        <Component Id="cmp_b8b5113e065ef4f7c1497f6a" Guid="0EF90DEB-C0AD-5072-91C4-6516E1092D8F">
+          <File Id="fil_b8b5113e065ef4f7c1497f6a" Source="$(var.PublishRoot)\extras\VIIPER-0.1.0-pureds4.2-x64.exe" KeyPath="yes" />
         </Component>
-        <Component Id="cmp_0d6a47c1058c99f7cb038064" Guid="686CE64B-0AC6-55F7-B58D-9364A65CDFDD">
-          <File Id="fil_0d6a47c1058c99f7cb038064" Source="$(var.PublishRoot)\extras\VIIPER-0.1.0-pureds4.1-x64.exe.sha256" KeyPath="yes" />
+        <Component Id="cmp_9a8f5542a369100acac3f46d" Guid="A6FC9D5C-B411-56C4-B3A6-B1E24F950504">
+          <File Id="fil_9a8f5542a369100acac3f46d" Source="$(var.PublishRoot)\extras\VIIPER-0.1.0-pureds4.2-x64.exe.sha256" KeyPath="yes" />
         </Component>
       </Directory>
       <Directory Id="dir_e89b30aa1dc30a6ad8c34610" Name="Resources">
@@ -121,9 +121,9 @@
       <ComponentRef Id="cmp_dd8d72b6d2de84b6218f16fe" />
       <ComponentRef Id="cmp_2410fca94ce9664b4df90c9a" />
       <ComponentRef Id="cmp_5de46db45d70b6b94cf6c974" />
-      <ComponentRef Id="cmp_f784d5b1f77104e7c899f737" />
-      <ComponentRef Id="cmp_14a93ea14df6f35d1de40990" />
-      <ComponentRef Id="cmp_0d6a47c1058c99f7cb038064" />
+      <ComponentRef Id="cmp_0a5306d40f0245f360501d0d" />
+      <ComponentRef Id="cmp_b8b5113e065ef4f7c1497f6a" />
+      <ComponentRef Id="cmp_9a8f5542a369100acac3f46d" />
       <ComponentRef Id="cmp_4f4c0ad5e329f71965d85631" />
       <ComponentRef Id="cmp_e73a90b0a6c3de115cb63217" />
       <ComponentRef Id="cmp_ef6cf4f87a75fd2455393f4d" />

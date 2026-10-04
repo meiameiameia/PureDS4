@@ -10,12 +10,115 @@ PureDS4 is an independently maintained DS4Windows derivative by
 <https://github.com/meiameiameia/pureds4>.
 
 **The first public release supports the DualShock 4 only.** DualShock 3 is a
-planned milestone with no schedule and its own gate in `AGENTS.md`; it does not
+planned milestone with no schedule and separate implementation/hardware gates; it does not
 block this release, is not claimed by it, and is not offered by its UI. Users
 who need any other controller family use
 [`hbashton/DS4Windows`](https://github.com/hbashton/DS4Windows).
 
 ## Identity and compatibility
+
+### 5.1.1 maintenance scope (2026-10-04)
+
+The next target is **5.1.1**, with assembly/file version **5.1.1.0**.
+The intended names are `PureDS4_5.1.1_Setup_x64.exe` and
+`PureDS4_5.1.1_x64.zip`. On 2026-10-04 the owner authorized finishing 5.1.1
+and publishing it on GitHub, including the source commits/pushes needed for
+traceability, conditional on the required final acceptance. Installation and
+new release-specific risk exceptions still require their own approval.
+Published 5.1.0 artifacts and their evidence remain unchanged.
+
+This is a reliability/security update, not a controller-support expansion:
+
+- Reject malformed USB/IP imports without terminating the backend; restrict
+  the API and USB/IP listeners, including overrides, to local IPv4.
+- Cancel, drain, and release controller-owned macros before entering native
+  physical mode, stopping, or recycling a disconnected input slot. Failed
+  cleanup must remain retryable, and must not admit a replacement macro session.
+- Preserve virtual-device, bus, port, and output-slot identities until their
+  retirement is confirmed. Failed creation cleanup is retained for retry;
+  a failed retirement must not announce a successful native/stop transition.
+- Write profiles atomically, keep the original on failed saves/renames, and
+  report persistence failure instead of emitting success events.
+- Migrate the application, tests, and both managed installer hosts to .NET 10
+  LTS. Pin SDK `10.0.302` separately from Core/Desktop runtime `10.0.12`;
+  use locked dependencies and retain the reviewed Microsoft terms/notices.
+- Notify users about newer stable PureDS4 releases through a read-only GitHub
+  metadata check. Check on startup at most once per 24 hours, with an opt-out
+  and a manual Check action. Never download/install assets or start an updater.
+
+The owner approved local implementation of this notifier on 2026-10-04.
+A GitHub publication and a Reddit announcement remain separate decisions;
+the owner does not want a second Reddit announcement on the same day.
+
+On 2026-10-04 the owner separately accepted an unsigned 5.1.1 and the limited
+residual risk of unobserved consumer-Windows clean installation, real rollback,
+and reboot/resume, conditional on final USB/Bluetooth acceptance. A failed
+installation may require manual repair. Keep those gaps explicit; do not count
+them as passing tests, weaken Windows protections, or deliberately damage the
+daily-driver stack. This decision does not authorize installation of the
+candidate on the owner's PC. Known safety/integrity defects still hold release.
+
+DS3, DualSense, and per-shortcut absolute mouse destinations for RTS games are
+out of this update. The community examples (Dota 2, Red Alert 2, and AoE2)
+inform later exploration; no implementation date is promised.
+
+Before release-ready: complete composition checks using the clean-source backend
+pin, freeze one source/hash-identified installer and portable candidate,
+then batch USB/Bluetooth hardware acceptance on that candidate. That pass must
+exercise readings, virtual pad/gameplay, reconnect/restart, and managed → native
+→ managed routing. Include cancellation of a delayed held-input macro once;
+persistence failures use disposable automated fixtures, never the owner's profile.
+Document clean-install, rollback, and reboot/resume evidence or obtain a specific
+5.1.1 risk decision; the bounded first-release exceptions are not inherited.
+`releaseReady` in the component manifest is necessary, not overall acceptance.
+
+Local builds in `artifacts/validation-5.1.1/` are disposable, dirty-source
+verification outputs, not accepted publication candidates or daily-driver installs.
+The final backend input was rebuilt from clean commit
+`04c10b1e0b5439b649730389673a64918a43578e`; its source, binary and notice
+identities are recorded in [provenance](component-provenance.md#511-pinned-inputs-2026-10-04).
+This closes the component-source blocker, not the remaining package and owner gates.
+
+Before the release-notification change, local verification on 2026-10-04 passed **934 Release tests** in self-contained
+.NET 10.0.12 (live process audio capture explicitly excluded), backend Go tests
+and vet, locked restores, release-input/managed-notice regression gates, and
+installer/portable composition. Both Core/Desktop packs were verified as
+10.0.12 for the application, tests, bootstrapper, and setup-action host. NuGet
+advisory queries reported no known vulnerable packages for the application,
+tests, or either managed setup host. Installer state-machine, on-demand task,
+and USB-IP reboot-boundary simulations passed; these are not real Windows
+installation/rollback/reboot observations. The public-input gate correctly
+rejects the blocked backend. Hardware/GUI acceptance of these new bytes has
+not been performed; no application, installer, driver, or task was activated.
+
+After the notifier implementation, the final application regression on
+2026-10-04 passed **967 Release tests**, with zero failures or skips, using
+the explicit test project, locked restore, and self-contained .NET 10.0.12.
+Live process audio capture remained excluded. New isolated tests cover stable
+numeric version comparisons, opt-out/manual checking, persistent daily
+throttling, malformed/oversized metadata, HTTP failures, timeout/cancellation,
+concurrent checks, cache failures, and detached WPF preference/banner behavior.
+The HTTP tests use fake responses; they do not contact GitHub or activate
+controllers. This proves neither the final packaged application's live GUI
+workflow nor a real installation. No replacement package was composed in this
+pass; final-candidate and hardware acceptance remain pending as described above.
+
+Verification outputs before the clean backend source pin:
+
+Application changes are uncommitted on source base
+`5c890ddcb4d13951b0ca2d21155a2cd81110768a`; backend changes are uncommitted on
+`c472717d2eed950d8aab3eab80edc87400a75ae8`. Neither base SHA identifies the
+complete changed source as a public candidate.
+
+| Local artifact | Bytes | SHA-256 |
+| --- | --- | --- |
+| `installer/PureDS4_5.1.1_Setup_x64.exe` | 189,995,918 | `9AB74942751820090FEEC97BD7026D875224A492C35B6C4A3112D9A9FC407297` |
+| `portable/x64/Release/PureDS4_5.1.1_x64.zip` | 122,854,090 | `8DCCE06341D2B3950DCC0045EC366FD0EBFAE58FDEE363DDBC1E094FC0C064D2` |
+
+Paths are relative to `artifacts/validation-5.1.1/`. Both layouts contain the
+same application bytes. These pre-notifier packages are now stale relative to
+the changed application source; replace them after notification verification
+and the clean-source backend rebuild, not as an accepted final candidate.
 
 The public product name is **PureDS4**. Application metadata, window titles,
 installer presentation, package names, release artifacts, and first-party links
@@ -208,7 +311,28 @@ The inherited hbashton release feed is not an update or release-notes authority
 for PureDS4. `UpdateAuthorityPolicy` keeps automatic product updates and live
 release-note retrieval disabled, and no upstream release feed is queried, until
 an independent signed channel, rollback design, and prerelease ordering
-implementation are complete. Inherited DS4Windows release notes are not
+implementation are complete. The 5.1.1 read-only release notifier is separately
+authorized: it reads only public `/releases/latest` metadata from the PureDS4
+repository over HTTPS, accepts strictly numeric stable version tags, and opens
+only the fixed official Releases page when the user clicks. It neither requires
+nor establishes authority to install an unsigned binary. No remote release
+Markdown or asset URLs are executed or rendered. Network operations have a
+10-second deadline, cancellation, bounded response size, and no redirects.
+There is no telemetry or transmission of profiles/controller data; GitHub still
+receives ordinary request metadata such as the connection's IP address.
+
+The General setting reuses `CheckWhen`: zero disables automatic checks and a
+fresh configuration defaults to 24 hours. Existing opt-outs are preserved;
+legacy shorter intervals are clamped to 24 hours (longer intervals up to 30 days
+are retained). The tiny `release-check.json` cache in the active PureDS4 data
+folder atomically stores the UTC attempt time and last confirmed stable tag;
+both successes and failures are throttled across normal restarts. If the cache
+is unwritable, automatic requests are suppressed while manual checking remains
+available. Offline, invalid, rate-limited, or failed manual checks say they could
+not check, never falsely claim the installed build is current. Neither checking
+nor dismissing a notice changes controller, driver, profile, or backend state.
+5.1.0 installations do not gain notification retroactively and need manual
+communication to discover 5.1.1. Inherited DS4Windows release notes are not
 presented as PureDS4 notes. The application does not solicit donations for an
 upstream maintainer under the PureDS4 identity.
 

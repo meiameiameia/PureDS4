@@ -62,6 +62,9 @@
                                 State="Neutral"
                                 ShowAction="True"
                                 ActionRequested="ElevationStatusBanner_ActionRequested" />
+            <local:StatusBanner x:Name="releaseNotificationBanner"
+                                State="Neutral" ActionLabel="Open release page"
+                                ActionRequested="ReleaseNotificationBanner_ActionRequested" />
         </StackPanel>
         <Grid DockPanel.Dock="Top">
             <TabControl x:Name="mainTabCon" SelectedIndex="1" SelectionChanged="MainTabCon_SelectionChanged" Style="{StaticResource BridgeMainTabControlStyle}">
@@ -798,19 +801,25 @@
                                             </StackPanel>
                                         </Grid>
                                     </Border>
-                                    <!-- The first release ships English only and has no signed update channel.
-                                         These controls keep their bindings but stay hidden instead of showing
-                                         permanently disabled UI. -->
+                                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="New release notifications" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                                <TextBlock Text="Check GitHub when the app opens, at most once a day. Installation stays manual."
+                                                           Style="{StaticResource FoundationSettingDescriptionStyle}" TextWrapping="Wrap" />
+                                            </StackPanel>
+                                            <CheckBox Grid.Column="1" Style="{StaticResource FoundationToggleSwitchStyle}"
+                                                      AutomationProperties.Name="New release notifications"
+                                                      IsChecked="{Binding CheckForUpdates}" />
+                                        </Grid>
+                                    </Border>
+                                    <!-- Language packs remain unavailable in this release. -->
                                     <StackPanel Visibility="Collapsed">
                                         <local:LanguagePackControl />
-                                        <CheckBox IsChecked="{Binding CheckForUpdates}" IsEnabled="False" />
-                                        <StackPanel x:Name="checkEveryOptionsStack" Orientation="Horizontal" IsEnabled="False">
-                                            <xctk:IntegerUpDown d:IsHidden="True" Value="{Binding CheckEvery}" Maximum="30" Minimum="0" />
-                                            <ComboBox SelectedIndex="{Binding CheckEveryUnit,FallbackValue=1}">
-                                                <ComboBoxItem Content="{lex:Loc Hours}" />
-                                                <ComboBoxItem Content="{lex:Loc Days}" />
-                                            </ComboBox>
-                                        </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
                             </ScrollViewer>
@@ -1352,7 +1361,9 @@
                                             </Grid.ColumnDefinitions>
                                             <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
                                                 <TextBlock Text="Updates" Style="{StaticResource FoundationSettingTitleStyle}" />
-                                                    <TextBlock Text="Look for a newer PureDS4 release." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                                    <TextBlock Text="Check GitHub. Downloads and installation stay manual." Style="{StaticResource FoundationSettingDescriptionStyle}" TextWrapping="Wrap" />
+                                                    <TextBlock x:Name="releaseCheckStatusText" Style="{StaticResource FoundationSecondaryTextStyle}" TextWrapping="Wrap"
+                                                               AutomationProperties.LiveSetting="Polite" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                                     <Button x:Name="checkUpdatesBtn" Content="Check" MinWidth="72" Style="{StaticResource FoundationButtonStyle}" Click="CheckUpdatesBtn_Click"

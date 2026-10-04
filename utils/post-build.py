@@ -1,4 +1,4 @@
-﻿import os
+import os
 from pathlib import Path
 import sys
 import shutil
@@ -43,8 +43,8 @@ required_offline_files = (
     "ThirdParty/WindowsSdk-LICENSE.rtf",
     "ThirdParty/WindowsSdk-LICENSE.txt",
     "extras/install-viiper-backend.ps1",
-    "extras/VIIPER-0.1.0-pureds4.1-x64.exe",
-    "extras/VIIPER-0.1.0-pureds4.1-LICENSES.txt",
+    "extras/VIIPER-0.1.0-pureds4.2-x64.exe",
+    "extras/VIIPER-0.1.0-pureds4.2-LICENSES.txt",
     "extras/USBip-0.9.7.7-x64.exe",
     "extras/USBip-0.9.7.7-LICENSE.txt",
     "extras/HidHide_1.5.230_x64.exe",
@@ -75,7 +75,7 @@ if missing_offline_files:
 # Bind setup to the exact VIIPER executable copied by this publish. This
 # sidecar is regenerated for every artifact, so no hand-maintained hash can
 # drift when the bundled executable changes.
-viiper_name = "VIIPER-0.1.0-pureds4.1-x64.exe"
+viiper_name = "VIIPER-0.1.0-pureds4.2-x64.exe"
 viiper_path = target_dir / "extras" / viiper_name
 viiper_hasher = hashlib.sha256()
 with viiper_path.open("rb") as viiper_stream:
@@ -195,7 +195,7 @@ if len({path.casefold() for path in managed_files}) != len(managed_files):
 manifest_path.write_text("\n".join(managed_files) + "\n", encoding="utf-8")
 
 
-# rename target dir (net8.0-windows) to PureDS4
+# rename the target-framework directory to PureDS4
 renamed_dir = target_dir.parent / "PureDS4"
 if renamed_dir.exists():
     if is_reparse_point(renamed_dir):

@@ -10,9 +10,9 @@ namespace PureDS4.Bootstrapper
 {
     internal static class InfrastructureProbe
     {
-        private const string ExpectedMarker = "VIIPER-0.1.0-pureds4.1+USBIP-0.9.7.7";
-        private const string ExpectedViiperVersion = "0.1.0-pureds4.1";
-        private const string ExpectedViiperHash = "67559205427F18849E16B0A8329E6270D9A42E4AA155ACA9FD5EA8574A8A01C8";
+        private const string ExpectedMarker = "VIIPER-0.1.0-pureds4.2+USBIP-0.9.7.7";
+        private const string ExpectedViiperVersion = "0.1.0-pureds4.2";
+        private const string ExpectedViiperHash = "13E591AFFBFEEAD3E721E57CC4B1E2E10A170C312F19527129BACE17F1FCB2D9";
         private const string ExpectedUsbipVersion = "0.9.7.7";
         private const string ExpectedUsbipHash = "FC1660E3759D8AF4CEDE48DBE194285A5A1DE85CE6E3216724499AFD32BE92E8";
         private const string ExpectedUdeHash = "51DB440065393E588A6B2585508C50EB3E1510B7B06D9AFA6C5BDE583751EA7D";

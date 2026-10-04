@@ -2,5 +2,8 @@
   <PropertyGroup>
     <!-- Release dependencies are content-addressed by committed NuGet locks. -->
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <!-- Keep the existing language semantics while migrating the runtime. -->
+    <LangVersion>12.0</LangVersion>
+    <PureDS4RuntimeVersion>10.0.12</PureDS4RuntimeVersion>
   </PropertyGroup>
 </Project>

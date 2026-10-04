@@ -433,6 +433,7 @@ namespace DS4Windows
                 result.Status.Mode == ControllerExposureMode.ManagedVirtual &&
                 !result.Status.NeedsRecovery)
             {
+                Mapping.ResumeMacros(controllerIndex);
                 RemoveControllerExposureSession(session);
             }
             else
@@ -484,6 +485,7 @@ namespace DS4Windows
 
             if (result.Succeeded)
             {
+                Mapping.ResumeMacros(session.PreferredSlot);
                 RemoveControllerExposureSession(session);
             }
             else
@@ -588,6 +590,8 @@ namespace DS4Windows
                     "Native Physical is blocked while VJoy steering output is configured because that route cannot yet be retired atomically.");
             }
 
+            if (!Mapping.SuspendMacros(index, System.TimeSpan.FromSeconds(2)))
+                return ControllerExposureOperationResult.Failure("Mapped macros did not finish stopping; native mode was not entered.");
             Mapping.Commit(index);
             return ControllerExposureOperationResult.Success();
         }
@@ -614,6 +618,8 @@ namespace DS4Windows
                 ControllerExposureRuntimeSession session)
         {
             int index = session.PreferredSlot;
+            if (!Mapping.SuspendMacros(index, System.TimeSpan.FromSeconds(2)))
+                return ControllerExposureOperationResult.Failure("Mapped macros are still stopping.");
             DS4Device device = session.Device;
             session.ReacquiredPostProfileSetup = false;
             OutputDevice compatibilityOutput = Volatile.Read(
@@ -996,10 +1002,13 @@ namespace DS4Windows
                     "The physical controller was unavailable while restoring its input reader.");
             }
 
-            return device.ResumeAfterNativeExposureQuiesce()
+            if (!device.ResumeAfterNativeExposureQuiesce())
+                return ControllerExposureOperationResult.Failure(
+                    "The physical input reader could not be resumed during rollback.");
+            return Mapping.ResumeMacros(session.PreferredSlot)
                 ? ControllerExposureOperationResult.Success()
                 : ControllerExposureOperationResult.Failure(
-                    "The physical input reader could not be resumed during rollback.");
+                    "Mapped macros still own unfinished cleanup; managed input was not fully resumed.");
         }
 
         private ControllerExposureOperationResult

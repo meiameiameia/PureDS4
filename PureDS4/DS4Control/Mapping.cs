@@ -748,10 +748,12 @@ namespace DS4Windows
         private static bool stickWheelDownDir = false;
 
         //mapcustom
-        public static bool[] pressedonce = new bool[2400], macrodone = new bool[DS4_CONTROL_MACRO_ARRAY_LEN];
-        static bool[] macroControl = new bool[26];
-        static uint macroCount = 0;
-        static Dictionary<string, Task>[] macroTaskQueue = new Dictionary<string, Task>[Global.MAX_DS4_CONTROLLER_COUNT] { new Dictionary<string, Task>(), new Dictionary<string, Task>(), new Dictionary<string, Task>(), new Dictionary<string, Task>(), new Dictionary<string, Task>(), new Dictionary<string, Task>(), new Dictionary<string, Task>(), new Dictionary<string, Task>() };
+        public static bool[] pressedonce = new bool[2400];
+        private static readonly bool[][] macrodone = Enumerable.Range(0, Global.MAX_DS4_CONTROLLER_COUNT)
+            .Select(_ => new bool[DS4_CONTROL_MACRO_ARRAY_LEN]).ToArray();
+        private static readonly bool[][] macroControl = Enumerable.Range(0, Global.MAX_DS4_CONTROLLER_COUNT)
+            .Select(_ => new bool[26]).ToArray();
+        private static readonly uint[] macroCount = new uint[Global.MAX_DS4_CONTROLLER_COUNT];
 
         //actions
         public static bool[] extrasRumbleActive = new bool[Global.MAX_DS4_CONTROLLER_COUNT];
@@ -843,12 +845,12 @@ namespace DS4Windows
             50, // DS4Controls.BLP
             51, // DS4Controls.BRP
         };
-        private static int macroEndIndex = DS4_CONTROL_MACRO_ARRAY_LEN - 1;
 
         // Special macros
-        static bool altTabDone = true;
-        static DateTime altTabNow = DateTime.UtcNow,
-            oldAltTabNow = DateTime.UtcNow - TimeSpan.FromSeconds(1);
+        private static readonly bool[] altTabDone = Enumerable.Repeat(true, Global.MAX_DS4_CONTROLLER_COUNT).ToArray();
+        private static readonly DateTime[] altTabNow = Enumerable.Repeat(DateTime.UtcNow, Global.MAX_DS4_CONTROLLER_COUNT).ToArray();
+        private static readonly DateTime[] oldAltTabNow = Enumerable.Repeat(DateTime.UtcNow - TimeSpan.FromSeconds(1), Global.MAX_DS4_CONTROLLER_COUNT).ToArray();
+        private static readonly object[] altTabOwners = Enumerable.Range(0, Global.MAX_DS4_CONTROLLER_COUNT).Select(_ => new object()).ToArray();
 
         // Mouse
         public static int mcounter = 34;
@@ -1007,56 +1009,56 @@ namespace DS4Windows
             if (globalState.currentClicks.toggleCount != 0 && globalState.previousClicks.toggleCount == 0 && globalState.currentClicks.toggle)
             {
                 if (globalState.currentClicks.leftCount != 0 && globalState.previousClicks.leftCount == 0)
-                    outputKBMHandler.PerformMouseButtonEvent(outputKBMMapping.MOUSEEVENTF_LEFTDOWN);
+                    EmitMappedMouse(256, true);
                 if (globalState.currentClicks.rightCount != 0 && globalState.previousClicks.rightCount == 0)
-                    outputKBMHandler.PerformMouseButtonEvent(outputKBMMapping.MOUSEEVENTF_RIGHTDOWN);
+                    EmitMappedMouse(257, true);
                 if (globalState.currentClicks.middleCount != 0 && globalState.previousClicks.middleCount == 0)
-                    outputKBMHandler.PerformMouseButtonEvent(outputKBMMapping.MOUSEEVENTF_MIDDLEDOWN);
+                    EmitMappedMouse(258, true);
                 if (globalState.currentClicks.fourthCount != 0 && globalState.previousClicks.fourthCount == 0)
-                    outputKBMHandler.PerformMouseButtonEventAlt(outputKBMMapping.MOUSEEVENTF_XBUTTONDOWN, 1);
+                    EmitMappedMouse(259, true);
                 if (globalState.currentClicks.fifthCount != 0 && globalState.previousClicks.fifthCount == 0)
-                    outputKBMHandler.PerformMouseButtonEventAlt(outputKBMMapping.MOUSEEVENTF_XBUTTONDOWN, 2);
+                    EmitMappedMouse(260, true);
             }
             else if (globalState.currentClicks.toggleCount != 0 && globalState.previousClicks.toggleCount == 0 && !globalState.currentClicks.toggle)
             {
                 if (globalState.currentClicks.leftCount != 0 && globalState.previousClicks.leftCount == 0)
-                    outputKBMHandler.PerformMouseButtonEvent(outputKBMMapping.MOUSEEVENTF_LEFTUP);
+                    EmitMappedMouse(256, false);
                 if (globalState.currentClicks.rightCount != 0 && globalState.previousClicks.rightCount == 0)
-                    outputKBMHandler.PerformMouseButtonEvent(outputKBMMapping.MOUSEEVENTF_RIGHTUP);
+                    EmitMappedMouse(257, false);
                 if (globalState.currentClicks.middleCount != 0 && globalState.previousClicks.middleCount == 0)
-                    outputKBMHandler.PerformMouseButtonEvent(outputKBMMapping.MOUSEEVENTF_MIDDLEUP);
+                    EmitMappedMouse(258, false);
                 if (globalState.currentClicks.fourthCount != 0 && globalState.previousClicks.fourthCount == 0)
-                    outputKBMHandler.PerformMouseButtonEventAlt(outputKBMMapping.MOUSEEVENTF_XBUTTONUP, 1);
+                    EmitMappedMouse(259, false);
                 if (globalState.currentClicks.fifthCount != 0 && globalState.previousClicks.fifthCount == 0)
-                    outputKBMHandler.PerformMouseButtonEventAlt(outputKBMMapping.MOUSEEVENTF_XBUTTONUP, 2);
+                    EmitMappedMouse(260, false);
             }
 
             if (globalState.currentClicks.toggleCount == 0 && globalState.previousClicks.toggleCount == 0)
             {
                 if (globalState.currentClicks.leftCount != 0 && globalState.previousClicks.leftCount == 0)
-                    outputKBMHandler.PerformMouseButtonEvent(outputKBMMapping.MOUSEEVENTF_LEFTDOWN);
+                    EmitMappedMouse(256, true);
                 else if (globalState.currentClicks.leftCount == 0 && globalState.previousClicks.leftCount != 0)
-                    outputKBMHandler.PerformMouseButtonEvent(outputKBMMapping.MOUSEEVENTF_LEFTUP);
+                    EmitMappedMouse(256, false);
 
                 if (globalState.currentClicks.middleCount != 0 && globalState.previousClicks.middleCount == 0)
-                    outputKBMHandler.PerformMouseButtonEvent(outputKBMMapping.MOUSEEVENTF_MIDDLEDOWN);
+                    EmitMappedMouse(258, true);
                 else if (globalState.currentClicks.middleCount == 0 && globalState.previousClicks.middleCount != 0)
-                    outputKBMHandler.PerformMouseButtonEvent(outputKBMMapping.MOUSEEVENTF_MIDDLEUP);
+                    EmitMappedMouse(258, false);
 
                 if (globalState.currentClicks.rightCount != 0 && globalState.previousClicks.rightCount == 0)
-                    outputKBMHandler.PerformMouseButtonEvent(outputKBMMapping.MOUSEEVENTF_RIGHTDOWN);
+                    EmitMappedMouse(257, true);
                 else if (globalState.currentClicks.rightCount == 0 && globalState.previousClicks.rightCount != 0)
-                    outputKBMHandler.PerformMouseButtonEvent(outputKBMMapping.MOUSEEVENTF_RIGHTUP);
+                    EmitMappedMouse(257, false);
 
                 if (globalState.currentClicks.fourthCount != 0 && globalState.previousClicks.fourthCount == 0)
-                    outputKBMHandler.PerformMouseButtonEventAlt(outputKBMMapping.MOUSEEVENTF_XBUTTONDOWN, 1);
+                    EmitMappedMouse(259, true);
                 else if (globalState.currentClicks.fourthCount == 0 && globalState.previousClicks.fourthCount != 0)
-                    outputKBMHandler.PerformMouseButtonEventAlt(outputKBMMapping.MOUSEEVENTF_XBUTTONUP, 1);
+                    EmitMappedMouse(259, false);
 
                 if (globalState.currentClicks.fifthCount != 0 && globalState.previousClicks.fifthCount == 0)
-                    outputKBMHandler.PerformMouseButtonEventAlt(outputKBMMapping.MOUSEEVENTF_XBUTTONDOWN, 2);
+                    EmitMappedMouse(260, true);
                 else if (globalState.currentClicks.fifthCount == 0 && globalState.previousClicks.fifthCount != 0)
-                    outputKBMHandler.PerformMouseButtonEventAlt(outputKBMMapping.MOUSEEVENTF_XBUTTONUP, 2);
+                    EmitMappedMouse(260, false);
 
                 if (globalState.currentClicks.wUpCount != 0 && globalState.previousClicks.wUpCount == 0)
                 {
@@ -1119,30 +1121,30 @@ namespace DS4Windows
                 if (gkp.current.toggleCount != 0 && gkp.previous.toggleCount == 0 && gkp.current.toggle)
                 {
                     if (gkp.current.scanCodeCount != 0)
-                        outputKBMHandler.PerformKeyPressAlt(nativeKey);
+                        EmitMappedKey(kvpKey, nativeKey, true, true);
                     else
-                        outputKBMHandler.PerformKeyPress(nativeKey);
+                        EmitMappedKey(kvpKey, nativeKey, false, true);
                 }
                 else if (gkp.current.toggleCount != 0 && gkp.previous.toggleCount == 0 && !gkp.current.toggle)
                 {
                     if (gkp.previous.scanCodeCount != 0) // use the last type of VK/SC
-                        outputKBMHandler.PerformKeyReleaseAlt(nativeKey);
+                        EmitMappedKey(kvpKey, nativeKey, true, false);
                     else
-                        outputKBMHandler.PerformKeyRelease(nativeKey);
+                        EmitMappedKey(kvpKey, nativeKey, false, false);
                 }
                 else if (gkp.current.vkCount + gkp.current.scanCodeCount != 0 && gkp.previous.vkCount + gkp.previous.scanCodeCount == 0)
                 {
                     if (gkp.current.scanCodeCount != 0)
                     {
                         oldnow = DateTime.UtcNow;
-                        outputKBMHandler.PerformKeyPressAlt(nativeKey);
+                        EmitMappedKey(kvpKey, nativeKey, true, true);
                         pressagain = false;
                         keyshelddown = kvpKey;
                     }
                     else
                     {
                         oldnow = DateTime.UtcNow;
-                        outputKBMHandler.PerformKeyPress(nativeKey);
+                        EmitMappedKey(kvpKey, nativeKey, false, true);
                         pressagain = false;
                         keyshelddown = kvpKey;
                     }
@@ -1183,12 +1185,12 @@ namespace DS4Windows
                 {
                     if (gkp.previous.scanCodeCount != 0) // use the last type of VK/SC
                     {
-                        outputKBMHandler.PerformKeyReleaseAlt(nativeKey);
+                        EmitMappedKey(kvpKey, nativeKey, true, false);
                         pressagain = false;
                     }
                     else
                     {
-                        outputKBMHandler.PerformKeyRelease(nativeKey);
+                        EmitMappedKey(kvpKey, nativeKey, false, false);
                         pressagain = false;
                     }
                 }
@@ -2915,34 +2917,34 @@ namespace DS4Windows
 
             outputfieldMapping.PopulateState(MappedState);
 
-            if (macroCount > 0)
+            if (macroCount[device] > 0)
             {
-                if (macroControl[00]) MappedState.Cross = true;
-                if (macroControl[01]) MappedState.Circle = true;
-                if (macroControl[02]) MappedState.Square = true;
-                if (macroControl[03]) MappedState.Triangle = true;
-                if (macroControl[04]) MappedState.Options = true;
-                if (macroControl[05]) MappedState.Share = true;
-                if (macroControl[06]) MappedState.DpadUp = true;
-                if (macroControl[07]) MappedState.DpadDown = true;
-                if (macroControl[08]) MappedState.DpadLeft = true;
-                if (macroControl[09]) MappedState.DpadRight = true;
-                if (macroControl[10]) MappedState.PS = true;
-                if (macroControl[11]) MappedState.L1 = true;
-                if (macroControl[12]) MappedState.R1 = true;
-                if (macroControl[13]) MappedState.L2 = 255;
-                if (macroControl[14]) MappedState.R2 = 255;
-                if (macroControl[15]) MappedState.L3 = true;
-                if (macroControl[16]) MappedState.R3 = true;
-                if (macroControl[17]) MappedState.LX = 255;
-                if (macroControl[18]) MappedState.LX = 0;
-                if (macroControl[19]) MappedState.LY = 255;
-                if (macroControl[20]) MappedState.LY = 0;
-                if (macroControl[21]) MappedState.RX = 255;
-                if (macroControl[22]) MappedState.RX = 0;
-                if (macroControl[23]) MappedState.RY = 255;
-                if (macroControl[24]) MappedState.RY = 0;
-                if (macroControl[25]) MappedState.OutputTouchButton = true;
+                if (macroControl[device][00]) MappedState.Cross = true;
+                if (macroControl[device][01]) MappedState.Circle = true;
+                if (macroControl[device][02]) MappedState.Square = true;
+                if (macroControl[device][03]) MappedState.Triangle = true;
+                if (macroControl[device][04]) MappedState.Options = true;
+                if (macroControl[device][05]) MappedState.Share = true;
+                if (macroControl[device][06]) MappedState.DpadUp = true;
+                if (macroControl[device][07]) MappedState.DpadDown = true;
+                if (macroControl[device][08]) MappedState.DpadLeft = true;
+                if (macroControl[device][09]) MappedState.DpadRight = true;
+                if (macroControl[device][10]) MappedState.PS = true;
+                if (macroControl[device][11]) MappedState.L1 = true;
+                if (macroControl[device][12]) MappedState.R1 = true;
+                if (macroControl[device][13]) MappedState.L2 = 255;
+                if (macroControl[device][14]) MappedState.R2 = 255;
+                if (macroControl[device][15]) MappedState.L3 = true;
+                if (macroControl[device][16]) MappedState.R3 = true;
+                if (macroControl[device][17]) MappedState.LX = 255;
+                if (macroControl[device][18]) MappedState.LX = 0;
+                if (macroControl[device][19]) MappedState.LY = 255;
+                if (macroControl[device][20]) MappedState.LY = 0;
+                if (macroControl[device][21]) MappedState.RX = 255;
+                if (macroControl[device][22]) MappedState.RX = 0;
+                if (macroControl[device][23]) MappedState.RY = 255;
+                if (macroControl[device][24]) MappedState.RY = 0;
+                if (macroControl[device][25]) MappedState.OutputTouchButton = true;
             }
 
             if (GetSASteeringWheelEmulationAxis(device) != SASteeringWheelEmulationAxisType.None)
@@ -3755,11 +3757,11 @@ namespace DS4Windows
                     bool active = GetBoolMapping(device, dcs.control, cState, eState, tp, fieldMapping);
                     if (active)
                     {
-                        PlayMacro(device, macroControl, string.Empty, null, action.actionMacro, dcs.control, keyType);
+                        _ = PlayMacro(device, macroControl[device], string.Empty, null, action.actionMacro, dcs.control, keyType);
                     }
                     else
                     {
-                        EndMacro(device, macroControl, action.actionMacro, dcs.control);
+                        EndMacro(device, macroControl[device], action.actionMacro, dcs.control);
                     }
 
                     // erase default mappings for things that are remapped
@@ -4402,12 +4404,12 @@ namespace DS4Windows
                                         }
                                         */
 
-                                        PlayMacro(device, macroControl, String.Empty, action.macro, null, DS4Controls.None, keyType, action, actionDone[index]);
+                                        _ = PlayMacro(device, macroControl[device], String.Empty, action.macro, null, DS4Controls.None, keyType, action, actionDone[index]);
                                     }
                                     else
                                     {
                                         if (!action.keyType.HasFlag(DS4KeyType.RepeatMacro))
-                                            EndMacro(device, macroControl, action.macro, DS4Controls.None);
+                                            EndMacro(device, macroControl[device], action.macro, DS4Controls.None);
                                     }
                                 }
                                 else
@@ -4427,7 +4429,7 @@ namespace DS4Windows
                                             }
                                             */
 
-                                            PlayMacro(device, macroControl, String.Empty, action.macro, null, DS4Controls.None, keyType, action, null);
+                                            _ = PlayMacro(device, macroControl[device], String.Empty, action.macro, null, DS4Controls.None, keyType, action, null);
                                         }
                                     }
                                     else
@@ -4710,7 +4712,7 @@ namespace DS4Windows
                                     if ((DateTime.UtcNow - action.TimeofEnd) > TimeSpan.FromMilliseconds(150) + TimeSpan.FromMilliseconds(Global.DebouncingMs[device]))
                                     {
                                         if (macro != "")
-                                            PlayMacro(device, macroControl, macro, null, null, DS4Controls.None, DS4KeyType.None);
+                                            _ = PlayMacro(device, macroControl[device], macro, null, null, DS4Controls.None, DS4KeyType.None);
 
                                         tappedOnce = false;
                                         action.tappedOnce = false;
@@ -4736,7 +4738,7 @@ namespace DS4Windows
                                     }
 
                                     if (macro != "")
-                                        PlayMacro(device, macroControl, macro, null, null, DS4Controls.None, DS4KeyType.None);
+                                        _ = PlayMacro(device, macroControl[device], macro, null, null, DS4Controls.None, DS4KeyType.None);
 
                                     firstTouch = false;
                                     action.firstTouch = false;
@@ -4760,7 +4762,7 @@ namespace DS4Windows
                                     }
 
                                     if (macro != "")
-                                        PlayMacro(device, macroControl, macro, null, null, DS4Controls.None, DS4KeyType.None);
+                                        _ = PlayMacro(device, macroControl[device], macro, null, null, DS4Controls.None, DS4KeyType.None);
 
                                     secondtouchbegin = false;
                                     action.secondtouchbegin = false;
@@ -4893,177 +4895,134 @@ namespace DS4Windows
         // Play macro as a background task. Optionally the new macro play waits for completion of a previous macro execution (synchronized macro special action). 
         // Macro steps are defined either as macrostr string value, macroLst list<int> object or as macroArr integer array. Only one of these should have a valid macro definition when this method is called.
         // If the macro definition is a macroStr string value then it will be converted as integer array on the fl. If steps are already defined as list or array of integers then there is no need to do type cast conversion.
-        private static void PlayMacro(int device, bool[] macrocontrol, string macroStr, List<int> macroLst, int[] macroArr, DS4Controls control, DS4KeyType keyType, SpecialAction action = null, ActionState actionDoneState = null)
+        private static readonly MacroExecutionCoordinator macroExecutions = new MacroExecutionCoordinator();
+        private static readonly MacroInputOwnership macroInputs = new MacroInputOwnership();
+        private static readonly object mappedInputOwner = new object();
+        internal static Action<int, bool, bool> MacroInputEmitterForTests;
+
+        internal static void EmitMappedKey(int code, uint nativeKey, bool scan, bool down)
         {
-            if (action != null && action.synchronized)
+            macroInputs.Set(mappedInputOwner, code, scan, down, pressed =>
             {
-                // Run special action macros in synchronized order (ie. FirstIn-FirstOut). The trigger control name string is the execution queue identifier (ie. each unique trigger combination has an own synchronization queue).
-                if (!macroTaskQueue[device].TryGetValue(action.controls, out Task prevTask))
-                    macroTaskQueue[device].Add(action.controls, (Task.Factory.StartNew(() => PlayMacroTask(device, macroControl, macroStr, macroLst, macroArr, control, keyType, action, actionDoneState))));
+                if (MacroInputEmitterForTests != null)
+                    MacroInputEmitterForTests(code, scan, pressed);
+                else if (scan)
+                {
+                    if (pressed) outputKBMHandler.PerformKeyPressAlt(nativeKey);
+                    else outputKBMHandler.PerformKeyReleaseAlt(nativeKey);
+                }
                 else
-                    macroTaskQueue[device][action.controls] = prevTask.ContinueWith((x) => PlayMacroTask(device, macroControl, macroStr, macroLst, macroArr, control, keyType, action, actionDoneState));
-            }
-            else
-                // Run macro as "fire and forget" background task. No need to wait for completion of any of the other macros. 
-                // If the same trigger macro is re-launched while previous macro is still running then the order of parallel macros is not guaranteed.
-                Task.Factory.StartNew(() => PlayMacroTask(device, macroControl, macroStr, macroLst, macroArr, control, keyType, action, actionDoneState));
+                {
+                    if (pressed) outputKBMHandler.PerformKeyPress(nativeKey);
+                    else outputKBMHandler.PerformKeyRelease(nativeKey);
+                }
+            });
         }
 
-        // Play through a macro. The macro steps are defined either as string, List or Array object (always only one of those parameters is set to a valid value)
-        private static void PlayMacroTask(int device, bool[] macrocontrol, string macroStr, List<int> macroLst, int[] macroArr, DS4Controls control, DS4KeyType keyType, SpecialAction action, ActionState actionDoneState)
+        internal static void EmitMappedMouse(int code, bool down)
+            => macroInputs.Set(mappedInputOwner, code, false, down,
+                pressed => EmitMacroInput(code, false, pressed));
+
+        internal static bool SuspendMacros(int device, TimeSpan timeout)
         {
-            if (!String.IsNullOrEmpty(macroStr))
-            {
-                string[] skeys;
+            if (!macroExecutions.SuspendAndDrain(device, timeout)) return false;
+            macroInputs.Release(altTabOwners[device]);
+            altTabDone[device] = true;
+            Array.Clear(macrodone[device]);
+            Array.Clear(macroControl[device]);
+            macroCount[device] = 0;
+            return true;
+        }
+        internal static bool ResumeMacros(int device) => macroExecutions.Resume(device);
 
-                skeys = macroStr.Split('/');
-                macroArr = new int[skeys.Length];
-                for (int i = 0; i < macroArr.Length; i++)
-                    macroArr[i] = int.Parse(skeys[i]);
+        internal static Task ScheduleMacroForTests(int device, int[] codes, DS4KeyType keyType = DS4KeyType.None) =>
+            _ = PlayMacro(device, macroControl[device], null, null, codes, DS4Controls.None, keyType);
+
+        private static Task PlayMacro(int device, bool[] macrocontrol, string macroStr, List<int> macroLst, int[] macroArr, DS4Controls control, DS4KeyType keyType, SpecialAction action = null, ActionState actionDoneState = null)
+        {
+            return macroExecutions.Schedule(device, action?.synchronized == true ? action.controls : null,
+                token => PlayMacroTask(device, macrocontrol, macroStr, macroLst, macroArr, control,
+                    keyType, action, actionDoneState, token));
+        }
+
+        private static void PlayMacroTask(int device, bool[] macrocontrol, string macroStr, List<int> macroLst, int[] macroArr, DS4Controls control, DS4KeyType keyType, SpecialAction action, ActionState actionDoneState, CancellationToken token)
+        {
+            int[] codes = !string.IsNullOrEmpty(macroStr)
+                ? macroStr.Split('/').Select(int.Parse).ToArray()
+                : macroLst?.ToArray() ?? macroArr;
+            if (codes == null) return;
+            var owner = new object();
+            bool[] keydown = new bool[512];
+            void ReleaseHeld()
+            {
+                macroInputs.Release(owner);
+                DS4LightBar.forcedFlash[device] = 0;
+                DS4LightBar.forcelight[device] = false;
             }
-
-            // macro.StartsWith("164/9/9/164") || macro.StartsWith("18/9/9/18")
-            if ((macroLst != null && macroLst.Count >= 4 && ((macroLst[0] == 164 && macroLst[1] == 9 && macroLst[2] == 9 && macroLst[3] == 164) || (macroLst[0] == 18 && macroLst[1] == 9 && macroLst[2] == 9 && macroLst[3] == 18)))
-              || (macroArr != null && macroArr.Length >= 4 && ((macroArr[0] == 164 && macroArr[1] == 9 && macroArr[2] == 9 && macroArr[3] == 164) || (macroArr[0] == 18 && macroArr[1] == 9 && macroArr[2] == 9 && macroArr[3] == 18)))
-            )
+            bool keepHeld = false;
+            macroExecutions.RegisterCleanup(device, ReleaseHeld);
+            try
             {
-                int wait;
-                if (macroLst != null)
-                    wait = macroLst[macroLst.Count - 1];
-                else
-                    wait = macroArr[macroArr.Length - 1];
-
-                if (wait <= 300 || wait > ushort.MaxValue)
-                    wait = 1000;
-                else
-                    wait -= 300;
-
-                AltTabSwapping(wait, device);
-                if (control != DS4Controls.None)
-                    macrodone[DS4ControltoInt(control)] = true;
-            }
-            else if (control == DS4Controls.None || !macrodone[DS4ControltoInt(control)])
-            {
-                int macroCodeValue;
-                bool[] keydown = new bool[512];
-
-                if (control != DS4Controls.None)
-                    macrodone[DS4ControltoInt(control)] = true;
-
-                // Play macro codes and simulate key down/up events (note! The same key may go through several up and down events during the same macro).
-                // If the return value is TRUE then this method should do a asynchronized delay (the usual Thread.Sleep doesnt work here because it would block the main gamepad reading thread).
-                if (macroLst != null)
+                token.ThrowIfCancellationRequested();
+                if (codes.Length >= 4 && ((codes[0] == 164 && codes[1] == 9 && codes[2] == 9 && codes[3] == 164) ||
+                    (codes[0] == 18 && codes[1] == 9 && codes[2] == 9 && codes[3] == 18)))
                 {
-                    for (int i = 0; i < macroLst.Count; i++)
-                    {
-                        macroCodeValue = macroLst[i];
-                        if (PlayMacroCodeValue(device, macrocontrol, keyType, macroCodeValue, keydown))
-                            Task.Delay(macroCodeValue - 300).Wait();
-                    }
+                    int wait = codes[codes.Length - 1];
+                    wait = wait <= 300 || wait > ushort.MaxValue ? 1000 : wait - 300;
+                    AltTabSwapping(wait, device);
+                    if (control != DS4Controls.None) macrodone[device][DS4ControltoInt(control)] = true;
+                    return;
                 }
-                else
+                if (control != DS4Controls.None && macrodone[device][DS4ControltoInt(control)]) return;
+                if (control != DS4Controls.None) macrodone[device][DS4ControltoInt(control)] = true;
+                foreach (int code in codes)
                 {
-                    for (int i = 0; i < macroArr.Length; i++)
-                    {
-                        macroCodeValue = macroArr[i];
-                        if (PlayMacroCodeValue(device, macrocontrol, keyType, macroCodeValue, keydown))
-                            Task.Delay(macroCodeValue - 300).Wait();
-                    }
+                    token.ThrowIfCancellationRequested();
+                    if (PlayMacroCodeValue(device, macrocontrol, keyType, code, keydown, owner))
+                        Task.Delay(code - 300, token).GetAwaiter().GetResult();
                 }
-
-                // The macro is finished. If any of the keys is still in down state then release a key state (ie. simulate key up event) unless special action specified to keep the last state as it is left in a macro
-                if (action == null || !action.keepKeyState)
-                {
-                    for (int i = 0, arlength = keydown.Length; i < arlength; i++)
-                    {
-                        if (keydown[i])
-                            PlayMacroCodeValue(device, macrocontrol, keyType, i, keydown);
-                    }
-
-                    // Reset lightbar back to a default value (if the macro modified the color) because keepKeyState macro option was not set
-                    DS4LightBar.forcedFlash[device] = 0;
-                    DS4LightBar.forcelight[device] = false;
-                }
-
-                // Commented out rumble reset. No need to zero out rumble after a macro because it may conflict with a game generated rumble events (ie. macro would stop a game generated rumble effect).
-                // If macro generates rumble effects then the macro can stop the rumble as a last step or wait for rumble watchdog timer to do it after few seconds.
-                //Program.rootHub.DS4Controllers[device].setRumble(0, 0);
-
                 if (keyType.HasFlag(DS4KeyType.HoldMacro))
                 {
-                    Task.Delay(50).Wait();
-                    if (control != DS4Controls.None)
-                        macrodone[DS4ControltoInt(control)] = false;
+                    Task.Delay(50, token).GetAwaiter().GetResult();
+                    if (control != DS4Controls.None) macrodone[device][DS4ControltoInt(control)] = false;
+                }
+                if (actionDoneState != null && keyType.HasFlag(DS4KeyType.RepeatMacro))
+                    actionDoneState.dev[device] = false;
+                keepHeld = action?.keepKeyState == true && !token.IsCancellationRequested;
+            }
+            finally
+            {
+                if (!keepHeld)
+                {
+                    ReleaseHeld();
+                    macroExecutions.CompleteCleanup(device, ReleaseHeld);
                 }
             }
-
-            // If a special action type of Macro has "Repeat while held" option and actionDoneState object is defined then reset the action back to "not done" status in order to re-fire it if the trigger key is still held down
-            if (actionDoneState != null && keyType.HasFlag(DS4KeyType.RepeatMacro))
-                actionDoneState.dev[device] = false;
         }
 
-        private static bool PlayMacroCodeValue(int device, bool[] macrocontrol, DS4KeyType keyType, int macroCodeValue, bool[] keydown)
+        private static bool PlayMacroCodeValue(int device, bool[] macrocontrol, DS4KeyType keyType, int macroCodeValue, bool[] keydown, object owner)
         {
             bool doDelayOnCaller = false;
             if (macroCodeValue >= 261 && macroCodeValue <= DS4ControlSettings.MAX_MACRO_VALUE)
             {
-                // Gamepad button up or down macro event. macroCodeValue index value is the button identifier (codeValue-261 = idx in 0..24 range)
-                if (!keydown[macroCodeValue])
+                bool down = !keydown[macroCodeValue];
+                macroInputs.Set(owner, macroCodeValue + (device + 1) * 10000, false, down, pressed =>
                 {
-                    macroControl[macroCodeValue - 261] = keydown[macroCodeValue] = true;
-                    macroCount++;
-                }
-                else
-                {
-                    macroControl[macroCodeValue - 261] = keydown[macroCodeValue] = false;
-                    if (macroCount > 0) macroCount--;
-                }
+                    macrocontrol[macroCodeValue - 261] = pressed;
+                    if (pressed) macroCount[device]++;
+                    else if (macroCount[device] > 0) macroCount[device]--;
+                });
+                keydown[macroCodeValue] = down;
             }
-            else if (macroCodeValue < 300)
+            else if (macroCodeValue >= 0 && macroCodeValue < 300)
             {
-                // Keyboard key or mouse button macro event
-                if (!keydown[macroCodeValue])
-                {
-                    switch (macroCodeValue)
-                    {
-                        //anything above 255 is not a keyvalue
-                        case 256: outputKBMHandler.PerformMouseButtonEvent(outputKBMMapping.MOUSEEVENTF_LEFTDOWN); break;
-                        case 257: outputKBMHandler.PerformMouseButtonEvent(outputKBMMapping.MOUSEEVENTF_RIGHTDOWN); break;
-                        case 258: outputKBMHandler.PerformMouseButtonEvent(outputKBMMapping.MOUSEEVENTF_MIDDLEDOWN); break;
-                        case 259: outputKBMHandler.PerformMouseButtonEventAlt(outputKBMMapping.MOUSEEVENTF_XBUTTONDOWN, 1); break;
-                        case 260: outputKBMHandler.PerformMouseButtonEventAlt(outputKBMMapping.MOUSEEVENTF_XBUTTONDOWN, 2); break;
-
-                        default:
-                            uint eventMacroCode = !outputKBMMapping.macroKeyTranslate ? (uint)macroCodeValue :
-                                outputKBMMapping.GetRealEventKey((uint)macroCodeValue);
-
-                            if (keyType.HasFlag(DS4KeyType.ScanCode)) outputKBMHandler.PerformKeyPressAlt(eventMacroCode);
-                            else outputKBMHandler.PerformKeyPress(eventMacroCode);
-                            break;
-                    }
-                    keydown[macroCodeValue] = true;
-                }
-                else
-                {
-                    switch (macroCodeValue)
-                    {
-                        //anything above 255 is not a keyvalue
-                        case 256: outputKBMHandler.PerformMouseButtonEvent(outputKBMMapping.MOUSEEVENTF_LEFTUP); break;
-                        case 257: outputKBMHandler.PerformMouseButtonEvent(outputKBMMapping.MOUSEEVENTF_RIGHTUP); break;
-                        case 258: outputKBMHandler.PerformMouseButtonEvent(outputKBMMapping.MOUSEEVENTF_MIDDLEUP); break;
-                        case 259: outputKBMHandler.PerformMouseButtonEventAlt(outputKBMMapping.MOUSEEVENTF_XBUTTONUP, 1); break;
-                        case 260: outputKBMHandler.PerformMouseButtonEventAlt(outputKBMMapping.MOUSEEVENTF_XBUTTONUP, 2); break;
-
-                        default:
-                            uint eventMacroCode = !outputKBMMapping.macroKeyTranslate ? (uint)macroCodeValue :
-                                outputKBMMapping.GetRealEventKey((uint)macroCodeValue);
-
-                            if (keyType.HasFlag(DS4KeyType.ScanCode)) outputKBMHandler.PerformKeyReleaseAlt(eventMacroCode);
-                            else outputKBMHandler.PerformKeyRelease(eventMacroCode);
-                            break;
-                    }
-                    keydown[macroCodeValue] = false;
-                }
+                bool down = !keydown[macroCodeValue];
+                // Scan-code mode applies to keyboard keys, not mouse buttons.
+                // Both mapping paths must share the same mouse ownership key.
+                bool scan = macroCodeValue < 256 && keyType.HasFlag(DS4KeyType.ScanCode);
+                macroInputs.Set(owner, macroCodeValue, scan, down,
+                    pressed => EmitMacroInput(macroCodeValue, scan, pressed));
+                keydown[macroCodeValue] = down;
             }
             else if (macroCodeValue >= 1000000000)
             {
@@ -5105,61 +5064,88 @@ namespace DS4Windows
             return doDelayOnCaller;
         }
 
+        private static void EmitMacroInput(int code, bool scan, bool down)
+        {
+            if (MacroInputEmitterForTests != null)
+            {
+                MacroInputEmitterForTests(code, scan, down);
+                return;
+            }
+            switch (code)
+            {
+                case 256: outputKBMHandler.PerformMouseButtonEvent(down ? outputKBMMapping.MOUSEEVENTF_LEFTDOWN : outputKBMMapping.MOUSEEVENTF_LEFTUP); break;
+                case 257: outputKBMHandler.PerformMouseButtonEvent(down ? outputKBMMapping.MOUSEEVENTF_RIGHTDOWN : outputKBMMapping.MOUSEEVENTF_RIGHTUP); break;
+                case 258: outputKBMHandler.PerformMouseButtonEvent(down ? outputKBMMapping.MOUSEEVENTF_MIDDLEDOWN : outputKBMMapping.MOUSEEVENTF_MIDDLEUP); break;
+                case 259: outputKBMHandler.PerformMouseButtonEventAlt(down ? outputKBMMapping.MOUSEEVENTF_XBUTTONDOWN : outputKBMMapping.MOUSEEVENTF_XBUTTONUP, 1); break;
+                case 260: outputKBMHandler.PerformMouseButtonEventAlt(down ? outputKBMMapping.MOUSEEVENTF_XBUTTONDOWN : outputKBMMapping.MOUSEEVENTF_XBUTTONUP, 2); break;
+                default:
+                    uint key = !outputKBMMapping.macroKeyTranslate ? (uint)code : outputKBMMapping.GetRealEventKey((uint)code);
+                    if (scan)
+                    {
+                        if (down) outputKBMHandler.PerformKeyPressAlt(key);
+                        else outputKBMHandler.PerformKeyReleaseAlt(key);
+                    }
+                    else if (down) outputKBMHandler.PerformKeyPress(key);
+                    else outputKBMHandler.PerformKeyRelease(key);
+                    break;
+            }
+        }
+
+
         private static void EndMacro(int device, bool[] macrocontrol, string macro, DS4Controls control)
         {
-            if ((macro.StartsWith("164/9/9/164") || macro.StartsWith("18/9/9/18")) && !altTabDone)
-                AltTabSwappingRelease();
+            if ((macro.StartsWith("164/9/9/164") || macro.StartsWith("18/9/9/18")) && !altTabDone[device])
+                AltTabSwappingRelease(device);
 
             if (control != DS4Controls.None)
-                macrodone[DS4ControltoInt(control)] = false;
+                macrodone[device][DS4ControltoInt(control)] = false;
         }
 
         private static void EndMacro(int device, bool[] macrocontrol, List<int> macro, DS4Controls control)
         {
-            if (macro.Count >= 4 && ((macro[0] == 164 && macro[1] == 9 && macro[2] == 9 && macro[3] == 164) || (macro[0] == 18 && macro[1] == 9 && macro[2] == 9 && macro[3] == 18)) && !altTabDone)
-                AltTabSwappingRelease();
+            if (macro.Count >= 4 && ((macro[0] == 164 && macro[1] == 9 && macro[2] == 9 && macro[3] == 164) || (macro[0] == 18 && macro[1] == 9 && macro[2] == 9 && macro[3] == 18)) && !altTabDone[device])
+                AltTabSwappingRelease(device);
 
             if (control != DS4Controls.None)
-                macrodone[DS4ControltoInt(control)] = false;
+                macrodone[device][DS4ControltoInt(control)] = false;
         }
 
         private static void EndMacro(int device, bool[] macrocontrol, int[] macro, DS4Controls control)
         {
-            if (macro.Length >= 4 && ((macro[0] == 164 && macro[1] == 9 && macro[2] == 9 && macro[3] == 164) || (macro[0] == 18 && macro[1] == 9 && macro[2] == 9 && macro[3] == 18)) && !altTabDone)
-                AltTabSwappingRelease();
+            if (macro.Length >= 4 && ((macro[0] == 164 && macro[1] == 9 && macro[2] == 9 && macro[3] == 164) || (macro[0] == 18 && macro[1] == 9 && macro[2] == 9 && macro[3] == 18)) && !altTabDone[device])
+                AltTabSwappingRelease(device);
 
             if (control != DS4Controls.None)
-                macrodone[DS4ControltoInt(control)] = false;
+                macrodone[device][DS4ControltoInt(control)] = false;
         }
 
         private static void AltTabSwapping(int wait, int device)
         {
-            if (altTabDone)
+            if (altTabDone[device])
             {
-                altTabDone = false;
-                outputKBMHandler.PerformKeyPress(outputKBMMapping.KEY_TAB);
+                altTabDone[device] = false;
+                macroInputs.Set(altTabOwners[device], 9, false, true, down => EmitMacroInput(9, false, down));
             }
             else
             {
-                altTabNow = DateTime.UtcNow;
-                if (altTabNow >= oldAltTabNow + TimeSpan.FromMilliseconds(wait))
+                altTabNow[device] = DateTime.UtcNow;
+                if (altTabNow[device] >= oldAltTabNow[device] + TimeSpan.FromMilliseconds(wait))
                 {
-                    oldAltTabNow = altTabNow;
-                    outputKBMHandler.PerformKeyPress(outputKBMMapping.KEY_TAB);
-                    outputKBMHandler.PerformKeyRelease(outputKBMMapping.KEY_TAB);
+                    oldAltTabNow[device] = altTabNow[device];
+                    macroInputs.Set(altTabOwners[device], 9, false, true, down => EmitMacroInput(9, false, down));
+                    macroInputs.Set(altTabOwners[device], 9, false, false, down => EmitMacroInput(9, false, down));
                 }
             }
         }
 
-        private static void AltTabSwappingRelease()
+        private static void AltTabSwappingRelease(int device)
         {
-            if (altTabNow < DateTime.UtcNow - TimeSpan.FromMilliseconds(10)) //in case multiple controls are mapped to alt+tab
+            if (altTabNow[device] < DateTime.UtcNow - TimeSpan.FromMilliseconds(10)) //in case multiple controls are mapped to alt+tab
             {
-                altTabDone = true;
-                outputKBMHandler.PerformKeyRelease(outputKBMMapping.KEY_TAB);
-                outputKBMHandler.PerformKeyRelease(outputKBMMapping.KEY_LALT);
-                altTabNow = DateTime.UtcNow;
-                oldAltTabNow = DateTime.UtcNow - TimeSpan.FromDays(1);
+                altTabDone[device] = true;
+                macroInputs.Set(altTabOwners[device], 9, false, false, down => EmitMacroInput(9, false, down));
+                altTabNow[device] = DateTime.UtcNow;
+                oldAltTabNow[device] = DateTime.UtcNow - TimeSpan.FromDays(1);
             }
         }
 

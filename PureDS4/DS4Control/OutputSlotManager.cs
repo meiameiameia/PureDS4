@@ -109,6 +109,7 @@ namespace DS4Windows
             if (RunningQueue)
             {
                 ControlService.StartupDiag("OutputSlotManager.Stop timed out waiting for queued output task");
+                throw new TimeoutException("Virtual output work is still running; slot ownership was retained.");
             }
 
             deviceDict.Clear();
@@ -255,16 +256,18 @@ namespace DS4Windows
                 {
                     ControlService.StartupDiag($"OutputSlotManager.DeferredRemoval found slot={slot + 1} type={outputDevice.GetDeviceType()}");
                     //int slot = revDeviceDict[outputDevice];
-                    outputDevices[slot] = null;
-                    deviceDict.Remove(slot);
-                    revDeviceDict.Remove(outputDevice);
-
                     ControlService.StartupDiag($"OutputSlotManager.RemoveFeedbacks begin slot={slot + 1}");
                     outputDevice.RemoveFeedbacks();
                     ControlService.StartupDiag($"OutputSlotManager.RemoveFeedbacks end slot={slot + 1}");
                     ControlService.StartupDiag($"OutputSlotManager.Disconnect begin slot={slot + 1}");
                     outputDevice.Disconnect();
                     ControlService.StartupDiag($"OutputSlotManager.Disconnect end slot={slot + 1}");
+
+                    // Retain ownership and the retry route until teardown is
+                    // confirmed. Disconnect failures must not erase the slot.
+                    outputDevices[slot] = null;
+                    deviceDict.Remove(slot);
+                    revDeviceDict.Remove(outputDevice);
 
                     if (inIdx != -1)
                     {
@@ -330,11 +333,6 @@ namespace DS4Windows
         internal bool TryUnbindInput(OutputDevice outputDevice, int inIdx,
             OutputDevice[] outdevs, bool force = false)
         {
-            if (inIdx >= 0 && inIdx < outdevs.Length)
-            {
-                outdevs[inIdx] = null;
-            }
-
             OutSlotDevice slotDevice = GetOutSlotDevice(outputDevice);
             if (slotDevice == null ||
                 slotDevice.CurrentAttachedStatus != OutSlotDevice.AttachedStatus.Attached)
@@ -349,9 +347,11 @@ namespace DS4Windows
                 return GetOutSlotDevice(outputDevice) == null;
             }
 
-            slotDevice.CurrentInputBound = OutSlotDevice.InputBound.Unbound;
             outputDevice.ResetState();
             outputDevice.RemoveFeedbacks();
+            slotDevice.CurrentInputBound = OutSlotDevice.InputBound.Unbound;
+            if (inIdx >= 0 && inIdx < outdevs.Length)
+                outdevs[inIdx] = null;
             return true;
         }
 
@@ -442,9 +442,10 @@ namespace DS4Windows
                 {
                     if (device.OutputDevice != null)
                     {
-                        outputDevices[slotIdx] = null;
                         device.OutputDevice.Disconnect();
-
+                        outputDevices[slotIdx] = null;
+                        deviceDict.Remove(slotIdx);
+                        revDeviceDict.Remove(device.OutputDevice);
                         device.DetachDevice();
                         SlotUnassigned?.Invoke(this, slotIdx, outputSlots[slotIdx]);
                         //if (!immediate)

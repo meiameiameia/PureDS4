@@ -110,8 +110,13 @@ On/off options use the shared switch (`FoundationToggleSwitchStyle`). It is a
 `AutomationProperties.Name` because it has no visible text of its own.
 
 Do not show permanently disabled controls. A feature that is unavailable for the
-whole release (such as language packs or update checks without a signed channel)
+whole release (such as language packs)
 stays bound but hidden until it can work.
+
+5.1.1 exposes a General switch for read-only release notifications and a manual
+Check action in Tools. A newer version uses the existing dismissible neutral
+banner with an Open release page action; checking and failures use inline Tools
+text, never a modal interruption. Download and installation remain manual.
 
 Auto Profiles hides the rule editor until a rule is selected, showing a short
 explanation instead; options that apply to every rule stay visible in their own
@@ -150,7 +155,7 @@ Degraded mode must preserve Settings, repair, diagnostics, and recovery paths.
 Build and automated tests validate resource construction, theme contrast,
 state mapping, and preserved behavior. Final visual validation is manual from
 the exact disposable executable. A virtual-output change also requires the
-controller and in-game manual gate described in `AGENTS.md`.
+controller and in-game manual gate described in `HARDWARE_VALIDATION.md`.
 
 For each migrated surface check light/dark themes, 720×480 and 1024×660 windows,
 0/1/2/4 controllers, long names/localized labels, missing output, and service

@@ -44,7 +44,7 @@ The exact .NET runtime pack's notices are also in
 ThirdParty/DotNet-RuntimePack-THIRD-PARTY-NOTICES.txt.
 Microsoft's Windows-specific license breakdown is at
 https://github.com/dotnet/core/blob/main/license-information-windows.md .
-Microsoft.Windows.SDK.NET.Ref/10.0.19041.56 supplies the unmodified
+Microsoft.Windows.SDK.NET.Ref/10.0.19041.57 supplies the unmodified
 Microsoft.Windows.SDK.NET.dll and WinRT.Runtime.dll embedded in the application.
 These Microsoft components retain their own Windows SDK terms; PureDS4's GPL
 license does not relicense them. Terms: https://aka.ms/WinSDKLicenseURL .

@@ -9,6 +9,9 @@ PureDS4/ThirdParty/DotNet-LICENSE.txt -text -whitespace
 PureDS4/ThirdParty/WindowsSdk-LICENSE.rtf -text -whitespace
 PureDS4/ThirdParty/WindowsSdk-LICENSE.txt -text -whitespace
 
+# Keep generated backend notice bytes stable across Windows/Linux checkouts.
+extras/VIIPER-0.1.0-pureds4.2-LICENSES.txt text eol=lf
+
 ###############################################################################
 # Set default behavior for command prompt diff.
 #

@@ -11,6 +11,11 @@ or **DualShock 4** game output. The app includes button remapping, stick and
 trigger adjustments, gyro and touchpad controls, rumble, lightbar settings,
 and live controller readings for checking input and mapped output.
 
+You can also switch a controller to [direct/native use](#use-the-physical-ds4-directly)
+from Home without closing PureDS4 or stopping its controller service. Use
+PureDS4's mapped output for some games and let Steam handle the physical DS4
+for others.
+
 **This release supports the DualShock 4 only.** DualSense, DualSense Edge,
 Switch Pro and Joy-Con are outside its scope. DualShock 3 support is planned,
 with no release date. For other controller families, see
@@ -79,6 +84,20 @@ DS4Windows update channel. Version 5.1.0 bundles .NET 8.0.31, and .NET 8
 [reaches end of support on November 10, 2026](https://devblogs.microsoft.com/dotnet/dotnet-8-9-end-of-support/). Runtime security fixes require
 an updated PureDS4 package; see the
 [runtime maintenance plan](docs/RELEASE_CONTRACT.md#update-and-release-authority).
+
+## Use the physical DS4 directly
+
+On Home, choose **Use controller directly** to release the selected physical
+DS4 to Windows. Its virtual output stops, but PureDS4 and its controller
+service stay running. Steam, or a game with native DS4 support, can then use
+the physical controller instead of PureDS4's virtual one.
+
+Profile remapping and virtual-controller features are unavailable for that
+controller in direct mode. Choose **Use game output** to restore PureDS4's
+protected virtual output. Switching modes is manual, not automatic per game.
+
+Switch before launching the game. A game or Steam may need to be restarted
+to detect the change; immediate controller re-detection is not guaranteed.
 
 ## Screenshots
 

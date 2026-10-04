@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using ContextMenu = System.Windows.Controls.ContextMenu;
+using MenuItem = System.Windows.Controls.MenuItem;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -1816,33 +1818,28 @@ namespace DS4WinWPF.DS4Forms
                 temp.IndexOfAny(System.IO.Path.GetInvalidFileNameChars()) == -1)
             {
                 SetLateProperties(false);
-                DS4Windows.Global.ProfilePath[deviceNum] =
-                    DS4Windows.Global.OlderProfilePath[deviceNum] = temp;
-
                 if (currentProfile != null)
                 {
-                    if (temp != currentProfile.Name)
+                    result = currentProfile.SaveProfile(deviceNum, temp);
+                    if (result)
                     {
-                        //File.Delete(DS4Windows.Global.appdatapath + @"\Profiles\" + currentProfile.Name + ".xml");
-                        currentProfile.DeleteFile();
-                        currentProfile.Name = temp;
+                        Global.ProfilePath[deviceNum] = Global.OlderProfilePath[deviceNum] = temp;
+                        currentProfile.FireSaved();
                     }
-                }
-
-                if (currentProfile != null)
-                {
-                    currentProfile.SaveProfile(deviceNum);
-                    currentProfile.FireSaved();
-                    result = true;
+                    else ShowProfileSaveError();
                 }
                 else
                 {
                     string tempprof = Global.appdatapath + @"\Profiles\" + temp + ".xml";
                     if (!File.Exists(tempprof))
                     {
-                        Global.SaveProfile(deviceNum, temp);
-                        CreatedProfile?.Invoke(this, temp);
-                        result = true;
+                        result = Global.SaveProfile(deviceNum, temp, overwrite: false);
+                        if (result)
+                        {
+                            Global.ProfilePath[deviceNum] = Global.OlderProfilePath[deviceNum] = temp;
+                            CreatedProfile?.Invoke(this, temp);
+                        }
+                        else ShowProfileSaveError();
                     }
                     else
                     {
@@ -1858,6 +1855,14 @@ namespace DS4WinWPF.DS4Forms
             }
 
             return result;
+        }
+
+        private void ShowProfileSaveError()
+        {
+            MessageBox.Show("The profile could not be saved. Your previous saved profile is preserved, " +
+                "and the editor remains open. Check write permissions and free disk space. " +
+                "For rename errors, check Logs for details about any preserved copies.",
+                ProductIdentity.Name, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         public void Close()

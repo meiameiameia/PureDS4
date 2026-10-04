@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>Bundle</OutputType>
     <Platform>x64</Platform>
-    <BundleVersion Condition="'$(BundleVersion)' == ''">5.1.0</BundleVersion>
+    <BundleVersion Condition="'$(BundleVersion)' == ''">5.1.1</BundleVersion>
     <DisplayVersion Condition="'$(DisplayVersion)' == ''">$(BundleVersion)</DisplayVersion>
     <ExperimentalDS3 Condition="'$(ExperimentalDS3)' == ''">false</ExperimentalDS3>
     <!-- A DualShock 3 hardware-validation bundle is a distinct product with
@@ -15,7 +15,7 @@
     <!-- DisplayVersion already carries -ds3experimental for an experimental
          build, so the file name is distinctive without a second suffix. -->
     <OutputName>PureDS4_$(DisplayVersion)_Setup_x64</OutputName>
-    <MsiPath Condition="'$(MsiPath)' == ''">$(MSBuildThisFileDirectory)..\PureDS4.Package\bin\x64\Release\PureDS4_5.1.0_x64.msi</MsiPath>
+    <MsiPath Condition="'$(MsiPath)' == ''">$(MSBuildThisFileDirectory)..\PureDS4.Package\bin\x64\Release\PureDS4_5.1.1_x64.msi</MsiPath>
     <BootstrapperRoot Condition="'$(BootstrapperRoot)' == ''">$(MSBuildThisFileDirectory)..\PureDS4.Bootstrapper\bin\x64\Release\net48\win-x64</BootstrapperRoot>
     <SetupActionsPath Condition="'$(SetupActionsPath)' == ''">$(MSBuildThisFileDirectory)..\PureDS4.SetupActions\bin\x64\Release\net48\PureDS4.SetupActions.exe</SetupActionsPath>
     <ExtrasRoot Condition="'$(ExtrasRoot)' == ''">$(MSBuildThisFileDirectory)..\..\extras</ExtrasRoot>

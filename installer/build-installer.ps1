@@ -2,9 +2,9 @@
 param(
     [Parameter(Mandatory = $true)]
     [string]$PublishRoot,
-    [string]$ProductVersion = "5.1.0",
-    [string]$DisplayVersion = "5.1.0",
-    [string]$BundleVersion = "5.1.0",
+    [string]$ProductVersion = "5.1.1",
+    [string]$DisplayVersion = "5.1.1",
+    [string]$BundleVersion = "5.1.1",
     [string]$OutputDirectory,
     [switch]$SkipApplicationPublish,
     [switch]$RequireSigning,

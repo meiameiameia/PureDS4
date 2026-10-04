@@ -137,6 +137,7 @@ namespace DS4WinWPF.DS4Forms
             App root = Application.Current as App;
             settingsWrapVM = new SettingsViewModel();
             settingsTab.DataContext = settingsWrapVM;
+            InitializeReleaseNotifications();
             RefreshViiperStatusText();
             logvm = new LogViewModel(App.rootHub);
             logListView.DataContext = logvm;
@@ -291,52 +292,8 @@ namespace DS4WinWPF.DS4Forms
 
             // Log exceptions that might occur
             Util.LogAssistBackgroundTask(tempTask);
-#if !BETA_VERSION
-            tempTask = Task.Delay(100).ContinueWith(_ =>
-            {
-                if (!UpdateAuthorityPolicy.ProductUpdatesEnabled)
-                {
-                    return;
-                }
-
-                int checkwhen = Global.CheckWhen;
-                if (checkwhen > 0 && DateTime.Now >= Global.LastChecked + TimeSpan.FromHours(checkwhen))
-                {
-                    try
-                    {
-                        if (Changelog.CheckNewerReleaseExists(out string releaseTag, false))
-                        {
-                            DisplayUpdaterWindow(releaseTag);
-                        }
-                    }
-                    catch
-                    {
-                        Dispatcher.Invoke(() => MessageBox.Show(Strings.FailedToRetrieveLatestVersion,
-                            $"{ProductIdentity.Name} updates"));
-                        // bubble the exception up to allow to see what's wrong in the log
-                        throw;
-                    }
-
-                    Global.LastChecked = DateTime.Now;
-                }
-
-                // Check if main window closing was requested from app update.
-                // Quit task early
-                //if (contextclose)
-                //{
-                //    return;
-                //}
-            });
-#endif
-            Util.LogAssistBackgroundTask(tempTask);
-        }
-
-        private void DisplayUpdaterWindow(string version)
-        {
-            Dispatcher.Invoke(() => MessageBox.Show(
-                UpdateAuthorityPolicy.DisabledMessage,
-                $"{ProductIdentity.Name} updates",
-                MessageBoxButton.OK, MessageBoxImage.Information));
+            // Metadata checking is independent of controller startup/output.
+            Util.LogAssistBackgroundTask(CheckReleaseNotificationAsync(automatic: true));
         }
 
         private void TrayIconVM_RequestMinimize(object sender, EventArgs e)
@@ -1832,6 +1789,7 @@ Suspend support not enabled.", true);
                     continue;
                 }
 
+                bool profileSaved = false;
                 Mapping.ExecuteSerializedProfileMutation(deviceIndex, () =>
                 {
                     // A profile reload can finish between the ComboBox setter
@@ -1859,13 +1817,21 @@ Suspend support not enabled.", true);
                         .SingleOrDefault(item => item.Name == profileName);
                     if (profile != null)
                     {
-                        profile.SaveProfile(deviceIndex);
+                        profileSaved = profile.SaveProfile(deviceIndex);
                     }
                     else
                     {
-                        Global.SaveProfile(deviceIndex, profileName);
+                        profileSaved = Global.SaveProfile(deviceIndex, profileName);
                     }
                 });
+
+                if (!profileSaved)
+                {
+                    ShowExposureFailure("Profile changes were not saved",
+                        "Your previous saved profile is preserved. Check write permissions, free disk space, and Logs before retrying.",
+                        canRecover: false);
+                    continue;
+                }
 
                 overviewRequestedOutputControllers.Remove(deviceIndex);
                 overviewRequestedSpeakerOutputStates.Remove(deviceIndex);
@@ -2082,6 +2048,7 @@ Suspend support not enabled.", true);
 
         private void MainDS4Window_Closed(object sender, EventArgs e)
         {
+            DisposeReleaseNotifications();
             DisposePowerLifecycle();
             CancelBoundedHotplugRecovery();
             overviewProfileSaveTimer.Stop();
@@ -2761,9 +2728,9 @@ Suspend support not enabled.", true);
         internal static bool ShouldShowGameOutputWarning(bool startupCheckComplete,
             bool gameOutputReady) => startupCheckComplete && !gameOutputReady;
 
-        private void CheckUpdatesBtn_Click(object sender, RoutedEventArgs e)
+        private async void CheckUpdatesBtn_Click(object sender, RoutedEventArgs e)
         {
-            DisplayUpdaterWindow(string.Empty);
+            await CheckReleaseNotificationAsync(automatic: false);
         }
 
         private void ImportProfBtn_Click(object sender, RoutedEventArgs e)

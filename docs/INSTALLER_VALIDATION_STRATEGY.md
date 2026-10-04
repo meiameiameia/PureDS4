@@ -47,7 +47,8 @@ API contract must be verified first.
 
 ## Pinned runtime contract
 
-- VIIPER must match the SHA-256 of the bundled 0.1.0-pureds4.1 executable.
+- VIIPER must match the SHA-256 of the bundled 0.1.0-pureds4.2 executable
+  for 5.1.1; historical 5.1.0 evidence below retains its pureds4.1 identity.
 - `usbip.exe` must report version 0.9.7.7 and match the pinned executable
   SHA-256.
 - The active `usbip2_ude` and `usbip2_filter` driver files must match the two
@@ -56,7 +57,7 @@ API contract must be verified first.
   mismatch diagnostic.
 - The VIIPER API must answer its local readiness probe.
 - The machine readiness marker must be
-  `VIIPER-0.1.0-pureds4.1+USBIP-0.9.7.7 / Ready` in the 64-bit registry view.
+  `VIIPER-0.1.0-pureds4.2+USBIP-0.9.7.7 / Ready` in the 64-bit registry view.
 
 PureDS4 repeats these identity and ABI checks at startup. Missing or
 mismatched prerequisites open an offline repair prompt; suppressing a location
@@ -101,6 +102,20 @@ Clean full-bundle installation, real failure/recovery and reboot/resume on
 Windows 10/11 are still unobserved. Do not manufacture that evidence by
 deliberately damaging the daily-driver installation or by counting a model
 simulation as a driver installation.
+
+### 5.1.1 preparation — 2026-10-04
+
+The maintenance candidate uses .NET/Core/Desktop `10.0.12` and backend
+`0.1.0-pureds4.2` from clean source
+`04c10b1e0b5439b649730389673a64918a43578e`. The component-source gate is
+complete; the final package and exact-build USB/Bluetooth pass are still pending.
+On 2026-10-04 the owner accepted unsigned distribution and the bounded risk of
+unobserved clean full-bundle installation, actual failure rollback, and
+reboot/resume on consumer Windows for **5.1.1**, conditional on final hardware
+acceptance. Installation failure can require manual repair. This is a fresh
+risk decision, not inheritance of the 5.1.0 exception or a claim that these
+scenarios passed. See the [release contract](RELEASE_CONTRACT.md#511-maintenance-scope-2026-10-04).
+No real installation or driver mutation is authorized by preparation alone.
 
 ### Evidence checkpoint — 2026-10-03
 
@@ -219,7 +234,8 @@ or test-only changes.
 - Full unit/regression suite.
 - WiX MSI ICE validation.
 - Burn/bootstrapper and setup-action compilation.
-- Self-contained .NET 8 publication for both installer hosts.
+- Self-contained .NET 10 publication for both installer hosts (historical
+  5.1.0 records above used .NET 8).
 - Real MSI install, repair, and uninstall execution on the Windows CI runner.
 - Content-addressed payload manifest and hash validation.
 - Fail-fast equality between `PureDS4.release` and the requested package

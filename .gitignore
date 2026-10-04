@@ -337,3 +337,7 @@ ASALocalRun/
 
 # Local Claude Code permission rules, personal to each machine.
 .claude/settings.local.json
+
+# Personal coding-agent guidance remains on this machine, not in distribution.
+/AGENTS.md
+/CLAUDE.md

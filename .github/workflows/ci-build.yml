@@ -32,7 +32,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.425
+          dotnet-version: 10.0.302
 
       - name: Verify pinned .NET SDK
         shell: pwsh
@@ -54,7 +54,7 @@ jobs:
       - name: Check package security advisories
         shell: pwsh
         run: |
-          $report = dotnet list .\PureDS4.sln package --vulnerable --include-transitive --format json | ConvertFrom-Json
+          $report = dotnet list .\PureDS4.sln package --vulnerable --include-transitive --no-restore --format json | ConvertFrom-Json
           if ($LASTEXITCODE -ne 0) { throw "NuGet advisory query failed." }
           if (-not $report.sources -or -not $report.projects) {
             throw "NuGet advisory query returned no source or projects."
@@ -78,7 +78,9 @@ jobs:
         # were excluded here (CheckSettingsSave, CheckWriteProfile,
         # CheckJaysProfileRead) now pass against the regenerated fixtures, so
         # the filter that hid them is gone.
-        run: dotnet test .\PureDS4.Tests\PureDS4.Tests.csproj -c Release -p:Platform=x64 --verbosity normal
+        # Exercise the same pinned runtime shipped to users rather than the
+        # older shared runtime that happens to come with the selected SDK.
+        run: dotnet test .\PureDS4.Tests\PureDS4.Tests.csproj -c Release -p:Platform=x64 -r win-x64 -p:SelfContained=true --filter "FullyQualifiedName!~LiveProcessCapture" --verbosity normal
 
   build:
     runs-on: windows-2022
@@ -93,7 +95,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.425
+          dotnet-version: 10.0.302
 
       - name: Verify pinned .NET SDK
         shell: pwsh
@@ -222,8 +224,8 @@ jobs:
                 throw "Cannot identify the exact $component $name runtime pack from restore assets."
               }
               $version = $Matches[1]
-              if ([version]$version -lt [version]'8.0.31') {
-                throw "$component $name is stale: $version (minimum reviewed patch: 8.0.31)."
+              if ([version]$version -lt [version]'10.0.12' -or ([version]$version).Major -ne 10) {
+                throw "$component $name is stale or uses the wrong runtime: $version (reviewed .NET 10 minimum: 10.0.12)."
               }
               $runtimePacks += [ordered]@{ component = $component; name = $name; version = $version }
             }

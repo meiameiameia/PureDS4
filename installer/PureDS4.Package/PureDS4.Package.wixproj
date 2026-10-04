@@ -14,7 +14,7 @@
     <PkgInstallFolder Condition="'$(ExperimentalDS3)' == 'true'">PureDS4 DS3 Experimental</PkgInstallFolder>
     <PkgOutputSuffix Condition="'$(ExperimentalDS3)' == 'true'">_DS3Experimental</PkgOutputSuffix>
     <OutputName>PureDS4_$(ProductVersion)_x64$(PkgOutputSuffix)</OutputName>
-    <ProductVersion Condition="'$(ProductVersion)' == ''">5.1.0</ProductVersion>
+    <ProductVersion Condition="'$(ProductVersion)' == ''">5.1.1</ProductVersion>
     <PublishRoot Condition="'$(PublishRoot)' == ''">$(MSBuildThisFileDirectory)..\..\bin\x64\Release\output</PublishRoot>
     <RepoRoot Condition="'$(RepoRoot)' == ''">$(MSBuildThisFileDirectory)..\..\</RepoRoot>
     <DefineConstants>ProductVersion=$(ProductVersion);PublishRoot=$(PublishRoot);RepoRoot=$(RepoRoot);PkgProductName=$(PkgProductName);PkgUpgradeCode=$(PkgUpgradeCode);PkgInstallFolder=$(PkgInstallFolder)</DefineConstants>

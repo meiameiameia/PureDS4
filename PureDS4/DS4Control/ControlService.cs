@@ -1811,30 +1811,26 @@ namespace DS4Windows
 
         public void UnplugOutDev(int index, DS4Device device, bool immediate = false, bool force = false)
         {
-            if (!useDInputOnly[index])
+            if (!useDInputOnly[index] || force)
             {
-                try
+                OutputDevice dev = outputDevices[index];
+                OutSlotDevice slotDevice = outputslotMan.GetOutSlotDevice(dev);
+                if (dev != null && slotDevice != null)
                 {
-                    //OutContType contType = Global.OutContType[index];
-                    OutputDevice dev = outputDevices[index];
-                    OutSlotDevice slotDevice = outputslotMan.GetOutSlotDevice(dev);
-                    if (dev != null && slotDevice != null)
-                    {
-                        string tempType = slotDevice.CurrentType.ToDisplayName();
-                        LogDebug($"Disassociated virtual {tempType} Controller in{(slotDevice.CurrentReserveStatus == OutSlotDevice.ReserveStatus.Permanent ? " permanent" : "")} output slot #{slotDevice.Index + 1} from input controller #{index + 1} ({device.DisplayName})", false);
-
-                        activeOutDevType[index] = OutContType.None;
-                        outputslotMan.TryUnbindInput(dev, index, outputDevices, force);
-                    }
+                    string tempType = slotDevice.CurrentType.ToDisplayName();
+                    if (!outputslotMan.TryUnbindInput(dev, index, outputDevices, force))
+                        throw new IOException("The virtual output slot could not be retired; its identity was retained.");
+                    LogDebug($"Disassociated virtual {tempType} Controller in{(slotDevice.CurrentReserveStatus == OutSlotDevice.ReserveStatus.Permanent ? " permanent" : "")} output slot #{slotDevice.Index + 1} from input controller #{index + 1} ({device?.DisplayName ?? "disconnected controller"})", false);
                 }
-                finally
+                else if (dev != null)
                 {
-                    outputDevices[index] = null;
-                    activeOutDevType[index] = OutContType.None;
-                    useDInputOnly[index] = true;
-                    virtualOutputBlockReasons[index] =
-                        VirtualOutputBlockReason.None;
+                    // An output outside the slot map still owns a lifetime.
+                    dev.Disconnect();
                 }
+                outputDevices[index] = null;
+                activeOutDevType[index] = OutContType.None;
+                useDInputOnly[index] = true;
+                virtualOutputBlockReasons[index] = VirtualOutputBlockReason.None;
             }
         }
 
@@ -1864,6 +1860,8 @@ namespace DS4Windows
             inServiceTask = true;
             {
                 // Initialize output KBM handler at start of ControlService
+                for (int index = 0; index < CURRENT_DS4_CONTROLLER_LIMIT; index++)
+                    Mapping.ResumeMacros(index);
                 StartupDiag("ControlService.Start before InitOutputKBMHandler");
                 InitOutputKBMHandler();
                 StartupDiag($"ControlService.Start after InitOutputKBMHandler handler={Global.outputKBMHandler?.GetFullDisplayName()}");
@@ -2102,6 +2100,49 @@ namespace DS4Windows
             CancelAllOutputBindingRetries();
             if (running)
             {
+                try
+                {
+                    for (int index = 0; index < CURRENT_DS4_CONTROLLER_LIMIT; index++)
+                    {
+                        if (!Mapping.SuspendMacros(index, TimeSpan.FromSeconds(2)))
+                        {
+                            LogDebug("Controller handling could not stop because mapped macros are still finishing.", true);
+                            return false;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogDebug("Controller handling could not stop because macro input could not be released: " + ex.Message, true);
+                    return false;
+                }
+                // Finish virtual retirement before closing physical handles or
+                // publishing a stopped service. On failure the caller can retry
+                // Stop with the original output identities still retained.
+                bool anyUnplugged = outputslotMan.NumAttachedDevices > 0;
+                bool previousHotPlug = runHotPlug;
+                runHotPlug = false;
+                StopGameBarStateTimer();
+                try
+                {
+                    StopAllGameBarCompatibilityOutputs();
+                    if (gameBarCompatibilityOutputDevices.Any(output => output != null))
+                        throw new IOException("A Game Bar virtual output could not be retired.");
+                    StopAllPlayStationFeatureOutputs();
+                    for (int index = 0; index < outputDevices.Length; index++)
+                    {
+                        if (outputDevices[index] != null)
+                            UnplugOutDev(index, DS4Controllers[index], immediate: true, force: true);
+                    }
+                    outputslotMan.Stop(true);
+                }
+                catch (Exception ex)
+                {
+                    runHotPlug = previousHotPlug;
+                    LogDebug("Controller handling could not stop because virtual output removal was not confirmed. Retry Stop: " + ex.Message, true);
+                    return false;
+                }
+
                 if (OpenRGBServer.Instance.IsRunning)
                 {
                     StartupDiag("ControlService.Stop OpenRGB stop begin");
@@ -2112,8 +2153,6 @@ namespace DS4Windows
                 running = false;
                 runHotPlug = false;
                 inServiceTask = true;
-                StopGameBarStateTimer();
-                StopAllGameBarCompatibilityOutputs();
                 StartupDiag("ControlService.Stop PreServiceStop begin");
                 PreServiceStop?.Invoke(this, EventArgs.Empty);
                 StartupDiag("ControlService.Stop PreServiceStop end");
@@ -2123,7 +2162,6 @@ namespace DS4Windows
 
                 LogDebug("Closing VIIPER virtual-controller connections");
 
-                bool anyUnplugged = false;
                 for (int i = 0, arlength = DS4Controllers.Length; i < arlength; i++)
                 {
                     DS4Device tempDevice = DS4Controllers[i];
@@ -2165,15 +2203,6 @@ namespace DS4Windows
                         }
 
                         CurrentState[i].Battery = PreviousState[i].Battery = 0; // Reset for the next connection's initial status change.
-                        OutputDevice tempout = outputDevices[i];
-                        if (tempout != null)
-                        {
-                            StartupDiag($"ControlService.Stop UnplugOutDev begin index={i} type={tempout.GetDeviceType()}");
-                            UnplugOutDev(i, tempDevice, immediate: immediateUnplug, force: true);
-                            StartupDiag($"ControlService.Stop UnplugOutDev end index={i}");
-                            anyUnplugged = true;
-                        }
-
                         //outputDevices[i] = null;
                         //useDInputOnly[i] = true;
                         //Global.activeOutDevType[i] = OutContType.None;
@@ -2192,9 +2221,6 @@ namespace DS4Windows
                 StartupDiag("ControlService.Stop DualShock4Audio reset begin");
                 dualShock4AudioPassthrough.ResetForServiceStop();
                 StartupDiag("ControlService.Stop DualShock4Audio reset end");
-                StartupDiag("ControlService.Stop PlayStation feature outputs begin");
-                StopAllPlayStationFeatureOutputs();
-                StartupDiag("ControlService.Stop PlayStation feature outputs end");
                 StartupDiag("ControlService.Stop DS4Devices.stopControllers begin");
                 DS4Devices.stopControllers();
                 StartupDiag("ControlService.Stop DS4Devices.stopControllers end");
@@ -2230,10 +2256,6 @@ namespace DS4Windows
                 {
                     StartupDiag("ControlService.Stop timed out waiting for output slot queue");
                 }
-
-                StartupDiag("ControlService.Stop outputslotMan.Stop begin");
-                outputslotMan.Stop(true);
-                StartupDiag("ControlService.Stop outputslotMan.Stop end");
 
                 if (anyUnplugged)
                 {
@@ -2404,6 +2426,9 @@ namespace DS4Windows
                     ShouldDeferControllerExposureProfileSetup(index, device);
                 RecordControllerExposureProfileReady(index, device,
                     profileLoaded || useAutoProfile);
+
+                if (!deferExposureProfileSetup)
+                    Mapping.ResumeMacros(index);
 
                 if (deferExposureProfileSetup)
                 {
@@ -2612,8 +2637,8 @@ namespace DS4Windows
 
                 if (existing != null)
                 {
-                    playStationFeatureOutputDevices[index] = null;
                     existing.Disconnect();
+                    playStationFeatureOutputDevices[index] = null;
                 }
 
                 ViiperOutDevice sidecar = new ViiperOutDevice(
@@ -2626,15 +2651,27 @@ namespace DS4Windows
                     StartupDiag(
                         $"Persistent PlayStation audio owner connect begin index={index} type={desiredSidecar}");
                     sidecar.Connect();
-                    sidecar.BindPhysicalController(index);
                     playStationFeatureOutputDevices[index] = sidecar;
+                    sidecar.BindPhysicalController(index);
                     StartupDiag(
                         $"Persistent PlayStation audio owner ready index={index} type={desiredSidecar} port={sidecar.DirectSpeakerUsbipPort}");
                     return sidecar;
                 }
                 catch (Exception ex)
                 {
-                    sidecar.Disconnect();
+                    // Keep a successfully created lifetime reachable even if
+                    // binding or its first cleanup attempt fails.
+                    try
+                    {
+                        sidecar.Disconnect();
+                        if (ReferenceEquals(playStationFeatureOutputDevices[index], sidecar))
+                            playStationFeatureOutputDevices[index] = null;
+                    }
+                    catch (Exception cleanupError)
+                    {
+                        playStationFeatureOutputDevices[index] = sidecar;
+                        StartupDiag("PlayStation audio cleanup must be retried: " + cleanupError.Message);
+                    }
                     AppLogger.LogToGui(
                         $"Could not create the {desiredSidecar.ToDisplayName()} audio interface for controller #{index + 1}: {ex.Message}",
                         true);
@@ -2654,7 +2691,6 @@ namespace DS4Windows
                     playStationFeatureOutputDevices.Length)
                 {
                     sidecar = playStationFeatureOutputDevices[index];
-                    playStationFeatureOutputDevices[index] = null;
                 }
             }
 
@@ -2663,6 +2699,11 @@ namespace DS4Windows
                 StartupDiag(
                     $"Persistent PlayStation audio owner disconnect index={index} type={sidecar.OutputType}");
                 sidecar.Disconnect();
+                lock (playStationFeatureOutputLock)
+                {
+                    if (ReferenceEquals(playStationFeatureOutputDevices[index], sidecar))
+                        playStationFeatureOutputDevices[index] = null;
+                }
             }
         }
 
@@ -3026,8 +3067,14 @@ namespace DS4Windows
                 {
                     if (!useDInputOnly[ind])
                     {
-                        Global.activeOutDevType[ind] = OutContType.None;
-                        UnplugOutDev(ind, device);
+                        try
+                        {
+                            UnplugOutDev(ind, device);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogDebug("Virtual output removal after losing sync was not confirmed. Retry Stop: " + ex.Message, true);
+                        }
                     }
                 }
                 else
@@ -3082,19 +3129,38 @@ namespace DS4Windows
                     CurrentState[ind].Battery = PreviousState[ind].Battery = 0; // Reset for the next connection's initial status change.
                     if (!exposureRelease)
                     {
-                        DeactivateGameBarCompatibilityOutput(ind);
-                        if (!useDInputOnly[ind])
+                        try
                         {
-                            UnplugOutDev(ind, device);
-                        }
-                        else if (!device.PrimaryDevice)
-                        {
-                            OutputDevice outDev = outputDevices[ind];
-                            if (outDev != null)
+                            if (!Mapping.SuspendMacros(ind, TimeSpan.FromSeconds(2)))
+                                throw new IOException("Pending macros are still finishing after controller removal.");
+                            DeactivateGameBarCompatibilityOutput(ind);
+                            if (gameBarCompatibilityOutputDevices[ind] != null)
+                                throw new IOException("The Game Bar output remained active.");
+                            if (!useDInputOnly[ind])
                             {
-                                outDev.RemoveFeedback(ind);
-                                outputDevices[ind] = null;
+                                UnplugOutDev(ind, device);
                             }
+                            else if (!device.PrimaryDevice)
+                            {
+                                OutputDevice outDev = outputDevices[ind];
+                                if (outDev != null)
+                                {
+                                    outDev.RemoveFeedback(ind);
+                                    outputDevices[ind] = null;
+                                }
+                            }
+                            dualShock4AudioPassthrough.Stop(ind);
+                            DisconnectPlayStationFeatureOutput(ind);
+                        }
+                        catch (Exception ex)
+                        {
+                            // Do not recycle this input slot while its output
+                            // lifetime still owns a device or USB/IP port.
+                            device.IsRemoved = true;
+                            device.Synced = false;
+                            Mapping.Commit(ind);
+                            LogDebug("Controller removal is incomplete. Retry Stop before reconnecting: " + ex.Message, true);
+                            return;
                         }
 
                         // Use Task to reset device synth state and commit it
@@ -3115,11 +3181,6 @@ namespace DS4Windows
                     {
                         LogDebug(removed);
                         AppLogger.LogToTray(removed);
-                    }
-                    if (!exposureRelease)
-                    {
-                        dualShock4AudioPassthrough.Stop(ind);
-                        DisconnectPlayStationFeatureOutput(ind);
                     }
                     /*Stopwatch sw = new Stopwatch();
                     sw.Start();
@@ -3538,15 +3599,11 @@ namespace DS4Windows
             }
             catch (Exception ex)
             {
-                if (compatibilityOutput != null &&
-                    outputslotMan.GetOutSlotDevice(compatibilityOutput) != null)
+                if (compatibilityOutput != null)
                 {
-                    outputslotMan.DeferredRemoval(compatibilityOutput, -1,
-                        outputDevices, true);
+                    Interlocked.Exchange(ref gameBarCompatibilityOutputDevices[index], compatibilityOutput);
+                    DeactivateGameBarCompatibilityOutputCore(index);
                 }
-
-                Interlocked.Exchange(
-                    ref gameBarCompatibilityOutputDevices[index], null);
                 Interlocked.Exchange(ref gameBarCompatibilityRoutingActive[index], 0);
                 gameBarCompatibilityNextRetryUtc[index] =
                     DateTime.UtcNow + TimeSpan.FromSeconds(2);
@@ -3568,8 +3625,8 @@ namespace DS4Windows
             // Return the report path to the native output before withdrawing or
             // disconnecting the companion. Reports never observe a null route.
             Interlocked.Exchange(ref gameBarCompatibilityRoutingActive[index], 0);
-            OutputDevice compatibilityOutput = Interlocked.Exchange(
-                ref gameBarCompatibilityOutputDevices[index], null);
+            OutputDevice compatibilityOutput = Volatile.Read(
+                ref gameBarCompatibilityOutputDevices[index]);
             if (compatibilityOutput == null)
             {
                 return;
@@ -3577,13 +3634,22 @@ namespace DS4Windows
 
             try
             {
-                compatibilityOutput?.ResetState();
-                if (compatibilityOutput != null &&
-                    outputslotMan.GetOutSlotDevice(compatibilityOutput) != null)
+                try { compatibilityOutput.ResetState(); }
+                catch (Exception resetError)
+                {
+                    StartupDiag("Game Bar neutral reset failed: " + resetError.Message);
+                }
+                if (outputslotMan.GetOutSlotDevice(compatibilityOutput) != null)
                 {
                     outputslotMan.DeferredRemoval(compatibilityOutput, -1,
                         outputDevices, true);
                 }
+                else
+                {
+                    compatibilityOutput.Disconnect();
+                }
+                Interlocked.CompareExchange(ref gameBarCompatibilityOutputDevices[index],
+                    null, compatibilityOutput);
             }
             catch (Exception ex)
             {
