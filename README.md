@@ -23,23 +23,23 @@ with no release date. For other controller families, see
 
 ## Download and install
 
-The first public release is **5.1.0**. Get the packages from
+The current release is **5.1.1**. Get the packages from
 [PureDS4 Releases](https://github.com/meiameiameia/PureDS4/releases).
 
 PureDS4 targets **Windows 10/11 x64**. Testing so far is limited to one Windows
 PC; see [what has been tested](#what-has-been-tested) before installing.
 
-- **Standard setup:** `PureDS4_5.1.0_Setup_x64.exe`
-- **Portable package:** `PureDS4_5.1.0_x64.zip`
+- **Standard setup:** `PureDS4_5.1.1_Setup_x64.exe`
+- **Portable package:** `PureDS4_5.1.1_x64.zip`
 - **Checksums and build details:** `SHA256SUMS.txt` and `candidate-identity.json`
 
-The first installer is **unsigned and has no verified publisher**. The tested
+The installer is **unsigned and has no verified publisher**. An earlier
 browser download produced a SmartScreen warning, and Windows policy may block
 it. Download from this repository's Releases page and compare the file's
 SHA-256 with `SHA256SUMS.txt`:
 
 ```powershell
-Get-FileHash .\PureDS4_5.1.0_Setup_x64.exe -Algorithm SHA256
+Get-FileHash .\PureDS4_5.1.1_Setup_x64.exe -Algorithm SHA256
 ```
 
 A matching hash confirms that the file matches the published checksum; it
@@ -79,10 +79,15 @@ portable use still needs the machine-wide game-output components and drivers.
 Extracting the archive does not install or configure them. PureDS4 checks
 these components and offers setup or repair when needed.
 
-Updates are manual. Use PureDS4's Releases page; the app does not use the
-DS4Windows update channel. Version 5.1.0 bundles .NET 8.0.31, and .NET 8
-[reaches end of support on November 10, 2026](https://devblogs.microsoft.com/dotnet/dotnet-8-9-end-of-support/). Runtime security fixes require
-an updated PureDS4 package; see the
+Downloads and installation stay manual. From 5.1.1, PureDS4 checks GitHub for
+new stable releases on startup, at most once per 24 hours. Automatic checks
+can be disabled in Settings; **Tools → Updates → Check** works manually.
+The app does not use the DS4Windows update channel, download packages or
+install updates. Users on 5.1.0 need to download 5.1.1 manually to get the checker.
+
+Version 5.1.1 bundles **.NET 10.0.12 LTS**, so no separate runtime installation
+is needed. Runtime security fixes still require an updated PureDS4 package;
+see the
 [runtime maintenance plan](docs/RELEASE_CONTRACT.md#update-and-release-authority).
 
 ## Use the physical DS4 directly
@@ -150,11 +155,12 @@ guaranteed downgrade.
 ## What has been tested
 
 Testing has covered a **DS4 v2.1 on one Windows PC**, using USB and Bluetooth.
-Earlier 5.1.0 candidates passed input, Xbox 360 game output, gameplay,
-disconnect/reconnect and app restart checks. The current candidate completed
-an in-place update, preserved the existing Default profile, and matched its
-installed-file manifest. A full gameplay pass was not repeated on that exact
-build.
+The exact 5.1.1 candidate passed USB/Bluetooth input, Xbox 360 game output,
+gameplay/rumble, disconnect/reconnect, app restart and managed/native round trips.
+A temporary-profile check confirmed that switching to native mode releases
+a held macro key and cancels its later steps. The in-place update from 5.1.0
+preserved Default, and all 29 installed application files matched the candidate
+manifest. These results do not establish physical validation of DS4 game output.
 
 The remaining limits matter:
 
@@ -170,7 +176,7 @@ The remaining limits matter:
   game when PureDS4 is running without elevation.
 
 The [hardware validation record](docs/HARDWARE_VALIDATION.md) and
-[installer checkpoint](docs/INSTALLER_VALIDATION_STRATEGY.md#evidence-checkpoint--2026-10-03)
+[installer checkpoint](docs/INSTALLER_VALIDATION_STRATEGY.md#511-preparation--2026-10-04)
 separate observed results from procedures and untested cases.
 
 ## Troubleshooting and support

@@ -9,9 +9,92 @@ and two built-in Windows tools cover sticks, triggers, gyro, touchpad, rumble,
 lightbar and the virtual pad. Only the controller speaker and the headset
 microphone need a trick, and both are described at the end.
 
-## Current internal candidate evidence
+## Release hardware evidence
 
-The current packaged candidate is `5.1.0` from clean commit
+### 5.1.1 in-place upgrade — 2026-10-04
+
+The owner completed the authorized `5.1.0` → `5.1.1` update using the frozen
+candidate from application source `5a14defb05992250b73cb6f2e6bf0b9ffe438952`.
+Installer SHA-256:
+`0B83EC6A74D1E119D621AAF426D68816C6A732C4D86DBD8D06A5DBB8411F059D`.
+All 29 installed application payload files matched the candidate manifest.
+The installed file at `C:\Program Files\PureDS4\PureDS4.exe` reports `5.1.1`
+and SHA-256 `3A742C470678C25480DE98D3F710397BBDF65C381F1F551CC011EA258077EC50`.
+Default remained byte-identical to its recovery copy.
+
+Read-only post-install checks confirmed the new canonical backend hash/version,
+`Ready` infrastructure registration, canonical Program Files task actions,
+USB-IP `0.9.7.7` executable and active driver hashes, a successful USB-IP port
+ABI probe, and a successful backend API ping. Both API/USB-IP listeners were
+observed only on `127.0.0.1` (ports 3242/3241). No real failure was injected.
+The elevated backend process's executable path was unavailable to the read-only
+process query; this does not claim direct process-path verification.
+
+The owner subsequently reported that the requested grouped checks passed,
+separately over USB and Bluetooth: controller readings and virtual-pad input
+in `joy.cpl`, familiar-game gameplay/rumble, disconnect/reconnect with the
+game open, app close/reopen, and managed → native → managed routing. No game
+names or new screenshots were supplied for this pass. This is owner-reported
+one-PC acceptance of this frozen candidate, not broader compatibility proof.
+The installed file hash was rechecked and remained the candidate hash above;
+the app was not running at that later process query.
+
+The owner authorized one temporary profile for the delayed held-input macro
+cancellation check. `Teste-macro-5.1.1.xml` was created from the public test
+fixture in `PureDS4.Tests/ProfileTests.cs`, not from personal Default. Triangle
+holds F24 for 10 seconds, releases it, waits 2 seconds, then pulses F23 for
+1 second (`135/10300/135/2300/134/1300/134`). Program launch and special actions
+are empty; gyro/touchpad output is disabled. XML structure and the supported
+enum values were checked; Default and the installed app hashes are unchanged.
+At preparation time, the profile had not yet been activated or exercised with
+the controller; the completed result follows below.
+
+A disposable observation panel was prepared to poll only F23/F24, without
+input injection or other-key recording. Its PowerShell syntax check passed,
+but launching the script was refused by the existing Windows script policy.
+No policy, permission or security setting was changed, no observer process
+was started, and no hardware result was claimed at that point. The planned check:
+first demonstrate normal execution, then trigger a second macro and switch
+to native mode during the held F24. F24 must release before its normal delay
+ends, and no additional F23 pulse may follow. Restore Default afterwards.
+No physical backend failure was forced or observed.
+Clean full-bundle installation, actual rollback and reboot/resume remain the
+explicit evidence gaps accepted separately for 5.1.1.
+
+The owner then authorized a temporary executable observation panel, without
+installation or a security-policy change. A 17,920-byte WinForms helper was
+compiled with the existing Windows .NET Framework compiler and opened from
+`artifacts/disposable/macro-acceptance-5.1.1/Observe-TestKeys.exe`. Its five
+fixture checks passed (normal counters, cancelled-sequence counters, bounded
+event retention, polling-gap detection and snapshot serialization); these
+check the observer, not production macro cancellation. The panel queries only
+F23/F24 current state and records only those events and elapsed times in the
+same disposable directory. It does not inject input, capture other keys, or
+control another application's UI. Default and installed app hashes remain
+unchanged. The panel was left open for the authorized owner-assisted check;
+its closure and the completed acceptance are recorded below.
+
+The owner subsequently reported passing the normal/cancelled macro check.
+The observer's recorded normal sequence held F24 for 10.009 seconds, waited
+2.004 seconds, and pulsed F23 for 1.002 seconds. The second sequence released
+F24 after 4.029 seconds during the owner-reported native transition; no second
+F23 pulse occurred through the remaining 32.076-second observation window.
+Both keys were released, counters were 2/2 for F24 and 1/1 for F23, the maximum
+polling gap was 132 ms, and no observer error was recorded. The running
+application path was the canonical installed `PureDS4.exe` identified above.
+The owner then restored Default and closed PureDS4. Saved Controller1 selected
+Default and no longer referenced the test profile; its file hash stayed unchanged.
+The observer was already closed. Only the task-created test profile was moved
+to the disposable directory, preserving its bytes for recoverable cleanup.
+The frozen candidate's requested USB/Bluetooth and macro acceptance is complete;
+this remains one-PC evidence, not a physical backend-interruption or broader
+installation/audio/controller compatibility pass.
+These unchanged candidate bytes were subsequently published as
+[PureDS4 5.1.1](https://github.com/meiameiameia/PureDS4/releases/tag/v5.1.1).
+
+### Published 5.1.0 candidate
+
+The published `5.1.0` candidate was built from clean commit
 `8999108763aa09c5478c8713f7fd62d99cf7ebb5`. On 2026-09-30 the owner completed
 an in-place same-version update using installer SHA-256
 `75B3F8516870A9473AF8E1684C00AFE1446067327AA642497C22EBBB68AE58F5`.

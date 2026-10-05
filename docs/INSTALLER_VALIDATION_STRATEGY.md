@@ -108,7 +108,25 @@ simulation as a driver installation.
 The maintenance candidate uses .NET/Core/Desktop `10.0.12` and backend
 `0.1.0-pureds4.2` from clean source
 `04c10b1e0b5439b649730389673a64918a43578e`. The component-source gate is
-complete; the final package and exact-build USB/Bluetooth pass are still pending.
+complete. Final local composition and all 29 payload hashes passed for clean
+application commit `5a14defb05992250b73cb6f2e6bf0b9ffe438952`; exact identities
+are recorded in the [frozen candidate checkpoint](RELEASE_CONTRACT.md#frozen-511-candidate--2026-10-04).
+The owner completed the exact-build in-place upgrade on 2026-10-04. All 29
+installed payload hashes, preservation of Default, canonical backend/tasks,
+USB-IP executable/driver hashes and ABI probe, backend API response and
+loopback-only listening passed read-only checks. See the
+[5.1.1 upgrade evidence](HARDWARE_VALIDATION.md#511-in-place-upgrade--2026-10-04).
+The owner subsequently passed the requested USB/Bluetooth input, gameplay,
+rumble, reconnect/reopen and routing checks on that candidate. The separate
+delayed-macro cancellation check also passed, with observer evidence and
+preservation/restoration of Default recorded in the hardware checkpoint.
+Hosted [CI 37253102643](https://github.com/meiameiameia/PureDS4/actions/runs/37253102643)
+passed for that exact application source: tests, locked dependencies/advisories,
+component/notice gates, build/package, offline layout and application MSI
+install/repair/uninstall on Windows Server 2022. The pinned backend also passed
+[CI 37253100965](https://github.com/meiameiameia/PureDS4-VIIPER/actions/runs/37253100965).
+No downloadable CI artifact was retained; the accepted local packages remain
+unchanged. The hosted lifecycle is not consumer-Windows full-bundle proof.
 On 2026-10-04 the owner accepted unsigned distribution and the bounded risk of
 unobserved clean full-bundle installation, actual failure rollback, and
 reboot/resume on consumer Windows for **5.1.1**, conditional on final hardware
@@ -116,6 +134,27 @@ acceptance. Installation failure can require manual repair. This is a fresh
 risk decision, not inheritance of the 5.1.0 exception or a claim that these
 scenarios passed. See the [release contract](RELEASE_CONTRACT.md#511-maintenance-scope-2026-10-04).
 No real installation or driver mutation is authorized by preparation alone.
+
+### 5.1.1 public distribution verification — 2026-10-04
+
+[PureDS4 5.1.1](https://github.com/meiameiameia/PureDS4/releases/tag/v5.1.1)
+was published as latest stable from release `403308929` at
+`2026-10-05T02:05:07Z` (2026-10-04 local). Its annotated tag resolves to
+`5a14defb05992250b73cb6f2e6bf0b9ffe438952`; backend source
+`04c10b1e0b5439b649730389673a64918a43578e` is publicly available.
+All four asset sizes and GitHub SHA-256 digests matched their accepted local
+files before publication. After publication, all four were downloaded without
+authentication and matched again byte-for-byte by size/SHA-256. No public
+download was executed and no accepted binary was rebuilt or replaced.
+
+The package hashes are in the frozen candidate checkpoint. The accompanying
+`SHA256SUMS.txt` is 182 bytes, SHA-256
+`E0740B08C9EA82DA851D0AAD857E663C351783A7D509E6388F31D4039F6716DF`;
+`candidate-identity.json` is 1,950 bytes, SHA-256
+`9B293D0CE6D73CA2F8681CF3992EA04CBD54EB792B945FB34DFDAFB2AC0D06B5`.
+It identifies a local clean-source build, the successful hosted source-validation
+run, .NET 10.0.12, the pinned backend, and unsigned setup; it does not claim a
+downloadable hosted artifact. Published 5.1.0 assets/tag were left untouched.
 
 ### Evidence checkpoint — 2026-10-03
 

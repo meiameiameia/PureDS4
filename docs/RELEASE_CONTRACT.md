@@ -19,8 +19,8 @@ who need any other controller family use
 
 ### 5.1.1 maintenance scope (2026-10-04)
 
-The next target is **5.1.1**, with assembly/file version **5.1.1.0**.
-The intended names are `PureDS4_5.1.1_Setup_x64.exe` and
+The maintenance release is **5.1.1**, with assembly/file version **5.1.1.0**.
+The distribution names are `PureDS4_5.1.1_Setup_x64.exe` and
 `PureDS4_5.1.1_x64.zip`. On 2026-10-04 the owner authorized finishing 5.1.1
 and publishing it on GitHub, including the source commits/pushes needed for
 traceability, conditional on the required final acceptance. Installation and
@@ -103,9 +103,103 @@ controllers. This proves neither the final packaged application's live GUI
 workflow nor a real installation. No replacement package was composed in this
 pass; final-candidate and hardware acceptance remain pending as described above.
 
+### Frozen 5.1.1 candidate — 2026-10-04
+
+The final local candidate was composed from clean application source
+`5a14defb05992250b73cb6f2e6bf0b9ffe438952`, with the clean backend pin above.
+The complete application regression was repeated with that backend input:
+**967 tests passed**, zero failures/skips, with live process capture excluded.
+Final advisory queries for the application, tests, and both managed installer
+hosts reported zero known vulnerable packages. This is a local Windows build;
+no hosted CI validation run or artifact is claimed for this source yet.
+
+Paths below are relative to `artifacts/candidate-5.1.1-5a14def/`:
+
+| Frozen candidate | Bytes | SHA-256 |
+| --- | --- | --- |
+| `installer/PureDS4_5.1.1_Setup_x64.exe` | 190,015,404 | `0B83EC6A74D1E119D621AAF426D68816C6A732C4D86DBD8D06A5DBB8411F059D` |
+| `portable/x64/Release/PureDS4_5.1.1_x64.zip` | 122,849,936 | `87A9E9961E8F33AD5939513EB1E49C0E548825CDCA45655FD1C62C8BD87A6D78` |
+
+`installer/candidate-identity.json` records source, backend, runtime-pack,
+signature and file identities; `installer/SHA256SUMS.txt` accompanies it.
+Core/Desktop/apphost packs were verified as `10.0.12` for all three managed
+components. Both executable product versions are `5.1.1`; setup is unsigned.
+Composition passed release-input/signature gates, managed-notice checks, MSI
+ICE/Burn builds, package validation, and the existing isolated installer,
+on-demand-task and USB-IP reboot-boundary simulations. These simulations are
+not real host installation or driver-failure evidence. The portable archive
+and installer manifest match all 29 application payload files byte-for-byte,
+with no unexpected archive files.
+
+At the initial freeze, this candidate had **not been installed or accepted on
+hardware**, pushed, tagged, or published; the installed app was then `5.1.0`.
+Do not substitute a rebuilt package or an earlier verification artifact for
+these frozen bytes. Next: obtain specific in-place upgrade authority, verify
+the installed payload and preservation of Default, then perform the batched
+USB/Bluetooth and routing/macro acceptance above. Public documentation updates
+may follow separately without relabelling the package's source commit.
+
+The owner subsequently authorized this exact in-place `5.1.0` → `5.1.1`
+upgrade on 2026-10-04, preserving the current Default profile and completing
+normal Windows elevation personally. A hash-verified copy of Default was
+preserved outside the repository; no full-data backup was created. The exact
+setup above was opened for the owner to complete. Installation completion,
+installed payload identity and the hardware pass are not yet observed.
+No deliberate driver-failure injection, rollback or shared-driver removal
+is authorized by this upgrade approval.
+
+The owner then reported completion. Read-only verification confirmed `5.1.1`,
+all 29 installed payload hashes, unchanged Default, the new canonical backend,
+task actions, USB-IP executable/driver identities and ABI, backend API response,
+and loopback-only listening. The [installation checkpoint](HARDWARE_VALIDATION.md#511-in-place-upgrade--2026-10-04)
+records the evidence and its process-query limitation. Hardware acceptance
+and hosted CI remain pending; nothing has been pushed, tagged or published.
+
+The owner subsequently reported passing the requested grouped USB/Bluetooth
+readings, virtual-pad/gameplay/rumble, disconnect/reconnect, app restart and
+managed/native round-trip checks on these installed bytes. The owner subsequently
+authorized a temporary macro profile, which was prepared without changing
+Default. The observation script was refused by the existing Windows script
+policy; no security settings were changed and no macro result is claimed.
+The owner then authorized an executable observation panel; it was prepared
+and opened without installation, new dependencies or policy changes.
+The owner then passed the normal/cancelled macro check. The observer recorded
+a normal 10.009-second F24 hold and one F23 pulse, followed by a cancelled
+4.029-second hold and no later F23 pulse. The owner restored Default and closed
+the app; saved profile selection and Default hash were checked, the observer
+was closed, and the test profile was recoverably archived. See the hardware
+checkpoint above. All requested frozen-candidate hardware acceptance is now
+complete; no fault-injection scenario is inferred from those passes.
+
+Both clean source commits were pushed under the owner's publication approval.
+Hosted validation passed for exact application source in
+[CI 37253102643](https://github.com/meiameiameia/PureDS4/actions/runs/37253102643)
+and backend source in
+[CI 37253100965](https://github.com/meiameiameia/PureDS4-VIIPER/actions/runs/37253100965).
+The application run passed tests, advisories, input/notice gates, build/package,
+offline layout, and application MSI install/repair/uninstall on Windows Server
+2022. The backend run passed tests, vet, build and notices. CI retained no
+downloadable artifact, so the accepted local package hashes remain the release
+identity. `candidate-identity.json` now links the successful source-validation
+run without claiming that CI produced those bytes. Compilation reported
+unused-member/local warnings, and Actions reported its Node 20 deprecation;
+this is not a warning-free-build claim.
+
+[PureDS4 5.1.1](https://github.com/meiameiameia/PureDS4/releases/tag/v5.1.1)
+was then published as latest stable from release `403308929` at
+`2026-10-05T02:05:07Z` (2026-10-04 local). The annotated tag `v5.1.1` resolves
+to the exact application source above, and both source repositories are public.
+All four uploaded assets matched accepted size/hash identities, then passed
+anonymous public download verification. No accepted binary was rebuilt or
+replaced; 5.1.0 remained untouched. See the
+[public distribution checkpoint](INSTALLER_VALIDATION_STRATEGY.md#511-public-distribution-verification--2026-10-04).
+The owner-approved unsigned/untested-case limits remain explicit in the public
+notes below. No Reddit post, UI-framework migration or upstream contribution
+was started by this publication.
+
 Verification outputs before the clean backend source pin:
 
-Application changes are uncommitted on source base
+At that earlier verification point, application changes were uncommitted on source base
 `5c890ddcb4d13951b0ca2d21155a2cd81110768a`; backend changes are uncommitted on
 `c472717d2eed950d8aab3eab80edc87400a75ae8`. Neither base SHA identifies the
 complete changed source as a public candidate.
@@ -356,15 +450,21 @@ behavior, not malware detection, a warning-free launch, or a promise of
 compatibility with stricter Windows policy. The accepted local in-place update
 is separate evidence; there is no need to reinstall merely to repeat it.
 
-The self-contained .NET 8 payload makes runtime security servicing PureDS4's
-responsibility. Record the actual .NET and Windows Desktop runtime-pack patch
+The self-contained runtime makes security servicing PureDS4's responsibility.
+Version 5.1.1 moves the app and managed installer hosts to .NET 10 LTS, with
+Core/Desktop/apphost `10.0.12`. Microsoft's
+[official .NET 10 metadata](https://builds.dotnet.microsoft.com/dotnet/release-metadata/10.0/releases.json)
+was rechecked on 2026-10-04 and still listed `10.0.12` as the current runtime.
+SDK `10.0.302` remains a deliberate reproducible build pin, not a claim to be
+the latest SDK. Record the actual .NET and Windows Desktop runtime-pack patch
 versions from the candidate's restore assets, and check package advisories
 before approval. Microsoft's [.NET 8 support](https://dotnet.microsoft.com/en-us/platform/support/policy)
-ends November 10, 2026. The maintenance checkpoint is October 27, 2026:
-by then, validate a supported-runtime migration candidate or plan to stop
-distributing the .NET 8 build before end of support. Recheck the current
-servicing patch and advisories for every candidate; the 8.0.31 minimum in CI
-records the September 2026 baseline, not an evergreen latest-version claim.
+ends November 10, 2026. The original October 27, 2026 migration checkpoint for
+the .NET 8 release is superseded by this accepted .NET 10 candidate; publication
+still depends on the remaining gates above. Recheck the current
+servicing patch and advisories for every candidate; the historical 8.0.31
+minimum in the former CI records the September 2026 baseline, not an evergreen
+latest-version claim.
 A pinned SDK version alone is not evidence of the candidate's embedded
 runtime patch.
 
@@ -391,6 +491,71 @@ The separate distribution/visibility decision was approved on 2026-10-03:
 commit/push the final documentation, expose the tracked repository/history,
 and publish the unchanged accepted assets under the source-accurate tag.
 Those actions are not authorized by the installation-risk exception alone.
+
+## 5.1.1 publication text
+
+The following text was published with the frozen accepted candidate after
+successful hosted source validation and the integrity gates above.
+The release tag must point to application source
+`5a14defb05992250b73cb6f2e6bf0b9ffe438952`, not a later documentation commit.
+
+### PureDS4 5.1.1
+
+5.1.1 is a maintenance release for the DS4-only Windows x64 fork. It focuses
+on safe cleanup, profile saving and runtime maintenance; controller support
+and Xbox 360 / DS4 output choices are unchanged.
+
+#### Changes
+
+- Reject malformed USB-IP imports without stopping the backend, and keep its
+  API and USB-IP listeners on local IPv4 only.
+- Cancel controller-owned macros and release held inputs when switching to
+  direct/native use, stopping, or disconnecting a controller.
+- Keep track of virtual outputs when cleanup fails, rather than reporting a
+  successful removal or reusing the slot prematurely.
+- Save profiles atomically and report failed saves/renames without claiming
+  success or overwriting the original with an incomplete file.
+- Move the app and managed installer components to bundled **.NET 10.0.12 LTS**.
+- Add a read-only GitHub release checker, with automatic checks at most once
+  per 24 hours, an opt-out in Settings, and a manual **Tools → Updates → Check**.
+  Downloads and installation stay manual; there is no automatic updater.
+
+#### Updating and downloads
+
+Use `PureDS4_5.1.1_Setup_x64.exe` to update an existing PureDS4 installation.
+Back up your profiles/settings and keep your previous trusted package first.
+The portable package is `PureDS4_5.1.1_x64.zip`; it includes the runtime, but
+still needs the machine-wide game-output components and drivers. Read its
+included terms before use. Compare either download with `SHA256SUMS.txt`;
+`candidate-identity.json` records the build and component identities.
+
+**5.1.0 users must download 5.1.1 manually to get the release checker.**
+PureDS4 does not use the upstream DS4Windows update channel. Do not run both
+apps together; see the [migration and recovery guide](https://github.com/meiameiameia/PureDS4/blob/main/docs/INSTALL_AND_ROLLBACK.md).
+
+#### Validation and limits
+
+The exact candidate completed an in-place 5.1.0 update on one Windows PC,
+preserved Default, and matched all 29 installed application files. A DS4 v2.1
+passed USB/Bluetooth input, Xbox 360 output, gameplay/rumble, reconnect/restart
+and managed/native round trips. A separate macro check confirmed early release
+of a held key and cancellation of the later step when entering native mode.
+
+The installer remains **unsigned, with no verified publisher**. Windows may
+warn or block it. A matching checksum establishes identity, not safety;
+do not disable Windows protections to install it.
+
+Clean full-bundle installation, real installation-failure rollback,
+reboot/resume, physical backend interruption, multiple controllers and
+current DS4 speaker/headset audio remain unvalidated. A failed installation
+may need manual repair. Automated tests do not replace those hardware checks.
+Report problems through [PureDS4 issues](https://github.com/meiameiameia/PureDS4/issues)
+with the version, Windows version, controller/connection type and reproduction
+steps; remove personal details from any logs you share.
+
+Source: [PureDS4](https://github.com/meiameiameia/PureDS4/tree/5a14defb05992250b73cb6f2e6bf0b9ffe438952)
+and [PureDS4-VIIPER](https://github.com/meiameiameia/PureDS4-VIIPER/tree/04c10b1e0b5439b649730389673a64918a43578e).
+Upstream credits and GPL-3.0-or-later licensing are unchanged.
 
 ## 5.1.0 publication text
 
