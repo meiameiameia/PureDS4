@@ -47,8 +47,31 @@ API contract must be verified first.
 
 ## Pinned runtime contract
 
+### Installer/runtime launcher compatibility (5.1.2)
+
+`New-ScheduledTaskSettingsSet` emits Windows priority 7 (`BelowNormal`).
+Runtime validation accepts that installer-owned value and the legacy `High`
+value for both `RunPureDS4` and `RunPureDS4VIIPER`. Priority does not replace
+the required `Highest` run level, current-account identity, exact executable,
+arguments, working directory, enabled state or trigger contract. Validation
+does not rewrite, register, enable or execute a Windows task.
+
+`OwnedStartupTaskContractTests` obtains definitions from the actual installer
+registration functions. `test-viiper-launch-task.ps1 -EmitInstallerTasks`
+imports the Windows task module before intercepting host-mutation commands,
+asserts that interception, and calls the real in-memory constructors only.
+The fixture then feeds those properties to the same runtime predicates used
+for live tasks, including XML reload into a fresh unregistered definition.
+Negative cases retain rejection of foreign paths/accounts, lower elevation,
+disabled tasks and malformed action/trigger/settings contracts.
+
+This proves definition compatibility without changing the host. It does not
+prove a real logon/reboot, installer update or the reporter's complete setup.
+The exact candidate still needs the affected update -> Windows restart ->
+game-output-without-repair acceptance flow before publication.
+
 - VIIPER must match the SHA-256 of the bundled 0.1.0-pureds4.2 executable
-  for 5.1.1; historical 5.1.0 evidence below retains its pureds4.1 identity.
+  for 5.1.1/5.1.2; historical 5.1.0 evidence below retains its pureds4.1 identity.
 - `usbip.exe` must report version 0.9.7.7 and match the pinned executable
   SHA-256.
 - The active `usbip2_ude` and `usbip2_filter` driver files must match the two

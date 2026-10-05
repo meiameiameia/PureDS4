@@ -145,7 +145,7 @@ namespace DS4WindowsTests
             Assembly assembly = typeof(ProductIdentity).Assembly;
 
             Assert.AreEqual("PureDS4", assembly.GetName().Name);
-            Assert.AreEqual(new System.Version(5, 1, 1, 0),
+            Assert.AreEqual(new System.Version(5, 1, 2, 0),
                 assembly.GetName().Version);
             Assert.AreEqual(ProductIdentity.Name,
                 assembly.GetCustomAttribute<AssemblyProductAttribute>()?.Product);
@@ -160,9 +160,9 @@ namespace DS4WindowsTests
             // marker cannot be dropped without a test noticing.
             Assert.AreEqual(
 #if PUREDS4_EXPERIMENTAL_DS3
-                "5.1.1+ds3-experimental",
+                "5.1.2+ds3-experimental",
 #else
-                "5.1.1",
+                "5.1.2",
 #endif
                 assembly.GetCustomAttribute<
                     AssemblyInformationalVersionAttribute>()?.InformationalVersion);

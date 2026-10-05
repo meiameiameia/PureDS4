@@ -17,6 +17,87 @@ who need any other controller family use
 
 ## Identity and compatibility
 
+### 5.1.2 launcher hotfix preparation (2026-10-05)
+
+The owner approved preparing a separate **5.1.2** local candidate from the
+published `v5.1.1` source, commit `5a14defb05992250b73cb6f2e6bf0b9ffe438952`.
+Assembly/file version is **5.1.2.0**; intended distribution names are
+`PureDS4_5.1.2_Setup_x64.exe` and `PureDS4_5.1.2_x64.zip`.
+On 2026-10-05 the owner additionally authorized committing this hotfix,
+updating the existing 5.1.1 installation under `C:\Program Files\PureDS4`
+while preserving profiles, and publishing 5.1.2 on GitHub (including the
+necessary source push/tag) only after final USB/Bluetooth and Windows-restart
+acceptance. The owner specifically accepted unsigned distribution and the
+remaining unobserved clean-install/real-rollback risk for 5.1.2, including
+possible manual repair. This does not waive known safety defects or the
+required exact-candidate acceptance. Published packages remain unchanged.
+The source line retains documentation-only commit
+`10d058b9b3c5e124a9c397fb96ecadc827567506` after the published 5.1.1 base;
+no uncommitted 5.2.0 UI work is included.
+
+Scope is the installer/runtime scheduled-task contract mismatch only: the
+installer creates Windows priority 7 (`BelowNormal`), but 5.1.0/5.1.1 runtime
+validation required `High`. Accept the installer's default and the already
+supported legacy `High` value for both owned launcher definitions. Keep the
+executable, arguments, working directory, current-account, enabled-state,
+elevation and trigger checks. No existing task is rewritten by this change.
+Installer/runtime contract regression tests accompany the fix.
+
+The recurring repair report is consistent with this defect, but the reporter's
+machine has not been reproduced. Synthetic task-definition reload is not a
+real Windows reboot test. The Windows-style UI and setup-prompt preference
+changes remain outside this hotfix, planned separately for 5.2.0.
+
+The backend source/hash, drivers, locked dependencies, SDK `10.0.302` and
+bundled Core/Desktop runtime `10.0.12` stay unchanged. Microsoft's
+[.NET 10 download page](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
+was rechecked on 2026-10-05 and still lists runtime `10.0.12` as the latest
+servicing patch. The newer SDK feature band is not bundled with this product.
+
+Before publication: freeze clean source and package hashes, complete package
+checks, obtain exact-candidate installation and final acceptance, and verify
+the affected update/startup/reboot flow. The specific 5.1.2 unsigned/clean-install/
+rollback risk decision above does not waive the required real Windows-restart
+check. Keep all remaining evidence gaps explicit. Component
+`releaseReady` alone does not establish release acceptance.
+
+Local verification on 2026-10-05 passed **976 Release tests**, zero failures
+or skips, after updating the exact-version identity assertion to 5.1.2. Live
+process audio capture remained explicitly excluded. The nine new launcher
+contract cases passed. The first run had 975 passes and one obsolete 5.1.1
+identity expectation; its corrected final TRX is
+`artifacts/disposable/launcher-hotfix-20261005-01/tests/release-suite-final.trx`.
+An initial solution-only restore omitted the test project's assets; an explicit
+locked test-project restore without overriding its two locked RIDs resolved
+that setup issue without changing dependencies or lockfiles.
+
+The Release solution build succeeded with the existing four unused-member
+warnings (eight emissions across WPF compilation). The application, MSI and
+Burn bundle composed successfully; both installer builds had zero warnings
+and errors. Release-input/signature, managed-notice, launcher-contract,
+reboot-boundary and installer-state-machine gates passed. NuGet advisory
+queries for the application, tests and both managed setup hosts reported zero
+affected dependencies. All three shipped managed components resolve Core and
+Windows Desktop runtime packs to 10.0.12. Each of the portable ZIP's 29 files
+matches the installer staging manifest by size and SHA-256.
+
+The first preparation produced **dirty-source disposable packages**, not a clean-SHA frozen public
+candidate or an accepted daily driver. Paths below are relative to
+`artifacts/disposable/launcher-hotfix-20261005-01/` in the isolated
+`pure-ds4-hotfix-5.1.2` worktree; the base SHA above does not identify the
+complete uncommitted source. At that preliminary checkpoint no app/installer was launched, no live task,
+driver or profile was changed, and no commit/push/publication had occurred.
+
+| Preliminary artifact | Bytes | SHA-256 |
+| --- | --- | --- |
+| `installer/PureDS4_5.1.2_Setup_x64.exe` | 190,074,566 | `72016631BBD41095EB141B9CB711B29C6D9CCC63838C9C2BB5F3704D082A7FAB` |
+| `portable/x64/Release/PureDS4_5.1.2_x64.zip` | 122,850,107 | `0D3599F3AAE01E01A2F9D7E259956D125DCD8A3CE193BBF7E8DDD90729B412E6` |
+
+The installer and application are unsigned. Application SHA-256 is
+`A997671DAE7F0CB18BEF69969B8998D75761FE2078134087ABEDA8FC7A0B26A0`.
+Exact-package UI/hardware, full installer lifecycle and real Windows reboot
+acceptance remain unperformed; deterministic simulations are not substitutes.
+
 ### 5.1.1 maintenance scope (2026-10-04)
 
 The maintenance release is **5.1.1**, with assembly/file version **5.1.1.0**.

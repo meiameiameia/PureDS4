@@ -1479,41 +1479,10 @@ namespace DS4Windows
 
                 using (task)
                 {
-                    TaskDefinition definition = task.Definition;
-                    if (!task.Enabled || definition.Actions.Count != 1 ||
-                        definition.Triggers.Count != 0 ||
-                        definition.Principal.RunLevel != TaskRunLevel.Highest ||
-                        definition.Principal.LogonType !=
-                            TaskLogonType.InteractiveToken ||
-                        definition.Settings.Priority !=
-                            ProcessPriorityClass.High ||
-                        definition.Actions[0] is not ExecAction action)
-                    {
-                        failureMessage = "RunPureDS4VIIPER does not have the exact " +
-                            "enabled, elevated on-demand task shape.";
-                        return false;
-                    }
-
-                    string expectedDirectory = Path.GetDirectoryName(
-                        viiperPath);
-                    string currentSid = WindowsIdentity.GetCurrent().User?.Value;
-                    bool valid = IsExactViiperExecutablePath(action.Path,
-                            viiperPath) &&
-                        string.Equals(action.Arguments?.Trim(), "server",
-                            StringComparison.Ordinal) &&
-                        IsExactViiperExecutablePath(
-                            Path.Combine(action.WorkingDirectory ?? string.Empty,
-                                "viiper.exe"), viiperPath) &&
-                        string.Equals(TryResolveAccountSid(
-                                definition.Principal.UserId), currentSid,
-                            StringComparison.OrdinalIgnoreCase);
-                    if (!valid)
-                    {
-                        failureMessage = "RunPureDS4VIIPER does not target the " +
-                            "selected backend for the current Windows account.";
-                    }
-
-                    return valid;
+                    return IsViiperStartupTaskDefinitionValid(task.Definition,
+                        task.Enabled, viiperPath,
+                        WindowsIdentity.GetCurrent().User?.Value,
+                        out failureMessage);
                 }
             }
             catch (Exception ex)
@@ -1522,6 +1491,46 @@ namespace DS4Windows
                     ex.Message;
                 return false;
             }
+        }
+
+        // Unregistered definitions let tests exercise the runtime verifier
+        // against the actual installer's output without changing the host.
+        internal static bool IsViiperStartupTaskDefinitionValid(
+            TaskDefinition definition, bool enabled, string viiperPath,
+            string currentSid, out string failureMessage)
+        {
+            failureMessage = null;
+            if (definition == null || !enabled ||
+                !definition.Settings.Enabled ||
+                definition.Actions.Count != 1 ||
+                definition.Triggers.Count != 0 ||
+                definition.Principal.RunLevel != TaskRunLevel.Highest ||
+                definition.Principal.LogonType != TaskLogonType.InteractiveToken ||
+                !DS4WinWPF.StartupMethods.IsSupportedOwnedTaskPriority(
+                    definition.Settings.Priority) ||
+                definition.Actions[0] is not ExecAction action)
+            {
+                failureMessage = "RunPureDS4VIIPER does not have the exact " +
+                    "enabled, elevated on-demand task shape.";
+                return false;
+            }
+
+            bool valid = IsExactViiperExecutablePath(action.Path, viiperPath) &&
+                string.Equals(action.Arguments?.Trim(), "server",
+                    StringComparison.Ordinal) &&
+                IsExactViiperExecutablePath(
+                    Path.Combine(action.WorkingDirectory ?? string.Empty,
+                        "viiper.exe"), viiperPath) &&
+                !string.IsNullOrWhiteSpace(currentSid) &&
+                string.Equals(TryResolveAccountSid(definition.Principal.UserId),
+                    currentSid, StringComparison.OrdinalIgnoreCase);
+            if (!valid)
+            {
+                failureMessage = "RunPureDS4VIIPER does not target the " +
+                    "selected backend for the current Windows account.";
+            }
+
+            return valid;
         }
 
         internal static bool IsExactViiperExecutablePath(string candidatePath,

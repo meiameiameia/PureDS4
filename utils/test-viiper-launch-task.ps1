@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [string]$BackendScript
+    [string]$BackendScript,
+    [switch]$EmitInstallerTasks
 )
 
 Set-StrictMode -Version Latest
@@ -26,6 +27,95 @@ $script:TargetUserSid = 'S-1-5-21-1234-5678-9012-1001'
 $viiper = 'C:\Program Files\PureDS4\VIIPER\viiper.exe'
 $app = 'C:\Program Files\PureDS4\PureDS4.exe'
 function Convert-AccountToSid([string]$identity) { return $identity }
+
+if ($EmitInstallerTasks) {
+    # CDXML module autoload can replace same-named mock functions. Import
+    # before installing the interceptors; only the New-* constructors stay real.
+    Import-Module ScheduledTasks -ErrorAction Stop
+    $script:MemoryTasks = @{}
+    function Register-ScheduledTask {
+        param($TaskPath, $TaskName, $Action, $Principal, $Settings, $Trigger,
+            [switch]$Force)
+        if ($TaskPath -ne '\' -or -not $Force) {
+            throw 'Unexpected registration contract.'
+        }
+        $script:MemoryTasks[$TaskName] = [pscustomobject]@{
+            Actions = @($Action)
+            Principal = $Principal
+            Settings = $Settings
+            Triggers = @($Trigger)
+        }
+    }
+    function Enable-ScheduledTask {
+        param($TaskPath, $TaskName, $ErrorAction)
+        if (-not $script:MemoryTasks.ContainsKey($TaskName)) {
+            throw 'Enabling an unknown in-memory task.'
+        }
+    }
+    function Get-ScheduledTask {
+        param($TaskPath, $TaskName, $ErrorAction)
+        return $script:MemoryTasks[$TaskName]
+    }
+    function Unregister-ScheduledTask {
+        param($TaskPath, $TaskName, $Confirm, $ErrorAction)
+        throw 'Registration failed in the memory-only installer fixture.'
+    }
+    function Start-ScheduledTask { throw 'Task execution is forbidden in this fixture.' }
+    function Write-SetupLog { param($Message, $Color) }
+
+    foreach ($commandName in @('Register-ScheduledTask', 'Enable-ScheduledTask',
+            'Get-ScheduledTask', 'Unregister-ScheduledTask', 'Start-ScheduledTask')) {
+        $command = Get-Command $commandName
+        if ($command.CommandType -ne 'Function' -or $command.ModuleName) {
+            throw "Host task command is not intercepted: $commandName"
+        }
+    }
+    foreach ($functionName in @('Register-HighestLogonTask',
+            'Register-ViiperRunTask', 'Register-Ds4WindowsRunTask')) {
+        $node = $ast.Find({
+            param($candidate)
+            $candidate -is [Management.Automation.Language.FunctionDefinitionAst] -and
+                $candidate.Name -eq $functionName
+        }, $true)
+        if (-not $node) { throw "Installer function missing: $functionName" }
+        Invoke-Expression $node.Extent.Text
+    }
+    if (-not (Register-ViiperRunTask $viiper 'RunPureDS4VIIPER') -or
+            -not (Register-Ds4WindowsRunTask $app)) {
+        throw 'Installer did not approve its in-memory task definitions.'
+    }
+    $fixtures = foreach ($name in @('RunPureDS4VIIPER', 'RunPureDS4')) {
+        $task = $script:MemoryTasks[$name]
+        if ($task.Actions.Count -ne 1) { throw 'Unexpected action count.' }
+        $action = $task.Actions[0]
+        [pscustomobject]@{
+            Name = $name
+            Execute = [string]$action.Execute
+            Arguments = [string]$action.Arguments
+            WorkingDirectory = [string]$action.WorkingDirectory
+            UserId = [string]$task.Principal.UserId
+            RunLevel = [string]$task.Principal.RunLevel
+            LogonType = [string]$task.Principal.LogonType
+            Enabled = [bool]$task.Settings.Enabled
+            Priority = [int]$task.Settings.Priority
+            ExecutionTimeLimit = [string]$task.Settings.ExecutionTimeLimit
+            MultipleInstances = [int]$task.Settings.MultipleInstances
+            DisallowStartIfOnBatteries = [bool]$task.Settings.DisallowStartIfOnBatteries
+            StopIfGoingOnBatteries = [bool]$task.Settings.StopIfGoingOnBatteries
+            Triggers = @($task.Triggers | Where-Object { $null -ne $_ } |
+                ForEach-Object {
+                    [pscustomobject]@{
+                        Type = $_.CimClass.CimClassName
+                        UserId = [string]$_.UserId
+                        Enabled = [bool]$_.Enabled
+                    }
+                })
+        }
+    }
+    ConvertTo-Json -InputObject @($fixtures) -Depth 5
+    return
+}
+
 function Get-ScheduledTask {
     param([string]$TaskPath, [string]$TaskName, $ErrorAction)
     return $script:RegisteredTask

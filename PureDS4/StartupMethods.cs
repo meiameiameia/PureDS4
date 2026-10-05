@@ -49,7 +49,10 @@ namespace DS4WinWPF
             using TaskService ts = new TaskService();
             using Task tasker = ts.GetTask(
                 @"\" + DS4Windows.ProductIdentity.StartupTaskName);
-            return tasker != null && TaskTargetsCurrentExecutable(tasker);
+            return tasker != null && TaskTargetsCurrentExecutable(
+                tasker.Definition, tasker.Enabled,
+                DS4Windows.Global.exelocation, DS4Windows.Global.exedirpath,
+                WindowsIdentity.GetCurrent().User?.Value);
         }
 
         public static bool IsRunAtStartupEnabled()
@@ -188,19 +191,21 @@ namespace DS4WinWPF
             }
         }
 
-        private static bool TaskTargetsCurrentExecutable(Task task)
+        // The same read-only predicate is used for live definitions and
+        // unregistered installer fixtures. It never registers or runs a task.
+        internal static bool TaskTargetsCurrentExecutable(
+            TaskDefinition definition, bool enabled, string executablePath,
+            string executableDirectory, string currentUserSid)
         {
-            if (task.Definition.Actions.Count != 1 ||
-                task.Definition.Actions[0] is not ExecAction action ||
-                task.Definition.Triggers.Count != 1 ||
-                task.Definition.Triggers[0] is not LogonTrigger trigger)
+            if (definition == null || definition.Actions.Count != 1 ||
+                definition.Actions[0] is not ExecAction action ||
+                definition.Triggers.Count != 1 ||
+                definition.Triggers[0] is not LogonTrigger trigger)
             {
                 return false;
             }
 
-            TaskDefinition definition = task.Definition;
-            string currentUserSid = WindowsIdentity.GetCurrent().User?.Value;
-            return task.Enabled && definition.Settings.Enabled &&
+            return enabled && definition.Settings.Enabled &&
                 definition.Principal.RunLevel == TaskRunLevel.Highest &&
                 definition.Principal.LogonType ==
                     TaskLogonType.InteractiveToken &&
@@ -212,15 +217,23 @@ namespace DS4WinWPF
                 definition.Settings.ExecutionTimeLimit == TimeSpan.Zero &&
                 definition.Settings.MultipleInstances ==
                     TaskInstancesPolicy.IgnoreNew &&
-                definition.Settings.Priority == ProcessPriorityClass.High &&
+                IsSupportedOwnedTaskPriority(definition.Settings.Priority) &&
                 !definition.Settings.StopIfGoingOnBatteries &&
                 !definition.Settings.DisallowStartIfOnBatteries &&
-                PathsEqual(action.Path, DS4Windows.Global.exelocation) &&
+                PathsEqual(action.Path, executablePath) &&
                 string.Equals(action.Arguments?.Trim(), "-m",
                     StringComparison.Ordinal) &&
-                PathsEqual(action.WorkingDirectory,
-                    DS4Windows.Global.exedirpath);
+                PathsEqual(action.WorkingDirectory, executableDirectory);
         }
+
+        // New-ScheduledTaskSettingsSet uses Windows priority 7 (BelowNormal).
+        // Accept that installer contract without rewriting registered tasks;
+        // retain High for already-existing definitions accepted by older builds.
+        // Process priority is distinct from the required elevated RunLevel.
+        internal static bool IsSupportedOwnedTaskPriority(
+            ProcessPriorityClass priority) =>
+            priority == ProcessPriorityClass.BelowNormal ||
+            priority == ProcessPriorityClass.High;
 
         private static bool AccountMatchesSid(string account,
             string expectedSid)
