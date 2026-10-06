@@ -37,13 +37,35 @@ isolated worktree. These replace the preliminary dirty-source packages below:
 | `PureDS4_5.1.2_Setup_x64.exe` | 190,059,022 | `FD6A49D0BB20FFAE96FBBBC210C8C1A1F2855988B9FFB6211351CEA3EF32E936` |
 | `PureDS4_5.1.2_x64.zip` | 122,850,107 | `50E01FB87F88824CD0873C0D710C3A73588629A09E1D21E9481C47B713B4BA3B` |
 
-Publish these two packages plus their unchanged `candidate-identity.json` and
-`SHA256SUMS.txt`. Tag `v5.1.2` must identify the frozen source above, not a later
-documentation-only acceptance commit. The accepted application remains
+The published assets are these two packages plus their unchanged
+`candidate-identity.json` and `SHA256SUMS.txt`. Tag `v5.1.2` identifies the
+frozen source above, not a later documentation-only acceptance commit. The accepted application remains
 byte-identical to the application that passed 976 Release tests. No rebuild
 or UI changes are part of publication. Clean installation, actual rollback,
 interrupted-installer reboot/resume and the reporting user's result remain
 unobserved; the specific owner-approved risk exception remains bounded.
+
+The unchanged assets were published as stable/latest
+[PureDS4 5.1.2](https://github.com/meiameiameia/PureDS4/releases/tag/v5.1.2)
+at `2026-10-06T00:32:43Z` (2026-10-05 21:32:43 in America/Sao_Paulo).
+The annotated remote tag was resolved and matches the frozen source. The
+acceptance/README commit `d25712173175db318e20ca7adbc94bd1dc2e0551` differs
+from that source only in four Markdown documentation files. Its
+[CI run](https://github.com/meiameiameia/PureDS4/actions/runs/37393809047)
+passed **976 tests**, package-security/input/notice gates, x64 application/ZIP
+and installer composition, offline layout planning and the MSI install/repair/
+uninstall lifecycle on the disposable Windows runner. That MSI-only lifecycle
+does not establish a consumer full-bundle clean installation or failure rollback.
+Existing unused-member warnings and hosted-action Node runtime deprecation
+warnings remain; neither job failed. Push CI retained no downloadable artifacts.
+
+Unauthenticated requests independently confirmed that the public latest-release
+API exposes stable `v5.1.2`, and downloaded all four release assets. Every
+download matched its unchanged local SHA-256, including both identity/checksum
+sidecars. The version checker's existing latest-release endpoint can discover
+this newer stable version; no personal settings were changed to force a check.
+The 5.2.0 working files remain separate and untouched. No Reddit message or
+announcement was posted by the agent.
 
 #### 5.1.2 public release notes
 

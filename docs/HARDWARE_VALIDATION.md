@@ -36,6 +36,9 @@ installation, actual failure rollback, interrupted-install reboot/resume,
 sleep/wake and physical backend interruption remain unobserved. Prior 5.1.1
 macro/native-mode results below are retained as earlier evidence, not relabelled
 as another 5.1.2 hardware pass. The hotfix adds no new controller or output type.
+These unchanged packages were published as
+[PureDS4 5.1.2](https://github.com/meiameiameia/PureDS4/releases/tag/v5.1.2);
+unauthenticated downloads matched the frozen hashes.
 
 ### 5.1.1 in-place upgrade — 2026-10-04
 
