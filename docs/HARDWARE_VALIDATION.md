@@ -11,6 +11,32 @@ microphone need a trick, and both are described at the end.
 
 ## Release hardware evidence
 
+### 5.1.2 launcher hotfix — 2026-10-05
+
+The owner completed the in-place 5.1.1 -> 5.1.2 update and reported passing
+Windows restart without another repair, followed by the requested readings,
+gameplay, disconnect/reconnect and app close/reopen checks separately over
+USB and Bluetooth. This is owner-reported acceptance on the same one-PC DS4
+setup, not an automated gameplay result or validation on the reporter's PC.
+No new game names, controller models or screenshots were supplied.
+
+Frozen source: `42ab4041d5d7ef40b17b63134cce331e7b2fee53`.
+Installer SHA-256:
+`FD6A49D0BB20FFAE96FBBBC210C8C1A1F2855988B9FFB6211351CEA3EF32E936`.
+Installed app version 5.1.2.0 and SHA-256:
+`A997671DAE7F0CB18BEF69969B8998D75761FE2078134087ABEDA8FC7A0B26A0`.
+All 29 installed payload files matched the frozen manifest after the independently
+observed Windows restart. The Ready infrastructure marker, canonical task
+definitions/current-account identities and live VIIPER readiness ping passed.
+The app was closed when the later read-only process query ran.
+
+The [installer checkpoint](INSTALLER_VALIDATION_STRATEGY.md#512-installed-candidate-checkpoint--2026-10-05)
+records package hashes and update/data-preservation checks. Clean full-bundle
+installation, actual failure rollback, interrupted-install reboot/resume,
+sleep/wake and physical backend interruption remain unobserved. Prior 5.1.1
+macro/native-mode results below are retained as earlier evidence, not relabelled
+as another 5.1.2 hardware pass. The hotfix adds no new controller or output type.
+
 ### 5.1.1 in-place upgrade — 2026-10-04
 
 The owner completed the authorized `5.1.0` → `5.1.1` update using the frozen

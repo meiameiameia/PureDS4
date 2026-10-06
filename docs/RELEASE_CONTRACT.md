@@ -17,6 +17,66 @@ who need any other controller family use
 
 ## Identity and compatibility
 
+### 5.1.2 frozen candidate acceptance — 2026-10-05
+
+The owner accepted the unchanged clean-source candidate from
+`42ab4041d5d7ef40b17b63134cce331e7b2fee53` after the authorized in-place update
+from 5.1.1, a real Windows restart without renewed repair, and the requested
+USB/Bluetooth readings, gameplay, disconnect/reconnect and app close/reopen
+checks. These are owner-reported hardware results on one PC; read-only checks
+independently confirmed the changed boot, all 29 installed payload files,
+canonical task definitions/current account, Ready marker and live backend ping.
+See [hardware evidence](HARDWARE_VALIDATION.md#512-launcher-hotfix--2026-10-05)
+and [installer evidence](INSTALLER_VALIDATION_STRATEGY.md#512-installed-candidate-checkpoint--2026-10-05).
+
+The frozen public assets are under `artifacts/candidate-5.1.2-42ab404/` in the
+isolated worktree. These replace the preliminary dirty-source packages below:
+
+| Public package | Bytes | SHA-256 |
+| --- | --- | --- |
+| `PureDS4_5.1.2_Setup_x64.exe` | 190,059,022 | `FD6A49D0BB20FFAE96FBBBC210C8C1A1F2855988B9FFB6211351CEA3EF32E936` |
+| `PureDS4_5.1.2_x64.zip` | 122,850,107 | `50E01FB87F88824CD0873C0D710C3A73588629A09E1D21E9481C47B713B4BA3B` |
+
+Publish these two packages plus their unchanged `candidate-identity.json` and
+`SHA256SUMS.txt`. Tag `v5.1.2` must identify the frozen source above, not a later
+documentation-only acceptance commit. The accepted application remains
+byte-identical to the application that passed 976 Release tests. No rebuild
+or UI changes are part of publication. Clean installation, actual rollback,
+interrupted-installer reboot/resume and the reporting user's result remain
+unobserved; the specific owner-approved risk exception remains bounded.
+
+#### 5.1.2 public release notes
+
+This is a small launcher fix, not the new UI release.
+
+Setup creates a launcher task with Windows' default priority, but PureDS4
+5.1.0 and 5.1.1 expected a different value. That mismatch could make the app
+ask to repair game output again after restarting Windows. 5.1.2 accepts the
+task setup actually creates, while keeping the path, account and elevation
+checks. It also keeps compatibility with the earlier high-priority task.
+
+I checked an in-place update from 5.1.1, a Windows restart without another
+repair, and USB/Bluetooth readings, gameplay, reconnecting and app restart
+on my DS4 setup. The original reporter's PC hasn't been retested yet, so this
+isn't a promise that every setup problem is fixed.
+
+The installer is still unsigned. Clean full-bundle installation, rollback
+after a real installation failure and resuming an interrupted installation
+after reboot still need validation. Back up your profiles before updating;
+don't disable Windows protections to install it.
+
+Download `PureDS4_5.1.2_Setup_x64.exe` for standard setup, or
+`PureDS4_5.1.2_x64.zip` for portable use. The portable package still needs the
+machine-wide drivers. Updates remain manual; 5.1.1's version checker can notify
+you about this release. Controller support, drivers and the bundled .NET
+10.0.12 runtime are unchanged.
+
+The packages were built locally from clean source
+`42ab4041d5d7ef40b17b63134cce331e7b2fee53`. `candidate-identity.json` records
+the build inputs; `SHA256SUMS.txt` lets you check the two package downloads.
+See the [installation and recovery guide](https://github.com/meiameiameia/PureDS4/blob/main/docs/INSTALL_AND_ROLLBACK.md)
+and [validation record](https://github.com/meiameiameia/PureDS4/blob/main/docs/HARDWARE_VALIDATION.md).
+
 ### 5.1.2 launcher hotfix preparation (2026-10-05)
 
 The owner approved preparing a separate **5.1.2** local candidate from the
@@ -95,8 +155,10 @@ driver or profile was changed, and no commit/push/publication had occurred.
 
 The installer and application are unsigned. Application SHA-256 is
 `A997671DAE7F0CB18BEF69969B8998D75761FE2078134087ABEDA8FC7A0B26A0`.
-Exact-package UI/hardware, full installer lifecycle and real Windows reboot
-acceptance remain unperformed; deterministic simulations are not substitutes.
+At that preliminary checkpoint, exact-package UI/hardware, full installer
+lifecycle and real Windows reboot acceptance were unperformed; deterministic
+simulations were not substitutes. Final frozen-candidate acceptance is recorded
+above, without changing these historical preliminary hashes.
 
 ### 5.1.1 maintenance scope (2026-10-04)
 

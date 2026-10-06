@@ -23,14 +23,14 @@ with no release date. For other controller families, see
 
 ## Download and install
 
-The current release is **5.1.1**. Get the packages from
+The current release is **5.1.2**. Get the packages from
 [PureDS4 Releases](https://github.com/meiameiameia/PureDS4/releases).
 
 PureDS4 targets **Windows 10/11 x64**. Testing so far is limited to one Windows
 PC; see [what has been tested](#what-has-been-tested) before installing.
 
-- **Standard setup:** `PureDS4_5.1.1_Setup_x64.exe`
-- **Portable package:** `PureDS4_5.1.1_x64.zip`
+- **Standard setup:** `PureDS4_5.1.2_Setup_x64.exe`
+- **Portable package:** `PureDS4_5.1.2_x64.zip`
 - **Checksums and build details:** `SHA256SUMS.txt` and `candidate-identity.json`
 
 The installer is **unsigned and has no verified publisher**. An earlier
@@ -39,7 +39,7 @@ it. Download from this repository's Releases page and compare the file's
 SHA-256 with `SHA256SUMS.txt`:
 
 ```powershell
-Get-FileHash .\PureDS4_5.1.1_Setup_x64.exe -Algorithm SHA256
+Get-FileHash .\PureDS4_5.1.2_Setup_x64.exe -Algorithm SHA256
 ```
 
 A matching hash confirms that the file matches the published checksum; it
@@ -83,9 +83,10 @@ Downloads and installation stay manual. From 5.1.1, PureDS4 checks GitHub for
 new stable releases on startup, at most once per 24 hours. Automatic checks
 can be disabled in Settings; **Tools → Updates → Check** works manually.
 The app does not use the DS4Windows update channel, download packages or
-install updates. Users on 5.1.0 need to download 5.1.1 manually to get the checker.
+install updates. Users on 5.1.0 need to download a newer release manually to
+get the checker.
 
-Version 5.1.1 bundles **.NET 10.0.12 LTS**, so no separate runtime installation
+Version 5.1.2 bundles **.NET 10.0.12 LTS**, so no separate runtime installation
 is needed. Runtime security fixes still require an updated PureDS4 package;
 see the
 [runtime maintenance plan](docs/RELEASE_CONTRACT.md#update-and-release-authority).
@@ -155,6 +156,13 @@ guaranteed downgrade.
 ## What has been tested
 
 Testing has covered a **DS4 v2.1 on one Windows PC**, using USB and Bluetooth.
+The exact 5.1.2 candidate passed the in-place update from 5.1.1, Windows restart
+without another repair, and USB/Bluetooth readings, gameplay, reconnecting and
+app close/reopen. All 29 installed application files still matched the frozen
+candidate after the restart. The hotfix corrects a mismatch between setup's
+launcher task and the app's validation; the reporting user's PC has not yet
+been retested.
+
 The exact 5.1.1 candidate passed USB/Bluetooth input, Xbox 360 game output,
 gameplay/rumble, disconnect/reconnect, app restart and managed/native round trips.
 A temporary-profile check confirmed that switching to native mode releases
@@ -165,8 +173,8 @@ manifest. These results do not establish physical validation of DS4 game output.
 The remaining limits matter:
 
 - Clean full-bundle installation, actual installation-failure rollback, and
-  reboot/resume on Windows 10/11 have not been observed. A failed installation
-  may need manual repair.
+  resuming an interrupted installation after reboot have not been observed.
+  A failed installation may need manual repair.
 - Physical backend interruption, sleep/wake, and two simultaneous controllers
   have not been validated. Automated recovery tests do not cover those
   hardware scenarios.
@@ -176,7 +184,7 @@ The remaining limits matter:
   game when PureDS4 is running without elevation.
 
 The [hardware validation record](docs/HARDWARE_VALIDATION.md) and
-[installer checkpoint](docs/INSTALLER_VALIDATION_STRATEGY.md#511-preparation--2026-10-04)
+[installer checkpoint](docs/INSTALLER_VALIDATION_STRATEGY.md#512-installed-candidate-checkpoint--2026-10-05)
 separate observed results from procedures and untested cases.
 
 ## Troubleshooting and support

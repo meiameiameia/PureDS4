@@ -47,6 +47,60 @@ API contract must be verified first.
 
 ## Pinned runtime contract
 
+### 5.1.2 installed candidate checkpoint — 2026-10-05
+
+The owner completed the authorized in-place 5.1.1 -> 5.1.2 update using the
+clean-source candidate from `42ab4041d5d7ef40b17b63134cce331e7b2fee53`.
+The source worktree remains `pure-ds4-hotfix-5.1.2`, isolated from the dirty
+5.2.0 UI. Package paths are relative to
+`artifacts/candidate-5.1.2-42ab404/`:
+
+- `installer/PureDS4_5.1.2_Setup_x64.exe`: 190,059,022 bytes; SHA-256
+  `FD6A49D0BB20FFAE96FBBBC210C8C1A1F2855988B9FFB6211351CEA3EF32E936`.
+- `portable/x64/Release/PureDS4_5.1.2_x64.zip`: 122,850,107 bytes; SHA-256
+  `50E01FB87F88824CD0873C0D710C3A73588629A09E1D21E9481C47B713B4BA3B`.
+- `installer/candidate-identity.json` and `installer/SHA256SUMS.txt` bind
+  these bytes to the source and the unchanged pinned backend/runtime inputs.
+  The installer is unsigned; no hosted-CI artifact is claimed.
+
+Read-only checks after the owner's completion confirmed all 29 installed
+application files against the frozen package manifest. Installed
+`C:\Program Files\PureDS4\PureDS4.exe` reports 5.1.2.0 and matches
+`A997671DAE7F0CB18BEF69969B8998D75761FE2078134087ABEDA8FC7A0B26A0`,
+byte-identical to the application that passed the 976-test regression. Both
+PureDS4 uninstall entries report 5.1.2; no older PureDS4 registration remained.
+The eight non-log user-data files, including profiles/configuration/cache and
+the HidHide ownership journal, were hash-identical to the pre-update backup
+at that post-update checkpoint.
+That private backup also preserves the infrastructure recovery files and the
+previous verified 5.1.1 installer; it is not part of any public artifact.
+
+The registry marker is Ready for `VIIPER-0.1.0-pureds4.2+USBIP-0.9.7.7`.
+The installed backend matches its pinned hash and answered a live local
+readiness ping. Both enabled tasks target the canonical Program Files
+executables for the current account with Highest/Interactive and priority 7;
+only `RunPureDS4` has a logon trigger. The infrastructure transaction completed
+with exit code 0. No separate manual repair or task rewrite was performed by
+the agent.
+
+The owner subsequently reported passing the requested exact-candidate checks:
+Windows restart without another repair, and separately over USB and Bluetooth,
+readings, gameplay, disconnect/reconnect and app close/reopen without renewed
+repair. The new boot was independently observed at `2026-10-06T00:05:25.500Z`
+(2026-10-05 21:05:25 in America/Sao_Paulo), compared with the previous boot
+`2026-10-03T23:47:19.500Z`. All 29 installed payload files still match the frozen
+manifest. Both tasks retain their canonical actions, priority 7 and expected
+trigger shapes; resolving their account names to SIDs confirms the current
+account. The Ready registry marker and live backend ping also passed after
+restart. The app was closed at the read-only process query.
+
+This closes the authorized in-place update/startup/reboot and owner-reported
+USB/Bluetooth gates, allowing the previously approved GitHub publication.
+It does not establish clean installation, real failure rollback, interrupted
+installer reboot/resume, another Windows PC or the reporting user's result.
+Retain the frozen source/tag identity if a later documentation-only commit
+records acceptance; do not rebuild or relabel the accepted application bytes.
+
 ### Installer/runtime launcher compatibility (5.1.2)
 
 `New-ScheduledTaskSettingsSet` emits Windows priority 7 (`BelowNormal`).
@@ -67,8 +121,9 @@ disabled tasks and malformed action/trigger/settings contracts.
 
 This proves definition compatibility without changing the host. It does not
 prove a real logon/reboot, installer update or the reporter's complete setup.
-The exact candidate still needs the affected update -> Windows restart ->
-game-output-without-repair acceptance flow before publication.
+The affected update -> Windows restart -> game-output-without-repair flow was
+accepted on the owner's PC as recorded above; it has not been reproduced on
+the reporting user's machine.
 
 - VIIPER must match the SHA-256 of the bundled 0.1.0-pureds4.2 executable
   for 5.1.1/5.1.2; historical 5.1.0 evidence below retains its pureds4.1 identity.
