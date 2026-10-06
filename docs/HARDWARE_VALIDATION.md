@@ -132,7 +132,7 @@ All 29 installed application payload files matched its manifest; the installed
 `605592D61617E0D6A1276823120F4C781997C5AE4DFF46D7D691B0B263B4016D`.
 The owner's Default profile remained byte-identical, and installed infrastructure,
 VIIPER API response and canonical task actions were verified. The submitted
-Home capture showed DS4 v2.1 over Bluetooth, Protected, Default, Xbox 360 output,
+Home capture showed DS4 v2 over Bluetooth, Protected, Default, Xbox 360 output,
 Ready and Service running. That capture does not independently prove gameplay.
 
 The earlier USB/Bluetooth gameplay evidence below is retained for the unchanged

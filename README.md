@@ -155,7 +155,7 @@ guaranteed downgrade.
 
 ## What has been tested
 
-Testing has covered a **DS4 v2.1 on one Windows PC**, using USB and Bluetooth.
+Testing has covered a **DS4 v2 on one Windows PC**, using USB and Bluetooth.
 The exact 5.1.2 candidate passed the in-place update from 5.1.1, Windows restart
 without another repair, and USB/Bluetooth readings, gameplay, reconnecting and
 app close/reopen. All 29 installed application files still matched the frozen

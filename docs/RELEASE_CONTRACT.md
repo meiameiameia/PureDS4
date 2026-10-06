@@ -17,6 +17,15 @@ who need any other controller family use
 
 ## Identity and compatibility
 
+### GitHub publishing account
+
+The owner requires public releases and release-asset uploads to use the
+authenticated GitHub account `meiameiameia`. Verify the API account before
+publication; the SSH identity and Git author/committer do not establish it.
+An unexpected API account blocks new publication or uploads. Existing release
+authorship is separate from editable release text; changing it must not silently
+delete releases, replace assets or alter accepted source/tag identities.
+
 ### 5.1.2 frozen candidate acceptance — 2026-10-05
 
 The owner accepted the unchanged clean-source candidate from
@@ -701,7 +710,7 @@ apps together; see the [migration and recovery guide](https://github.com/meiamei
 #### Validation and limits
 
 The exact candidate completed an in-place 5.1.0 update on one Windows PC,
-preserved Default, and matched all 29 installed application files. A DS4 v2.1
+preserved Default, and matched all 29 installed application files. A DS4 v2
 passed USB/Bluetooth input, Xbox 360 output, gameplay/rumble, reconnect/restart
 and managed/native round trips. A separate macro check confirmed early release
 of a held key and cancellation of the later step when entering native mode.
