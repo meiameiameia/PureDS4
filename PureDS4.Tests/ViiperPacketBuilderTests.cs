@@ -13,7 +13,31 @@ namespace DS4WindowsTests
 
             byte[] packet = BuildViiperStatePacket(ViiperVirtualDeviceType.DualShock4, state);
 
+            Assert.AreEqual(31, packet.Length);
             AssertSonyMotion(packet, 19);
+        }
+
+        [TestMethod]
+        public void DualShock4PacketPreservesMappedButtonsTriggersAndAxisExtremes()
+        {
+            // Canonical mapped state -> protocol bytes, not physical-parser or
+            // hardware compatibility evidence. Independent explicit expectations
+            // catch a non-empty packet that silently loses mapped input.
+            var state = new DS4State
+            {
+                LX = 0, LY = 255, RX = 255, RY = 0,
+                L2 = 37, R2 = 219,
+                Cross = true, Triangle = true, L1 = true, R1 = true,
+                Share = true, Options = true, L3 = true, R3 = true,
+                PS = true, OutputTouchButton = true, DpadUp = true,
+            };
+            byte[] packet = BuildViiperStatePacket(ViiperVirtualDeviceType.DualShock4, state);
+            Assert.AreEqual(31, packet.Length);
+            CollectionAssert.AreEqual(new byte[] { 128, 127, 127, 128 }, packet[..4]);
+            Assert.AreEqual((ushort)0xFFA3, (ushort)(packet[4] | (packet[5] << 8)));
+            Assert.AreEqual((byte)1, packet[6]);
+            Assert.AreEqual((byte)37, packet[7]);
+            Assert.AreEqual((byte)219, packet[8]);
         }
 
         [TestMethod]
@@ -78,10 +102,13 @@ namespace DS4WindowsTests
         {
             byte[] packet = BuildNeutralViiperStatePacket(type);
 
+            Assert.AreEqual(31, packet.Length);
             Assert.AreEqual(0, packet[0], "LX should be centered");
             Assert.AreEqual(0, packet[1], "LY should be centered");
             Assert.AreEqual(0, packet[2], "RX should be centered");
             Assert.AreEqual(0, packet[3], "RY should be centered");
+            CollectionAssert.AreEqual(new byte[5], packet[4..9],
+                "Neutral buttons, D-pad and triggers must be released.");
         }
 
         private static DS4State CreateMotionState()
