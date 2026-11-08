@@ -146,9 +146,16 @@ namespace DS4WindowsTests
             // NOT governed by ProductScope at all — that asymmetry is
             // deliberate upstream behavior and is called out here so a future
             // change does not silently alter one and not the other.
-            Type devices = typeof(ProductIdentity).Assembly
-                .GetType("DS4Windows.DS4Devices");
-            Assert.IsNotNull(devices, "DS4Devices must remain present.");
+            var entries = (VidPidInfo[])typeof(DS4Devices).GetField("knownDevices",
+                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
+                .GetValue(null);
+            var emulated = entries.Single(entry => entry.vid == 0x7331 && entry.pid == 0x0001);
+            Assert.AreEqual(InputDeviceType.DS4, emulated.inputDevType);
+            Assert.IsTrue(emulated.featureSet.HasFlag(VidPidFeatureSet.VendorDefinedDevice));
+            var native = entries.Single(entry => entry.vid == 0x054C && entry.pid == 0x0268);
+            Assert.AreEqual(InputDeviceType.DS3, native.inputDevType);
+            Assert.AreEqual(typeof(DS3Device), native.checkConnection.Method.DeclaringType);
+            Assert.AreEqual(nameof(DS3Device.DetermineConnectionType), native.checkConnection.Method.Name);
         }
     }
 }

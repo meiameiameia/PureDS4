@@ -190,6 +190,37 @@ At that preliminary checkpoint, exact-package UI/hardware, full installer
 lifecycle and real Windows reboot acceptance were unperformed; deterministic
 simulations were not substitutes. Final frozen-candidate acceptance is recorded
 above, without changing these historical preliminary hashes.
+### Planned 5.2.0 Windows-style UI release (2026-10-05)
+
+The Windows 11 / Fluent-inspired WPF modernization is planned for **5.2.0**,
+not another 5.1.x artifact. This is a planning target, not a version bump,
+publication authorization, release date or claim of readiness. Published 5.1.x
+files and acceptance remain unchanged.
+
+Scope: shared controls and themes, native caption integration, Home, Profiles,
+the editor shell, Settings/Tools and their supporting dialogs. Preserve profile
+compatibility, keyboard access, Apply/Save/Cancel semantics and managed/native
+controller routing. No WinUI rewrite, new controller support or automatic
+installer is implied. See [visual contract](visual-contract.md).
+
+Use one identified final candidate for batched owner visual/hardware acceptance;
+internal presentation/test changes alone do not require a new hardware session.
+Test/CI improvements and the corrected setup-prompt preference can travel with
+this candidate. The recurring setup report was investigated separately and the
+launcher-task priority correction shipped in 5.1.2 without the unfinished UI;
+the reporter subsequently confirmed that 5.1.2 is working on their own PC,
+with an issue planned if the fault returns. This is confirmation of that
+report, not a general installation/recovery pass. Prior unsigned and
+unobserved-installation risk exceptions do not automatically cover 5.2.0.
+
+Before freezing 5.2.0, the owner requested a bounded code-health review after
+the UI work: investigate unused-code warnings, genuinely dead paths and
+structural changes with a concrete maintenance benefit. An unused member is
+not proof that a feature is removable: check XAML, reflection, compatibility
+and dormant DS3 paths. Separate safe cleanup, justified small refactors and
+larger work deferred to a later release. This records a planned review, not a
+completed audit or blanket authority for an architectural rewrite. Any runtime
+changes still need their risk-relevant tests and hardware acceptance.
 
 ### 5.1.1 maintenance scope (2026-10-04)
 

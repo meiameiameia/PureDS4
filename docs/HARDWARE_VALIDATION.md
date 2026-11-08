@@ -11,6 +11,216 @@ microphone need a trick, and both are described at the end.
 
 ## Release hardware evidence
 
+### 5.2.0 owner decision on the no-audio effect experiment — 2026-11-08
+
+The owner chose to revert only the unvalidated experiment (byte 2 of ordinary
+Bluetooth effect reports `0x00` instead of `0xA0` when speaker and microphone
+are off). 5.2.0 sends the 5.1.2 value again: `0xA1` with the microphone armed,
+otherwise `0xA0`. The HID read-safety fix and the file-only pipeline diagnostics
+ship as their own changes. The 15-minute Bluetooth input stall stays a known
+open investigation: it recurred in preview.4 and preview.6 before the byte
+change, so the byte is not its cause, and it is unknown whether 5.1.2 shows it.
+No latency or fix claim is made for 5.2.0.
+
+### 5.2.0 private preview.7 Forza Bluetooth result — 2026-10-19
+
+The owner reported a Forza Bluetooth session on the installed preview.7 with
+speaker and microphone disabled. The controller did not power off or
+disconnect, but input froze, and the virtual pad kept the pressed state
+(for example, a held R2) until input resumed. This does not pass the stability
+gate. The runtime log, preserved under the ignored
+`artifacts/disposable/bt-no-audio-20261015-01/evidence/freeze-20261019/`
+(SHA-256 `64E7727E193E9F59CD05477F3EACC80C7BAF7A869667697BCC556080E025B8F6`),
+shows active game feedback from about 20:21 to 20:50 (about 28 minutes, short
+of the 90-minute target). It records two Bluetooth read stalls, starting at
+about 20:30:07.6 (a 3,008 ms read timeout, then retry) and 20:45:07.6
+(1,200 ms). Processing, dispatch and effect writes stayed fast, and no effect
+write failed.
+
+The stalls recur on a 15-minute cadence, to the same second within a session.
+That pattern also appears in the earlier logs: 2026-10-11 at 21:09:15, 21:39:15,
+21:54:15, 22:09:15 and 22:24:15 (preview.4), and the 2026-10-13 power-off stall
+at 20:33:34 (preview.6). This points to a periodic host-side trigger, not the
+removed `0xA0` byte. That trigger is not identified yet. The radio is a USB
+`CSR8510 A10` (`VID_0A12&PID_0001`) on Microsoft's generic driver. No Windows
+event and no scheduled task with a 15-minute repetition matched the 2026-10-19
+stalls. During a stall, the inherited retry policy (`ShouldRetryBluetoothInputAfterTimeout`,
+from upstream RC4.2) keeps the last state on the virtual pad for up to the
+3-second read timeout per attempt and a 9-second grace. This explains the
+held input without explaining the stall itself.
+
+### 5.2.0 private preview.7 installation — 2026-10-15
+
+After separately authorizing the in-place preview.6 -> preview.7 update, the
+owner completed setup and left **Launch PureDS4** unchecked. Read-only checks
+confirmed all 29 installed payloads against the package manifest below.
+`C:\Program Files\PureDS4\PureDS4.exe` reports `5.2.0-ui-preview.7` and matches
+SHA-256 `48777392F59C042FF1696289C1D37AD82D4B53CA9C01677DC08C7F5032E0A7A1`.
+All eight pre-update Roaming files, including profiles, settings and the
+HidHide ownership journal, remain hash-identical to the fresh private backup.
+
+Canonical tasks, the Ready marker, pinned backend/USB-IP executable and driver
+hashes, the USB-IP runtime probe and a read-only VIIPER API ping passed. Setup
+completed with exit code 0 and no requested restart; see the
+[installer checkpoint](INSTALLER_VALIDATION_STRATEGY.md#520-private-preview7-installed-checkpoint--2026-10-15)
+for the backup, logs and limits. PureDS4 was not running during this check.
+
+Installation is verified, not Bluetooth stability. Exact-preview.7 controller
+readings, virtual/native routing, USB/Bluetooth gameplay, audio transitions,
+reconnect/restart and at least 90 minutes of comparable Forza Bluetooth use
+remain pending. Keep the no-audio comparison's speaker and microphone modes
+disabled, as in the previous failing session, without changing other settings.
+Any recurrence needs its approximate time and whether only input stopped or
+the physical controller powered off. No commit, push or publication occurred.
+The package-only and experiment entries below describe earlier checkpoints.
+
+### 5.2.0 private preview.7 package — 2026-10-15
+
+The owner authorized private package generation only. The installer was built
+without launching it or the controller app. No installation, activation, commit,
+push or publication occurred. The no-audio experiment below remains unproven
+on hardware.
+
+Candidate root: `artifacts/disposable/bt-no-audio-20261015-01/`. Its
+`candidate-identity.json` records the dirty source baseline and composition
+fingerprint, runtime packs, tests and file identities; `SHA256SUMS.txt` covers
+the app, installer and incidental portable archive.
+
+- Installer: `installer/PureDS4_5.2.0-ui-preview.7_Setup_x64.exe`,
+  190,076,666 bytes, SHA-256
+  `ABC6F97C499917E15E7AACD8C5BEF4EEA20D7FF381F0C24417156D5392794019`.
+- App: `x64/Release/PureDS4/PureDS4.exe`, SHA-256
+  `48777392F59C042FF1696289C1D37AD82D4B53CA9C01677DC08C7F5032E0A7A1`.
+- App and bundle report `5.2.0-ui-preview.7`; the app's numeric file version
+  remains `5.2.0.0`. The installer is unsigned.
+
+MSI/Burn composition, release-input/signature checks, managed notices and
+isolated installer/launcher/reboot-boundary simulations passed. All 29 portable
+payloads match the staged installer manifest; only the app and release marker
+differ from preview.6, with the other 27 files byte-identical. Core, Desktop and
+apphost remain pinned to .NET 10.0.12 for the app and both setup hosts. The
+generated WiX source was restored byte-for-byte after composition.
+
+The final stamped preview.7 managed build passed 162 focused Bluetooth/HID
+tests. The 1,172-test standard-version Release source pass below is reused;
+three live-process audio capture tests remain excluded. The installed preview.6
+and all eight existing non-log Roaming data files remained hash-identical.
+Installer execution/layout, real installation/repair/rollback and exact-preview.7
+USB/Bluetooth, audio-mode, native-mode and sustained Forza gameplay are still
+unperformed. The Bluetooth stability gate remains open.
+
+### 5.2.0 private no-audio effect experiment — 2026-10-15
+
+The owner reported that the DS4 powered off during Forza Bluetooth gameplay on
+2026-10-13, on the identified preview.6 below. At 20:33 the input observer
+recorded a blocked physical read, a three-second timeout and then Win32 error
+1167 (device not connected). Windows recorded an unresponsive Bluetooth HID
+device at the same time. The owner manually powered the controller on again;
+its appearance at 20:34 was not automatic recovery. This fails the Bluetooth
+stability gate and does not establish whether the cause is in PureDS4, the
+controller, the radio or the Windows Bluetooth stack. A later removal after
+the logged app shutdown at 21:03 is not another spontaneous disconnection.
+
+The authorized local experiment changes only byte 2 of ordinary Bluetooth
+effect reports when both audio lanes are disabled: `0xA0` becomes `0x00`.
+Speaker-only remains `0xA0`; microphone and duplex remain `0xA1`. Rumble,
+lightbar, poll interval, CRC framing, buffer size, handle lifetime, read timeout,
+retry grace and diagnostics are unchanged. This isolates one difference from
+[schmaldeo 3.9.9](https://github.com/schmaldeo/DS4Windows/blob/722c561c3d7aa65dcf063e716c04ca69e4ca33bd/DS4Windows/DS4Library/DS4Device.cs);
+the owner's exact predecessor version and a controlled comparison remain
+unconfirmed. The other transport differences are not reverted in this pass.
+
+Local tests use a recording writer without opening HID devices or personal
+profiles. They check ordinary, speaker, microphone and duplex effect reports,
+audio-to-ordinary transitions, rumble/lightbar preservation, an independent CRC
+reference, the four-second keepalive and unchanged USB serialization. This is a
+diagnostic hypothesis, not a demonstrated fix. A hardware candidate still needs
+packaging and identification, followed by separately authorized installation,
+USB/Bluetooth, audio-mode and sustained gameplay checks before the 5.2.0
+stability gate can close.
+
+The standard-version Release/x64 build passed 1,172 tests, with the three
+opt-in live-process audio capture tests excluded. The focused Bluetooth/HID
+pass passed 162 tests. An earlier run stamped as preview.7 failed only the
+unchanged public-version assertion; the standard-version rerun above passed.
+No installer was produced or activated in this pass.
+
+### 5.2.0 private preview.6 installation — 2026-10-13
+
+The owner completed the authorized preview.4 -> preview.6 update after a
+controlled retry using the installer's default log location. Read-only checks
+confirmed all 29 installed payload files against the identified preview.6
+manifest and all eight existing Roaming data files against the private backup.
+The installed `C:\Program Files\PureDS4\PureDS4.exe` reports
+`5.2.0-ui-preview.6`, SHA-256
+`ADDE80041AA3D42C8A2292E06930AFF5AAE91C2294FEE0DE33D968A9585D0CE0`.
+Backend identity, canonical enabled tasks, the Ready marker and a read-only
+VIIPER API ping passed. See the [installer checkpoint](INSTALLER_VALIDATION_STRATEGY.md#520-private-preview6-installed-checkpoint--2026-10-13)
+for the earlier MSI logging failure, secondary restore error and evidence limits.
+
+PureDS4 was not running at that post-install check. USB and Bluetooth readings,
+virtual-pad input, gameplay/rumble, disconnect/reconnect, app restart, managed
+-> native -> managed routing and sustained Bluetooth use have not yet been
+accepted on this candidate. Installation success does not close the original
+Bluetooth-freeze investigation or authorize publication.
+
+### 5.2.0 private Bluetooth diagnostic follow-up — 2026-10-12
+
+An independent 250 ms diagnostic observer samples the current Bluetooth input
+stage and actual VIIPER state-write progress. An activity still in flight after
+one second produces a file-only incident without waiting for that activity to
+return; observed progress produces one paired recovery record. Repeated
+incidents in the same stage are limited to one per 30 seconds. Recovery timing
+is sampled, not an exact freeze duration or proof that a game received input.
+Input incident context includes speaker/microphone mode and effect counters,
+but no input values or controller identifiers. The observer takes none of the
+input/output/audio/UI locks and performs no recovery action.
+
+VIIPER observes pending or in-flight work without successful write progress,
+not equality of submitted/written counts: superseded states are intentionally
+coalesced. Idle output, native-mode retirement and old worker generations must
+not be diagnosed as stalls. This instrumentation changes no HID timeout,
+transport, output packet, profile, grace period, UI or neutral-state policy.
+
+The original hardware freeze remains unexplained. Candidate preparation and
+disposable tests are not installed-app or physical-controller acceptance.
+After authorized installation of the identified candidate, batch the existing
+USB/Bluetooth input/output/gameplay/reconnect/restart/native round trips, then
+observe at least 90 minutes of comparable Bluetooth use. Record the game,
+audio mode, duration, any input loss/stuck output and relevant incident stages.
+No input loss, stuck output or unexplained pipeline incident is the practical
+acceptance target; this duration is not a statistical confidence claim or proof
+of broader compatibility. Any recurrence keeps the stability gate open and
+must be correlated with the exact artifact before changing behavior.
+
+### 5.2.0 private UI dogfood — Bluetooth input freeze, 2026-10-11
+
+The owner accepted the UI and reported that the requested initial interactions
+worked, but subsequently observed intermittent Bluetooth input loss while the
+controller remained connected in Windows and PureDS4. This is not a passing
+Bluetooth stability gate. The owner reported no equivalent interruption with
+their previous schmaldeo DS4Windows installation; no controlled comparison or
+exact predecessor version was supplied.
+
+The installed file at `C:\Program Files\PureDS4\PureDS4.exe` reports
+`5.2.0-ui-preview.4`, SHA-256
+`2091E393DDAA6C2111A107A8EAA919F9F17F80D059719CEFD92DAEA741E973A3`.
+Its startup log identifies that preview; the elevated running process's path
+was unavailable to the read-only query. Logs on 2026-10-11 show two 3-second
+input-read pauses at 21:09:15 and 21:39:15 without controller removal. A Windows
+Bluetooth-adapter command timeout was also recorded earlier, not at either
+pause. Neither observation establishes the underlying cause.
+
+Local changes preserve a successful read that completes during cancellation,
+distinguish a failed completion from a recoverable timeout, and drain pending
+reads before releasing their native buffers. Incident-only diagnostics measure
+HID reading, processing, report dispatch and feedback separately, without input
+values or controller identifiers. They do not change the read timeout, removal
+grace, feedback transport, profiles or UI. Automated native byte-pipe and
+diagnostic tests do not demonstrate recovery of the reported hardware freeze.
+New-candidate USB/Bluetooth acceptance and sustained Bluetooth gameplay remain
+pending; this pass does not qualify 5.2.0 for release.
+
 ### 5.1.2 launcher hotfix — 2026-10-05
 
 The owner completed the in-place 5.1.1 -> 5.1.2 update and reported passing

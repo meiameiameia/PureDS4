@@ -45,7 +45,132 @@ API contract must be verified first.
     managed application and VIIPER backend; setup never registers an elevated
     task against a directory it could not protect.
 
+### Installer-to-runtime task compatibility
+
+The development candidate's application and VIIPER task readers accept the
+installer's default `BelowNormal` process priority, while retaining existing
+`High`-priority definitions. Required `Highest` elevation remains a separate
+check; executable/action/principal/trigger ownership is not inferred from
+process priority. No task is rewritten by this compatibility correction.
+
+`OwnedStartupTaskContractTests` invokes `utils/test-viiper-launch-task.ps1` with
+`-EmitInstallerTasks` through the existing PowerShell 7 verification shell.
+The script imports ScheduledTasks before installing its interceptors, asserts
+that host task commands are intercepted, then runs the actual installer
+registration functions and verifier with real Windows `New-*` constructors.
+The emitted definitions are tested by the same runtime predicates used for
+live tasks, including XML reload and incompatible target/account/shape cases.
+Only unregistered in-memory task definitions are created. This is not evidence
+of an actual reboot, successful task execution or resolution on a reporter's PC.
+
+On 2026-10-05 the two installer-to-runtime acceptance cases failed with the old
+High-only rule, while the other seven new cases passed. With the compatibility
+correction, all 90 focused tests and the 1,102-test Release suite passed locally;
+live-process audio capture was excluded. Release compilation also passed.
+The TRX evidence is under `artifacts/disposable/launcher-fix-20261005-01/`.
+No installation, real task registration/execution or reboot was performed.
+
 ## Pinned runtime contract
+
+### 5.2.0 private preview.7 installed checkpoint — 2026-10-15
+
+The owner authorized and completed the private preview.6 -> preview.7 update,
+leaving **Launch PureDS4** unchecked. The exact installer is
+`artifacts/disposable/bt-no-audio-20261015-01/installer/PureDS4_5.2.0-ui-preview.7_Setup_x64.exe`,
+SHA-256 `ABC6F97C499917E15E7AACD8C5BEF4EEA20D7FF381F0C24417156D5392794019`.
+This is an unsigned private diagnostic candidate, not a committed release.
+
+Before activation, all 29 installed files matched preview.6. A fresh private
+backup under `%LocalAppData%\PureDS4\ValidationBackups\preview7-20261015-01`
+preserves eight non-log Roaming files, three ProgramData recovery files, the
+verified original preview.6 installer and identity/manifest/checksums, owned
+task definitions and the PureDS4 registry export. Copied data/recovery payloads
+were hash-verified. There was a general Windows Update/CBS restart pending,
+but no controller-related pending file rename or infrastructure RebootPending
+marker; the USB-IP probe passed. No Windows restart was performed.
+
+Setup used default logging with no custom log argument. The MSI replacement,
+older-bundle removal and deferred infrastructure pass returned 0; Burn reported
+successful Apply and exit 0 with restart None. HidHide was already present and
+was not installed or repaired. Seven setup logs were copied and hash-verified
+in the private backup's `InstallerLogs` directory, not in the repository.
+
+Read-only post-install checks confirmed:
+
+- All 29 installed application files match the preview.7 manifest. Installed
+  `C:\Program Files\PureDS4\PureDS4.exe` reports `5.2.0-ui-preview.7`, SHA-256
+  `48777392F59C042FF1696289C1D37AD82D4B53CA9C01677DC08C7F5032E0A7A1`.
+- All eight backed-up Roaming files remain hash-identical. The registered
+  bundle is preview.7, the managed MSI remains numeric 5.2.0 and the preview.6
+  bundle registration is no longer listed.
+- Both tasks remain enabled for the current account, Highest/Interactive,
+  priority 7, with canonical Program Files actions. Only the app task has a
+  logon trigger; the backend action is `viiper.exe server` in its canonical
+  VIIPER directory, without a logon trigger.
+- Infrastructure is Ready for `VIIPER-0.1.0-pureds4.2+USBIP-0.9.7.7`. The
+  backend, USB-IP executable and both USB-IP driver hashes match their pins.
+  HidHide and both USB-IP drivers are running. The USB-IP runtime probe and
+  read-only VIIPER API ping passed. Ports 3241/3242 listen only on 127.0.0.1
+  under the same VIIPER PID. The elevated process path was unavailable to the
+  read-only process query; its live executable path was not independently proven.
+
+PureDS4 was not launched during these checks. Exact-candidate hardware and
+sustained Bluetooth validation remain pending, as do clean-install, rollback
+and reboot/resume evidence. This success does not resolve the preview.6 custom
+logging failure or prove the Bluetooth hypothesis. Nothing was published.
+
+### 5.2.0 private preview.6 installed checkpoint — 2026-10-13
+
+The owner authorized the in-place preview.4 -> preview.6 update for private
+USB/Bluetooth dogfood, not publication. The unchanged installer is
+`artifacts/disposable/bt-dogfood-20261012-01/installer/PureDS4_5.2.0-ui-preview.6_Setup_x64.exe`,
+SHA-256 `A13EFB4B961A703F92A6E74F524D8D3B939A890BBD22830F99C83DDC54AAD1F6`.
+Its candidate identity retains the dirty source baseline
+`82bb1ccbe0c91c7403d0ecc0281b14f8f71db928`, composition fingerprint and
+the 1,166-test Release evidence; this is not a committed release milestone.
+
+Before activation, all 29 installed files matched preview.4. Eight non-log
+Roaming data files and three ProgramData recovery files were copied and
+hash-verified in a private local backup, together with the identified original
+preview.4 installer, package manifest, product registry export and owned-task
+definitions. No backup or personal data belongs in distribution artifacts.
+
+The first attempt used an explicit log path inside that private backup. The
+MSI initialization returned 1622 (`0x80070656`, failure opening the installation
+log); the older related bundle's automatic restore attempt also returned 1638
+(`0x80070666`). Subsequent checks found all 29 preview.4 files and all eight
+Roaming data files unchanged, with the original registrations and enabled
+canonical tasks retained. This failed attempt is not proof of successful
+rollback after file replacement. The logging failure and secondary restore
+behavior remain observations requiring investigation, not defects declared fixed.
+
+With separate owner authorization, the exact same preview.6 installer was
+reopened without the custom log argument. The MSI, older-bundle removal and
+deferred infrastructure pass completed with exit code 0 and no requested
+restart. The owner reported successful completion. Changing the log invocation
+was sufficient for this retry; it does not establish why the first attempt failed.
+Both attempts' logs are preserved privately, not uploaded.
+
+Read-only post-install checks confirmed:
+
+- All 29 installed application payload files match the preview.6 manifest.
+  `C:\Program Files\PureDS4\PureDS4.exe` reports `5.2.0-ui-preview.6`, SHA-256
+  `ADDE80041AA3D42C8A2292E06930AFF5AAE91C2294FEE0DE33D968A9585D0CE0`.
+- All eight pre-update Roaming data files, including profiles/settings and
+  the HidHide ownership journal, remain hash-identical to the backup.
+- The registered bundle is preview.6 and the managed MSI remains numeric
+  5.2.0; the preview.4 bundle registration is no longer listed.
+- Both tasks are enabled for the current account with Highest elevation and
+  canonical Program Files actions. Only the app task has a logon trigger.
+- Infrastructure is marked Ready for `VIIPER-0.1.0-pureds4.2+USBIP-0.9.7.7`;
+  the installed backend matches the pinned candidate payload and answers its
+  read-only API ping. API/USB-IP listeners are only on `127.0.0.1` ports
+  3242/3241. The elevated process's path was unavailable to the read-only query.
+
+PureDS4 was not running at that check. No new-candidate hardware result,
+Windows restart, sustained Bluetooth stability, clean installation, mid-update
+failure recovery or public-release acceptance is claimed. Those gates remain
+separate; the owner has not authorized publication.
 
 ### 5.1.2 installed candidate checkpoint — 2026-10-05
 
@@ -138,10 +263,14 @@ the reporting user's machine.
   `VIIPER-0.1.0-pureds4.2+USBIP-0.9.7.7 / Ready` in the 64-bit registry view.
 
 PureDS4 repeats these identity and ABI checks at startup. Missing or
-mismatched prerequisites open an offline repair prompt; suppressing a location
-recommendation never suppresses a verification failure. The main UI remains
-available in degraded mode for Settings and diagnostics, while virtual output
-continues to fail closed until a fresh readiness check passes.
+mismatched prerequisites remain visible as unavailable output with offline
+repair available. In the development candidate, automatic setup dialogs respect
+the saved preference and appear at most once per session; manual setup remains
+available. Suppressing a dialog never suppresses the verification failure or
+permits output to start. The main UI remains available in degraded mode for
+Settings and diagnostics, while virtual output continues to fail closed until a
+fresh readiness check passes. Released 5.1.0/5.1.1 builds still force the modal
+repair prompt when prerequisites are unhealthy.
 Installer detection accepts a stopped but exact backend because VIIPER no
 longer starts independently at login. The post-install check still requires
 setup to start VIIPER and receive its live API response before reporting a
@@ -360,6 +489,11 @@ or test-only changes.
 - USB-IP reboot-boundary simulation.
 - Installer state-machine simulation covering clean install, update, repair,
   uninstall, downgrade, cancellation, concurrency, failure, and reboot/resume.
+  This is a specification model plus source-anchor checks, not execution of
+  those production transitions. `InstallerPlanningPolicyTests` separately
+  compiles the same ownership decisions used by Burn (upgrade deferral,
+  parent-owned uninstall and direct-uninstall cleanup); it does not exercise
+  Burn callbacks, mutexes, driver mutation or real reboot/resume.
 - Atomic publication of the completed installer only after every gate passes.
   The verified manifest is committed first and the installer EXE last.
 - Authenticode verification when signing is explicitly requested; that path

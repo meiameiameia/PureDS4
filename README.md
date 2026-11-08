@@ -160,8 +160,9 @@ The exact 5.1.2 candidate passed the in-place update from 5.1.1, Windows restart
 without another repair, and USB/Bluetooth readings, gameplay, reconnecting and
 app close/reopen. All 29 installed application files still matched the frozen
 candidate after the restart. The hotfix corrects a mismatch between setup's
-launcher task and the app's validation; the reporting user's PC has not yet
-been retested.
+launcher task and the app's validation. The user who reported recurring repair
+also confirmed that 5.1.2 is working on their PC and will open an issue if it
+returns; that report does not establish every setup scenario.
 
 The exact 5.1.1 candidate passed USB/Bluetooth input, Xbox 360 game output,
 gameplay/rumble, disconnect/reconnect, app restart and managed/native round trips.

@@ -6,6 +6,44 @@ are recorded in the
 The exception accepts specific unobserved failure scenarios; it does not make
 repair, rollback or driver removal safe without checking the affected machine.
 
+## Setup prompts and unavailable game output
+
+The development candidate uses the notification behavior below. Released
+5.1.0/5.1.1 builds instead override prompt suppression when output is unready.
+
+Settings → Game output → **Prompt when setup is needed** controls automatic
+setup dialogs, not the checks that allow virtual output. When disabled, startup
+does not open the setup dialog. Missing, incompatible or unverified components
+still block virtual output; the Home warning and Settings diagnostics/repair
+remain available.
+
+With prompts enabled, an unhealthy backend opens at most one automatic setup
+dialog per application session. Choosing **Continue without game output** must
+not immediately open the same dialog again during the main window's late checks.
+An already healthy backend consumes no prompt. Manual **Set up** remains
+available regardless of the preference or a previously dismissed dialog.
+Verified successful repair resets the notification session; otherwise restarting
+the app starts a new session, still respecting the saved preference.
+
+Suppressing a dialog never permits an unverified backend to start, skips driver
+validation, performs installation, or weakens the guided replacement procedure.
+The preference does not repair the cause of unavailable game output.
+
+### Launcher-task compatibility in the development candidate
+
+The development candidate recognizes the installer's default `BelowNormal`
+task priority (Windows priority 7) and retains compatibility with existing
+`High`-priority tasks. Released 5.1.0/5.1.1 require `High` even though their
+installer creates priority-7 tasks. This disagreement can leave a task approved
+by setup but rejected by the application. Setup can also start the verified
+backend directly for that session, masking a launcher problem until it exits.
+
+The compatibility correction only reads task definitions. It does not change
+task priority, register tasks, or repair the machine automatically. Executable,
+arguments, working directory, account, elevation and trigger checks still apply;
+the VIIPER launcher must have no logon trigger. This addresses the reproduced
+installer/runtime disagreement, not every cause of launcher or reboot failure.
+
 ## Upgrading an existing PureDS4 installation
 
 The first public-version target is `5.1.0`. The last full USB/Bluetooth gameplay
