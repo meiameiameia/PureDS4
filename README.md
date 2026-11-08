@@ -86,7 +86,7 @@ The app does not use the DS4Windows update channel, download packages or
 install updates. Users on 5.1.0 need to download a newer release manually to
 get the checker.
 
-Version 5.1.2 bundles **.NET 10.0.12 LTS**, so no separate runtime installation
+Version 5.2.0 bundles **.NET 10.0.14 LTS**, so no separate runtime installation
 is needed. Runtime security fixes still require an updated PureDS4 package;
 see the
 [runtime maintenance plan](docs/RELEASE_CONTRACT.md#update-and-release-authority).

@@ -190,6 +190,16 @@ At that preliminary checkpoint, exact-package UI/hardware, full installer
 lifecycle and real Windows reboot acceptance were unperformed; deterministic
 simulations were not substitutes. Final frozen-candidate acceptance is recorded
 above, without changing these historical preliminary hashes.
+### 5.2.0 runtime servicing update (2026-11-08)
+
+Microsoft's .NET 10 release metadata listed runtime **10.0.14** (2026-10-25;
+10.0.13 and 10.0.14 carry security fixes) as current. The owner approved raising
+the bundled Core/Desktop runtime and apphost pin from `10.0.12` to `10.0.14` for
+5.2.0 (`Directory.Build.props`; the CI runtime-pack minimum follows). SDK
+`10.0.302` in `global.json` is unchanged. NuGet lock files do not record the
+runtime packs and did not change. Statements below that name `10.0.12` describe
+the earlier 5.1.x releases and stay as history.
+
 ### Planned 5.2.0 Windows-style UI release (2026-10-05)
 
 The Windows 11 / Fluent-inspired WPF modernization is planned for **5.2.0**,

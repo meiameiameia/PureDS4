@@ -200,8 +200,8 @@ jobs:
                 throw "Cannot identify the exact $component $name runtime pack from restore assets."
               }
               $version = $Matches[1]
-              if ([version]$version -lt [version]'10.0.12' -or ([version]$version).Major -ne 10) {
-                throw "$component $name is stale or uses the wrong runtime: $version (reviewed .NET 10 minimum: 10.0.12)."
+              if ([version]$version -lt [version]'10.0.14' -or ([version]$version).Major -ne 10) {
+                throw "$component $name is stale or uses the wrong runtime: $version (reviewed .NET 10 minimum: 10.0.14)."
               }
               $runtimePacks += [ordered]@{ component = $component; name = $name; version = $version }
             }

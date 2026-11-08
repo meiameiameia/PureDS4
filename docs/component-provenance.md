@@ -28,8 +28,9 @@ The notices retain the upstream license and dependency attribution. Inputs
 calculate `releaseReady: true`; this does not establish final package/hardware
 acceptance or authorize installation. Earlier dirty-tree outputs are superseded.
 
-The 5.1.1 .NET migration pins SDK `10.0.302`, Core/Desktop runtime packs and
-apphost `10.0.12`. The Windows SDK projection is `10.0.19041.57`; its shipped
+The 5.1.1 .NET migration pinned SDK `10.0.302`, Core/Desktop runtime packs and
+apphost `10.0.12`; 5.2.0 raises the runtime packs and apphost to `10.0.14`
+(owner-approved 2026-11-08, SDK pin unchanged). The Windows SDK projection is `10.0.19041.57`; its shipped
 terms and acceptance identifier are unchanged. The SDK's own shared runtime
 is not the payload identity: verify restore assets for all managed hosts and
 the candidate records. [.NET 10 is LTS through November 14, 2028](https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core);

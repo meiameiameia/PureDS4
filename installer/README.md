@@ -5,7 +5,7 @@ bundle with a custom WPF interface. It contains the managed PureDS4 MSI,
 PureDS4 VIIPER 0.1.0-pureds4.2, USB-IP 0.9.7.7, and an optional HidHide package.
 The development target is 5.2.0; 5.1.2 remains the published maintenance release.
 The application and managed setup hosts
-use self-contained .NET 10.0.12, independently pinned from SDK 10.0.302.
+use self-contained .NET 10.0.14, independently pinned from SDK 10.0.302.
 The backend is built from clean source commit
 `04c10b1e0b5439b649730389673a64918a43578e`; component inputs calculate
 `releaseReady: true`. Final package/hardware acceptance and publication remain

@@ -4,6 +4,6 @@
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <!-- Keep the existing language semantics while migrating the runtime. -->
     <LangVersion>12.0</LangVersion>
-    <PureDS4RuntimeVersion>10.0.12</PureDS4RuntimeVersion>
+    <PureDS4RuntimeVersion>10.0.14</PureDS4RuntimeVersion>
   </PropertyGroup>
 </Project>
