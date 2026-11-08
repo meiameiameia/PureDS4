@@ -10,6 +10,90 @@ namespace DS4WindowsTests;
 public class BluetoothOutputKeepAliveTests
 {
     [DataTestMethod]
+    [DataRow(false, false, 0xA0)]
+    [DataRow(true, false, 0xA0)]
+    [DataRow(false, true, 0xA1)]
+    [DataRow(true, true, 0xA1)]
+    public void EffectsKeepTheFiveOneTwoAudioModeBytes(bool speaker, bool microphone,
+        int expectedMode)
+    {
+        var device = CreateDevice();
+        device.BTPollRate = 4;
+        device.setRumble(60, 120);
+        device.LightBarColor = new DS4Color(12, 34, 56);
+        AudioState(device).Update(speaker, microphone, null, null, null, null);
+        byte[] audioReport = null;
+        Assert.IsTrue(device.RegisterDualShock4BluetoothAudioControlLane(
+            new object(), report =>
+            {
+                audioReport = (byte[])report.Clone();
+                return true;
+            }));
+
+        Send(device);
+
+        Assert.AreEqual(speaker ? 0 : 1, device.Writes,
+            "Speaker effects must retain their audio lane; ordinary and microphone-only effects retain their existing writer.");
+        AssertBluetoothEffectReport(speaker ? audioReport : device.LastReport,
+            (byte)expectedMode);
+    }
+
+    [TestMethod]
+    public void LeavingMicrophoneReturnsToTheOrdinaryReportWithoutLosingEffectsOrKeepAlive()
+    {
+        var device = CreateDevice();
+        device.BTPollRate = 4;
+        device.setRumble(60, 120);
+        device.LightBarColor = new DS4Color(12, 34, 56);
+        var reports = new List<byte[]>();
+        Assert.IsTrue(device.RegisterDualShock4BluetoothAudioControlLane(
+            new object(), report => { reports.Add((byte[])report.Clone()); return true; }));
+
+        AudioState(device).Update(true, false, null, null, null, null);
+        Send(device);
+        AssertBluetoothEffectReport(reports.Single(), 0xA0);
+        Assert.AreEqual(0, device.Writes);
+
+        AudioState(device).Update(false, true, null, null, null, null);
+        Send(device);
+        AssertBluetoothEffectReport(device.LastReport, 0xA1);
+        Assert.AreEqual(1, device.Writes);
+
+        AudioState(device).Update(false, false, null, null, null, null);
+        Send(device); // The header change itself must publish, without new rumble.
+        AssertBluetoothEffectReport(device.LastReport, 0xA0);
+        Assert.AreEqual(2, device.Writes);
+        byte[] ordinaryReport = (byte[])device.LastReport.Clone();
+
+        device.Advance(3999);
+        Send(device);
+        Assert.AreEqual(2, device.Writes);
+        device.Advance(1);
+        Send(device);
+        Assert.AreEqual(3, device.Writes);
+        CollectionAssert.AreEqual(ordinaryReport, device.LastReport,
+            "The existing four-second keepalive must keep the ordinary 0xA0 report.");
+        Assert.AreEqual(1, reports.Count, "No ordinary effects may leak into the speaker lane.");
+    }
+
+    [TestMethod]
+    public void BluetoothAudioFlagsDoNotChangeUsbEffects()
+    {
+        var device = CreateDevice(ConnectionType.USB);
+        device.setRumble(60, 120);
+        device.LightBarColor = new DS4Color(12, 34, 56);
+        Send(device, force: true);
+        byte[] report = (byte[])device.LastReport.Clone();
+
+        AudioState(device).Update(true, true, null, null, null, null);
+        Send(device, force: true);
+
+        Assert.AreEqual(2, device.Writes);
+        Assert.AreEqual((byte)0x05, device.LastReport[0]);
+        CollectionAssert.AreEqual(report, device.LastReport);
+    }
+
+    [DataTestMethod]
     [DataRow(0, 0)]
     [DataRow(60, 120)]
     public void IdenticalBluetoothFeedbackDoesNotRepeatPhysicalWrites(int fast, int slow)
@@ -183,9 +267,11 @@ public class BluetoothOutputKeepAliveTests
         device.setRumble(0, 0);
         Send(device);
         Assert.IsTrue(device.Timer.IsRunning);
-        Assert.IsTrue(SpinWait.SpinUntil(
-            () => device.Timer.ElapsedMilliseconds >= 4000, TimeSpan.FromSeconds(10)));
-
+        device.Advance(3999);
+        device.setRumble(0, 0);
+        Send(device);
+        Assert.AreEqual(2, device.Writes, "Do not send before the deadline.");
+        device.Advance(1);
         device.setRumble(0, 0); // Repeated neutral feedback must not postpone keepalive.
         Send(device);
         Assert.AreEqual(3, device.Writes,
@@ -193,6 +279,12 @@ public class BluetoothOutputKeepAliveTests
         Assert.IsTrue(device.Timer.IsRunning);
         Send(device);
         Assert.AreEqual(3, device.Writes);
+        device.Advance(3999);
+        Send(device);
+        Assert.AreEqual(3, device.Writes, "A successful write must rearm the interval.");
+        device.Advance(1);
+        Send(device);
+        Assert.AreEqual(4, device.Writes);
     }
 
     [TestMethod]
@@ -208,8 +300,7 @@ public class BluetoothOutputKeepAliveTests
         Assert.AreEqual(0, device.Writes, "Speaker effects must use the owned audio lane.");
         Assert.IsTrue(device.Timer.IsRunning);
 
-        Assert.IsTrue(SpinWait.SpinUntil(
-            () => device.Timer.ElapsedMilliseconds >= 4000, TimeSpan.FromSeconds(10)));
+        device.Advance(4000);
         Send(device);
         Assert.AreEqual(1, audioWrites,
             "Speaker packets already maintain the connection; do not add idle effects.");
@@ -236,12 +327,43 @@ public class BluetoothOutputKeepAliveTests
         AudioState(device).Update(false, true, null, null, null, null);
         Send(device, force: true);
         Assert.IsTrue(device.Timer.IsRunning);
-        Assert.IsTrue(SpinWait.SpinUntil(
-            () => device.Timer.ElapsedMilliseconds >= 1000, TimeSpan.FromSeconds(10)));
+        device.Advance(999);
+        Send(device);
+        Assert.AreEqual(1, device.Writes, "Microphone keepalive must not fire early.");
+        device.Advance(1);
         Send(device);
         Assert.AreEqual(2, device.Writes);
         Assert.AreEqual((byte)0xA1, device.LastReport[2], "Preserve microphone mode in the keepalive.");
         Assert.IsTrue(device.Timer.IsRunning);
+        device.Advance(999);
+        Send(device);
+        Assert.AreEqual(2, device.Writes);
+        device.Advance(1);
+        Send(device);
+        Assert.AreEqual(3, device.Writes);
+    }
+
+    [DataTestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public void FailedKeepAliveIsRetriedWithoutPostponingTheDeadline(bool throws)
+    {
+        var device = CreateDevice();
+        Send(device, force: true);
+        device.Advance(4000);
+        device.WriteSucceeds = false;
+        device.ThrowOnWrite = throws;
+        Send(device);
+        Assert.AreEqual(2, device.Writes);
+        Assert.AreEqual(4000L, device.IdleMilliseconds,
+            "A failed attempt must not reset the successful-output clock.");
+        device.WriteSucceeds = true;
+        device.ThrowOnWrite = false;
+        Send(device);
+        Assert.AreEqual(3, device.Writes);
+        Assert.AreEqual(0L, device.IdleMilliseconds);
+        Send(device);
+        Assert.AreEqual(3, device.Writes);
     }
 
     [TestMethod]
@@ -302,6 +424,27 @@ public class BluetoothOutputKeepAliveTests
         (DualShock4BluetoothAudioState)typeof(DS4Device).GetField(
             "bluetoothAudioState", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(device)!;
 
+    private static void AssertBluetoothEffectReport(byte[] report, byte audioMode)
+    {
+        Assert.IsNotNull(report);
+        Assert.AreEqual(78, report.Length);
+        Assert.AreEqual((byte)0x11, report[0]);
+        Assert.AreEqual((byte)0xC4, report[1], "Preserve HID/CRC flags and the profile's poll interval.");
+        Assert.AreEqual(audioMode, report[2]);
+        CollectionAssert.AreEqual(new byte[] { 60, 120, 12, 34, 56 }, report[6..11]);
+
+        // Independent bitwise reference, including the Bluetooth output prefix.
+        uint crc = uint.MaxValue;
+        for (int index = -1; index < report.Length - 4; index++)
+        {
+            crc ^= index < 0 ? 0xA2u : report[index];
+            for (int bit = 0; bit < 8; bit++)
+                crc = (crc >> 1) ^ ((crc & 1) == 0 ? 0 : 0xEDB88320u);
+        }
+        Assert.AreEqual(~crc, BitConverter.ToUInt32(report, report.Length - 4),
+            "The transmitted CRC must cover the selected audio mode and unchanged effects.");
+    }
+
     private static void Set(DS4Device device, string name, object value) =>
         typeof(DS4Device).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!
             .SetValue(device, value);
@@ -320,11 +463,24 @@ public class BluetoothOutputKeepAliveTests
         public bool ThrowOnWrite;
         public byte[] LastReport;
         public Stopwatch Timer => standbySw;
+        private long clockMilliseconds;
+        private long restartedAt;
+        public long IdleMilliseconds => BluetoothOutputIdleMilliseconds;
+        public void Advance(long milliseconds) => clockMilliseconds += milliseconds;
+
+        protected override long BluetoothOutputIdleMilliseconds => clockMilliseconds - restartedAt;
+
+        protected override void RestartBluetoothOutputIdleClock()
+        {
+            base.RestartBluetoothOutputIdleClock();
+            restartedAt = clockMilliseconds;
+        }
 
         protected override bool writeOutput()
         {
             Writes++;
-            LastReport = (byte[])outputReport.Clone();
+            LastReport = (byte[])(getConnectionType() == ConnectionType.BT ?
+                outputReport : outReportBuffer).Clone();
             if (ThrowOnWrite) throw new IOException("Simulated write failure");
             return WriteSucceeds;
         }

@@ -299,6 +299,8 @@ namespace DS4Windows
         private long microphoneWorkerGeneration;
         private long stateWriterGeneration;
         private long stateWriterThreadGeneration;
+        private PipelineActivity stateWriterActivity;
+        private PipelineIncidentMonitor stateWriterIncidentMonitor;
         private int streamRecoveryAttempts;
         private long replacedPendingPacketCount;
         private long submittedPacketCount;
@@ -703,6 +705,16 @@ namespace DS4Windows
             writerStopRequested = false;
             feedbackDispatchStopRequested = false;
             connected = true;
+            var writerActivity = new PipelineActivity();
+            stateWriterActivity = writerActivity;
+            stateWriterIncidentMonitor = new PipelineIncidentMonitor(() =>
+                GetStateWriterProgress(writerGeneration, writerActivity), incident =>
+                NLog.LogManager.GetLogger("ViiperWriter").Warn(
+                    $"VIIPER output slot={Volatile.Read(ref lastInputDeviceIndex)} type={viiperType} generation={writerGeneration}: {incident} " +
+                    $"submitted={Interlocked.Read(ref submittedPacketCount)} written={Interlocked.Read(ref writtenPacketCount)} " +
+                    $"coalesced={Interlocked.Read(ref replacedPendingPacketCount)} microphoneCapable={activeStreamSupportsMicrophone} " +
+                    $"microphoneInterfaceActive={Volatile.Read(ref virtualMicrophoneInterfaceActive)}"));
+            stateWriterIncidentMonitor.Start();
             Interlocked.Increment(ref feedbackDispatchGeneration);
             long workerGeneration = Interlocked.Read(
                 ref microphoneWorkerGeneration);
@@ -817,6 +829,7 @@ namespace DS4Windows
 
         public override void Disconnect()
         {
+            Interlocked.Exchange(ref stateWriterIncidentMonitor, null)?.Dispose();
             Interlocked.Increment(ref microphoneWorkerGeneration);
             Interlocked.Increment(ref stateWriterGeneration);
             Interlocked.Increment(ref feedbackDispatchGeneration);
@@ -1565,8 +1578,9 @@ namespace DS4Windows
                     return;
                 }
 
+                PipelineActivity activity = stateWriterActivity;
                 Thread writerThread = new Thread(() =>
-                    StateWriteLoop(writerGeneration))
+                    StateWriteLoop(writerGeneration, activity))
                 {
                     IsBackground = true,
                     Name = $"VIIPER {viiperType} writer",
@@ -1585,7 +1599,25 @@ namespace DS4Windows
                 Interlocked.Read(ref stateWriterGeneration);
         }
 
-        private void StateWriteLoop(long writerGeneration)
+        internal PipelineProgressSnapshot? GetStateWriterProgress(long generation,
+            PipelineActivity activity)
+        {
+            if (!IsStateWriterCurrent(generation))
+                return new PipelineProgressSnapshot(PipelineStage.ViiperWriter, 0);
+            var running = activity.Snapshot();
+            if (!running.HasValue) return null;
+            // Counts need not match: latest-state coalescing intentionally
+            // drops superseded packets. Only outstanding work with no actual
+            // write progress is an incident; an idle/native output is not.
+            bool outstanding = running.Value.Identity != 0 ||
+                Volatile.Read(ref pendingStatePacket) != null;
+            long progress = Interlocked.Read(ref writtenPacketCount);
+            if (!IsStateWriterCurrent(generation)) return null;
+            return new PipelineProgressSnapshot(PipelineStage.ViiperWriter,
+                outstanding ? progress + 1 : 0);
+        }
+
+        private void StateWriteLoop(long writerGeneration, PipelineActivity activity)
         {
             using MultimediaThreadRegistration mmcss =
                 MultimediaThreadRegistration.EnterGames();
@@ -1601,6 +1633,7 @@ namespace DS4Windows
 
                     while (IsStateWriterCurrent(writerGeneration))
                     {
+                        using var writerActivity = activity.Watch(PipelineStage.ViiperWriter);
                         bool hasPendingPacket;
                         lock (pendingPacketLock)
                         {

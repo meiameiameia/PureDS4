@@ -304,25 +304,43 @@ namespace DS4Windows
                     return ReadStatus.ReadError;
                 }
 
+                // This reader owns the pending request until completion. An
+                // alertable wait can return for an unrelated APC while the
+                // kernel still owns our stack OVERLAPPED and pinned buffer.
                 if (!PInvoke.GetOverlappedResultEx(SafeReadHandle, ov, out _,
-                    timeout, true))
+                    timeout, false))
                 {
                     uint error = (uint)Marshal.GetLastWin32Error();
-                    if (error == NativeMethods.WAIT_TIMEOUT)
-                    {
-                        // Both the buffer and OVERLAPPED stay pinned/alive until
-                        // the exact pending IRP has been cancelled and drained.
-                        NativeMethods.CancelIoEx(
-                            SafeReadHandle.DangerousGetHandle(), (IntPtr)(&ov));
-                        PInvoke.GetOverlappedResult(SafeReadHandle, ov, out _, true);
-                        return ReadStatus.WaitTimedOut;
-                    }
-
-                    return ReadStatus.ReadError;
+                    // Drain on every unsuccessful wait, including a zero-time
+                    // poll. Cancellation can race a valid completion; keep that
+                    // input instead of unconditionally discarding it as timeout.
+                    // Never cancel another owner's I/O on this shared handle.
+                    NativeMethods.CancelIoEx(
+                        SafeReadHandle.DangerousGetHandle(), (IntPtr)(&ov));
+                    bool completed = PInvoke.GetOverlappedResult(
+                        SafeReadHandle, ov, out _, true);
+                    uint completionError = completed ? 0 :
+                        (uint)Marshal.GetLastWin32Error();
+                    return ClassifyDrainedRead(error, completed, completionError);
                 }
 
                 return ReadStatus.Success;
             }
+        }
+
+        internal static ReadStatus ClassifyDrainedRead(uint waitError,
+            bool completed, uint completionError)
+        {
+            if (completed)
+            {
+                return ReadStatus.Success;
+            }
+
+            bool timedOut = waitError == NativeMethods.WAIT_TIMEOUT ||
+                waitError == (uint)WIN32_ERROR.ERROR_IO_INCOMPLETE;
+            return timedOut &&
+                completionError == (uint)WIN32_ERROR.ERROR_OPERATION_ABORTED ?
+                ReadStatus.WaitTimedOut : ReadStatus.ReadError;
         }
 
         public bool WriteOutputReportViaControl(byte[] outputBuffer)

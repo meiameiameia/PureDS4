@@ -241,6 +241,7 @@ namespace DS4Windows
         private long bluetoothEffectReportsDeferredDuringAudio;
         private long lastBluetoothEffectReportDuringAudioTick;
         private long lastBluetoothInputReportTick;
+        private PipelineIncidentMonitor bluetoothInputIncidentMonitor;
         private int bluetoothAudioDefaultInputIntervalOverride;
         protected int inputReportErrorCount = 0; // Num of consequtive input report errors (fex if BT device fails 5 times in crc32 and 0x11 data type check then switch over to handle incoming BT packets as those were usb PC-friendly packets. Some fake DS4 gamepads needs this)
         protected readonly DS4Touchpad touchpad = null;
@@ -1052,6 +1053,7 @@ namespace DS4Windows
 
         public virtual void StopUpdate()
         {
+            Interlocked.Exchange(ref bluetoothInputIncidentMonitor, null)?.Dispose();
             if (ds4Input != null &&
                 ds4Input.IsAlive && !ds4Input.ThreadState.HasFlag(System.Threading.ThreadState.Stopped) &&
                 !ds4Input.ThreadState.HasFlag(System.Threading.ThreadState.AbortRequested))
@@ -1516,6 +1518,11 @@ namespace DS4Windows
         private byte[] outputBTCrc32Head = new byte[] { 0xA2 };
         protected readonly Stopwatch standbySw = new Stopwatch();
 
+        // Keep the production clock unchanged. Disposable scheduler tests can
+        // control elapsed time without waiting on the wall clock or opening HID.
+        protected virtual long BluetoothOutputIdleMilliseconds => standbySw.ElapsedMilliseconds;
+        protected virtual void RestartBluetoothOutputIdleClock() => standbySw.Restart();
+
         /** Is the device alive and receiving valid sensor input reports? */
         public virtual bool IsAlive()
         {
@@ -1608,6 +1615,55 @@ namespace DS4Windows
             }
         }
 
+        private HidDevice.ReadStatus ReadInputWithDiagnostics(byte[] buffer,
+            uint timeout, BluetoothInputPipelineDiagnostics diagnostics,
+            out int nativeError)
+        {
+            long started = diagnostics == null ? 0 :
+                diagnostics.Activity.Begin(PipelineStage.Read);
+            HidDevice.ReadStatus status = hDevice.ReadFile(buffer, timeout);
+            // Capture before diagnostic logging can replace the native error.
+            nativeError = status == HidDevice.ReadStatus.Success ? 0 :
+                Marshal.GetLastWin32Error();
+            LogBluetoothInputStage(diagnostics, BluetoothInputStage.Read,
+                started, status, nativeError);
+            return status;
+        }
+
+        private void LogBluetoothInputStage(
+            BluetoothInputPipelineDiagnostics diagnostics,
+            BluetoothInputStage stage, long started,
+            HidDevice.ReadStatus status = HidDevice.ReadStatus.Success,
+            int nativeError = 0)
+        {
+            if (diagnostics == null) return;
+            PipelineStage activityStage = stage switch
+            {
+                BluetoothInputStage.Read => PipelineStage.Read,
+                BluetoothInputStage.Processing => PipelineStage.Processing,
+                BluetoothInputStage.Dispatch => PipelineStage.Dispatch,
+                _ => PipelineStage.Feedback
+            };
+            diagnostics.Activity.End(activityStage, started);
+            try
+            {
+                var incident = diagnostics.Record(stage, Environment.TickCount64,
+                    Stopwatch.GetElapsedTime(started).TotalMilliseconds,
+                    status, nativeError);
+                if (incident.HasValue)
+                {
+                    // File-only incident context. No UI dispatch, input values,
+                    // device identifiers or healthy per-packet messages.
+                    NLog.LogManager.GetLogger("BluetoothInput").Warn(
+                        $"DS4 BT input slot={deviceSlotNumber}: {incident.Value}");
+                }
+            }
+            catch
+            {
+                // Optional telemetry must not change input or removal behavior.
+            }
+        }
+
         protected unsafe void performDs4Input()
         {
             unchecked
@@ -1637,6 +1693,20 @@ namespace DS4Windows
                 idleInput = true;
                 bool syncWriteReport = true;
                 bool forceWrite = false;
+                var bluetoothInputDiagnostics = conType == ConnectionType.BT ?
+                    new BluetoothInputPipelineDiagnostics() : null;
+                using var inputIncidentMonitor = bluetoothInputDiagnostics == null ?
+                    null : new PipelineIncidentMonitor(
+                        () => exitInputThread || isDisconnecting ||
+                            Volatile.Read(ref nativeExposureQuiesceRequested) != 0 ?
+                            null : bluetoothInputDiagnostics.Activity.Snapshot(),
+                        incident => NLog.LogManager.GetLogger("BluetoothInput").Warn(
+                            $"DS4 BT input slot={deviceSlotNumber}: {incident} " +
+                            $"speaker={BluetoothSpeakerStreaming} microphone={BluetoothMicrophoneStreaming} " +
+                            $"effectWrites={BluetoothEffectReportsDuringAudio} effectDeferred={BluetoothEffectReportsDeferredDuringAudio}"));
+                Interlocked.Exchange(ref bluetoothInputIncidentMonitor,
+                    inputIncidentMonitor)?.Dispose();
+                inputIncidentMonitor?.Start();
 
                 uint tempStamp = 0;
                 double elapsedDeltaTime = 0.0;
@@ -1687,10 +1757,13 @@ namespace DS4Windows
                         // overlapped read on the primary input handle. The
                         // former two-deep IOCP pump stopped receiving when DS4
                         // firmware entered its Bluetooth audio report mode.
-                        HidDevice.ReadStatus res = hDevice.ReadFile(
-                            btInputReport, READ_STREAM_TIMEOUT);
+                        HidDevice.ReadStatus res = ReadInputWithDiagnostics(
+                            btInputReport, READ_STREAM_TIMEOUT,
+                            bluetoothInputDiagnostics, out int readError);
                         if (res == HidDevice.ReadStatus.Success)
                         {
+                            using var packetActivity = bluetoothInputDiagnostics?.
+                                Activity.Watch(PipelineStage.PacketHandling);
                             int bluetoothReportLength =
                                 DualShock4BluetoothAudioProtocol.GetInputReportLength(
                                     btInputReport[0]);
@@ -1771,6 +1844,8 @@ namespace DS4Windows
 
                             if (res == HidDevice.ReadStatus.WaitTimedOut)
                             {
+                                using var timeoutActivity = bluetoothInputDiagnostics?.
+                                    Activity.Watch(PipelineStage.PacketHandling);
                                 long lastInputTick = Interlocked.Read(
                                     ref lastBluetoothInputReportTick);
                                 long lastInputAge = lastInputTick == 0 ? -1 :
@@ -1817,7 +1892,7 @@ namespace DS4Windows
                             }
                             else
                             {
-                                int winError = Marshal.GetLastWin32Error();
+                                int winError = readError;
                                 Console.WriteLine($"{Mac} {DateTime.UtcNow.ToString("o")}> disconnect due to read failure: {winError.ToString("x8")}");
                                 //Log.LogToGui(Mac.ToString() + " disconnected due to read failure: " + winError, true);
                                 AppLogger.LogToGui(Mac.ToString() + " disconnected due to read failure: " + winError, true);
@@ -1832,8 +1907,9 @@ namespace DS4Windows
                         //HidDevice.ReadStatus res = hDevice.ReadFile(inputReport);
                         //Array.Clear(inputReport, 0, inputReport.Length);
                         //HidDevice.ReadStatus res = hDevice.ReadAsyncWithFileStream(inputReport, READ_STREAM_TIMEOUT);
-                        HidDevice.ReadStatus res = hDevice.ReadFile(inputReport,
-                            conType == ConnectionType.BT ? READ_STREAM_TIMEOUT : uint.MaxValue);
+                        HidDevice.ReadStatus res = ReadInputWithDiagnostics(inputReport,
+                            conType == ConnectionType.BT ? READ_STREAM_TIMEOUT : uint.MaxValue,
+                            bluetoothInputDiagnostics, out int readError);
                         if (res != HidDevice.ReadStatus.Success)
                         {
                             if (ShouldSuppressNativeExposureInputRemoval())
@@ -1849,7 +1925,7 @@ namespace DS4Windows
                             }
                             else
                             {
-                                int winError = Marshal.GetLastWin32Error();
+                                int winError = readError;
                                 Console.WriteLine($"{Mac} {DateTime.UtcNow.ToString("o")}> disconnect due to read failure: {winError.ToString("x8")}");
                                 //Log.LogToGui(Mac.ToString() + " disconnected due to read failure: " + winError, true);
                             }
@@ -1879,6 +1955,9 @@ namespace DS4Windows
                         break;
                     }
 
+                    // Exclude the intentional native-exposure pause above.
+                    long processingStarted = bluetoothInputDiagnostics == null ?
+                        0 : bluetoothInputDiagnostics.Activity.Begin(PipelineStage.Processing);
                     curtime = Stopwatch.GetTimestamp();
                     testelapsed = curtime - oldtime;
                     lastTimeElapsedDouble = testelapsed * (1.0 / Stopwatch.Frequency) * 1000.0;
@@ -1891,6 +1970,8 @@ namespace DS4Windows
                         (this.featureSet & VidPidFeatureSet.OnlyInputData0x01) == 0)
                     {
                         //Received incorrect report, skip it
+                        bluetoothInputDiagnostics?.Activity.End(
+                            PipelineStage.Processing, processingStarted);
                         continue;
                     }
 
@@ -2206,8 +2287,22 @@ namespace DS4Windows
                         }
                     }
 
+                    LogBluetoothInputStage(bluetoothInputDiagnostics,
+                        BluetoothInputStage.Processing, processingStarted);
                     if (fireReport && Report != null)
-                        Report(this, EventArgs.Empty);
+                    {
+                        long dispatchStarted = bluetoothInputDiagnostics == null ?
+                            0 : bluetoothInputDiagnostics.Activity.Begin(PipelineStage.Dispatch);
+                        try
+                        {
+                            Report(this, EventArgs.Empty);
+                        }
+                        finally
+                        {
+                            LogBluetoothInputStage(bluetoothInputDiagnostics,
+                                BluetoothInputStage.Dispatch, dispatchStarted);
+                        }
+                    }
 
                     WaitForNativeExposureInputResume("after report dispatch");
 
@@ -2222,7 +2317,17 @@ namespace DS4Windows
                         break;
                     }
 
-                    sendOutputReport(syncWriteReport, forceWrite);
+                    long feedbackStarted = bluetoothInputDiagnostics == null ?
+                        0 : bluetoothInputDiagnostics.Activity.Begin(PipelineStage.Feedback);
+                    try
+                    {
+                        sendOutputReport(syncWriteReport, forceWrite);
+                    }
+                    finally
+                    {
+                        LogBluetoothInputStage(bluetoothInputDiagnostics,
+                            BluetoothInputStage.Feedback, feedbackStarted);
+                    }
                     forceWrite = false;
 
                     if (!string.IsNullOrEmpty(currerror))
@@ -2234,6 +2339,8 @@ namespace DS4Windows
 
                     if (hasInputEvts)
                     {
+                        using var callbackActivity = bluetoothInputDiagnostics?.
+                            Activity.Watch(PipelineStage.Callbacks);
                         lock (eventQueueLock)
                         {
                             Action tempAct = null;
@@ -2441,7 +2548,7 @@ namespace DS4Windows
             long keepAliveInterval = bluetoothAudio.MicrophoneEnabled ?
                 1000L : 4000L;
             bool haptime = force || (!audioKeepsBluetoothAlive &&
-                standbySw.ElapsedMilliseconds >= keepAliveInterval);
+                (usingBT ? BluetoothOutputIdleMilliseconds : standbySw.ElapsedMilliseconds) >= keepAliveInterval);
 
             PrepareOutputReportInner(ref change, ref haptime,
                 bluetoothAudio);
@@ -2526,7 +2633,7 @@ namespace DS4Windows
                             // must not disable keepalives when feedback goes
                             // quiet. Count from the last successful write, not
                             // from a failed or deferred attempt.
-                            standbySw.Restart();
+                            RestartBluetoothOutputIdleClock();
                         }
                         if (outputWritten && usingBT &&
                             (bluetoothAudio.SpeakerEnabled ||
