@@ -42,66 +42,6 @@ namespace DS4Windows
         private const string EndpointHistoryValueName = "{4b416b7d-8501-40c1-acfd-97aa9bdc17c8},1";
         private const string RenderEndpointRegistryPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render\";
 
-        private static MMDevice FindCaptureEndpoint(string endpointId, string speakerEndpointId,
-            ControllerAudioEndpointKind endpointKind)
-        {
-            bool useSystemDefault = string.Equals(endpointId,
-                DefaultSystemAudioEndpointId, StringComparison.Ordinal) ||
-                (string.IsNullOrEmpty(endpointId) &&
-                endpointKind == ControllerAudioEndpointKind.Any);
-            if (useSystemDefault)
-            {
-                return null;
-            }
-
-            try
-            {
-                using var enumerator = new MMDeviceEnumerator();
-                bool autoDetect = string.IsNullOrEmpty(endpointId) ||
-                    string.Equals(endpointId, AutoDetectGameAudioEndpointId,
-                        StringComparison.Ordinal);
-                MMDevice endpoint = autoDetect ?
-                    FindActiveGameAudioEndpoint(enumerator, null, endpointKind) :
-                    enumerator.GetDevice(endpointId);
-                if (endpoint?.State != DeviceState.Active)
-                {
-                    return null;
-                }
-
-                if (string.Equals(endpoint.ID, speakerEndpointId, StringComparison.Ordinal))
-                {
-                    AppLogger.LogToGui("DualSense audio passthrough capture source cannot be the same as the speaker endpoint. Falling back to default audio endpoint.", true);
-                    return null;
-                }
-
-                return endpoint;
-            }
-            catch
-            {
-                AppLogger.LogToGui("Controller audio passthrough capture source was not found. Falling back to default audio endpoint.", true);
-                return null;
-            }
-        }
-
-        private static bool DefaultEndpointMatches(string endpointId)
-        {
-            if (string.IsNullOrEmpty(endpointId))
-            {
-                return false;
-            }
-
-            try
-            {
-                using var enumerator = new MMDeviceEnumerator();
-                MMDevice endpoint = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-                return string.Equals(endpoint?.ID, endpointId, StringComparison.Ordinal);
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
         public static bool IsDualSenseEndpoint(MMDevice device)
         {
             ControllerAudioEndpointKind kind = ClassifyEndpoint(device);

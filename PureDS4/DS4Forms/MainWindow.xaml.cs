@@ -467,20 +467,6 @@ Suspend support not enabled.", true);
             }));
         }
 
-        private void AutoProfVM_AutoProfileSystemChange(AutoProfilesViewModel sender, bool state)
-        {
-            if (state)
-            {
-                ChangeAutoProfilesStatus(true);
-                autoProfileHolder.AutoProfileColl.CollectionChanged += AutoProfileColl_CollectionChanged;
-            }
-            else
-            {
-                ChangeAutoProfilesStatus(false);
-                autoProfileHolder.AutoProfileColl.CollectionChanged -= AutoProfileColl_CollectionChanged;
-            }
-        }
-
         private void AutoProfileColl_CollectionChanged(object sender,
             System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
@@ -864,15 +850,6 @@ Suspend support not enabled.", true);
             {
                 Global.SwipeProfileList = dialog.SelectedProfiles;
                 Global.Save();
-            }
-        }
-
-        private void ShowHotkeyNotification(string message)
-        {
-            if (!IsActive && (Global.Notifications == 2))
-            {
-                notifyIcon.ShowNotification(TrayIconViewModel.ballonTitle,
-                    message, H.NotifyIcon.Core.NotificationIcon.Info);
             }
         }
 
