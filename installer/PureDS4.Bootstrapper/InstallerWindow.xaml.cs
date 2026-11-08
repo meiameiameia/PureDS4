@@ -187,8 +187,8 @@ namespace PureDS4.Bootstrapper
                 || state.StartsWith("Installed", StringComparison.OrdinalIgnoreCase);
             target.Text = ready ? "✓ " + state : state;
             target.Foreground = (Brush)(ready
-                ? FindResource("SuccessBrush")
-                : FindResource("PendingStatusBrush"));
+                ? FindResource("StateSuccessBrush")
+                : FindResource("StateRecoveryBrush"));
         }
 
         internal void ShowPlanning()
@@ -249,7 +249,7 @@ namespace PureDS4.Bootstrapper
             bool managedOutputNeedsAttention = action != LaunchAction.Uninstall &&
                 !hidHideAvailable;
             CompleteStatusBorder.BorderBrush = (Brush)FindResource(
-                managedOutputNeedsAttention ? "WarningBrush" : "SuccessBrush");
+                managedOutputNeedsAttention ? "StateWarningBrush" : "StateSuccessBrush");
             CompleteStatusGlyph.Foreground = CompleteStatusBorder.BorderBrush;
             CompleteStatusGlyph.Text = managedOutputNeedsAttention ? "!" : "✓";
             applying = false;
@@ -334,19 +334,11 @@ namespace PureDS4.Bootstrapper
             {
                 InstallerTerms.VerifyDocuments();
                 var button = (Button)sender;
-                var viewer = new FlowDocumentScrollViewer
-                {
-                    Document = LoadTermsDocument((string)button.Tag),
-                    IsToolBarVisible = true, Margin = new Thickness(16),
-                    Background = Brushes.White, Foreground = Brushes.Black
-                };
-                // Read-only and offline: do not shell-open a vendor RTF or require Office/browser.
-                new Window
-                {
-                    Owner = this, Title = (string)button.Content, Content = viewer,
-                    Width = 720, Height = 580, MinWidth = 480, MinHeight = 360,
-                    WindowStartupLocation = WindowStartupLocation.CenterOwner
-                }.ShowDialog();
+                var document = LoadTermsDocument((string)button.Tag);
+                var terms = InstallerTermsView.Create(document, (string)button.Content, Resources);
+                terms.Owner = this;
+                // Read-only and offline: no shell-open of a vendor RTF.
+                terms.ShowDialog();
             }
             catch (Exception ex)
             {
@@ -414,14 +406,11 @@ namespace PureDS4.Bootstrapper
             }
             catch { }
 
-            Resources["WindowBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(light ? "#E0E6EA" : "#12181E"));
-            Resources["CardBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(light ? "#FFFFFF" : "#222C35"));
-            Resources["HoverBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(light ? "#D8E3EA" : "#354754"));
-            Resources["BorderBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(light ? "#65727C" : "#71808C"));
-            Resources["TextBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(light ? "#20272C" : "#F1F4F6"));
-            Resources["MutedBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(light ? "#515E67" : "#B7C1C8"));
-            Resources["SuccessBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(light ? "#1F6B3A" : "#62C88B"));
-            Resources["PendingStatusBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(light ? "#2E647F" : "#8FB5D1"));
+            Resources.MergedDictionaries[0] = new ResourceDictionary
+            {
+                Source = new Uri("/PureDS4.Bootstrapper;component/DS4Forms/Themes/" +
+                    (light ? "PaletteLight.xaml" : "PaletteDark.xaml"), UriKind.Relative)
+            };
         }
     }
 }

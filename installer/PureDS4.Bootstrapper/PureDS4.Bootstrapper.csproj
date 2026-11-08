@@ -27,6 +27,11 @@
     <PackageReference Include="WixToolset.BootstrapperApplicationApi" Version="5.0.2" />
   </ItemGroup>
   <ItemGroup>
+    <!-- The same presentation-only sources as the app; no app/backend reference. -->
+    <Compile Include="..\..\PureDS4\DS4Forms\NativeWindowFrame.cs" Link="NativeWindowFrame.cs" />
+    <Page Include="..\..\PureDS4\DS4Forms\Themes\PaletteLight.xaml" Link="DS4Forms\Themes\PaletteLight.xaml" />
+    <Page Include="..\..\PureDS4\DS4Forms\Themes\PaletteDark.xaml" Link="DS4Forms\Themes\PaletteDark.xaml" />
+    <Page Include="..\..\PureDS4\DS4Forms\Themes\PresentationControls.xaml" Link="DS4Forms\Themes\PresentationControls.xaml" />
     <EmbeddedResource Include="..\..\PureDS4\ThirdParty\DotNet-LICENSE.txt" LogicalName="PureDS4.Terms.DotNet-LICENSE.txt" />
     <EmbeddedResource Include="..\..\PureDS4\ThirdParty\WindowsSdk-LICENSE.rtf" LogicalName="PureDS4.Terms.WindowsSdk-LICENSE.rtf" />
     <EmbeddedResource Include="..\..\COPYING" LogicalName="PureDS4.Terms.COPYING" />

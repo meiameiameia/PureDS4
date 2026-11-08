@@ -1,8 +1,9 @@
 """Deterministic release-gate simulation for PureDS4 installer ownership.
 
-This deliberately models transitions rather than launching a kernel-driver
-installer on the build machine. Source-contract checks below tie every modeled
-transition to the Burn/bootstrapper and backend implementation.
+This models intended transitions, not execution of Burn or backend decisions.
+Source checks only detect missing integration anchors; they cannot prove that
+production conditions implement the model. Real backend function tests and
+installer lifecycle gates remain separate and mandatory.
 """
 
 from dataclasses import dataclass, field
@@ -18,7 +19,6 @@ class Transaction:
     related: str = "none"  # none, older, newer
     managed_related: bool = True
     invoked_by_upgrade: bool = False
-    infrastructure_healthy: bool = False
     mutex_available: bool = True
     cancel_before_apply: bool = False
     helper_result: int = 0
@@ -159,7 +159,7 @@ def main() -> None:
         "SupportedUsbipUdeSha256",
         "SupportedUsbipFilterSha256",
         "TryProbeUsbipRuntime",
-        "mandatoryRepairRequired = !status.Ready",
+        "EnsureReadyWithPromptCore(",
         "Continue in degraded mode",
         "ResolveRuntimeViiperPath(",
         "FindAlternativeViiperPath(canonicalViiperPath)",
@@ -180,7 +180,7 @@ def main() -> None:
         "preflight", "apply-msi", "apply-or-repair-infrastructure",
         "verify-hash-driver-abi-api", "commit-ready-marker",
     ]
-    repair = Transaction("repair", infrastructure_healthy=True).run()
+    repair = Transaction("repair").run()
     assert "apply-or-repair-infrastructure" in repair.events
     update = Transaction("install", related="older").run()
     assert update.events.index("remove-old-related-without-shared-teardown") < update.events.index("isolated-infrastructure-recovery")
@@ -218,7 +218,7 @@ def main() -> None:
     assert optional_failed.result == 0
     assert optional_failed.events[-1] == "report-optional-package-failure"
 
-    print("Installer state-machine simulation passed: clean, update, repair, uninstall, downgrade, cancel, concurrency, core failure, optional failure, reboot/resume.")
+    print("Installer specification model and source anchors passed (not production transition or hardware proof): clean, update, repair, uninstall, downgrade, cancel, concurrency, core failure, optional failure, reboot/resume.")
 
 
 if __name__ == "__main__":

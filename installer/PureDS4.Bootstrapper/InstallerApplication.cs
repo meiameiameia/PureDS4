@@ -133,11 +133,10 @@ namespace PureDS4.Bootstrapper
             if (!parentOwnedRelatedUninstall && !EnsureBundleMutex()) return;
             StartPlan(action, () =>
             {
-                deferInfrastructureUntilUpgradeCompletes =
-                    !infrastructureRecoveryPass &&
-                    (action == LaunchAction.Install ||
-                     action == LaunchAction.Repair) &&
-                    relatedUpgradeDetected;
+                deferInfrastructureUntilUpgradeCompletes = InstallerPlanningPolicy.DeferInfrastructure(
+                    infrastructureRecoveryPass,
+                    action == LaunchAction.Install || action == LaunchAction.Repair,
+                    relatedUpgradeDetected);
                 if (deferInfrastructureUntilUpgradeCompletes)
                 {
                     engine.Log(LogLevel.Standard,
@@ -235,8 +234,8 @@ namespace PureDS4.Bootstrapper
 
         private bool IsParentOwnedRelatedUninstall(LaunchAction action)
         {
-            return command.Relation == RelationType.Upgrade &&
-                   action == LaunchAction.Uninstall;
+            return InstallerPlanningPolicy.ParentOwnsRelatedUninstall(
+                command.Relation == RelationType.Upgrade, action == LaunchAction.Uninstall);
         }
 
         private void ReleaseBundleMutex()
@@ -689,9 +688,8 @@ namespace PureDS4.Bootstrapper
                 // in the chain so this direct-uninstall cleanup runs after
                 // MSI, and never during an outgoing upgrade bundle.
                 e.State = PlanUninstallOnlyPackage(
-                    !infrastructureRecoveryPass &&
-                    plannedAction == LaunchAction.Uninstall &&
-                    command.Relation != RelationType.Upgrade);
+                    InstallerPlanningPolicy.RunOwnedUninstallCleanup(infrastructureRecoveryPass,
+                        plannedAction == LaunchAction.Uninstall, command.Relation == RelationType.Upgrade));
                 return;
             }
 
@@ -732,9 +730,8 @@ namespace PureDS4.Bootstrapper
                 // deleting the incoming backend. Only a direct Add/Remove
                 // Programs uninstall explicitly runs this dedicated action.
                 e.State = PlanUninstallOnlyPackage(
-                    !infrastructureRecoveryPass &&
-                    plannedAction == LaunchAction.Uninstall &&
-                    command.Relation != RelationType.Upgrade);
+                    InstallerPlanningPolicy.RunOwnedUninstallCleanup(infrastructureRecoveryPass,
+                        plannedAction == LaunchAction.Uninstall, command.Relation == RelationType.Upgrade));
                 return;
             }
 

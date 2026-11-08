@@ -3,94 +3,57 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="PureDS4 Setup" Width="760" Height="640" MinWidth="700" MinHeight="580"
         WindowStartupLocation="CenterScreen" ResizeMode="CanResize"
-        Icon="DS4W.ico" Background="{DynamicResource WindowBrush}" Foreground="{DynamicResource TextBrush}">
+        Icon="DS4W.ico" Style="{DynamicResource WindowStyle}">
   <Window.Resources>
-    <SolidColorBrush x:Key="AccentBrush" Color="#2E647F" />
-    <SolidColorBrush x:Key="AccentHoverBrush" Color="#25526B" />
-    <SolidColorBrush x:Key="SuccessBrush" Color="#1F6B3A" />
-    <SolidColorBrush x:Key="WarningBrush" Color="#7A5200" />
-    <Style TargetType="TextBlock">
-      <Setter Property="FontFamily" Value="Segoe UI" />
-    </Style>
-    <Style x:Key="PrimaryButton" TargetType="Button">
-      <Setter Property="Foreground" Value="White" />
-      <Setter Property="Background" Value="{StaticResource AccentBrush}" />
-      <Setter Property="BorderThickness" Value="0" />
-      <Setter Property="Padding" Value="24,11" />
-      <Setter Property="FontSize" Value="14" />
-      <Setter Property="FontWeight" Value="SemiBold" />
-      <Setter Property="Cursor" Value="Hand" />
-      <Setter Property="Template">
-        <Setter.Value>
-          <ControlTemplate TargetType="Button">
-            <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="2" Padding="{TemplateBinding Padding}">
-              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-            </Border>
-            <ControlTemplate.Triggers>
-              <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="border" Property="Background" Value="{StaticResource AccentHoverBrush}" /></Trigger>
-              <Trigger Property="IsEnabled" Value="False"><Setter TargetName="border" Property="Opacity" Value="0.45" /></Trigger>
-            </ControlTemplate.Triggers>
-          </ControlTemplate>
-        </Setter.Value>
-      </Setter>
-    </Style>
-    <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
-      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-      <Setter Property="Background" Value="{DynamicResource CardBrush}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
-      <Setter Property="BorderThickness" Value="1" />
-      <Setter Property="Template">
-        <Setter.Value>
-          <ControlTemplate TargetType="Button">
-            <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="2" Padding="{TemplateBinding Padding}">
-              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-            </Border>
-            <ControlTemplate.Triggers>
-              <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="border" Property="Background" Value="{DynamicResource HoverBrush}" /></Trigger>
-            </ControlTemplate.Triggers>
-          </ControlTemplate>
-        </Setter.Value>
-      </Setter>
-    </Style>
-    <Style x:Key="Card" TargetType="Border">
-      <Setter Property="Background" Value="{DynamicResource CardBrush}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
-      <Setter Property="BorderThickness" Value="1" />
-      <Setter Property="CornerRadius" Value="2" />
-      <Setter Property="Padding" Value="18" />
-      <Setter Property="Margin" Value="0,0,0,12" />
-    </Style>
-    <Style TargetType="CheckBox">
-      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-      <Setter Property="FontFamily" Value="Segoe UI" />
-      <Setter Property="FontSize" Value="14" />
-      <Setter Property="Margin" Value="0,6" />
-      <Setter Property="Cursor" Value="Hand" />
-    </Style>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/PureDS4.Bootstrapper;component/DS4Forms/Themes/PaletteLight.xaml" />
+        <ResourceDictionary Source="/PureDS4.Bootstrapper;component/DS4Forms/Themes/PresentationControls.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+      <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource FoundationPrimaryButtonStyle}">
+        <Setter Property="MinWidth" Value="104" />
+      </Style>
+      <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource FoundationButtonStyle}">
+        <Setter Property="MinWidth" Value="88" />
+      </Style>
+      <Style x:Key="Card" TargetType="Border" BasedOn="{StaticResource FoundationPropertyGroupStyle}">
+        <Setter Property="Padding" Value="12" />
+        <Setter Property="Margin" Value="0,0,0,12" />
+      </Style>
+      <Style TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource TypeUiFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource TypeBodySize}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+      </Style>
+      <Style TargetType="CheckBox" BasedOn="{StaticResource FoundationCheckBoxStyle}">
+        <Setter Property="Margin" Value="0,6" />
+      </Style>
+    </ResourceDictionary>
   </Window.Resources>
 
-  <Grid Margin="28,22,28,24">
+  <Grid Margin="16,12,16,16">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
-    <Grid Grid.Row="0" Margin="0,0,0,20">
+    <Grid Grid.Row="0" Margin="0,0,0,16">
       <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-      <Border Width="58" Height="58" CornerRadius="2" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-        <Image Source="AppIcon.png" Width="42" Height="42" Stretch="Uniform" />
+      <Border Width="40" Height="40" Background="Transparent">
+        <Image Source="AppIcon.png" Width="40" Height="40" Stretch="Uniform" />
       </Border>
-      <StackPanel Grid.Column="1" Margin="16,2,0,0">
-        <TextBlock Text="PureDS4" FontSize="25" FontWeight="SemiBold" />
-        <TextBlock x:Name="HeaderSubtitle" Text="Standard x64 setup" FontSize="13" Foreground="{DynamicResource MutedBrush}" Margin="0,5,0,0" />
+      <StackPanel Grid.Column="1" Margin="12,0,0,0">
+        <TextBlock Text="PureDS4" FontSize="{StaticResource TypePageTitleSize}" FontWeight="SemiBold" />
+        <TextBlock x:Name="HeaderSubtitle" Text="Standard x64 setup" FontSize="{StaticResource TypeBodySize}" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,5,0,0" />
       </StackPanel>
     </Grid>
 
     <Grid Grid.Row="1">
       <Grid x:Name="DetectingPage">
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-          <ProgressBar IsIndeterminate="True" Width="300" Height="5" Foreground="{StaticResource AccentBrush}" />
+          <ProgressBar IsIndeterminate="True" Width="300" Height="5" Foreground="{DynamicResource AccentBrush}" />
           <TextBlock Text="Checking this PC…" FontSize="17" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,20,0,0" />
-          <TextBlock Text="Checking PureDS4 and its included game-output components." Foreground="{DynamicResource MutedBrush}" Margin="0,7,0,0" />
+          <TextBlock Text="Checking PureDS4 and its included game-output components." Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,7,0,0" />
         </StackPanel>
       </Grid>
 
@@ -99,32 +62,32 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <!-- Reserve a gutter so the cards never sit under the scrollbar. -->
           <StackPanel Margin="0,0,12,0">
-            <TextBlock x:Name="ModeTitle" Text="Ready to install" FontSize="23" FontWeight="SemiBold" />
-            <TextBlock x:Name="ModeDescription" TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" Margin="0,6,0,18" />
+            <TextBlock x:Name="ModeTitle" Text="Ready to install" FontSize="{StaticResource TypePageTitleSize}" FontWeight="SemiBold" />
+            <TextBlock x:Name="ModeDescription" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,6,0,18" />
 
             <Border Style="{StaticResource Card}">
               <StackPanel>
-                <TextBlock Text="Installation status" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,11" />
-                <Grid Margin="0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="PureDS4" FontWeight="SemiBold"/><TextBlock x:Name="Ds4Status" Grid.Column="1" Foreground="{StaticResource AccentBrush}"/></Grid>
-                <Grid Margin="0,7,0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Game output (VIIPER)" FontWeight="SemiBold"/><TextBlock x:Name="ViiperStatus" Grid.Column="1" Foreground="{StaticResource AccentBrush}"/></Grid>
-                <Grid Margin="0,7,0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Virtual USB driver (USB-IP)" FontWeight="SemiBold"/><TextBlock x:Name="UsbipStatus" Grid.Column="1" Foreground="{StaticResource AccentBrush}"/></Grid>
-                <Grid Margin="0,7,0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Controller protection (HidHide)" FontWeight="SemiBold"/><TextBlock x:Name="HidHideStatus" Grid.Column="1" Foreground="{StaticResource AccentBrush}"/></Grid>
+                <TextBlock Text="Installation status" FontSize="{StaticResource TypeGroupTitleSize}" FontWeight="SemiBold" Margin="0,0,0,11" />
+                <Grid Margin="0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="PureDS4" FontWeight="SemiBold"/><TextBlock x:Name="Ds4Status" Grid.Column="1" Foreground="{DynamicResource AccentBrush}"/></Grid>
+                <Grid Margin="0,7,0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Game output (VIIPER)" FontWeight="SemiBold"/><TextBlock x:Name="ViiperStatus" Grid.Column="1" Foreground="{DynamicResource AccentBrush}"/></Grid>
+                <Grid Margin="0,7,0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Virtual USB driver (USB-IP)" FontWeight="SemiBold"/><TextBlock x:Name="UsbipStatus" Grid.Column="1" Foreground="{DynamicResource AccentBrush}"/></Grid>
+                <Grid Margin="0,7,0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Controller protection (HidHide)" FontWeight="SemiBold"/><TextBlock x:Name="HidHideStatus" Grid.Column="1" Foreground="{DynamicResource AccentBrush}"/></Grid>
               </StackPanel>
             </Border>
 
             <Border x:Name="OptionsCard" Style="{StaticResource Card}">
               <StackPanel>
-                <TextBlock Text="Options" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,7" />
+                <TextBlock Text="Options" FontSize="{StaticResource TypeGroupTitleSize}" FontWeight="SemiBold" Margin="0,0,0,7" />
                 <CheckBox x:Name="DesktopShortcutCheckBox" IsChecked="True" Content="Create a desktop shortcut" />
                 <StackPanel x:Name="HidHideInstallOption">
                   <CheckBox x:Name="HidHideCheckBox" IsChecked="True" Content="Install controller protection (HidHide, recommended)" />
-                  <TextBlock Text="Included in this setup; prevents games from seeing both controllers. PureDS4 checks controller protection when the controller connects." TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="24,-2,0,0" />
+                  <TextBlock Text="Included in this setup; prevents games from seeing both controllers. PureDS4 checks controller protection when the controller connects." TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="24,-2,0,0" />
                 </StackPanel>
                 <StackPanel x:Name="Ds3Section" Visibility="Collapsed" Margin="0,12,0,0">
                   <TextBlock Text="DualShock 3 (experimental)" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,5" />
                   <CheckBox x:Name="Ds3SupportCheckBox" IsChecked="False" Content="Enable DualShock 3 support" />
-                  <TextBlock x:Name="Ds3DriverStatus" TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="24,-2,0,0" />
-                  <TextBlock x:Name="Ds3DriverHelp" TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="24,5,0,0"
+                  <TextBlock x:Name="Ds3DriverStatus" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="24,-2,0,0" />
+                  <TextBlock x:Name="Ds3DriverHelp" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="24,5,0,0"
                              Text="Download the .msi from the official releases page and run it, then press Re-check below. Requires 64-bit Windows 10 or 11." />
                   <StackPanel Orientation="Horizontal" Margin="24,6,0,0">
                     <TextBlock FontSize="12" VerticalAlignment="Center">
@@ -141,8 +104,8 @@
 
             <Border x:Name="TermsCard" Style="{StaticResource Card}">
               <StackPanel>
-                <TextBlock Text="Licenses" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,7" />
-                <TextBlock Text="PureDS4 is free software under GPL-3.0-or-later. Microsoft components keep their separate terms; accepting those terms does not restrict your GPL rights to PureDS4." TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" FontSize="12" />
+                <TextBlock Text="Licenses" FontSize="{StaticResource TypeGroupTitleSize}" FontWeight="SemiBold" Margin="0,0,0,7" />
+                <TextBlock Text="PureDS4 is free software under GPL-3.0-or-later. Microsoft components keep their separate terms; accepting those terms does not restrict your GPL rights to PureDS4." TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
                 <WrapPanel Margin="0,10,0,6">
                   <Button Content=".NET Library terms" Tag="DotNet-LICENSE.txt" Style="{StaticResource SecondaryButton}" Padding="10,6" Margin="0,0,8,6" Click="ReadTerms_Click" />
                   <Button Content="Windows SDK terms" Tag="WindowsSdk-LICENSE.rtf" Style="{StaticResource SecondaryButton}" Padding="10,6" Margin="0,0,8,6" Click="ReadTerms_Click" />
@@ -151,37 +114,37 @@
                 <CheckBox x:Name="MicrosoftTermsCheckBox" IsChecked="False" Checked="MicrosoftTerms_Changed" Unchecked="MicrosoftTerms_Changed">
                   <TextBlock Text="I accept the separate Microsoft .NET Library and Windows SDK terms for the included Microsoft components." TextWrapping="Wrap" />
                 </CheckBox>
-                <TextBlock x:Name="TermsError" Visibility="Collapsed" TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" FontSize="12" />
+                <TextBlock x:Name="TermsError" Visibility="Collapsed" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
               </StackPanel>
             </Border>
-            <TextBlock Text="Installs to C:\Program Files\PureDS4. Profiles, settings, logs, and user-created files are preserved during updates and repairs." TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" FontSize="12" />
+            <TextBlock Text="Installs to C:\Program Files\PureDS4. Profiles, settings, logs, and user-created files are preserved during updates and repairs." TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
           </StackPanel>
         </ScrollViewer>
-        <Grid Grid.Row="1" Margin="0,20,0,0">
+        <Grid Grid.Row="1" Margin="0,12,0,0">
           <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-          <TextBlock x:Name="TermsHint" Text="Read and accept the Microsoft component terms above to continue." TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" FontSize="12" VerticalAlignment="Center" Margin="0,0,14,0" />
-          <Button x:Name="CancelButton" Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="Cancel" Margin="0,0,10,0" Click="Cancel_Click" />
+          <TextBlock x:Name="TermsHint" Text="Read and accept the Microsoft component terms above to continue." TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" Margin="0,0,14,0" />
+          <Button x:Name="CancelButton" Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="Cancel" Margin="0,0,8,0" Click="Cancel_Click" />
           <Button x:Name="ActionButton" Grid.Column="2" Style="{StaticResource PrimaryButton}" Content="Install" IsEnabled="False" Click="Action_Click" />
         </Grid>
       </Grid>
 
       <Grid x:Name="ProgressPage" Visibility="Collapsed">
         <StackPanel VerticalAlignment="Center">
-          <TextBlock x:Name="ProgressTitle" Text="Preparing installation…" FontSize="23" FontWeight="SemiBold" HorizontalAlignment="Center" />
-          <TextBlock x:Name="ProgressDetail" Text="Building a safe installation plan" Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Center" Margin="0,8,0,26" />
-          <ProgressBar x:Name="OverallProgress" Height="8" Minimum="0" Maximum="100" Foreground="{StaticResource AccentBrush}" Background="{DynamicResource BorderBrush}" />
-          <TextBlock x:Name="ProgressPercent" Text="0%" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Right" Margin="0,7,0,0" />
+          <TextBlock x:Name="ProgressTitle" Text="Preparing installation…" FontSize="{StaticResource TypePageTitleSize}" FontWeight="SemiBold" HorizontalAlignment="Center" />
+          <TextBlock x:Name="ProgressDetail" Text="Building a safe installation plan" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,8,0,26" />
+          <ProgressBar x:Name="OverallProgress" Height="8" Minimum="0" Maximum="100" Foreground="{DynamicResource AccentBrush}" Background="{DynamicResource SurfaceInsetBrush}" />
+          <TextBlock x:Name="ProgressPercent" Text="0%" FontSize="{StaticResource TypeBodySize}" FontWeight="SemiBold" HorizontalAlignment="Right" Margin="0,7,0,0" />
           <Border Style="{StaticResource Card}" Margin="0,26,0,0">
-            <TextBlock Text="PureDS4 Setup requests administrator permission once, closes only recognized PureDS4 and VIIPER processes, and will not replace a live USB driver across an unsafe reboot boundary." TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" />
+            <TextBlock Text="PureDS4 Setup requests administrator permission once, closes only recognized PureDS4 and VIIPER processes, and will not replace a live USB driver across an unsafe reboot boundary." TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" />
           </Border>
         </StackPanel>
       </Grid>
 
       <Grid x:Name="CompletePage" Visibility="Collapsed">
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Stretch">
-          <Border x:Name="CompleteStatusBorder" Width="64" Height="64" CornerRadius="32" Background="{DynamicResource CardBrush}" BorderBrush="{StaticResource SuccessBrush}" BorderThickness="1" HorizontalAlignment="Center"><TextBlock x:Name="CompleteStatusGlyph" Text="✓" FontSize="34" Foreground="{StaticResource SuccessBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
-          <TextBlock x:Name="CompleteTitle" Text="PureDS4 is ready" FontSize="25" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,20,0,0" />
-          <TextBlock x:Name="CompleteDescription" Text="Installation completed." TextAlignment="Center" TextWrapping="Wrap" MaxWidth="600" Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Center" Margin="0,8,0,22" />
+          <Border x:Name="CompleteStatusBorder" Width="64" Height="64" CornerRadius="32" Background="{DynamicResource SurfaceRaisedBrush}" BorderBrush="{DynamicResource StateSuccessBrush}" BorderThickness="1" HorizontalAlignment="Center"><TextBlock x:Name="CompleteStatusGlyph" Text="✓" FontSize="34" Foreground="{DynamicResource StateSuccessBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+          <TextBlock x:Name="CompleteTitle" Text="PureDS4 is ready" FontSize="{StaticResource TypePageTitleSize}" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,20,0,0" />
+          <TextBlock x:Name="CompleteDescription" Text="Installation completed." TextAlignment="Center" TextWrapping="Wrap" MaxWidth="600" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,8,0,22" />
           <Button x:Name="OpenCompleteLogButton" Style="{StaticResource SecondaryButton}" Content="Open setup log" Visibility="Collapsed" HorizontalAlignment="Center" Margin="0,0,0,12" Click="OpenLog_Click" />
           <CheckBox x:Name="LaunchCheckBox" IsChecked="True" Content="Launch PureDS4" HorizontalAlignment="Center" />
           <Button Style="{StaticResource PrimaryButton}" Content="Finish" Width="130" HorizontalAlignment="Center" Margin="0,20,0,0" Click="Finish_Click" />
@@ -190,25 +153,30 @@
 
       <Grid x:Name="RestartPage" Visibility="Collapsed">
         <StackPanel VerticalAlignment="Center">
-          <TextBlock Text="Restart required" FontSize="25" FontWeight="SemiBold" HorizontalAlignment="Center" />
-          <TextBlock x:Name="RestartDescription" Text="USB-IP was installed or repaired safely. Restart Windows to activate the verified driver, then PureDS4 and VIIPER will start automatically." TextWrapping="Wrap" TextAlignment="Center" Foreground="{DynamicResource MutedBrush}" Margin="50,12,50,26" />
-          <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Style="{StaticResource SecondaryButton}" Content="Restart later" Margin="0,0,10,0" Click="RestartLater_Click" />
+          <TextBlock Text="Restart required" FontSize="{StaticResource TypePageTitleSize}" FontWeight="SemiBold" HorizontalAlignment="Center" />
+          <TextBlock x:Name="RestartDescription" Text="USB-IP was installed or repaired safely. Restart Windows to activate the verified driver, then PureDS4 and VIIPER will start automatically." TextWrapping="Wrap" TextAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" Margin="50,12,50,26" />
+          <WrapPanel HorizontalAlignment="Center">
+            <Button Style="{StaticResource SecondaryButton}" Content="Restart later" Margin="0,0,8,0" Click="RestartLater_Click" />
             <Button x:Name="RestartNowButton" Style="{StaticResource PrimaryButton}" Content="Restart now" Click="RestartNow_Click" />
-          </StackPanel>
+          </WrapPanel>
         </StackPanel>
       </Grid>
 
       <Grid x:Name="FailurePage" Visibility="Collapsed">
+        <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel VerticalAlignment="Center">
-          <TextBlock Text="Setup needs attention" FontSize="25" FontWeight="SemiBold" HorizontalAlignment="Center" />
-          <TextBlock x:Name="FailureMessage" TextWrapping="Wrap" TextAlignment="Center" Foreground="{DynamicResource MutedBrush}" Margin="50,12,50,24" />
-          <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Style="{StaticResource SecondaryButton}" Content="Open log" Margin="0,0,10,0" Click="OpenLog_Click" />
-            <Button Style="{StaticResource SecondaryButton}" Content="Copy diagnostics" Margin="0,0,10,0" Click="CopyDiagnostics_Click" />
+          <TextBlock Text="Setup needs attention" FontSize="{StaticResource TypePageTitleSize}" FontWeight="SemiBold" HorizontalAlignment="Center" />
+          <TextBlock x:Name="FailureMessage" TextWrapping="Wrap" TextAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" Margin="50,12,50,24" />
+        </StackPanel>
+        </ScrollViewer>
+        <StackPanel Grid.Row="1" Margin="0,12,0,0">
+          <WrapPanel HorizontalAlignment="Center">
+            <Button Style="{StaticResource SecondaryButton}" Content="Open log" Margin="0,0,8,0" Click="OpenLog_Click" />
+            <Button Style="{StaticResource SecondaryButton}" Content="Copy diagnostics" Margin="0,0,8,0" Click="CopyDiagnostics_Click" />
             <Button Style="{StaticResource PrimaryButton}" Content="Retry" Click="Retry_Click" />
-          </StackPanel>
-          <Button Content="Close" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource MutedBrush}" Margin="0,18,0,0" Click="CloseFailure_Click" />
+          </WrapPanel>
+          <Button Content="Close" Style="{StaticResource FoundationButtonStyle}" MinWidth="88" HorizontalAlignment="Center" Margin="0,12,0,0" Click="CloseFailure_Click" />
         </StackPanel>
       </Grid>
     </Grid>

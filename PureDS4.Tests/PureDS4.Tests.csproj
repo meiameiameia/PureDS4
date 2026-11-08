@@ -30,6 +30,8 @@
 
   <ItemGroup>
     <Compile Include="..\installer\PureDS4.Bootstrapper\InstallerTerms.cs" Link="InstallerTerms.cs" />
+    <Compile Include="..\installer\PureDS4.Bootstrapper\InstallerTermsView.cs" Link="InstallerTermsView.cs" />
+    <Compile Include="..\installer\PureDS4.Bootstrapper\InstallerPlanningPolicy.cs" Link="InstallerPlanningPolicy.cs" />
     <EmbeddedResource Include="..\PureDS4\ThirdParty\DotNet-LICENSE.txt" LogicalName="PureDS4.Terms.DotNet-LICENSE.txt" />
     <EmbeddedResource Include="..\PureDS4\ThirdParty\WindowsSdk-LICENSE.rtf" LogicalName="PureDS4.Terms.WindowsSdk-LICENSE.rtf" />
     <EmbeddedResource Include="..\COPYING" LogicalName="PureDS4.Terms.COPYING" />
