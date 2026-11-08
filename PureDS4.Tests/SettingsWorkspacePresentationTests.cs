@@ -29,6 +29,42 @@ public class SettingsWorkspacePresentationTests
     private static readonly Size[] Viewports = { new Size(704, 360), new Size(1008, 540) };
 
     [TestMethod]
+    public void CategorySelectionHasAShortCueAndFocusBelongsToTheHeaderOnly()
+    {
+        WpfTestHost.Run(() =>
+        {
+            foreach (bool dark in new[] { false, true })
+            {
+                Theme(dark);
+                UserControl view = LoadTabWorkspace("settingsTab");
+                var categories = (TabControl)view.FindName("settingsCategoryTabs");
+                Layout(view, Viewports[0]);
+                var general = (TabItem)categories.Items[0];
+                var cue = (Border)general.Template.FindName("SelectionIndicator", general);
+                var focus = (Border)general.Template.FindName("KeyboardFocusRing", general);
+                Assert.AreEqual(Visibility.Visible, cue.Visibility);
+                Assert.AreEqual(((Border)general.Template.FindName("CategoryChrome", general)).ActualHeight - 8,
+                    cue.ActualHeight, 0.1);
+                Assert.IsTrue(cue.ActualHeight / general.ActualHeight >= 0.65);
+                Assert.AreEqual(Visibility.Collapsed, focus.Visibility);
+                Assert.IsFalse(general.Template.Triggers.OfType<Trigger>().Any(t =>
+                    t.Property == UIElement.IsKeyboardFocusWithinProperty),
+                    "Focusing page content must not decorate its navigation header.");
+                var hover = general.Template.Triggers.OfType<Trigger>().Single(t => t.Property == UIElement.IsMouseOverProperty);
+                Assert.AreEqual("CategoryChrome", hover.SourceName);
+                Size original = general.RenderSize;
+                categories.SelectedIndex = 1;
+                Layout(view, Viewports[0]);
+                Assert.AreEqual(original, general.RenderSize);
+                Assert.AreEqual(Visibility.Collapsed, cue.Visibility);
+                var controller = (TabItem)categories.Items[1];
+                Assert.AreEqual(Visibility.Visible,
+                    ((Border)controller.Template.FindName("SelectionIndicator", controller)).Visibility);
+            }
+        });
+    }
+
+    [TestMethod]
     public void SettingsCategoriesFitBothThemesAndViewports()
     {
         WpfTestHost.Run(() =>
@@ -208,9 +244,7 @@ public class SettingsWorkspacePresentationTests
 
     private static void Inside(FrameworkElement root, FrameworkElement child, string where)
     {
-        Rect b = child.TransformToAncestor(root).TransformBounds(new Rect(child.RenderSize));
-        Assert.IsTrue(b.Left >= -1 && b.Right <= root.ActualWidth + 1,
-            where + ": " + child.Name + "/" + child.GetType().Name + ": " + b + " outside " + root.ActualWidth);
+        PresentationHarness.AssertReachable(root, child, where);
     }
 
     private static bool Participates(DependencyObject element)

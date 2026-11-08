@@ -9,12 +9,30 @@
         lex:ResxLocalizationProvider.DefaultAssembly="PureDS4"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="Log" MinHeight="200" Height="200" Width="600" MinWidth="400" SizeToContent="Height" WindowStartupLocation="CenterScreen"
+        Title="Log message" MinHeight="320" Height="440" Width="640" MinWidth="420"
+        ResizeMode="CanResize" WindowStartupLocation="CenterOwner"
         Style="{DynamicResource WindowStyle}">
-    <DockPanel Margin="4">
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Right">
-            <Button x:Name="okayButton" Content="OK" MinWidth="60" Click="OkayButton_Click" />
+    <Grid Margin="16" TextElement.FontWeight="Normal">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="Log message" Style="{StaticResource FoundationPageTitleStyle}" />
+            <TextBlock Text="Full message from the runtime log." Margin="0,4,0,0"
+                       Style="{StaticResource FoundationSecondaryTextStyle}" />
         </StackPanel>
-        <RichTextBox x:Name="richMessageBox" DockPanel.Dock="Top" IsReadOnly="True" IsDocumentEnabled="True" BorderBrush="{x:Null}" BorderThickness="0" HorizontalContentAlignment="Stretch" VerticalAlignment="Center"/>
-    </DockPanel>
+        <RichTextBox Grid.Row="1" x:Name="richMessageBox" IsReadOnly="True" IsDocumentEnabled="True"
+                     Background="{DynamicResource SurfaceRaisedBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
+                     BorderBrush="{DynamicResource SurfaceDividerBrush}" BorderThickness="1" Padding="12,8"
+                     FontFamily="{StaticResource TypeUiFontFamily}" FontSize="{StaticResource TypeBodySize}"
+                     FontWeight="Normal" FocusVisualStyle="{StaticResource FoundationFocusVisualStyle}"
+                     VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                     AutomationProperties.Name="Full log message" />
+        <Border Grid.Row="2" Style="{StaticResource FoundationDialogActionsStyle}">
+            <Button x:Name="okayButton" Content="OK" MinWidth="88" Click="OkayButton_Click"
+                    HorizontalAlignment="Right" Style="{StaticResource FoundationPrimaryButtonStyle}" />
+        </Border>
+    </Grid>
 </Window>

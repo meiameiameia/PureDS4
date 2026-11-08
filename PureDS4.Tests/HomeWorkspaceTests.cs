@@ -24,6 +24,131 @@ namespace DS4WindowsTests;
 public class HomeWorkspaceTests
 {
     [TestMethod]
+    public void HomeShowsTheVectorControllerAndBoundsTheProfileSelectorAtAllWidths()
+    {
+        WpfTestHost.Run(() =>
+        {
+            foreach (bool dark in new[] { false, true })
+            foreach (Size size in new[] { new Size(704, 360), new Size(1008, 540), new Size(1600, 800) })
+            {
+                LoadTheme(dark);
+                var state = new HomeFixture(1);
+                Grid home = LoadHome();
+                var root = new Grid();
+                root.Children.Add(home);
+                var owner = new Window { Content = root, DataContext = state };
+                try
+                {
+                    Measure(root, size);
+                    var row = Descendants<ListViewItem>(home).Single();
+                    var icon = Descendants<System.Windows.Shapes.Path>(row).Single(p => p.Name == "controllerSilhouette");
+                    Assert.IsFalse(state.ControllerCol[0].HasControllerArtwork,
+                        "This fixture intentionally has no bitmap: the vector must remain visible.");
+                    Assert.AreEqual(Visibility.Visible, icon.Visibility);
+                    Assert.AreEqual(32d, icon.ActualWidth);
+                    Assert.AreEqual(Stretch.Uniform, icon.Stretch);
+                    Assert.AreEqual(icon.ActualWidth * icon.Data.Bounds.Height / icon.Data.Bounds.Width,
+                        icon.ActualHeight, 0.1, "The silhouette preserves its aspect ratio within the 32×24 slot.");
+                    AssertInside(row, icon, "DS4 silhouette");
+                    var profiles = Descendants<ComboBox>(row).Single();
+                    Assert.IsTrue(profiles.ActualWidth >= 110 && profiles.ActualWidth <= 212,
+                        $"Bounded profile selector at {size}: {profiles.ActualWidth}");
+                    Assert.AreEqual(state.ControllerCol[0].SelectedProfile, profiles.ToolTip);
+                    var cue = (Border)row.Template.FindName("SelectionIndicator", row);
+                    Assert.AreEqual(Visibility.Collapsed, cue.Visibility,
+                        "Home selection uses the row background, without a redundant side stripe.");
+
+                    // Render and locate pixels in the same zero-margin viewport.
+                    // Home's own margin and capped width can otherwise offset a
+                    // standalone root render relative to its local coordinates.
+                    var bitmap = new RenderTargetBitmap((int)Math.Ceiling(root.ActualWidth),
+                        (int)Math.Ceiling(root.ActualHeight), 96, 96, PixelFormats.Pbgra32);
+                    bitmap.Render(root);
+                    Point origin = icon.TransformToAncestor(root).Transform(new Point());
+                    string directory = Environment.GetEnvironmentVariable("PUREDS4_VISUAL_PREVIEW_DIRECTORY");
+                    if (!string.IsNullOrEmpty(directory))
+                    {
+                        var encoder = new PngBitmapEncoder();
+                        encoder.Frames.Add(BitmapFrame.Create(bitmap));
+                        using var stream = File.Create(Path.Combine(directory,
+                            $"pureds4-home-vector-{(int)size.Width}-{(dark ? "dark" : "light")}.png"));
+                        encoder.Save(stream);
+                    }
+                    var pixels = new byte[32 * 24 * 4];
+                    bitmap.CopyPixels(new Int32Rect((int)origin.X, (int)origin.Y, 32, 24), pixels, 32 * 4, 0);
+                    Color fill = ((SolidColorBrush)icon.Fill).Color;
+                    int matching = 0;
+                    for (int i = 0; i < pixels.Length; i += 4)
+                        if (Math.Abs(pixels[i] - fill.B) <= 2 && Math.Abs(pixels[i + 1] - fill.G) <= 2 &&
+                            Math.Abs(pixels[i + 2] - fill.R) <= 2 && pixels[i + 3] == 255) matching++;
+                    Assert.IsTrue(matching > 80,
+                        $"The actual DS4 icon must render, not just reserve empty space: {matching} pixels at {size} ({(dark ? "dark" : "light")}).");
+                }
+                finally { owner.Content = null; }
+            }
+        });
+    }
+
+    [TestMethod]
+    public void HomeSelectionUsesTheBackgroundAndKeepsKeyboardFocusSeparate()
+    {
+        WpfTestHost.Run(() =>
+        {
+            foreach (bool dark in new[] { false, true })
+            {
+                LoadTheme(dark);
+                var state = new HomeFixture(2);
+                Grid home = LoadHome();
+                var root = new Grid();
+                root.Children.Add(home);
+                var owner = new Window { Content = root, DataContext = state };
+                try
+                {
+                    var list = (ListView)home.FindName("controllerLV");
+                    foreach (int selected in new[] { 0, 1, -1, 0 })
+                    {
+                        list.SelectedIndex = selected;
+                        Measure(root, new Size(704, 360));
+                        var rows = Descendants<ListViewItem>(list).ToArray();
+                        for (int index = 0; index < rows.Length; index++)
+                        {
+                            ListViewItem row = rows[index];
+                            var chrome = (Border)row.Template.FindName("Chrome", row);
+                            var cue = (Border)row.Template.FindName("SelectionIndicator", row);
+                            var focus = (Border)row.Template.FindName("KeyboardFocusRing", row);
+                            Assert.AreEqual(Visibility.Collapsed, cue.Visibility);
+                            Assert.AreEqual(((SolidColorBrush)Application.Current.FindResource(
+                                index == selected ? "SurfaceSelectedBrush" : "SurfaceRaisedBrush")).Color,
+                                ((SolidColorBrush)chrome.Background).Color);
+                            Assert.AreEqual(Visibility.Collapsed, focus.Visibility,
+                                "Selection alone must not draw the keyboard focus ring.");
+                            Assert.IsTrue(row.Template.Triggers.OfType<Trigger>().Any(trigger =>
+                                trigger.Property == UIElement.IsKeyboardFocusedProperty &&
+                                trigger.Setters.OfType<Setter>().Any(setter =>
+                                    setter.TargetName == "KeyboardFocusRing" && Equals(setter.Value, Visibility.Visible))),
+                                "Removing the selection stripe must preserve keyboard focus indication.");
+                            Assert.AreEqual(48d, row.ActualHeight);
+                        }
+                    }
+
+                    // The owner requested this specifically for Home, not other
+                    // tables or section/main navigation selection indicators.
+                    var tableRow = new ListViewItem
+                    {
+                        Content = "Other table",
+                        Style = (Style)Application.Current.FindResource("FoundationTableListItemStyle"),
+                        IsSelected = true,
+                    };
+                    Measure(tableRow, new Size(200, 48));
+                    Assert.AreEqual(Visibility.Visible,
+                        ((Border)tableRow.Template.FindName("SelectionIndicator", tableRow)).Visibility);
+                }
+                finally { owner.Content = null; }
+            }
+        });
+    }
+
+    [TestMethod]
     public void HomeKeepsRawControllerIdentifierOutOfTheEverydayView()
     {
         XElement home = HomeSource();
@@ -53,7 +178,11 @@ public class HomeWorkspaceTests
                     var inspector = (Border)home.FindName("homeInspector");
                     Assert.AreEqual(count > 0, inspector.IsEnabled);
                     Assert.AreEqual(count > 0 ? Visibility.Visible : Visibility.Collapsed, inspector.Visibility);
-                    AssertInside(home, inspector, "selected controller inspector");
+                    if (count > 0)
+                        AssertInside(home, inspector, "selected controller inspector");
+                    else
+                        Assert.AreEqual(new Size(0, 0), inspector.RenderSize,
+                            "A collapsed inspector must reserve no rendered space. Its stale transform is not visible layout.");
                     Assert.AreEqual(count, list.Items.Count);
                     var rows = Descendants<ListViewItem>(list).ToArray();
                     Assert.AreEqual(count, rows.Length);
@@ -144,7 +273,7 @@ public class HomeWorkspaceTests
             var inspector = (Border)home.FindName("homeInspector");
             Rect rowBounds = row.TransformToAncestor(home).TransformBounds(new Rect(row.RenderSize));
             Rect inspectorBounds = inspector.TransformToAncestor(home).TransformBounds(new Rect(inspector.RenderSize));
-            Assert.IsTrue(inspectorBounds.Top - rowBounds.Bottom < 180,
+            Assert.IsTrue(inspectorBounds.Top - rowBounds.Bottom <= 16,
                 "The selected controller details should not be stranded at the bottom of a maximized window.");
             SavePreviewIfRequested(home, false, "pureds4-home-wide-wpf.png");
             owner.Content = null;
@@ -238,9 +367,9 @@ public class HomeWorkspaceTests
             {
                 LoadTheme(dark);
                 var menu = new ContextMenu { Style = (Style)Application.Current.FindResource("FoundationChoiceMenuStyle") };
-                var choice = new MenuItem { Header = "Use Profile Controls", IsChecked = true };
+                var choice = new MenuItem { Header = "Use profile controls", IsChecked = true };
                 menu.Items.Add(choice);
-                menu.Items.Add(new MenuItem { Header = "Use Custom Color" });
+                menu.Items.Add(new MenuItem { Header = "Use custom color" });
                 Measure(menu, new Size(220, 100));
                 Assert.AreSame(Application.Current.FindResource("FoundationChoiceMenuItemStyle"), choice.Style);
                 Assert.AreEqual(Visibility.Visible,
@@ -336,7 +465,7 @@ public class HomeWorkspaceTests
             "not controller-to-game latency");
     }
 
-    private static void LoadTheme(bool dark)
+    internal static void LoadTheme(bool dark)
     {
         Application.Current.Resources.MergedDictionaries.Clear();
         foreach (var file in new[] { dark ? "DarkTheme" : "DefaultTheme", "Foundation", "BridgeShellStyles" })
@@ -354,7 +483,7 @@ public class HomeWorkspaceTests
         return new XElement(document.Descendants().Single(e => (string)e.Attribute(x + "Name") == "homeWorkspace"));
     }
 
-    private static Grid LoadHome()
+    internal static Grid LoadHome()
     {
         XElement source = HomeSource();
         source.SetAttributeValue(XNamespace.Xmlns + "x", "http://schemas.microsoft.com/winfx/2006/xaml");
@@ -428,7 +557,7 @@ public class HomeWorkspaceTests
             selectedController = ControllerCol.FirstOrDefault();
         }
         public ObservableCollection<ControllerFixture> ControllerCol { get; } = new();
-        public object[] NativePhysicalSessions => Array.Empty<object>();
+        public object[] NativePhysicalSessions { get; set; } = Array.Empty<object>();
         public int CurrentIndex { get; set; }
         public ControllerFixture SelectedController
         {

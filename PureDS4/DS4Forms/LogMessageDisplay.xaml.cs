@@ -43,7 +43,8 @@ namespace DS4WinWPF.DS4Forms
 
             MarkdownEngine engine = new MarkdownEngine();
             FlowDocument tmpDoc = engine.Transform(message);
-            tmpDoc.TextAlignment = TextAlignment.Center;
+            tmpDoc.SetResourceReference(FrameworkContentElement.StyleProperty, "FoundationDocumentStyle");
+            tmpDoc.TextAlignment = TextAlignment.Left;
 
             richMessageBox.CommandBindings.Add(new CommandBinding(
                 NavigationCommands.GoToPage,

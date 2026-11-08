@@ -13,7 +13,7 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </UserControl.Resources>
-    <Grid Margin="16,8">
+    <Grid Margin="16,8" TextElement.FontWeight="Normal">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -37,11 +37,17 @@
                     BorderThickness="1,1,1,0" Padding="12,6">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*" MinWidth="200" />
-                        <ColumnDefinition Width="1.4*" MinWidth="130" />
-                        <ColumnDefinition Width="1.4*" MinWidth="130" />
-                        <ColumnDefinition Width="90" />
-                        <ColumnDefinition Width="80" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="1" Width="{x:Static SystemParameters.VerticalScrollBarWidth}" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" MinWidth="160" />
+                        <ColumnDefinition Width="1.4*" MinWidth="110" />
+                        <ColumnDefinition Width="1.4*" MinWidth="110" />
+                        <ColumnDefinition Width="76" />
+                        <ColumnDefinition Width="64" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="{lex:Loc OutputSlotMan.InputNum}" Style="{StaticResource FoundationColumnHeaderStyle}" />
                     <TextBlock Grid.Column="1" Text="{lex:Loc Current}" Style="{StaticResource FoundationColumnHeaderStyle}" />
@@ -49,28 +55,35 @@
                     <TextBlock Grid.Column="3" Text="{lex:Loc OutputSlotMan.XInputNum}" Style="{StaticResource FoundationColumnHeaderStyle}" />
                     <TextBlock Grid.Column="4" Text="{lex:Loc Active}" Style="{StaticResource FoundationColumnHeaderStyle}" />
                 </Grid>
+                </Grid>
             </Border>
             <ListView Grid.Row="1" x:Name="currentOutDevLV" ItemsSource="{Binding SlotDeviceEntries}"
                       SelectedIndex="{Binding SelectedIndex,Mode=OneWayToSource}"
                       Style="{StaticResource FoundationTableListViewStyle}"
-                      ItemContainerStyle="{StaticResource FoundationTableListItemStyle}"
+                      ScrollViewer.VerticalScrollBarVisibility="Visible"
+                      VirtualizingPanel.ScrollUnit="Pixel"
                       AutomationProperties.Name="Output slots">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem" BasedOn="{StaticResource FoundationTableListItemStyle}">
+                        <Setter Property="Padding" Value="10,5,12,5" />
+                    </Style>
+                </ListView.ItemContainerStyle>
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*" MinWidth="200" />
-                        <ColumnDefinition Width="1.4*" MinWidth="130" />
-                        <ColumnDefinition Width="1.4*" MinWidth="130" />
-                        <ColumnDefinition Width="90" />
-                        <ColumnDefinition Width="80" />
+                        <ColumnDefinition Width="2*" MinWidth="160" />
+                        <ColumnDefinition Width="1.4*" MinWidth="110" />
+                        <ColumnDefinition Width="1.4*" MinWidth="110" />
+                        <ColumnDefinition Width="76" />
+                        <ColumnDefinition Width="64" />
                     </Grid.ColumnDefinitions>
                             <TextBlock Text="{Binding InputSlotDisplayString}" TextTrimming="CharacterEllipsis"
                                        ToolTip="{Binding InputSlotDisplayString}" VerticalAlignment="Center" />
                             <TextBlock Grid.Column="1" Text="{Binding CurrentType}" TextTrimming="CharacterEllipsis"
-                                       VerticalAlignment="Center" />
+                                       ToolTip="{Binding CurrentType}" VerticalAlignment="Center" />
                             <TextBlock Grid.Column="2" Text="{Binding DesiredType}" TextTrimming="CharacterEllipsis"
-                                       VerticalAlignment="Center" />
+                                       ToolTip="{Binding DesiredType}" VerticalAlignment="Center" />
                             <TextBlock Grid.Column="3" Text="{Binding XInputSlotNum}" VerticalAlignment="Center"
                                        Visibility="{Binding DisplayXInputSlotNum, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}" />
                             <TextBlock Grid.Column="4" VerticalAlignment="Center"
@@ -100,20 +113,23 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="24" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="16" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <Button x:Name="pluginBtn" MinWidth="70" Content="{lex:Loc Plug}"
                         IsEnabled="{Binding PluginEnabled}" Click="PluginBtn_Click"
+                        VerticalAlignment="Top" AutomationProperties.Name="Plug selected output slot"
                         Style="{StaticResource FoundationToolbarButtonStyle}" />
                 <Button Grid.Column="1" x:Name="unplugBtn" MinWidth="70" Content="{lex:Loc Unplug}"
                         IsEnabled="{Binding UnpluginEnabled}" Click="UnplugBtn_Click"
+                        VerticalAlignment="Top" AutomationProperties.Name="Unplug selected output slot"
                         Style="{StaticResource FoundationToolbarButtonStyle}" />
-                <Grid Grid.Column="3" Grid.ColumnSpan="4" x:Name="reservationPanel"
+                <Grid Grid.Column="3" x:Name="reservationPanel"
                       Visibility="{Binding DataContext.SidePanelVisibility, ElementName=actionToolbar}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
@@ -123,15 +139,16 @@
                     <TextBlock Text="Reservation" VerticalAlignment="Center"
                                Style="{StaticResource FoundationColumnHeaderStyle}" />
                     <ComboBox Grid.Column="1" x:Name="reserveCombo" Margin="8,0,0,0" MinWidth="130"
+                              AutomationProperties.Name="Selected output slot reservation"
                               SelectedIndex="{Binding ReserveChoice,FallbackValue=0}">
                         <ComboBoxItem Tag="0" Content="{lex:Loc Dynamic}" ToolTip="Release the slot when it is no longer used." />
                         <ComboBoxItem Tag="1" Content="{lex:Loc Permanent}" ToolTip="Keep the selected slot reserved between sessions." />
                     </ComboBox>
-                    <TextBlock Grid.Column="2" Margin="10,0" VerticalAlignment="Center"
+                    <TextBlock Grid.Row="1" Grid.ColumnSpan="4" Margin="0,6,0,0"
                                Text="Dynamic releases unused slots; Permanent keeps this slot reserved."
                                Style="{StaticResource FoundationSecondaryTextStyle}" />
                     <Button Grid.Column="3" x:Name="slotChangeAcceptBtn" Content="{lex:Loc Accept}"
-                            IsEnabled="{Binding Dirty,FallbackValue=False}"
+                            IsEnabled="{Binding Dirty,FallbackValue=False}" AutomationProperties.Name="Apply output slot reservation"
                             Click="SlotChangeAcceptBtn_Click"
                             Style="{StaticResource FoundationPrimaryButtonStyle}" />
                 </Grid>

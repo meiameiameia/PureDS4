@@ -94,6 +94,10 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             this.profileListHolder = profileListHolder;
             this.controlService = service;
             contextMenu = new ContextMenu();
+            // The tray menu lives outside the window's logical tree. Keep its
+            // shared style live when application resources change themes.
+            ApplyContextMenuPresentation(contextMenu);
+            contextMenu.Opened += (_, _) => ApplyContextMenuPresentation(contextMenu);
             iconSource = ResolveConfiguredIconSource();
             Global.BatteryChanged += UpdateTrayBattery;
             Microsoft.Win32.SystemEvents.UserPreferenceChanged +=
@@ -205,6 +209,31 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             catch (Exception ex)
             {
                 DS4Windows.AppLogger.LogToGui($"Tray controller list update failed: {ex.Message}", true);
+            }
+        }
+
+        internal static void ApplyContextMenuPresentation(ContextMenu menu)
+        {
+            // Closed popups are outside the window tree. Resolve the current
+            // shared resources again when opening after a theme change.
+            menu.SetResourceReference(FrameworkElement.StyleProperty,
+                "FoundationContextMenuStyle");
+            RefreshItems(menu.Items);
+
+            static void RefreshItems(ItemCollection items)
+            {
+                foreach (object entry in items)
+                {
+                    if (entry is MenuItem item)
+                    {
+                        item.SetResourceReference(FrameworkElement.StyleProperty,
+                            "FoundationMenuItemStyle");
+                        RefreshItems(item.Items);
+                    }
+                    else if (entry is Separator separator)
+                        separator.SetResourceReference(FrameworkElement.StyleProperty,
+                            "FoundationMenuSeparatorStyle");
+                }
             }
         }
 

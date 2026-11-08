@@ -227,8 +227,23 @@ namespace DS4WindowsTests
                 dto.MapTo(tempStore);
             }
 
-            // Test writing BackingStore values back to an XML string.
-            // Make sure generated XML is equal to the initial input XML string
+            Assert.IsFalse(tempStore.suppressViiperSetupPrompt,
+                "A legacy file without the setting must retain the safe default.");
+            // Non-default preferences must survive serialization, not merely
+            // emit plausible XML or preserve the legacy fixture's defaults.
+            tempStore.suppressViiperSetupPrompt = true;
+            tempStore.startMinimized = true;
+            tempStore.minToTaskbar = true;
+            tempStore.CheckWhen = 0;
+            tempStore.reclaimSteamInput = true;
+            tempStore.swipeProfileList = new List<string> { "Default", "RTS fixture" };
+            tempStore.udpServPort = 26761;
+            tempStore.useUdpSmoothing = true;
+            tempStore.udpSmoothingMincutoff = 0.7;
+            tempStore.udpSmoothingBeta = 0.3;
+            tempStore.useCurrentTheme = AppThemeChoice.Dark;
+
+            // Serialize through the real DTO and read it into a fresh store.
             string testStr = string.Empty;
             serializer = new XmlSerializer(typeof(AppSettingsDTO));
             using (Utf8StringWriter strWriter = new Utf8StringWriter())
@@ -275,8 +290,17 @@ namespace DS4WindowsTests
                 roundTripStore.lastChecked);
             Assert.AreEqual(tempStore.autoProfileRevertDefaultProfile,
                 roundTripStore.autoProfileRevertDefaultProfile);
-            StringAssert.Contains(testStr,
-                "<SuppressViiperSetupPrompt>false</SuppressViiperSetupPrompt>");
+            Assert.IsTrue(roundTripStore.suppressViiperSetupPrompt);
+            Assert.IsTrue(roundTripStore.startMinimized);
+            Assert.IsTrue(roundTripStore.minToTaskbar);
+            Assert.AreEqual(0, roundTripStore.CheckWhen);
+            Assert.IsTrue(roundTripStore.reclaimSteamInput);
+            CollectionAssert.AreEqual(tempStore.swipeProfileList, roundTripStore.swipeProfileList);
+            Assert.AreEqual(26761, roundTripStore.udpServPort);
+            Assert.IsTrue(roundTripStore.useUdpSmoothing);
+            Assert.AreEqual(0.7, roundTripStore.udpSmoothingMincutoff, 0.0001);
+            Assert.AreEqual(0.3, roundTripStore.udpSmoothingBeta, 0.0001);
+            Assert.AreEqual(AppThemeChoice.Dark, roundTripStore.useCurrentTheme);
         }
     }
 }

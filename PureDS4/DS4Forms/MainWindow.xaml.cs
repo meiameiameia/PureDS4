@@ -23,6 +23,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using MessageBox = DS4WinWPF.DS4Forms.AppDialog;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
@@ -1206,6 +1207,9 @@ Suspend support not enabled.", true);
             }
         }
 
+        private void ToolsBackBtn_Click(object sender, RoutedEventArgs e) =>
+            PrimaryNavigation.ReturnToTools(mainTabCon);
+
         private static string DescribeServiceStatus(ControlService service) =>
             service.running ? "Service running" :
             service.HidHideRecoveryRequired
@@ -1250,7 +1254,7 @@ Suspend support not enabled.", true);
                     "after the interruption, its rule would also be removed. " +
                     "All other rules are preserved.";
                 if (MessageBox.Show(this, prompt, "Confirm HidHide recovery",
-                        MessageBoxButton.YesNo, MessageBoxImage.Warning) !=
+                        MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.Yes) !=
                     MessageBoxResult.Yes)
                 {
                     return;
@@ -2037,7 +2041,7 @@ Suspend support not enabled.", true);
             if (sender != null && conLvViewModel.ControllerCol.Count > 0)
             {
                 MessageBoxResult result = MessageBox.Show(Properties.Resources.CloseConfirm, Properties.Resources.Confirm,
-                        MessageBoxButton.YesNo, MessageBoxImage.Question);
+                        MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
                 if (result == MessageBoxResult.No)
                 {
                     e.Cancel = true;
@@ -2814,7 +2818,7 @@ Suspend support not enabled.", true);
                 string filename = entity.Name;
                 if (MessageBox.Show(Properties.Resources.ProfileCannotRestore.Replace("*Profile name*", "\"" + filename + "\""),
                     Properties.Resources.DeleteProfile,
-                    MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes) == MessageBoxResult.Yes)
                 {
                     entity.DeleteFile();
                     profileListHolder.ProfileListCol.Remove(entity);
@@ -3085,7 +3089,7 @@ Suspend support not enabled.", true);
 
         private void ChecklogViewBtn_Click(object sender, RoutedEventArgs e)
         {
-            ChangelogWindow changelogWin = new ChangelogWindow();
+            ChangelogWindow changelogWin = new ChangelogWindow { Owner = this };
             changelogWin.ShowDialog();
         }
 

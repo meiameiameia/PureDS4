@@ -37,7 +37,7 @@
                 Padding="8,3"
                 VerticalAlignment="Bottom"
                 Background="{DynamicResource SurfaceRaisedBrush}"
-                BorderBrush="{DynamicResource BorderDefaultBrush}"
+                BorderBrush="{DynamicResource SurfaceDividerBrush}"
                 BorderThickness="0,1,0,0">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
@@ -60,6 +60,7 @@
                                 ActionRequested="ExposureStatusBanner_ActionRequested" />
             <local:StatusBanner x:Name="elevationStatusBanner"
                                 State="Neutral"
+                                IsCompact="True"
                                 ShowAction="True"
                                 ActionRequested="ElevationStatusBanner_ActionRequested" />
             <local:StatusBanner x:Name="releaseNotificationBanner"
@@ -77,21 +78,11 @@
             </TabItem>
 
             <TabItem x:Name="controllersTab" Header="Home" Tag="&#xE7FC;" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
-                <Grid x:Name="homeWorkspace" Margin="16,8" MaxWidth="1180" MaxHeight="360"
+                <Grid x:Name="homeWorkspace" Margin="16,8" MaxWidth="1180"
+                      VerticalAlignment="Top"
                       TextElement.FontFamily="{StaticResource TypeUiFontFamily}"
                       TextElement.FontSize="{StaticResource TypeBodySize}"
                       TextElement.Foreground="{DynamicResource TextPrimaryBrush}">
-                    <Grid.Style>
-                        <Style TargetType="Grid">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}"
-                                             Value="Maximized">
-                                    <Setter Property="Height" Value="360" />
-                                    <Setter Property="VerticalAlignment" Value="Top" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Grid.Style>
                     <Grid.Resources>
                         <Style x:Key="HomeRowStyle" TargetType="ListViewItem"
                                BasedOn="{StaticResource FoundationControllerRowStyle}">
@@ -106,6 +97,7 @@
                     </Grid.RowDefinitions>
                     <TextBlock Text="Controllers" Style="{StaticResource FoundationPageTitleStyle}" Margin="0,0,0,8" />
                     <ListView x:Name="controllerLV" Grid.Row="1" ItemsSource="{Binding ControllerCol}" SelectionMode="Single"
+                              MaxHeight="420" VerticalAlignment="Top"
                               SelectedIndex="{Binding CurrentIndex, Mode=OneWayToSource}" Margin="0"
                               SelectedItem="{Binding DataContext.SelectedController, RelativeSource={RelativeSource AncestorType={x:Type Window}}, Mode=TwoWay}"
                               ItemContainerStyle="{StaticResource HomeRowStyle}"
@@ -125,15 +117,16 @@
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="{StaticResource HomeIdentityColumn}" MinWidth="174" />
                                                 <ColumnDefinition Width="{StaticResource HomeProtectionColumn}" />
-                                                <ColumnDefinition Width="{StaticResource HomeProfileColumn}" MinWidth="128" />
+                                                <ColumnDefinition Width="{StaticResource HomeProfileColumn}" MinWidth="128"
+                                                                  MaxWidth="{StaticResource HomeProfileColumnMaxWidth}" />
                                                 <ColumnDefinition Width="{StaticResource HomeBatteryColumn}" />
                                                 <ColumnDefinition Width="{StaticResource HomeLightbarColumn}" />
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="CONTROLLER" Style="{StaticResource FoundationColumnHeaderStyle}" />
-                                            <TextBlock Grid.Column="1" Text="PROTECTION" Style="{StaticResource FoundationColumnHeaderStyle}" />
-                                            <TextBlock Grid.Column="2" Text="PROFILE" Style="{StaticResource FoundationColumnHeaderStyle}" />
-                                            <TextBlock Grid.Column="3" Text="BATTERY" Style="{StaticResource FoundationColumnHeaderStyle}" />
-                                            <TextBlock Grid.Column="4" Text="LIGHTBAR" Style="{StaticResource FoundationColumnHeaderStyle}" />
+                                            <TextBlock Text="Controller" Style="{StaticResource FoundationColumnHeaderStyle}" />
+                                            <TextBlock Grid.Column="1" Text="Protection" Style="{StaticResource FoundationColumnHeaderStyle}" />
+                                            <TextBlock Grid.Column="2" Text="Profile" Style="{StaticResource FoundationColumnHeaderStyle}" />
+                                            <TextBlock Grid.Column="3" Text="Battery" Style="{StaticResource FoundationColumnHeaderStyle}" />
+                                            <TextBlock Grid.Column="4" Text="Lightbar" Style="{StaticResource FoundationColumnHeaderStyle}" />
                                         </Grid>
                                         <ItemsPresenter />
                                     </StackPanel>
@@ -146,7 +139,8 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="{StaticResource HomeIdentityColumn}" MinWidth="174" />
                                         <ColumnDefinition Width="{StaticResource HomeProtectionColumn}" />
-                                        <ColumnDefinition Width="{StaticResource HomeProfileColumn}" MinWidth="128" />
+                                        <ColumnDefinition Width="{StaticResource HomeProfileColumn}" MinWidth="128"
+                                                          MaxWidth="{StaticResource HomeProfileColumnMaxWidth}" />
                                         <ColumnDefinition Width="{StaticResource HomeBatteryColumn}" />
                                         <ColumnDefinition Width="{StaticResource HomeLightbarColumn}" />
                                     </Grid.ColumnDefinitions>
@@ -155,10 +149,10 @@
                                             <ColumnDefinition Width="38" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <Image Source="{Binding ControllerImageSource}" Stretch="Uniform"
-                                               Width="32" Height="28" Margin="0,0,6,0"
-                                               Visibility="{Binding HasControllerArtwork, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                               RenderOptions.BitmapScalingMode="HighQuality" />
+                                        <Path x:Name="controllerSilhouette" Data="{StaticResource DualShock4SilhouetteGeometry}"
+                                              Fill="{DynamicResource TextPrimaryBrush}" Stretch="Uniform"
+                                              Width="32" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"
+                                              IsHitTestVisible="False" />
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                             <TextBlock TextTrimming="CharacterEllipsis" FontWeight="SemiBold">
                                                 <Run Text="{Binding ControllerDisplayName, Mode=OneWay}" /><Run Text=" · " /><Run Text="{Binding DisplayDevIndex, Mode=OneWay}" />
@@ -184,7 +178,8 @@
                                               SelectionChanged="SelectProfCombo_SelectionChanged" KeyDown="SelectProfCombo_KeyDown">
                                         <ComboBox.ItemTemplate>
                                             <DataTemplate>
-                                                <TextBlock Text="{Binding Name, Mode=OneWay}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Name}" />
+                                                <TextBlock Text="{Binding Name, Mode=OneWay}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Name}"
+                                                           Style="{StaticResource FoundationControlCaptionStyle}" />
                                             </DataTemplate>
                                         </ComboBox.ItemTemplate>
                                     </ComboBox>
@@ -193,16 +188,18 @@
                                     <Button Grid.Column="4" Click="LightColorBtn_Click" Tag="{Binding DevIndex}"
                                             Style="{StaticResource FoundationButtonStyle}" Padding="6,2" VerticalAlignment="Center"
                                             AutomationProperties.Name="Lightbar color" ToolTip="Lightbar: use profile controls or choose a custom color">
-                                        <Grid>
+                                        <Grid VerticalAlignment="Center">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="16" />
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
                                             <Border Width="12" Height="12" Background="{Binding LightColor}"
+                                                    VerticalAlignment="Center"
                                                     BorderBrush="{DynamicResource TextSecondaryBrush}" BorderThickness="1" CornerRadius="{StaticResource RadiusSmall}" />
-                                            <TextBlock Grid.Column="1" Text="{Binding LightbarModeText}" Margin="4,0" TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Grid.Column="2" Text="⌄" />
+                                            <TextBlock Grid.Column="1" Text="{Binding LightbarModeText}" Margin="4,0" TextTrimming="CharacterEllipsis"
+                                                       Style="{StaticResource FoundationControlCaptionStyle}" />
+                                            <TextBlock Grid.Column="2" Text="⌄" Style="{StaticResource FoundationControlCaptionStyle}" />
                                         </Grid>
                                     </Button>
                                 </Grid>
@@ -217,7 +214,8 @@
                     <Border x:Name="homeInspector" Grid.Row="3" Margin="0,8,0,0" Padding="12,8"
                             Visibility="{Binding HasSelectedController, Converter={StaticResource BooleanToVisibilityConverter}}"
                             Background="{DynamicResource SurfaceRaisedBrush}"
-                            BorderBrush="{DynamicResource BorderDefaultBrush}" BorderThickness="0,1,0,0"
+                            BorderBrush="{DynamicResource SurfaceDividerBrush}" BorderThickness="1"
+                            CornerRadius="{StaticResource RadiusSurface}"
                             IsEnabled="{Binding HasSelectedController}">
                         <StackPanel>
                             <Grid>
@@ -275,32 +273,28 @@
                         </StackPanel>
                     </Border>
                     <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <ItemsControl ItemsSource="{Binding NativePhysicalSessions}"
+                    <ItemsControl x:Name="nativePhysicalSessionsList" ItemsSource="{Binding NativePhysicalSessions}"
                                   Margin="0,8,0,0">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Background="{DynamicResource RaisedBackgroundColor}"
-                                        BorderBrush="{DynamicResource BorderColor}"
-                                        BorderThickness="1" Padding="10,8" Margin="0,0,0,6">
+                                <Border Background="{DynamicResource SurfaceRaisedBrush}"
+                                        BorderBrush="{DynamicResource SurfaceDividerBrush}"
+                                        CornerRadius="{StaticResource RadiusSurface}"
+                                        BorderThickness="1" Padding="12,8" Margin="0,0,0,8">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <StackPanel>
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding ModeTitle}" FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource AccentColor}" />
-                                                <TextBlock Text="  ·  " Foreground="{DynamicResource MutedForegroundColor}" />
-                                                <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" />
-                                                <TextBlock Text="  ·  " Foreground="{DynamicResource MutedForegroundColor}" />
-                                                <TextBlock Text="{Binding SlotText}" Foreground="{DynamicResource MutedForegroundColor}" />
-                                                <TextBlock Text="  ·  " Foreground="{DynamicResource MutedForegroundColor}" />
-                                                <TextBlock Text="{Binding Connection}" Foreground="{DynamicResource MutedForegroundColor}" />
-                                            </StackPanel>
-                                            <TextBlock Text="{Binding Detail}" Margin="0,3,10,0" FontSize="11"
-                                                       Foreground="{DynamicResource MutedForegroundColor}"
-                                                       TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding ModeTitle}" Style="{StaticResource FoundationGroupTitleStyle}" />
+                                            <WrapPanel Margin="0,4,8,0">
+                                                <TextBlock Text="{Binding DisplayName}" Margin="0,0,12,0" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding SlotText}" Margin="0,0,12,0" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                                                <TextBlock Text="{Binding Connection}" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                                            </WrapPanel>
+                                            <TextBlock Text="{Binding Detail}" Margin="0,4,8,0"
+                                                       Style="{StaticResource FoundationSecondaryTextStyle}" />
                                         </StackPanel>
                                         <Button Grid.Column="1" Content="Use game output"
                                                 MinHeight="28" Margin="12,0,0,0"
@@ -352,60 +346,39 @@
                                            Margin="0,4,0,0" FontSize="12" TextWrapping="Wrap"
                                            Foreground="{DynamicResource MutedForegroundColor}" />
                             </StackPanel>
-                            <Border Grid.Column="1" Background="{DynamicResource RaisedBackgroundColor}"
-                                    BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
-                                    CornerRadius="2" Padding="10,5" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding ElementName=profilesListBox, Path=Items.Count, Converter={StaticResource CountLabel}, ConverterParameter=profile}"
-                                           FontSize="11" FontWeight="SemiBold"
-                                           Foreground="{DynamicResource MutedForegroundColor}" />
-                            </Border>
+                            <TextBlock Grid.Column="1" x:Name="profilesCountText" Margin="16,0,0,0"
+                                       VerticalAlignment="Center" Style="{StaticResource FoundationSecondaryTextStyle}"
+                                       Text="{Binding ElementName=profilesListBox, Path=Items.Count, Converter={StaticResource CountLabel}, ConverterParameter=profile}" />
                         </Grid>
 
-                        <Grid x:Name="profOptsToolbar" Grid.Row="1" Margin="0,0,0,12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
+                        <local:ActionGroupPanel x:Name="profOptsToolbar" Grid.Row="1" Margin="0,0,0,12">
                             <WrapPanel VerticalAlignment="Center">
                                 <Button x:Name="newProfListBtn" Click="NewProfListBtn_Click"
-                                        Style="{StaticResource FoundationPrimaryButtonStyle}" Margin="0,0,8,6" Content="New profile" />
+                                        Style="{StaticResource FoundationPrimaryButtonStyle}" Margin="0,0,8,0" Content="New profile" />
                                 <Button x:Name="editProfBtn" IsEnabled="False" Click="EditProfBtn_Click"
-                                        Style="{StaticResource FoundationButtonStyle}" Margin="0,0,8,6" Content="{lex:Loc Edit}" />
+                                        Style="{StaticResource FoundationButtonStyle}" Margin="0,0,8,0" Content="{lex:Loc Edit}" />
                                 <Button x:Name="dupProfBtn" IsEnabled="False" Click="DupProfBtn_Click"
-                                        Style="{StaticResource FoundationButtonStyle}" Margin="0,0,8,6" Content="{lex:Loc Duplicate}" />
+                                        Style="{StaticResource FoundationButtonStyle}" Margin="0,0,8,0" Content="{lex:Loc Duplicate}" />
                                 <Button x:Name="renameProfBtn" IsEnabled="False" Click="RenameProfBtn_Click"
-                                        Style="{StaticResource FoundationButtonStyle}" Margin="0,0,8,6" Content="{lex:Loc RenameProfile}" />
+                                        Style="{StaticResource FoundationButtonStyle}" Margin="0,0,8,0" Content="{lex:Loc RenameProfile}" />
                                 <Button x:Name="deleteProfBtn" IsEnabled="False" Click="DeleteProfBtn_Click"
                                         Style="{StaticResource FoundationButtonStyle}" Foreground="{DynamicResource StateErrorBrush}"
-                                        Margin="0,0,16,6" Content="{lex:Loc Delete}" />
+                                        Margin="0,0,16,0" Content="{lex:Loc Delete}" />
                                 <Button x:Name="importProfBtn" Click="ImportProfBtn_Click"
-                                        Style="{StaticResource FoundationButtonStyle}" Margin="0,0,8,6" Content="{lex:Loc Import}" />
+                                        Style="{StaticResource FoundationButtonStyle}" Margin="0,0,8,0" Content="{lex:Loc Import}" />
                                 <Button x:Name="exportProfBtn" IsEnabled="False" Click="ExportProfBtn_Click"
-                                        Style="{StaticResource FoundationButtonStyle}" Margin="0,0,0,6" Content="{lex:Loc Export}" />
+                                        Style="{StaticResource FoundationButtonStyle}" Content="{lex:Loc Export}" />
                             </WrapPanel>
-                            <Border Grid.Column="1" Margin="16,0,0,6" VerticalAlignment="Top"
+                            <Border x:Name="profilesSearchBorder" VerticalAlignment="Top"
                                     Width="260" MaxWidth="260" HorizontalAlignment="Right"
-                                    Background="{DynamicResource RaisedBackgroundColor}"
-                                    BorderThickness="1" CornerRadius="2">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
-                                        <Style.Triggers>
-                                            <!-- The whole search field takes focus, not the
-                                                 text box nested inside it. -->
-                                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                                                <Setter Property="BorderBrush" Value="{DynamicResource FocusBrush}" />
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
+                                    Style="{StaticResource FoundationSearchFieldStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="34" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="36" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets"
+                                    <TextBlock Text="&#xE721;" FontFamily="{StaticResource TypeIconFontFamily}"
                                                Foreground="{DynamicResource MutedForegroundColor}"
                                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="1" Text="Search profiles" IsHitTestVisible="False"
@@ -424,20 +397,20 @@
                                     </TextBlock>
                                     <TextBox x:Name="profilesSearchTextBox" Grid.Column="1" Tag="Embedded"
                                              BorderThickness="0" Background="Transparent"
-                                             Padding="4,2" MinHeight="28" VerticalContentAlignment="Center"
+                                             Padding="4,2" MinHeight="26" VerticalContentAlignment="Center"
                                              Style="{StaticResource FoundationTextBoxStyle}" AutomationProperties.Name="Search profiles"
                                              TextChanged="ProfilesSearchTextBox_TextChanged"
                                              ToolTip="Search profiles by name" />
                                     <Button x:Name="clearProfilesSearchBtn" Grid.Column="2" Content="&#xE711;"
-                                            FontFamily="Segoe MDL2 Assets" FontSize="11"
-                                            Style="{StaticResource FoundationButtonStyle}"
+                                            FontFamily="{StaticResource TypeIconFontFamily}" FontSize="11"
+                                            Style="{StaticResource FoundationButtonStyle}" MinHeight="26"
                                             Background="Transparent" BorderThickness="0"
                                             Visibility="Collapsed" ToolTip="Clear search"
                                             AutomationProperties.Name="Clear profile search"
                                             Click="ClearProfilesSearchBtn_Click" />
                                 </Grid>
                             </Border>
-                        </Grid>
+                        </local:ActionGroupPanel>
 
                         <Border x:Name="dupBoxBar" Grid.Row="2" Style="{StaticResource FoundationPropertyGroupStyle}"
                                 Padding="12,8" Margin="0,0,0,8" Visibility="Collapsed">
@@ -459,15 +432,15 @@
                                         <!-- Rows paint SurfaceRaised, so the empty area below them
                                              must match or the table changes tone halfway down. -->
                                         <Border Background="{DynamicResource SurfaceRaisedBrush}"
-                                                BorderBrush="{DynamicResource BorderDefaultBrush}"
-                                                BorderThickness="1,0,1,1">
+                                                BorderBrush="{DynamicResource SurfaceDividerBrush}"
+                                                BorderThickness="1" CornerRadius="{StaticResource RadiusSmall}">
                                             <Grid>
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="28" />
                                                     <RowDefinition Height="*" />
                                                 </Grid.RowDefinitions>
                                                 <Border Background="{DynamicResource SurfaceRaisedBrush}"
-                                                        BorderBrush="{DynamicResource BorderDefaultBrush}"
+                                                        BorderBrush="{DynamicResource SurfaceDividerBrush}"
                                                         BorderThickness="0,0,0,1"
                                                         Padding="14,0,12,0" HorizontalAlignment="Left"
                                                         Width="{Binding ViewportWidth, ElementName=ProfileRowsScroll}">
@@ -548,9 +521,9 @@
                     </Grid>
 
                     <Border x:Name="profileEditorLoadingPanel" Visibility="Collapsed" Panel.ZIndex="2"
-                            Background="{DynamicResource CardBackgroundColor}"
-                            BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
-                            CornerRadius="2" Padding="32">
+                            Background="{DynamicResource SurfaceRaisedBrush}"
+                            BorderBrush="{DynamicResource SurfaceDividerBrush}" BorderThickness="1"
+                            CornerRadius="{StaticResource RadiusSmall}" Padding="32">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="280">
                             <TextBlock Text="Loading profile editor" FontSize="18" FontWeight="SemiBold"
                                        HorizontalAlignment="Center" />
@@ -563,17 +536,31 @@
                 </Grid>
             </TabItem>
             <TabItem x:Name="autoProfilesTab" Header="{lex:Loc AutoProfiles}" Tag="&#xE823;" Visibility="Collapsed" Style="{StaticResource BridgeHiddenToolTabItemStyle}" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
-                <local:AutoProfiles x:Name="autoProfControl">
-
-                </local:AutoProfiles>
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                    <Button x:Name="autoProfilesBackBtn" Content="‹ Tools" Margin="16,8,16,0" HorizontalAlignment="Left"
+                            Style="{StaticResource FoundationButtonStyle}" Click="ToolsBackBtn_Click"
+                            AutomationProperties.Name="Back to Tools" />
+                    <local:AutoProfiles Grid.Row="1" x:Name="autoProfControl" />
+                </Grid>
             </TabItem>
             <TabItem x:Name="inputDiagnosticsTab" Header="Input diagnostics" Tag="&#xE9D2;" Visibility="Collapsed" Style="{StaticResource BridgeHiddenToolTabItemStyle}" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
-                <local:InputDiagnosticsControl x:Name="inputDiagnosticsControl" />
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                    <Button x:Name="inputDiagnosticsBackBtn" Content="‹ Tools" Margin="16,8,16,0" HorizontalAlignment="Left"
+                            Style="{StaticResource FoundationButtonStyle}" Click="ToolsBackBtn_Click"
+                            AutomationProperties.Name="Back to Tools" />
+                    <local:InputDiagnosticsControl Grid.Row="1" x:Name="inputDiagnosticsControl" />
+                </Grid>
             </TabItem>
             <TabItem x:Name="outputSlotsTab" Header="{lex:Loc OutputSlots}" Tag="&#xE950;" Visibility="Collapsed" Style="{StaticResource BridgeHiddenToolTabItemStyle}" IsEnabled="{Binding FullTabsEnabled,Mode=OneWay}">
-                <local:OutputSlotManagerControl x:Name="slotManControl">
-
-                </local:OutputSlotManagerControl>
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                    <Button x:Name="outputSlotsBackBtn" Content="‹ Tools" Margin="16,8,16,0" HorizontalAlignment="Left"
+                            Style="{StaticResource FoundationButtonStyle}" Click="ToolsBackBtn_Click"
+                            AutomationProperties.Name="Back to Tools" />
+                    <local:OutputSlotManagerControl Grid.Row="1" x:Name="slotManControl" />
+                </Grid>
             </TabItem>
             <TabItem x:Name="settingsTab" Header="{lex:Loc Settings}" Tag="&#xE713;" IsEnabled="{Binding ViewEnabled,Mode=OneWay}">
                 <TabItem.Resources>
@@ -584,34 +571,8 @@
                         <Setter Property="HorizontalAlignment" Value="Stretch" />
                         <Setter Property="Margin" Value="0,0,16,16" />
                     </Style>
-                    <Style x:Key="SettingsCategoryTabItemStyle" TargetType="TabItem">
-                        <Setter Property="Foreground" Value="{DynamicResource ClassicSecondaryTextBrush}" />
-                        <Setter Property="Padding" Value="12,8" />
-                        <Setter Property="Margin" Value="0,1" />
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="TabItem">
-                                    <Border x:Name="CategoryChrome" Background="Transparent" BorderBrush="Transparent" BorderThickness="3,0,0,0" Padding="{TemplateBinding Padding}">
-                                        <ContentPresenter ContentSource="Header" />
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsSelected" Value="True">
-                                            <Setter TargetName="CategoryChrome" Property="Background" Value="{DynamicResource ClassicSelectedSurfaceBrush}" />
-                                            <Setter TargetName="CategoryChrome" Property="BorderBrush" Value="{DynamicResource ClassicAccentBrush}" />
-                                            <Setter Property="Foreground" Value="{DynamicResource ClassicPrimaryTextBrush}" />
-                                            <Setter Property="FontWeight" Value="SemiBold" />
-                                        </Trigger>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="CategoryChrome" Property="Background" Value="{DynamicResource ClassicSurfaceBrush}" />
-                                        </Trigger>
-                                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                                            <Setter TargetName="CategoryChrome" Property="BorderBrush" Value="{DynamicResource ClassicFocusBrush}" />
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
+                    <Style x:Key="SettingsCategoryTabItemStyle" TargetType="TabItem"
+                           BasedOn="{StaticResource FoundationSectionTabItemStyle}" />
                     <Style x:Key="SettingsCategoryTabControlStyle" TargetType="TabControl">
                         <Setter Property="ItemContainerStyle" Value="{StaticResource SettingsCategoryTabItemStyle}" />
                         <Setter Property="TabStripPlacement" Value="Left" />
@@ -623,7 +584,7 @@
                                             <ColumnDefinition Width="180" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <Border Background="{DynamicResource ClassicWorkspaceBrush}" BorderBrush="{DynamicResource ClassicDividerBrush}" BorderThickness="0,0,1,0">
+                                        <Border Background="{DynamicResource ClassicWorkspaceBrush}" BorderBrush="{DynamicResource SurfaceDividerBrush}" BorderThickness="0,0,1,0">
                                             <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                                                 <StackPanel IsItemsHost="True" Margin="6" KeyboardNavigation.DirectionalNavigation="Contained" />
                                             </ScrollViewer>
@@ -994,7 +955,7 @@
                                             </Grid.ColumnDefinitions>
                                             <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
                                                 <TextBlock Text="Prompt when setup is needed" Style="{StaticResource FoundationSettingTitleStyle}" />
-                                                    <TextBlock Text="Offer setup automatically when game output isn't ready. Set up and Refresh stay available here." Style="{StaticResource FoundationSettingDescriptionStyle}" />
+                                                    <TextBlock Text="Control automatic setup prompts. Unavailable or unverified game output stays blocked; Set up and Refresh remain available." Style="{StaticResource FoundationSettingDescriptionStyle}" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                                     <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" AutomationProperties.Name="Prompt when setup is needed"
@@ -1394,7 +1355,25 @@
                 </Grid>
 
             </TabItem>
-            <TabItem x:Name="toolsTab" Header="Tools" Tag="&#xE713;">
+            <TabItem x:Name="toolsTab" Header="Tools" Tag="&#xE90F;">
+                <TabItem.Style>
+                    <Style TargetType="TabItem" BasedOn="{StaticResource BridgeNavigationTabItemStyle}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsSelected, ElementName=autoProfilesTab}" Value="True">
+                                <Setter Property="local:PrimaryNavigation.IsSectionActive" Value="True" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSelected, ElementName=inputDiagnosticsTab}" Value="True">
+                                <Setter Property="local:PrimaryNavigation.IsSectionActive" Value="True" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSelected, ElementName=outputSlotsTab}" Value="True">
+                                <Setter Property="local:PrimaryNavigation.IsSectionActive" Value="True" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSelected, ElementName=logTab}" Value="True">
+                                <Setter Property="local:PrimaryNavigation.IsSectionActive" Value="True" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TabItem.Style>
                 <Grid Margin="16,8">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -1408,7 +1387,7 @@
                     </StackPanel>
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                         <StackPanel MaxWidth="760" HorizontalAlignment="Left">
-                            <TextBlock Text="EVERYDAY TOOLS AND DIAGNOSTICS" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                            <TextBlock Text="Everyday tools and diagnostics" Style="{StaticResource FoundationSectionHeadingStyle}" />
                             <Border Style="{StaticResource FoundationPropertyGroupStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
@@ -1452,7 +1431,7 @@
                                     <Button Grid.Column="1" Content="Open" Margin="12,0,0,0" Click="AboutBtn_Click" Style="{StaticResource FoundationButtonStyle}" AutomationProperties.Name="Open hotkeys and About" />
                                 </Grid>
                             </Border>
-                            <TextBlock Text="MOVING FROM DS4WINDOWS" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                            <TextBlock Text="Moving from DS4Windows" Style="{StaticResource FoundationSectionHeadingStyle}" />
                             <Border Style="{StaticResource FoundationPropertyGroupStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
@@ -1472,7 +1451,12 @@
                 </Grid>
             </TabItem>
             <TabItem x:Name="logTab" Header="{lex:Loc Log}" Tag="&#xE9D9;" Visibility="Collapsed" Style="{StaticResource BridgeHiddenToolTabItemStyle}">
-                <Grid Margin="16,8">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                    <Button x:Name="logBackBtn" Content="‹ Tools" Margin="16,8,16,0" HorizontalAlignment="Left"
+                            Style="{StaticResource FoundationButtonStyle}" Click="ToolsBackBtn_Click"
+                            AutomationProperties.Name="Back to Tools" />
+                <Grid x:Name="runtimeLogWorkspace" Grid.Row="1" Margin="16,8" TextElement.FontWeight="Normal">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -1481,20 +1465,23 @@
                     <Grid Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="260" />
                             <ColumnDefinition Width="140" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <StackPanel>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.ColumnSpan="3" Margin="0,0,0,12">
                             <TextBlock Text="Runtime log" Style="{StaticResource FoundationPageTitleStyle}" />
                             <TextBlock Text="Search, inspect, and export diagnostic events."
                                        Margin="0,3,0,0" Style="{StaticResource FoundationSecondaryTextStyle}" />
                         </StackPanel>
-                        <TextBox Grid.Column="1" x:Name="logSearchTextBox" Margin="12,0,0,0"
+                        <TextBox Grid.Row="1" x:Name="logSearchTextBox"
                                  ToolTip="Search log messages" AutomationProperties.Name="Search log messages"
                                  TextChanged="LogFilter_Changed" />
-                        <TextBlock Grid.Column="1" Text="Search messages" IsHitTestVisible="False"
-                                                           Margin="22,0,0,0" VerticalAlignment="Center"
+                        <TextBlock Grid.Row="1" Text="Search messages" IsHitTestVisible="False"
+                                                           Margin="10,0,0,0" VerticalAlignment="Center"
                                                            Foreground="{DynamicResource TextSecondaryBrush}">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
@@ -1507,13 +1494,13 @@
                                                         </Style>
                                                     </TextBlock.Style>
                                                 </TextBlock>
-                                                <ComboBox Grid.Column="2" x:Name="logSeverityFilter" Margin="8,0,0,0"
+                                                <ComboBox Grid.Row="1" Grid.Column="1" x:Name="logSeverityFilter" Margin="8,0,0,0"
                                   SelectedIndex="0" SelectionChanged="LogFilter_Changed"
                                   AutomationProperties.Name="Log severity filter">
                             <ComboBoxItem Content="All events" />
                             <ComboBoxItem Content="Warnings" />
                         </ComboBox>
-                        <CheckBox Grid.Column="3" x:Name="logAutoScrollCheckBox" Margin="12,0,0,0"
+                        <CheckBox Grid.Row="1" Grid.Column="2" x:Name="logAutoScrollCheckBox" Margin="12,0,0,0"
                                   Content="Follow new events" IsChecked="True" VerticalAlignment="Center" />
                     </Grid>
                     <Border Grid.Row="1" Background="{DynamicResource SurfaceRaisedBrush}"
@@ -1521,10 +1508,12 @@
                             Padding="12,6">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="160" />
-                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="88" />
+                                <ColumnDefinition Width="88" />
                                 <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
+                            <Border Grid.Column="3" Width="{x:Static SystemParameters.VerticalScrollBarWidth}" />
                             <TextBlock Text="Time" Style="{StaticResource FoundationColumnHeaderStyle}" />
                             <TextBlock Grid.Column="1" Text="Severity" Style="{StaticResource FoundationColumnHeaderStyle}" />
                             <TextBlock Grid.Column="2" Text="Message" Style="{StaticResource FoundationColumnHeaderStyle}" />
@@ -1536,11 +1525,13 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <ListView x:Name="logListView" Style="{StaticResource FoundationTableListViewStyle}"
+                                  FontWeight="Normal" ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                  VirtualizingPanel.ScrollUnit="Pixel" AutomationProperties.Name="Runtime log events"
                                   BorderThickness="1,0,1,1" MouseDoubleClick="LogListView_MouseDoubleClick">
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="ListViewItem" BasedOn="{StaticResource FoundationTableListItemStyle}">
                                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                    <Setter Property="Padding" Value="12,5" />
+                                    <Setter Property="Padding" Value="10,6,12,6" />
                                     <Setter Property="MinHeight" Value="30" />
                                 </Style>
                             </ListView.ItemContainerStyle>
@@ -1548,11 +1539,12 @@
                                 <DataTemplate>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="160" />
-                                            <ColumnDefinition Width="100" />
+                                            <ColumnDefinition Width="88" />
+                                            <ColumnDefinition Width="88" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="{Binding Datetime, StringFormat=\{0:HH:mm:ss\}}"
+                                                   FontFamily="{StaticResource TypeMonoFontFamily}"
                                                    ToolTip="{Binding Datetime, StringFormat=\{0:G\}}" />
                                         <TextBlock Grid.Column="1" Text="{Binding Severity}" FontWeight="SemiBold">
                                             <TextBlock.Style>
@@ -1569,13 +1561,13 @@
                                                 </Style>
                                             </TextBlock.Style>
                                         </TextBlock>
-                                        <TextBlock Grid.Column="2" Text="{Binding Message}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="2" Text="{Binding Message}" TextWrapping="Wrap" />
                                     </Grid>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
                         <StackPanel x:Name="logEmptyState" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                    IsHitTestVisible="False" Margin="0,0,0,40" MaxWidth="360">
+                                    IsHitTestVisible="False" Margin="16,8" MaxWidth="360">
                             <StackPanel.Style>
                                 <Style TargetType="StackPanel">
                                     <Setter Property="Visibility" Value="Collapsed" />
@@ -1615,6 +1607,7 @@
                             </Grid>
                         </Border>
                     </Grid>
+                </Grid>
                 </Grid>
             </TabItem>
 

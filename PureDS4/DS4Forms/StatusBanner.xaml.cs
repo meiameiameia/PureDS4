@@ -9,6 +9,9 @@ namespace DS4WinWPF.DS4Forms
         public static readonly DependencyProperty IsOpenProperty =
             DependencyProperty.Register(nameof(IsOpen), typeof(bool),
                 typeof(StatusBanner), new PropertyMetadata(false));
+        public static readonly DependencyProperty IsCompactProperty =
+            DependencyProperty.Register(nameof(IsCompact), typeof(bool),
+                typeof(StatusBanner), new PropertyMetadata(false));
         public static readonly DependencyProperty TitleProperty =
             DependencyProperty.Register(nameof(Title), typeof(string),
                 typeof(StatusBanner), new PropertyMetadata(string.Empty));
@@ -34,6 +37,7 @@ namespace DS4WinWPF.DS4Forms
         public event EventHandler ActionRequested;
 
         public bool IsOpen { get => (bool)GetValue(IsOpenProperty); set => SetValue(IsOpenProperty, value); }
+        public bool IsCompact { get => (bool)GetValue(IsCompactProperty); set => SetValue(IsCompactProperty, value); }
         public string Title { get => (string)GetValue(TitleProperty); set => SetValue(TitleProperty, value); }
         public string Message { get => (string)GetValue(MessageProperty); set => SetValue(MessageProperty, value); }
         public string ActionLabel { get => (string)GetValue(ActionLabelProperty); set => SetValue(ActionLabelProperty, value); }

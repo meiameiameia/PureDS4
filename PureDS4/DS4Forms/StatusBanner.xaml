@@ -17,15 +17,18 @@
         </Style>
     </UserControl.Style>
     <Border x:Name="BannerBorder"
-            Margin="8,6,8,0"
-            Padding="10,8"
+            Margin="8,8,8,4"
             Background="{DynamicResource SurfaceRaisedBrush}"
             BorderThickness="3,1,1,1"
             CornerRadius="{StaticResource RadiusSmall}">
         <Border.Style>
             <Style TargetType="Border">
+                <Setter Property="Padding" Value="10,8" />
                 <Setter Property="BorderBrush" Value="{DynamicResource StateNeutralBrush}" />
                 <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsCompact, ElementName=root}" Value="True">
+                        <Setter Property="Padding" Value="10,4" />
+                    </DataTrigger>
                     <DataTrigger Binding="{Binding State, ElementName=root}" Value="{x:Static local:StatusVisualState.Success}">
                         <Setter Property="BorderBrush" Value="{DynamicResource StateSuccessBrush}" />
                     </DataTrigger>
@@ -51,16 +54,19 @@
             <TextBlock x:Name="StateGlyph"
                        Width="20"
                        Margin="0,0,8,0"
-                       VerticalAlignment="Top"
                        TextAlignment="Center"
                        FontFamily="{StaticResource TypeUiFontFamily}"
                        FontSize="{StaticResource TypeGroupTitleSize}"
                        FontWeight="SemiBold">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
-                        <Setter Property="Text" Value="…" />
+                        <Setter Property="VerticalAlignment" Value="Top" />
+                        <Setter Property="Text" Value="ℹ" />
                         <Setter Property="Foreground" Value="{DynamicResource StateNeutralBrush}" />
                         <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsCompact, ElementName=root}" Value="True">
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                            </DataTrigger>
                             <DataTrigger Binding="{Binding State, ElementName=root}" Value="{x:Static local:StatusVisualState.Success}">
                                 <Setter Property="Text" Value="✓" />
                                 <Setter Property="Foreground" Value="{DynamicResource StateSuccessBrush}" />
@@ -81,12 +87,33 @@
                     </Style>
                 </TextBlock.Style>
             </TextBlock>
-            <StackPanel Grid.Column="1">
-                <TextBlock Text="{Binding Title, ElementName=root}"
-                           Style="{StaticResource FoundationGroupTitleStyle}" />
-                <TextBlock Text="{Binding Message, ElementName=root}"
-                           Margin="0,2,8,0"
-                           Style="{StaticResource FoundationSecondaryTextStyle}" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Text="{Binding Title, ElementName=root}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource FoundationGroupTitleStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsCompact, ElementName=root}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <TextBlock Text="{Binding Message, ElementName=root}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource FoundationSecondaryTextStyle}">
+                            <Setter Property="Margin" Value="0,2,8,0" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsCompact, ElementName=root}" Value="True">
+                                    <Setter Property="Margin" Value="0,0,8,0" />
+                                    <Setter Property="RenderTransform">
+                                        <Setter.Value><TranslateTransform Y="-1" /></Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </StackPanel>
             <Button Grid.Column="2"
                     Margin="8,0,0,0"

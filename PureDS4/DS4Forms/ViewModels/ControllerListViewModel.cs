@@ -704,10 +704,10 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
         public void AddLightContextItems()
         {
-            MenuItem thing = new MenuItem() { Header = "Use Profile Controls", IsChecked = !useCustomColor };
+            MenuItem thing = new MenuItem() { Header = "Use profile controls", IsChecked = !useCustomColor };
             thing.Click += ProfileColorMenuClick;
             lightContext.Items.Add(thing);
-            thing = new MenuItem() { Header = "Use Custom Color", IsChecked = useCustomColor };
+            thing = new MenuItem() { Header = "Use custom color", IsChecked = useCustomColor };
             thing.Click += CustomColorItemClick;
             lightContext.Items.Add(thing);
         }
