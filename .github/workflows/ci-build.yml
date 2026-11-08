@@ -24,67 +24,10 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    runs-on: windows-2022
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 10.0.302
-
-      - name: Verify pinned .NET SDK
-        shell: pwsh
-        run: |
-          $expected = (Get-Content .\global.json -Raw | ConvertFrom-Json).sdk.version
-          $actual = dotnet --version
-          if ($actual -ne $expected) {
-            throw "Expected .NET SDK $expected but selected $actual."
-          }
-
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      - name: Restore dependencies
-        run: dotnet restore .\PureDS4.sln --locked-mode
-
-      - name: Check package security advisories
-        shell: pwsh
-        run: |
-          $report = dotnet list .\PureDS4.sln package --vulnerable --include-transitive --no-restore --format json | ConvertFrom-Json
-          if ($LASTEXITCODE -ne 0) { throw "NuGet advisory query failed." }
-          if (-not $report.sources -or -not $report.projects) {
-            throw "NuGet advisory query returned no source or projects."
-          }
-          $affected = @($report.projects | ForEach-Object { $_.frameworks } |
-            ForEach-Object { @($_.topLevelPackages) + @($_.transitivePackages) } |
-            Where-Object { $_.vulnerabilities.Count -gt 0 })
-          if ($affected.Count -gt 0) {
-            $affected | ConvertTo-Json -Depth 8 | Write-Host
-            throw "A restored dependency has a reported security advisory."
-          }
-
-      - name: Test release-input gate
-        run: python .\utils\test-release-inputs.py
-
-      - name: Test managed-notice gate
-        run: python .\utils\test-managed-notices.py
-
-      - name: Run tests (x64)
-        # The whole suite gates the build. The three XML snapshot tests that
-        # were excluded here (CheckSettingsSave, CheckWriteProfile,
-        # CheckJaysProfileRead) now pass against the regenerated fixtures, so
-        # the filter that hid them is gone.
-        # Exercise the same pinned runtime shipped to users rather than the
-        # older shared runtime that happens to come with the selected SDK.
-        run: dotnet test .\PureDS4.Tests\PureDS4.Tests.csproj -c Release -p:Platform=x64 -r win-x64 -p:SelfContained=true --filter "FullyQualifiedName!~LiveProcessCapture" --verbosity normal
-
   build:
     runs-on: windows-2022
-    needs: test
+    # One workspace retains the tested application build for publishing. Every
+    # previous test, package, integrity and installer gate still runs in order.
     strategy:
       fail-fast: false
       matrix:
@@ -112,8 +55,41 @@ jobs:
           python-version: "3.10"
 
       - name: Restore dependencies
+        # Restore both declared RIDs to retain the committed lock graph;
+        # execution and publishing below select only the supported x64 target.
+        run: dotnet restore .\PureDS4.sln --locked-mode -p:Configuration=Release -p:Platform=x64 -p:SelfContained=true
+
+      - name: Check package security advisories
+        shell: pwsh
         run: |
-          dotnet restore .\PureDS4.sln --locked-mode
+          $report = dotnet list .\PureDS4.sln package --vulnerable --include-transitive --no-restore --format json | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) { throw "NuGet advisory query failed." }
+          if (-not $report.sources -or -not $report.projects) {
+            throw "NuGet advisory query returned no source or projects."
+          }
+          $affected = @($report.projects | ForEach-Object { $_.frameworks } |
+            ForEach-Object { @($_.topLevelPackages) + @($_.transitivePackages) } |
+            Where-Object { $_.vulnerabilities.Count -gt 0 })
+          if ($affected.Count -gt 0) {
+            $affected | ConvertTo-Json -Depth 8 | Write-Host
+            throw "A restored dependency has a reported security advisory."
+          }
+
+      - name: Test release-input gate
+        run: python .\utils\test-release-inputs.py
+
+      - name: Test managed-notice gate
+        run: python .\utils\test-managed-notices.py
+
+      - name: Run tests (x64)
+        # The full disposable suite gates packaging. XML tests check semantic
+        # round-trips and authorized legacy normalization, not byte snapshots.
+        # Exercise the same pinned runtime shipped to users rather than the
+        # older shared runtime that happens to come with the selected SDK.
+        run: dotnet test .\PureDS4.Tests\PureDS4.Tests.csproj -c Release -p:Platform=x64 -r win-x64 -p:SelfContained=true --no-restore --filter "FullyQualifiedName!~LiveProcessCapture" --verbosity normal
+
+      - name: Restore installer dependencies
+        run: |
           dotnet restore .\installer\PureDS4.SetupActions\PureDS4.SetupActions.csproj --locked-mode
           dotnet restore .\installer\PureDS4.Bootstrapper\PureDS4.Bootstrapper.csproj --locked-mode
           dotnet restore .\installer\PureDS4.Package\PureDS4.Package.wixproj --locked-mode
