@@ -6,16 +6,44 @@
         xmlns:lex="http://wpflocalizeextension.codeplex.com"
         xmlns:mdxam="clr-namespace:MdXaml;assembly=MdXaml"
         xmlns:local="clr-namespace:DS4WinWPF.DS4Forms"
+        lex:ResxLocalizationProvider.DefaultAssembly="PureDS4"
+        lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="{lex:Loc Changelog}" Height="450" Width="800"
+        Title="{lex:Loc Changelog}" Height="560" Width="760" MinHeight="320" MinWidth="420"
+        ResizeMode="CanResize" WindowStartupLocation="CenterOwner"
         Style="{DynamicResource WindowStyle}">
-    <DockPanel Margin="8,0">
-        <TextBlock x:Name="captionTextBlock" Text="{Binding IntroText}" DockPanel.Dock="Top" Margin="0,4" />
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Right" Margin="0,0,0,8">
-            <Button x:Name="closeBtn" Content="{lex:Loc Close}" MinWidth="80" Click="CloseBtn_Click" />
+    <Grid Margin="16" TextElement.FontWeight="Normal">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="Release notes" Style="{StaticResource FoundationPageTitleStyle}" />
+            <TextBlock Text="Release notes and downloads are available on GitHub." Margin="0,4,0,0"
+                       Style="{StaticResource FoundationSecondaryTextStyle}" />
+            <TextBlock x:Name="captionTextBlock" Text="{Binding IntroText}" TextWrapping="Wrap">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource FoundationSecondaryTextStyle}">
+                        <Setter Property="Margin" Value="0,8,0,0" />
+                        <Style.Triggers>
+                            <Trigger Property="Text" Value=""><Setter Property="Visibility" Value="Collapsed" /></Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
         </StackPanel>
-
-        <mdxam:MarkdownScrollViewer Margin="0,8" Markdown="{Binding Markdown}"
-                                    ClickAction="OpenBrowser" MarkdownStyle="{StaticResource DocumentStyleGithubLike}" />
-    </DockPanel>
+        <Border Grid.Row="1" Padding="12,8" Background="{DynamicResource SurfaceRaisedBrush}"
+                BorderBrush="{DynamicResource SurfaceDividerBrush}" BorderThickness="1">
+            <mdxam:MarkdownScrollViewer x:Name="releaseNotesViewer" Markdown="{Binding Markdown}"
+                                        VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                        FocusVisualStyle="{StaticResource FoundationFocusVisualStyle}"
+                                        AutomationProperties.Name="Release notes"
+                                        ClickAction="OpenBrowser" MarkdownStyle="{DynamicResource FoundationDocumentStyle}" />
+        </Border>
+        <Border Grid.Row="2" Style="{StaticResource FoundationDialogActionsStyle}">
+            <Button x:Name="closeBtn" Content="{lex:Loc Close}" MinWidth="88" Click="CloseBtn_Click"
+                    HorizontalAlignment="Right" Style="{StaticResource FoundationPrimaryButtonStyle}" />
+        </Border>
+    </Grid>
 </Window>

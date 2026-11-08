@@ -25,6 +25,10 @@ namespace DS4WindowsTests
             Assert.AreEqual(
                 UpdateAuthorityPolicy.ReleaseNotesDisabledMarkdown,
                 await Changelog.GetChangelogMarkdown(allVersions: true));
+            StringAssert.Contains(UpdateAuthorityPolicy.ReleaseNotesDisabledMarkdown,
+                ProductIdentity.RepositoryUrl + "/releases");
+            StringAssert.Contains(UpdateAuthorityPolicy.ReleaseNotesDisabledMarkdown,
+                "does not download release notes");
             Assert.AreEqual(0,
                 (await Changelog.GetChangelog(allVersions: true)).Count);
             StringAssert.Contains(Changelog.GITHUB_RELEASES_API_URI,

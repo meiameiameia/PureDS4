@@ -17,6 +17,7 @@ using DS4Windows;
 using System;
 using System.Linq;
 using System.Windows;
+using MessageBox = DS4WinWPF.DS4Forms.AppDialog;
 using System.Windows.Automation;
 
 namespace DS4WinWPF.DS4Forms

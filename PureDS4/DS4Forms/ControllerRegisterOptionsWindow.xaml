@@ -9,69 +9,121 @@
         lex:ResxLocalizationProvider.DefaultAssembly="PureDS4"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="{lex:Loc ControllerRegOptWin.WinTitle}" Height="450" Width="800"
+        Title="{lex:Loc ControllerRegOptWin.WinTitle}" Height="480" Width="800"
+        MinHeight="400" MinWidth="720" UseLayoutRounding="True" SnapsToDevicePixels="True"
         Style="{DynamicResource WindowStyle}" Closed="Window_Closed">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>
-    <DockPanel x:Name="devOptionsDockPanel" Margin="4">
-        <DockPanel>
-            <StackPanel DockPanel.Dock="Top">
-                <CheckBox Content="{lex:Loc ControllerSupportDS4}" IsChecked="{Binding DS4DeviceOpts.Enabled}" />
-                <CheckBox Content="Accept Moonlight / Sunshine virtual controllers"
-                          IsChecked="{Binding UseMoonlight}"
-                          ToolTip="Accept every supported virtual controller created while Sunshine is running. PureDS4's own game outputs are always excluded." />
-                <TextBlock>
-                    <Hyperlink NavigateUri="https://github.com/meiameiameia/pureds4/blob/main/docs/moonlight_support.md"
-                               RequestNavigate="Hyperlink_RequestNavigate">
-                        About virtual controller support
-                    </Hyperlink>
-                </TextBlock>
-            </StackPanel>
-
-            <!-- Present only in a DualShock 3 hardware-validation build. A
-                 standard build binds nothing here because the panel is
-                 collapsed and ExperimentalDS3Build is a compile-time false. -->
-            <StackPanel DockPanel.Dock="Top" Margin="0,16,0,0"
-                        Visibility="{Binding ExperimentalDS3Build, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <TextBlock Text="DualShock 3 (experimental hardware validation)"
-                           FontWeight="SemiBold" />
-                <CheckBox Content="Enable DualShock 3 detection"
-                          IsChecked="{Binding DS3DeviceOpts.Enabled}"
-                          Margin="0,4,0,0"
-                          ToolTip="Experimental. Requires DsHidMini or a Sixaxis driver already installed. Not supported in a public release." />
-                <TextBlock TextWrapping="Wrap" Margin="0,4,0,0" Opacity="0.8"
-                           Text="This build is for testing a genuine DualShock 3 only. It is not a public release and must not be promoted." />
-            </StackPanel>
-
-            <StackPanel DockPanel.Dock="Top" Margin="0,16,0,0">
-                <CheckBox Content="{lex:Loc EnableVerboseLog}" IsChecked="{Binding VerboseLogMessages}" ToolTip="{lex:Loc EnableVerboseLogTip}"/>
-            </StackPanel>
-            
-            <DockPanel DockPanel.Dock="Bottom" Margin="0,20,0,0">
-                <Label Content="{lex:Loc DetectedControllers}" ContentStringFormat="{}{0}:" DockPanel.Dock="Top" FontWeight="Bold" />
-                <ListBox x:Name="controllerListBox" ItemsSource="{Binding CurrentInputDevices}" SelectedIndex="{Binding ControllerSelectedIndex}"
-                      Margin="0,8,0,0">
+    <DockPanel x:Name="devOptionsDockPanel" Margin="16,12">
+        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+            <TextBlock Text="Controller detection" Style="{StaticResource FoundationPageTitleStyle}" />
+            <TextBlock Text="Choose what PureDS4 detects and inspect device-specific options."
+                       Style="{StaticResource FoundationSecondaryTextStyle}" TextWrapping="Wrap" Margin="0,4,0,0" />
+        </StackPanel>
+        <TextBlock DockPanel.Dock="Bottom" Text="Changes are saved when you close this window."
+                   Style="{StaticResource FoundationSecondaryTextStyle}" TextWrapping="Wrap" Margin="0,12,0,0" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="20" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+                    <TextBlock Text="Detection" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,0,0,6" />
+                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                        <DockPanel>
+                            <CheckBox x:Name="ds4DetectionToggle" DockPanel.Dock="Right" Margin="12,0,0,0"
+                                      Style="{StaticResource FoundationToggleSwitchStyle}"
+                                      AutomationProperties.Name="DualShock 4 detection" IsChecked="{Binding DS4DeviceOpts.Enabled}" />
+                            <StackPanel>
+                                <TextBlock Text="DualShock 4" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                <TextBlock Text="Detect supported DS4 controllers." Style="{StaticResource FoundationSettingDescriptionStyle}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                        <DockPanel>
+                            <CheckBox x:Name="moonlightDetectionToggle" DockPanel.Dock="Right" Margin="12,0,0,0"
+                                      Style="{StaticResource FoundationToggleSwitchStyle}" IsChecked="{Binding UseMoonlight}"
+                                      AutomationProperties.Name="Moonlight / Sunshine virtual controllers"
+                                      ToolTip="PureDS4's own game outputs are always excluded." />
+                            <StackPanel>
+                                <TextBlock Text="Moonlight / Sunshine" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                <TextBlock Text="Accept supported streamed controllers." Style="{StaticResource FoundationSettingDescriptionStyle}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                    <TextBlock Margin="0,8,0,0" TextWrapping="Wrap">
+                        <Hyperlink NavigateUri="https://github.com/meiameiameia/pureds4/blob/main/docs/moonlight_support.md"
+                                   RequestNavigate="Hyperlink_RequestNavigate">About virtual controller support</Hyperlink>
+                    </TextBlock>
+                    <!-- Kept for explicit hardware-validation builds only. -->
+                    <StackPanel x:Name="experimentalDs3Panel" Margin="0,16,0,0"
+                                Visibility="{Binding ExperimentalDS3Build, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Text="DualShock 3 (experimental hardware validation)" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <CheckBox Content="Enable DualShock 3 detection" IsChecked="{Binding DS3DeviceOpts.Enabled}" Margin="0,4,0,0"
+                                  ToolTip="Experimental. Requires DsHidMini or a Sixaxis driver already installed. Not supported in a public release." />
+                        <TextBlock TextWrapping="Wrap" Margin="0,4,0,0" Style="{StaticResource FoundationSecondaryTextStyle}"
+                                   Text="This build is for testing a genuine DualShock 3 only. It is not a public release and must not be promoted." />
+                    </StackPanel>
+                    <TextBlock Text="Diagnostics" Style="{StaticResource FoundationSectionHeadingStyle}" />
+                    <Border Style="{StaticResource FoundationSettingRowStyle}">
+                        <DockPanel>
+                            <CheckBox x:Name="verboseDetectionToggle" DockPanel.Dock="Right" Margin="12,0,0,0"
+                                      Style="{StaticResource FoundationToggleSwitchStyle}" IsChecked="{Binding VerboseLogMessages}"
+                                      AutomationProperties.Name="Verbose detection logging" ToolTip="{lex:Loc EnableVerboseLogTip}" />
+                            <StackPanel>
+                                <TextBlock Text="Verbose logging" Style="{StaticResource FoundationSettingTitleStyle}" />
+                                <TextBlock Text="Include additional device diagnostics." Style="{StaticResource FoundationSettingDescriptionStyle}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="{lex:Loc DetectedControllers}" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,0,0,6" />
+                <ListBox x:Name="controllerListBox" Grid.Row="1" ItemsSource="{Binding CurrentInputDevices}"
+                         SelectedIndex="{Binding ControllerSelectedIndex}" AutomationProperties.Name="Detected controllers"
+                         HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding IdText}" />
+                            <TextBlock Text="{Binding IdText}" TextWrapping="Wrap" Margin="4" />
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-            </DockPanel>
-            
-        </DockPanel>
-
-        <TabControl x:Name="deviceSettingsTabControl" DockPanel.Dock="Right" SelectedIndex="{Binding CurrentTabSelectedIndex}" Margin="40,4,4,4">
-            <TabItem Header="Blank" Visibility="Collapsed">
-            </TabItem>
-
-            <TabItem x:Name="ds4OptsTabItem" Header="DS4" Visibility="Collapsed">
-                <StackPanel Visibility="{Binding Visible, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="4">
-                    <CheckBox Content="{lex:Loc Copycat}" IsChecked="{Binding Options.IsCopyCat, FallbackValue='False'}" ToolTip="{lex:Loc CopycatTip}" />
-                </StackPanel>
-            </TabItem>
-
-        </TabControl>
+                <Grid Grid.Row="2" Margin="0,12,0,0">
+                    <TextBlock Text="Select a controller to see its device options." TextWrapping="Wrap">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource FoundationSecondaryTextStyle}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ControllerSelectedIndex}" Value="-1">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TabControl x:Name="deviceSettingsTabControl" SelectedIndex="{Binding CurrentTabSelectedIndex}"
+                                Style="{StaticResource FoundationContentTabsStyle}">
+                        <TabItem Header="Blank" Visibility="Collapsed" />
+                        <TabItem x:Name="ds4OptsTabItem" Header="DS4" Visibility="Collapsed">
+                            <StackPanel Visibility="{Binding Visible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="Device options" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,0,0,6" />
+                                <CheckBox Content="{lex:Loc Copycat}" IsChecked="{Binding Options.IsCopyCat, FallbackValue='False'}"
+                                          ToolTip="{lex:Loc CopycatTip}" />
+                            </StackPanel>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+            </Grid>
+        </Grid>
     </DockPanel>
 </Window>

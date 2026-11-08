@@ -9,21 +9,22 @@
         lex:ResxLocalizationProvider.DefaultAssembly="PureDS4"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="{lex:Loc RenameProfileWin.WinTitle}" Height="210" Width="480" MinHeight="180" MinWidth="360"
+        Title="{lex:Loc RenameProfileWin.WinTitle}" Height="230" Width="480" MinHeight="180" MinWidth="360"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         Style="{DynamicResource WindowStyle}" Closed="Window_Closed">
     <DockPanel x:Name="mainDockPanel" Margin="16">
-        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource FoundationButtonStyle}" x:Name="cancelBtn" Content="{lex:Loc Cancel}" Click="CancelBtn_Click" MinWidth="80" />
-            <Button Style="{StaticResource FoundationButtonStyle}" x:Name="confirmBtn" Content="{lex:Loc Confirm}" Click="ConfirmBtn_Click" MinWidth="80" Margin="8,0,0,0" />
-        </StackPanel>
-
-        <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Center">
-            <TextBox Style="{StaticResource FoundationTextBoxStyle}" DockPanel.Dock="Bottom" Margin="0,16,0,0" Text="{Binding ProfileName}" AutomationProperties.Name="New profile name">
-            </TextBox>
-
-            <TextBlock DockPanel.Dock="Top" Text="{lex:Loc RenameProfileWin.TypeNewProfileName}">
-            </TextBlock>
-        </DockPanel>
+        <Border DockPanel.Dock="Bottom" Style="{StaticResource FoundationDialogActionsStyle}">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource FoundationButtonStyle}" x:Name="cancelBtn" Content="{lex:Loc Cancel}" Click="CancelBtn_Click" MinWidth="80" />
+                <Button Style="{StaticResource FoundationPrimaryButtonStyle}" x:Name="confirmBtn" Content="{lex:Loc Confirm}" Click="ConfirmBtn_Click" MinWidth="80" Margin="8,0,0,0" />
+            </StackPanel>
+        </Border>
+        <ScrollViewer x:Name="renamePropertiesScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+                <TextBlock Text="{lex:Loc RenameProfileWin.WinTitle}" Style="{StaticResource FoundationPageTitleStyle}" TextWrapping="Wrap" />
+                <TextBlock Text="{lex:Loc RenameProfileWin.TypeNewProfileName}" TextWrapping="Wrap" Style="{StaticResource FoundationSecondaryTextStyle}" Margin="0,4,0,12" />
+                <TextBox x:Name="profileNameTxt" Style="{StaticResource FoundationTextBoxStyle}" Text="{Binding ProfileName}" AutomationProperties.Name="New profile name" />
+            </StackPanel>
+        </ScrollViewer>
     </DockPanel>
 </Window>

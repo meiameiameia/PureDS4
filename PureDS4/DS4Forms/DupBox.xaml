@@ -12,20 +12,14 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="2*" MinWidth="126" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-        <StackPanel Margin="0,0,16,0">
-            <Label Content="{lex:Loc Resources:TypeNewName}" Target="{Binding ElementName=profileTxt}"
-                   Style="{StaticResource FoundationPropertyLabelStyle}" />
-            <TextBox x:Name="profileTxt" TextWrapping="Wrap" Text="" MaxLines="1"
-                     AutomationProperties.Name="New profile name"
-                     Style="{StaticResource FoundationTextBoxStyle}" />
-        </StackPanel>
-        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom">
-            <Button x:Name="saveBtn" Content="{lex:Loc Save}" MinWidth="72" Click="SaveBtn_Click"
-                    Style="{StaticResource FoundationPrimaryButtonStyle}" />
-            <Button x:Name="cancelBtn" Content="{lex:Loc Cancel}" MinWidth="72" Click="CancelBtn_Click"
-                    Style="{StaticResource FoundationButtonStyle}" Margin="8,0,0,0" />
+        <Label Content="{lex:Loc Resources:TypeNewName}" Target="{Binding ElementName=profileTxt}" Style="{StaticResource FoundationWrappedPropertyLabelStyle}" Margin="0,0,12,0" />
+        <TextBox Grid.Column="1" x:Name="profileTxt" TextWrapping="NoWrap" Text="" MaxLines="1" AutomationProperties.Name="New profile name" Style="{StaticResource FoundationTextBoxStyle}" Margin="0,0,16,0" VerticalAlignment="Center" />
+        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+            <Button x:Name="cancelBtn" Content="{lex:Loc Cancel}" MinWidth="72" Click="CancelBtn_Click" Style="{StaticResource FoundationButtonStyle}" />
+            <Button x:Name="saveBtn" Content="{lex:Loc Save}" MinWidth="72" Click="SaveBtn_Click" Style="{StaticResource FoundationPrimaryButtonStyle}" Margin="8,0,0,0" />
         </StackPanel>
     </Grid>
 </UserControl>

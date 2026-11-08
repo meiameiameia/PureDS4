@@ -60,9 +60,7 @@ namespace DS4Windows
 
             return new ElevationNotice(
                 "Some actions need administrator rights",
-                "Game output may still work. Setup and protection changes may " +
-                "need elevation; keyboard and mouse mappings cannot reach " +
-                "an elevated game from this process.");
+                "Keyboard and mouse mappings cannot reach games running as administrator.");
         }
     }
 

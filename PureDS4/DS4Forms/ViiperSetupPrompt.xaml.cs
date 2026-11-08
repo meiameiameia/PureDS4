@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using System.Windows.Input;
 
 namespace DS4WinWPF.DS4Forms
 {
@@ -56,7 +55,6 @@ namespace DS4WinWPF.DS4Forms
             installButton.Content = presentation.PrimaryAction;
             installPortableButton.Content = presentation.PortableAction;
             notNowButton.Content = presentation.ContinueAction;
-            closeButton.ToolTip = presentation.ContinueAction;
             installPortableButton.Visibility = presentation.ShowPortableAction
                 ? Visibility.Visible : Visibility.Collapsed;
             portableWarningPanel.Visibility = presentation.ShowPortableAction
@@ -150,15 +148,6 @@ namespace DS4WinWPF.DS4Forms
             };
         }
 
-        private void TitleBar_MouseLeftButtonDown(object sender,
-            MouseButtonEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed)
-            {
-                DragMove();
-            }
-        }
-
         private void InstallButton_Click(object sender, RoutedEventArgs e)
         {
             Decision = ViiperSetupPromptDecision.InstallStandard;
@@ -178,10 +167,5 @@ namespace DS4WinWPF.DS4Forms
             DialogResult = false;
         }
 
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
-        {
-            Decision = ViiperSetupPromptDecision.NotNow;
-            DialogResult = false;
-        }
     }
 }

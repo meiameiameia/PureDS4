@@ -9,23 +9,42 @@
         lex:ResxLocalizationProvider.DefaultAssembly="PureDS4"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="PluginOutDevWindow" Height="200" Width="400"
+        Title="Plug output slot" Height="350" Width="480" MinHeight="350" MinWidth="420"
+        ResizeMode="CanResize" WindowStartupLocation="CenterOwner"
         Style="{DynamicResource WindowStyle}">
-    <DockPanel LastChildFill="False">
-        <TextBlock Text="{lex:Loc DeviceType}" DockPanel.Dock="Top" />
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" Height="40" HorizontalAlignment="Right">
-            <Button x:Name="acceptBtn" Content="{lex:Loc Accept}" Click="AcceptBtn_Click" />
-            <Button x:Name="cancelBtn" Content="{lex:Loc Cancel}" Click="CancelBtn_Click" Margin="20,0,0,0" />
-        </StackPanel>
-
-        <ComboBox x:Name="devTypeCombo" SelectedIndex="0" DockPanel.Dock="Top">
-            <ComboBoxItem Tag="0" Content="DualShock 4" />
-            <ComboBoxItem Tag="1" Content="Xbox 360" />
-        </ComboBox>
-
-        <ComboBox x:Name="reserveTypeCombo" SelectedIndex="0" DockPanel.Dock="Top">
-            <ComboBoxItem Content="{lex:Loc Dynamic}" Tag="0" />
-            <ComboBoxItem Content="{lex:Loc Permanent}" Tag="1" />
-        </ComboBox>
-    </DockPanel>
+    <Grid Margin="16" TextElement.FontWeight="Normal">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+                <TextBlock Text="Plug output slot" Style="{StaticResource FoundationPageTitleStyle}" />
+                <TextBlock Text="Choose the virtual controller presented to games."
+                           Margin="0,4,0,16" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                <Label Content="{lex:Loc DeviceType}" Target="{Binding ElementName=devTypeCombo}" Padding="0,0,0,4" />
+                <ComboBox x:Name="devTypeCombo" SelectedIndex="0" AutomationProperties.Name="Output controller type"
+                          Style="{StaticResource FoundationComboBoxStyle}">
+                    <ComboBoxItem Tag="0" Content="DualShock 4" />
+                    <ComboBoxItem Tag="1" Content="Xbox 360" />
+                </ComboBox>
+                <Label Content="Reservation" Target="{Binding ElementName=reserveTypeCombo}" Padding="0,0,0,4" Margin="0,12,0,0" />
+                <ComboBox x:Name="reserveTypeCombo" SelectedIndex="0" AutomationProperties.Name="Output slot reservation"
+                          Style="{StaticResource FoundationComboBoxStyle}">
+                    <ComboBoxItem Content="{lex:Loc Dynamic}" Tag="0" />
+                    <ComboBoxItem Content="{lex:Loc Permanent}" Tag="1" />
+                </ComboBox>
+                <TextBlock Text="Dynamic releases unused slots. Permanent keeps the slot reserved between sessions."
+                           Margin="0,6,0,0" Style="{StaticResource FoundationSecondaryTextStyle}" />
+            </StackPanel>
+        </ScrollViewer>
+        <Border Grid.Row="1" Style="{StaticResource FoundationDialogActionsStyle}">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="cancelBtn" Content="{lex:Loc Cancel}" Click="CancelBtn_Click"
+                        MinWidth="88" Margin="0,0,8,0" Style="{StaticResource FoundationButtonStyle}" />
+                <Button x:Name="acceptBtn" Content="{lex:Loc Accept}" Click="AcceptBtn_Click"
+                        MinWidth="88" Style="{StaticResource FoundationPrimaryButtonStyle}" />
+            </StackPanel>
+        </Border>
+    </Grid>
 </Window>

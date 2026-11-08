@@ -39,6 +39,12 @@ namespace DS4WinWPF.DS4Forms
             Dispatcher.Invoke(() => { }, DispatcherPriority.Background);
         }
 
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            NativeWindowFrame.SetCloseCommandEnabled(this, false);
+        }
+
         public void SetPhase(string message)
         {
             if (Dispatcher.CheckAccess())
@@ -86,6 +92,8 @@ namespace DS4WinWPF.DS4Forms
             setupProgress.IsIndeterminate = false;
             setupProgress.Value = success ? 100 : 0;
             statusGlyph.Text = success ? "\u2713" : "!";
+            statusGlyph.SetResourceReference(System.Windows.Controls.TextBlock.ForegroundProperty,
+                success ? "StateSuccessBrush" : "StateErrorBrush");
             headingText.Text = success
                 ? "Game output is ready"
                 : "Game output setup needs attention";

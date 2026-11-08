@@ -17,9 +17,9 @@
             "signed update channel is established.";
 
         public const string ReleaseNotesDisabledMarkdown =
-            "## Release notes unavailable\n\n" +
-            ProductIdentity.Name + " release notes will become available when " +
-            "the independent release channel is established. No upstream " +
-            "release feed is queried by this build.";
+            "## View release notes on GitHub\n\n" +
+            "This window does not download release notes. See the changes " +
+            "and download files on the [" + ProductIdentity.Name + " releases page](" +
+            ProductIdentity.RepositoryUrl + "/releases).";
     }
 }

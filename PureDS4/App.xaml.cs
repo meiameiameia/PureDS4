@@ -682,8 +682,8 @@ namespace DS4WinWPF
         {
             if (!DS4Windows.Global.Save()) //if can't write to file
             {
-                if (MessageBox.Show("Cannot write at current location\nCopy Settings to appdata?", DS4Windows.ProductIdentity.Name,
-                    MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                if (DS4Forms.AppDialog.Show("Cannot write at current location\nCopy Settings to appdata?", DS4Windows.ProductIdentity.Name,
+                    MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.Yes) == MessageBoxResult.Yes)
                 {
                     try
                     {
@@ -699,12 +699,12 @@ namespace DS4WinWPF
                         }
                     }
                     catch { }
-                    MessageBox.Show("Copy complete, please relaunch PureDS4 and remove settings from Program Directory",
+                    DS4Forms.AppDialog.Show("Copy complete, please relaunch PureDS4 and remove settings from Program Directory",
                         DS4Windows.ProductIdentity.Name);
                 }
                 else
                 {
-                    MessageBox.Show("PureDS4 cannot edit settings here, This will now close",
+                    DS4Forms.AppDialog.Show("PureDS4 cannot edit settings here, This will now close",
                         DS4Windows.ProductIdentity.Name);
                 }
 

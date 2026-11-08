@@ -312,7 +312,7 @@ namespace DS4Windows.Tests
         }
 
         [TestMethod]
-        public void UnsafeUsbipRuntimeAndCitrixBypassPromptSuppression()
+        public void UnsafeUsbipRuntimeAndCitrixRequireVerifiedRepair()
         {
             ViiperPrerequisiteStatus status = new ViiperPrerequisiteStatus
             {

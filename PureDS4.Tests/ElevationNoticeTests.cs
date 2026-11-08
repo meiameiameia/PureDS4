@@ -28,9 +28,8 @@ public class ElevationNoticeTests
         Assert.IsNotNull(notice);
         StringAssert.Contains(notice.Title, "administrator");
         // Output may be working without elevation; the banner cannot decide.
-        StringAssert.Contains(notice.Message, "Game output");
-        StringAssert.Contains(notice.Message, "may still work");
-        StringAssert.Contains(notice.Message, "elevated game");
+        StringAssert.Contains(notice.Message, "Keyboard and mouse mappings");
+        StringAssert.Contains(notice.Message, "games running as administrator");
         Assert.IsFalse(notice.Message.Contains("no game output",
             StringComparison.OrdinalIgnoreCase));
         Assert.AreEqual(ElevationNotice.RestartActionLabel, notice.ActionLabel);

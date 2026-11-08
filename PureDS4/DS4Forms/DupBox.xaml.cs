@@ -22,6 +22,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using MessageBox = DS4WinWPF.DS4Forms.AppDialog;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;

@@ -233,7 +233,7 @@ namespace DS4Windows
         private static DateTime lastForeignViiperTerminationAttemptUtc =
             DateTime.MinValue;
         private static string lastForeignViiperTerminationFailure;
-        private static int promptShownThisSession;
+        private static readonly ViiperSetupPromptSession setupPromptSession = new();
         private static int installerRunning;
 
         private const uint ProcessQueryLimitedInformation = 0x1000;
@@ -381,33 +381,42 @@ namespace DS4Windows
         public static bool EnsureReadyWithPrompt(Window owner, bool forcePrompt = false)
         {
             ViiperPrerequisiteStatus status = GetStatus(tryStartServer: true);
+            return EnsureReadyWithPromptCore(status, setupPromptSession,
+                Global.SuppressViiperSetupPrompt, forcePrompt,
+                () => ShowSetupPrompt(owner, status));
+        }
+
+        // Injectable orchestration: tests use only synthetic prerequisite state
+        // and a callback, never GetStatus, Windows services or a real dialog.
+        internal static bool EnsureReadyWithPromptCore(
+            ViiperPrerequisiteStatus status, ViiperSetupPromptSession session,
+            bool suppressPrompt, bool forcePrompt, Func<bool> showPrompt)
+        {
+            ArgumentNullException.ThrowIfNull(status);
+            ArgumentNullException.ThrowIfNull(session);
+            ArgumentNullException.ThrowIfNull(showPrompt);
+            if (!session.TryBeginPrompt(status.Ready, suppressPrompt, forcePrompt))
+            {
+                return status.Ready;
+            }
+
+            // Showing/dismissing a dialog never authorizes invalid output.
+            // A false callback result also preserves the existing installer-
+            // launched path, which must wait for verified setup completion.
+            return showPrompt() && status.Ready;
+        }
+
+        private static bool ShowSetupPrompt(Window owner,
+            ViiperPrerequisiteStatus status)
+        {
             bool verifiedUpdateRequired = RequiresVerifiedViiperUpdate(status);
             bool usbipReplacementRequired =
                 RequiresUsbipReplacement(status);
-            // VIIPER is the only output backend. An incomplete, mismatched,
-            // ABI-incompatible, or non-running prerequisite set is therefore
-            // a startup gate rather than an ignorable warning. Keeping this
-            // separate from verifiedUpdateRequired lets the prompt explain a
-            // missing dependency accurately while still failing closed.
+            // Required repair describes output eligibility, not permission to
+            // override notification preferences. Keep it separate from exact
+            // identity mismatches so the dialog explains missing components
+            // accurately. Unready output stays blocked even without a dialog.
             bool mandatoryRepairRequired = !status.Ready;
-            if (status.Ready && !forcePrompt)
-            {
-                return true;
-            }
-
-            if (Global.SuppressViiperSetupPrompt && !forcePrompt &&
-                !mandatoryRepairRequired)
-            {
-                return status.Ready;
-            }
-
-            if (Volatile.Read(ref promptShownThisSession) == 1 && !forcePrompt &&
-                !mandatoryRepairRequired)
-            {
-                return status.Ready;
-            }
-
-            Interlocked.Exchange(ref promptShownThisSession, 1);
             string alternativeViiperPath =
                 FindAlternativeViiperPath(GetCanonicalViiperExePath());
             DS4WinWPF.DS4Forms.ViiperSetupPrompt prompt = new(
@@ -498,9 +507,9 @@ namespace DS4Windows
             ViiperPrerequisiteStatus status)
         {
             // A readable but unsupported version is an exact identity
-            // mismatch, not an optional missing prerequisite. It must bypass
-            // both "don't show again" and the once-per-session prompt latch so
-            // the user is offered the safe two-boot replacement flow.
+            // mismatch, not an optional missing prerequisite. Output must stay
+            // blocked and repair must use the safe two-boot replacement flow,
+            // even when automatic setup dialogs have been suppressed.
             return status != null &&
                 !string.IsNullOrWhiteSpace(status.UsbipVersion) &&
                 !status.UsbipInstalled;
@@ -666,7 +675,7 @@ namespace DS4Windows
                     tryStartServer: true);
                 if (exitCode == 0 && refreshed.Ready)
                 {
-                    Interlocked.Exchange(ref promptShownThisSession, 0);
+                    setupPromptSession.Reset();
                     AppLogger.LogToGui(
                         "SUCCESSFUL: VIIPER setup finished successfully.",
                         false, false);

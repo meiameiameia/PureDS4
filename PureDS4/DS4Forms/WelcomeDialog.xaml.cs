@@ -14,6 +14,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Windows;
+using MessageBox = DS4WinWPF.DS4Forms.AppDialog;
 
 namespace DS4WinWPF.DS4Forms
 {

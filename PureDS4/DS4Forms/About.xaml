@@ -4,11 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="About PureDS4" Height="600" Width="760"
+        Title="About PureDS4" Icon="/PureDS4;component/Resources/DS4W.ico" Height="600" Width="760"
         MinHeight="480" MinWidth="640" ResizeMode="CanResize"
         WindowStartupLocation="CenterOwner"
         Style="{DynamicResource WindowStyle}">
-    <Grid Margin="20">
+    <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -19,37 +19,38 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Image Source="/PureDS4;component/Resources/AppIcon.png"
-                   Width="48" Height="48" Margin="0,0,12,0"
+                   Width="56" Height="56" Margin="0,0,16,0" VerticalAlignment="Center"
                    AutomationProperties.Name="PureDS4 controller icon" />
             <StackPanel Grid.Column="1">
-                <TextBlock Text="PureDS4" FontSize="22" FontWeight="SemiBold" />
+                <TextBlock Text="PureDS4" FontSize="22" Style="{StaticResource FoundationPageTitleStyle}" />
                 <TextBlock Text="A focused Windows tool for the DualShock 4"
                            Margin="0,3,0,0" Style="{StaticResource FoundationSecondaryTextStyle}" />
-            </StackPanel>
-            <StackPanel Grid.Column="2" HorizontalAlignment="Right">
-                <TextBlock x:Name="versionText" FontWeight="SemiBold" HorizontalAlignment="Right" />
-                <TextBlock Text="Maintained by meiameiameia" Margin="0,3,0,0"
+                <TextBlock x:Name="versionText" Margin="0,6,0,0"
                            Style="{StaticResource FoundationSecondaryTextStyle}" />
             </StackPanel>
         </Grid>
 
-        <TabControl Grid.Row="1">
-            <TabItem Header="Overview">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="16">
-                        <TextBlock Text="About this derivative" Style="{StaticResource FoundationGroupTitleStyle}" />
-                        <TextBlock Margin="0,6,0,16" TextWrapping="Wrap"
-                                   Text="PureDS4 continues the DS4Windows lineage as a deliberately narrow tool for the DualShock 4, with a focused desktop-tool interface, explicit game-output status, and safer controller exposure transitions. If you use a DualSense, DualSense Edge, Switch Pro, Joy-Con or any other controller family, use DS4Windows instead. DualShock 3 is a planned future milestone and is not supported by this release." />
+        <TabControl Grid.Row="1" x:Name="aboutTabs" SelectedIndex="0"
+                    Style="{StaticResource FoundationDialogTabsStyle}" AutomationProperties.Name="About PureDS4 sections">
+            <TabItem Header="_Overview">
+                <ScrollViewer x:Name="overviewScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="0,16,0,0" TextElement.FontWeight="Normal">
+                        <TextBlock Text="Built around the DualShock 4" Style="{StaticResource FoundationGroupTitleStyle}" />
+                        <TextBlock Margin="0,6,0,12" TextWrapping="Wrap" Style="{StaticResource FoundationBodyTextStyle}"
+                                   Text="PureDS4 is an independently maintained fork of hbashton's DS4Windows for Windows. It supports the DualShock 4 over USB and Bluetooth." />
+                        <TextBlock Margin="0,0,0,12" TextWrapping="Wrap" Style="{StaticResource FoundationBodyTextStyle}"
+                                   Text="Use Xbox 360 or DS4 game output, with profiles, remapping and controller adjustments. You can also switch a controller to direct/native use while PureDS4 stays open." />
+                        <TextBlock Margin="0,0,0,16" Style="{StaticResource FoundationSecondaryTextStyle}"
+                                   Text="For DualSense, DualSense Edge, Switch Pro, Joy-Con or other controller families, use DS4Windows instead. DualShock 3 is not supported by this release." />
                         <Border Style="{StaticResource FoundationPropertyGroupStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="140" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Project" Style="{StaticResource FoundationColumnHeaderStyle}" />
+                                <TextBlock Text="Project" VerticalAlignment="Center" Style="{StaticResource FoundationColumnHeaderStyle}" />
                                 <Button Grid.Column="1" Content="Open source repository" HorizontalAlignment="Left"
                                         Click="SourceLink_Click" Style="{StaticResource FoundationLinkButtonStyle}" />
                             </Grid>
@@ -60,7 +61,7 @@
                                     <ColumnDefinition Width="140" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Upstream lineage" Style="{StaticResource FoundationColumnHeaderStyle}" />
+                                <TextBlock Text="Upstream" VerticalAlignment="Center" Style="{StaticResource FoundationColumnHeaderStyle}" />
                                 <Button Grid.Column="1" Content="hbashton/DS4Windows" HorizontalAlignment="Left"
                                         Click="UpstreamLink_Click" Style="{StaticResource FoundationLinkButtonStyle}" />
                             </Grid>
@@ -71,48 +72,79 @@
                                     <ColumnDefinition Width="140" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="License" Style="{StaticResource FoundationColumnHeaderStyle}" />
+                                <TextBlock Text="License" VerticalAlignment="Center" Style="{StaticResource FoundationColumnHeaderStyle}" />
                                 <TextBlock Grid.Column="1" TextWrapping="Wrap"
-                                           Text="GNU General Public License v3.0. This software comes with no warranty. You may redistribute and modify it under the license terms." />
+                                           Style="{StaticResource FoundationBodyTextStyle}"
+                                           Text="GPL-3.0-or-later. You may redistribute and modify this software under the license terms. No warranty is provided." />
                             </Grid>
                         </Border>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="Hotkeys">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="16">
+            <TabItem Header="_Shortcuts">
+                <ScrollViewer x:Name="shortcutsScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="0,16,0,0" TextElement.FontWeight="Normal">
                         <TextBlock Text="Controller shortcuts" Style="{StaticResource FoundationGroupTitleStyle}" />
                         <TextBlock Text="Shortcuts depend on the active profile and enabled features."
                                    Margin="0,4,0,12" Style="{StaticResource FoundationSecondaryTextStyle}" />
-                        <TextBlock Text="PS + Options, or hold PS for 10 seconds" FontWeight="SemiBold" />
-                        <TextBlock Text="Disconnect a Bluetooth controller." Margin="0,2,0,12" Style="{StaticResource FoundationSecondaryTextStyle}" />
-                        <TextBlock Text="Touchpad + PS" FontWeight="SemiBold" />
-                        <TextBlock Text="Toggle touchpad movement while preserving clicks." Margin="0,2,0,12" Style="{StaticResource FoundationSecondaryTextStyle}" />
-                        <TextBlock Text="Two-finger touchpad swipe left or right" FontWeight="SemiBold" />
-                        <TextBlock Text="Cycle profiles when swipe profiles are enabled." Margin="0,2,0,12" Style="{StaticResource FoundationSecondaryTextStyle}" />
-                        <TextBlock Text="Touchpad gestures" FontWeight="SemiBold" />
-                        <TextBlock Text="Two-finger vertical swipe scrolls; tap-and-hold starts a left-button drag when enabled."
-                                   Margin="0,2,0,12" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                        <Border Style="{StaticResource FoundationPropertyRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="210" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <TextBlock Text="PS + Options, or hold PS for 10 seconds" Margin="0,0,16,0" TextWrapping="Wrap"
+                                           Style="{StaticResource FoundationGroupTitleStyle}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="Disconnect a Bluetooth controller."
+                                           VerticalAlignment="Center" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource FoundationPropertyRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="210" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <TextBlock Text="Touchpad + PS" Margin="0,0,16,0" TextWrapping="Wrap"
+                                           Style="{StaticResource FoundationGroupTitleStyle}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="Toggle touchpad movement while preserving clicks."
+                                           VerticalAlignment="Center" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource FoundationPropertyRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="210" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <TextBlock Text="Two-finger swipe left or right" Margin="0,0,16,0" TextWrapping="Wrap"
+                                           Style="{StaticResource FoundationGroupTitleStyle}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="Cycle profiles when swipe profiles are enabled."
+                                           VerticalAlignment="Center" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource FoundationPropertyRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="210" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <TextBlock Text="Touchpad gestures" Margin="0,0,16,0" TextWrapping="Wrap"
+                                           Style="{StaticResource FoundationGroupTitleStyle}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="Two-finger vertical swipe scrolls; tap-and-hold starts a left-button drag when enabled."
+                                           VerticalAlignment="Center" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                            </Grid>
+                        </Border>
                         <TextBlock Text="Mapping terms" Style="{StaticResource FoundationGroupTitleStyle}" Margin="0,10,0,8" />
                         <TextBlock Text="Toggle keeps a mapping held until pressed again. Macro assigns a sequence. Scan Code uses low-level keyboard codes required by some games. Shift Modifier exposes a second mapping layer."
-                                   TextWrapping="Wrap" />
+                                   TextWrapping="Wrap" Style="{StaticResource FoundationBodyTextStyle}" />
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="Licenses and acknowledgements">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="16">
+            <TabItem Header="_Licenses and credits">
+                <ScrollViewer x:Name="licensesScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="0,16,0,0" TextElement.FontWeight="Normal">
                         <TextBlock Text="Open-source lineage" Style="{StaticResource FoundationGroupTitleStyle}" />
                         <TextBlock Margin="0,5,0,14" TextWrapping="Wrap"
-                                   Text="PureDS4 is a modified DS4Windows derivative. Original authors and contributors retain their respective copyrights." />
+                                   Style="{StaticResource FoundationBodyTextStyle}"
+                                   Text="PureDS4 builds on hbashton's DS4Windows and the work of the DS4Windows authors and contributors before it. Original authors and contributors retain their respective copyrights." />
                         <TextBlock Text="Bundled components" Style="{StaticResource FoundationGroupTitleStyle}" />
                         <TextBlock Margin="0,5,0,14" TextWrapping="Wrap"
+                                   Style="{StaticResource FoundationBodyTextStyle}"
                                    Text="Bundled and linked components remain governed by their own license terms. Driver, codec, and artwork notices ship with the application; pinned third-party binary provenance is maintained in the repository." />
                         <TextBlock Text="Required notices" Style="{StaticResource FoundationGroupTitleStyle}" />
                         <TextBlock Margin="0,5,0,14" TextWrapping="Wrap"
+                                   Style="{StaticResource FoundationBodyTextStyle}"
                                    Text="The complete GPL text and bundled third-party license notices are included with the distribution. Component versions and source locations are documented in the repository. No warranty is provided." />
                         <Button Content="Open repository notices" HorizontalAlignment="Left"
                                 Click="NoticesLink_Click" Style="{StaticResource FoundationToolbarButtonStyle}" />
@@ -121,8 +153,14 @@
             </TabItem>
         </TabControl>
 
-        <Button Grid.Row="2" Content="Close" IsCancel="True" MinWidth="90"
-                HorizontalAlignment="Right" Margin="0,16,0,0"
-                Style="{StaticResource FoundationPrimaryButtonStyle}" />
+        <Border Grid.Row="2" Style="{StaticResource FoundationDialogActionsStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <TextBlock Text="Maintained by meiameiameia" Margin="0,0,16,0" VerticalAlignment="Center"
+                           Style="{StaticResource FoundationSecondaryTextStyle}" />
+                <Button Grid.Column="1" x:Name="aboutCloseBtn" Content="Close" IsCancel="True" MinWidth="88"
+                        AutomationProperties.Name="Close About PureDS4" Style="{StaticResource FoundationPrimaryButtonStyle}" />
+            </Grid>
+        </Border>
     </Grid>
 </Window>
