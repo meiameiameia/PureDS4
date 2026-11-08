@@ -516,6 +516,17 @@ namespace DS4WindowsTests
                 dto.MapTo(tempStore);
             }
 
+            // Exercise non-default DS4 settings. Legacy output normalization
+            // is allowed; losing user input/audio preferences is not.
+            tempStore.lsModInfo[0].deadZone = 27;
+            tempStore.rsModInfo[0].deadZone = 31;
+            tempStore.l2ModInfo[0].deadZone = 13;
+            tempStore.r2ModInfo[0].deadZone = 19;
+            tempStore.rumble[0] = 67;
+            tempStore.rumbleAutostopTime[0] = 750;
+            tempStore.touchSensitivity[0] = 73;
+            tempStore.gyroSensitivity[0] = 127;
+            tempStore.btPollRate[0] = 4;
             string testStr = string.Empty;
             serializer = new XmlSerializer(typeof(ProfileDTO),
                 ProfileDTO.GetAttributeOverrides());
@@ -567,6 +578,15 @@ namespace DS4WindowsTests
             roundTrip.MapTo(roundTripStore);
             Assert.AreEqual(OutContType.ViiperX360,
                 roundTripStore.outputDevType[0]);
+            Assert.AreEqual(27, roundTripStore.lsModInfo[0].deadZone);
+            Assert.AreEqual(31, roundTripStore.rsModInfo[0].deadZone);
+            Assert.AreEqual(13, roundTripStore.l2ModInfo[0].deadZone);
+            Assert.AreEqual(19, roundTripStore.r2ModInfo[0].deadZone);
+            Assert.AreEqual((byte)67, roundTripStore.rumble[0]);
+            Assert.AreEqual(750, roundTripStore.rumbleAutostopTime[0]);
+            Assert.AreEqual((byte)73, roundTripStore.touchSensitivity[0]);
+            Assert.AreEqual(127, roundTripStore.gyroSensitivity[0]);
+            Assert.AreEqual(4, roundTripStore.btPollRate[0]);
         }
     }
 }

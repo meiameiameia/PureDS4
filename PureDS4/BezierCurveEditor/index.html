@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Curve editor · PureDS4</title>
   <style>
-    :root { color-scheme: light; --base: #e0e6ea; --surface: #fff; --text: #20272c; --muted: #515e67; --border: #65727c; --accent: #2e647f; }
+    :root { color-scheme: light; --base: #e1e6eb; --surface: #fff; --text: #202830; --muted: #4d5b69; --border: #737e8a; --accent: #285f8c; --hover: #dde3ea; }
     @media (prefers-color-scheme: dark) {
-      :root { color-scheme: dark; --base: #10171d; --surface: #202b34; --text: #edf2f6; --muted: #c5d0d8; --border: #718390; --accent: #89b8d6; }
+      :root { color-scheme: dark; --base: #1d2127; --surface: #303741; --text: #f1f4f8; --muted: #c5cfda; --border: #98a4b2; --accent: #94bfdf; --hover: #414c59; }
     }
     * { box-sizing: border-box; }
     body { margin: 0 auto; max-width: 1040px; padding: 24px !important; background: var(--base) !important; color: var(--text) !important; font: 14px/1.5 "Segoe UI Variable Text", "Segoe UI", sans-serif !important; }
@@ -15,14 +15,14 @@
     h3 { font-size: 14px; font-weight: 600; }
     p { max-width: 800px; color: var(--muted); }
     a { color: var(--accent) !important; text-decoration: underline !important; }
-    input:not([type="checkbox"]), button { min-height: 32px; padding: 4px 8px; border: 1px solid var(--border); border-radius: 2px; background: var(--surface); color: var(--text); font: inherit; }
+    input:not([type="checkbox"]), button { min-height: 28px; padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text); font: inherit; }
     input[type="checkbox"] { accent-color: var(--accent); margin-right: 8px; }
     :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     code { font: 14px "Cascadia Mono", Consolas, monospace; user-select: all; }
     table { width: 100%; border-collapse: collapse; }
     td { vertical-align: top; padding: 8px; }
     td button { margin: 4px 0; text-align: left; width: 100%; cursor: pointer; }
-    td button:hover { border-color: var(--accent); }
+    td button:hover { background: var(--hover); border-color: var(--accent); }
     /* The inherited graph has a fixed coordinate system and dark axis labels. */
     svg { box-sizing: content-box; background: #fff; color-scheme: light; outline: 1px solid var(--border); }
     @media (max-width: 700px) { body { padding: 16px !important; } table, tbody, tr, td { display: block; } }

@@ -12,37 +12,14 @@
              mc:Ignorable="d" 
              d:DesignHeight="380" d:DesignWidth="800">
     <UserControl.Resources>
-        <Style x:Key="AutoProfileRuleItemStyle" TargetType="ListViewItem">
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="Margin" Value="0" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListViewItem">
-                        <Border x:Name="RuleCard" Background="{DynamicResource SurfaceBaseBrush}"
-                                BorderBrush="{DynamicResource BorderDefaultBrush}" BorderThickness="2,0,0,1"
-                                CornerRadius="0" Padding="12,8">
-                            <ContentPresenter />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="RuleCard" Property="BorderBrush" Value="{DynamicResource AccentColor}" />
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="RuleCard" Property="Background" Value="{DynamicResource NavigationSelectionColor}" />
-                                <Setter TargetName="RuleCard" Property="BorderBrush" Value="{DynamicResource AccentColor}" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+        <Style x:Key="AutoProfileRuleItemStyle" TargetType="ListViewItem"
+               BasedOn="{StaticResource FoundationControllerRowStyle}">
+            <Setter Property="Padding" Value="12,8" />
         </Style>
         <Style x:Key="AutoProfileMetaLabelStyle" TargetType="TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource MutedForegroundColor}" />
-            <Setter Property="FontSize" Value="10" />
-            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="{StaticResource TypeColumnHeaderSize}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Margin" Value="0,1,10,1" />
             <Setter Property="VerticalAlignment" Value="Top" />
         </Style>
@@ -60,7 +37,7 @@
                        Margin="0,3,0,0" Style="{StaticResource FoundationSecondaryTextStyle}" />
         </StackPanel>
             <Border DockPanel.Dock="Right" Width="304" Margin="12,0,0,0"
-                    Background="{DynamicResource SurfaceRaisedBrush}" BorderBrush="{DynamicResource BorderDefaultBrush}"
+                    Background="{DynamicResource SurfaceRaisedBrush}" BorderBrush="{DynamicResource SurfaceDividerBrush}"
                     BorderThickness="1,0,0,0" CornerRadius="0" Padding="12">
             <ScrollViewer x:Name="sidebarScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <ScrollViewer.Resources>
@@ -392,11 +369,10 @@
             </Border>
 
         <DockPanel>
-            <Border DockPanel.Dock="Top" Width="390" MaxWidth="390"
-                    HorizontalAlignment="Left" Margin="0,0,0,10"
-                    Background="{DynamicResource RaisedBackgroundColor}"
-                    BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
-                    CornerRadius="2">
+            <Border DockPanel.Dock="Top" MaxWidth="390"
+                    Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DockPanel}}"
+                    HorizontalAlignment="Left" Margin="0,0,0,12"
+                    Style="{StaticResource FoundationSearchFieldStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="34" />
@@ -420,9 +396,10 @@
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
-                    <TextBox x:Name="autoProfilesSearchTextBox" Grid.Column="1"
+                    <TextBox x:Name="autoProfilesSearchTextBox" Grid.Column="1" Tag="Embedded"
                              BorderThickness="0" Background="Transparent"
-                             Padding="2,8" VerticalContentAlignment="Center"
+                             Padding="2,4" MinHeight="28" VerticalContentAlignment="Center"
+                             AutomationProperties.Name="Search auto-profile rules"
                              TextChanged="AutoProfilesSearchTextBox_TextChanged"
                              ToolTip="Search by profile, window title, executable, or path" />
                     <Button x:Name="clearAutoProfilesSearchBtn" Grid.Column="2" Content="&#xE711;"
@@ -471,6 +448,7 @@
             </StackPanel>
             <ListView x:Name="programListLV" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                       ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True"
+                      VirtualizingPanel.ScrollUnit="Pixel"
                       SelectedIndex="{Binding SelectedIndex}" SelectedItem="{Binding SelectedItem}"
                       ItemContainerStyle="{StaticResource AutoProfileRuleItemStyle}"
                       Background="Transparent" BorderThickness="0">
@@ -478,7 +456,8 @@
                     <!-- The theme's implicit ListView template draws a header rule that
                          shows as a stray line over the empty state. Rules need no header. -->
                     <ControlTemplate TargetType="ListView">
-                        <ScrollViewer Focusable="False" Padding="{TemplateBinding Padding}">
+                        <ScrollViewer Focusable="False" Padding="{TemplateBinding Padding}"
+                                      CanContentScroll="{TemplateBinding ScrollViewer.CanContentScroll}">
                             <ItemsPresenter />
                         </ScrollViewer>
                     </ControlTemplate>

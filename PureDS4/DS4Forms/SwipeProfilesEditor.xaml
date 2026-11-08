@@ -8,7 +8,7 @@
         MinHeight="420" MinWidth="420" ResizeMode="CanResize"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         Style="{DynamicResource WindowStyle}">
-    <Grid Margin="20">
+    <Grid Margin="16" TextElement.FontWeight="Normal">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -33,21 +33,31 @@
         </Border>
 
         <ListBox Grid.Row="2" x:Name="profilesListBox" ItemsSource="{Binding Items}"
+                 Style="{StaticResource FoundationListBoxStyle}"
                  HorizontalContentAlignment="Stretch"
-                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 ScrollViewer.CanContentScroll="True" VirtualizingPanel.ScrollUnit="Pixel"
+                 AutomationProperties.Name="Profiles available for swipe rotation">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <CheckBox Content="{Binding Name}" IsChecked="{Binding IsAllowed, Mode=TwoWay}"
-                              Margin="4,2" />
+                    <CheckBox IsChecked="{Binding IsAllowed, Mode=TwoWay}"
+                              Style="{StaticResource FoundationCheckBoxStyle}"
+                              AutomationProperties.Name="{Binding Name}" ToolTip="{Binding Name}"
+                              Margin="4,2" HorizontalContentAlignment="Stretch">
+                        <TextBlock Text="{Binding Name}" TextWrapping="Wrap" />
+                    </CheckBox>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-            <Button x:Name="cancelBtn" Content="Cancel" MinWidth="88" IsCancel="True" Click="CancelBtn_Click" />
-            <Button x:Name="okBtn" Content="Save" MinWidth="88" Margin="8,0,0,0"
-                    IsDefault="True" Click="OkBtn_Click"
-                    Style="{StaticResource FoundationPrimaryButtonStyle}" />
-        </StackPanel>
+        <Border Grid.Row="3" Style="{StaticResource FoundationDialogActionsStyle}">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="cancelBtn" Content="Cancel" MinWidth="88" IsCancel="True" Click="CancelBtn_Click" />
+                <Button x:Name="okBtn" Content="Save" MinWidth="88" Margin="8,0,0,0"
+                        IsDefault="True" Click="OkBtn_Click"
+                        Style="{StaticResource FoundationPrimaryButtonStyle}" />
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>

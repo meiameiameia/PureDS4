@@ -218,13 +218,28 @@ namespace DS4WinWPF.DS4Forms
             }
 
             FindCurrentHighlightButton();
+
+            X360Controls output = bind.outputType == OutBinding.OutType.Default
+                ? Global.defaultButtonMapping[(int)bind.input] : bind.control;
+            mapOptionsPanel.SelectedIndex = OutputPageIndex(expose, bind.outputType, output);
+        }
+
+        // Presentation routing only: selecting a page never writes a binding.
+        internal static int OutputPageIndex(ExposeMode mode, OutBinding.OutType type,
+            X360Controls output)
+        {
+            if (mode == ExposeMode.Keyboard || type is OutBinding.OutType.Key or OutBinding.OutType.Macro)
+                return 0;
+            if (output >= X360Controls.AbsMouseUp && output <= X360Controls.AbsMouseRight)
+                return 1;
+            return OutBinding.IsMouseRange(output) ? 0 : 2;
         }
 
         private void FindCurrentHighlightButton()
         {
             if (highlightBtn != null)
             {
-                highlightBtn.Background = SystemColors.ControlBrush;
+                highlightBtn.ClearValue(Control.BackgroundProperty);
             }
 
             OutBinding binding = bindingVM.ActionBinding;
@@ -243,7 +258,7 @@ namespace DS4WinWPF.DS4Forms
                 {
                     if (mouseBtnMap.TryGetValue(defaultBind, out Button tempBtn))
                     {
-                        tempBtn.Background = new SolidColorBrush(Colors.LimeGreen);
+                        tempBtn.SetResourceReference(Control.BackgroundProperty, "SurfaceSelectedBrush");
                         highlightBtn = tempBtn;
                     }
                 }
@@ -262,7 +277,7 @@ namespace DS4WinWPF.DS4Forms
                 {
                     if (mouseBtnMap.TryGetValue(binding.control, out Button tempBtn))
                     {
-                        tempBtn.Background = new SolidColorBrush(Colors.LimeGreen);
+                        tempBtn.SetResourceReference(Control.BackgroundProperty, "SurfaceSelectedBrush");
                         highlightBtn = tempBtn;
                     }
                 }
@@ -271,7 +286,7 @@ namespace DS4WinWPF.DS4Forms
             {
                 if (keyBtnMap.TryGetValue(binding.outkey, out Button tempBtn))
                 {
-                    tempBtn.Background = new SolidColorBrush(Colors.LimeGreen);
+                    tempBtn.SetResourceReference(Control.BackgroundProperty, "SurfaceSelectedBrush");
                     highlightBtn = tempBtn;
                 }
             }

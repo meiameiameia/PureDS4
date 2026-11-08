@@ -22,6 +22,7 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Windows;
+using MessageBox = DS4WinWPF.DS4Forms.AppDialog;
 using System.Windows.Controls;
 using System.Windows.Media;
 

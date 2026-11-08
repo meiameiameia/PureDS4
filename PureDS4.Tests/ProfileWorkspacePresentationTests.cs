@@ -28,12 +28,15 @@ public class ProfileWorkspacePresentationTests
         WpfTestHost.Run(() =>
         {
             foreach (bool dark in new[] { false, true })
-            foreach (Size size in new[] { new Size(704, 360), new Size(1008, 540) })
+            foreach (Size size in new[] { new Size(672, 268), new Size(704, 360), new Size(1008, 540) })
             {
                 Theme(dark);
                 UserControl view = Load("ProfileEditor");
                 var owner = new Window { Content = view };
                 view.DataContext = new EditorFixture();
+                var profileName = (TextBox)view.FindName("profileNameTxt");
+                profileName.Text = "Default";
+                profileName.IsEnabled = false;
                 var nav = (ListBox)view.FindName("sectionNavigationList");
                 var sidebar = (TabControl)view.FindName("sidebarTabControl");
                 var settings = (TabControl)view.FindName("profileSettingsTabCon");
@@ -57,12 +60,48 @@ public class ProfileWorkspacePresentationTests
                     if (section < 3) sidebar.SelectedIndex = section;
                     else settings.SelectedIndex = section - 3;
                     Layout(view, size);
-                    Assert.AreEqual(190, ((Border)nav.Parent).ActualWidth, 0.1);
-                    foreach (string name in new[] { "profileNameTxt", "presetBtn", "applyBtn", "cancelBtn", "saveBtn" })
+                    nav.ScrollIntoView(nav.SelectedItem);
+                    Layout(view, size);
+                    Assert.IsTrue(((ListBoxItem)nav.SelectedItem).ActualHeight > 0,
+                        "The selected profile section must be rendered even in the compact viewport.");
+                    Assert.AreEqual(180, ((Border)nav.Parent).ActualWidth, 0.1);
+                    // Native virtualization leaves offscreen items unrealized;
+                    // each section is checked after scrolling it into view.
+                    foreach (ListBoxItem item in nav.Items.Cast<ListBoxItem>().Where(i => i.ActualHeight > 0))
+                    {
+                        var captions = Descendants<TextBlock>(item).ToArray();
+                        Assert.AreEqual(1, captions.Length,
+                            $"Navigation '{item.Content}': size={item.RenderSize}, visible={item.Visibility}, template={item.ContentTemplate != null}.");
+                        var caption = captions.Single();
+                        Rect captionBounds = caption.TransformToAncestor(item)
+                            .TransformBounds(new Rect(caption.RenderSize));
+                        Assert.AreEqual(item.ActualHeight / 2 - 1,
+                            captionBounds.Top + captionBounds.Height / 2, 0.75,
+                            $"Profile navigation caption '{item.Content}' stays optically centered.");
+                        Assert.IsTrue(captionBounds.Top >= 0 && captionBounds.Bottom <= item.ActualHeight,
+                            "Navigation captions must not be clipped.");
+                        Assert.AreEqual(((SolidColorBrush)item.Foreground).Color,
+                            ((SolidColorBrush)caption.Foreground).Color,
+                            "Selection and unavailable sections retain their own foreground.");
+                    }
+                    foreach (string name in new[] { "profileNameHeading", "presetBtn", "applyBtn", "cancelBtn", "saveBtn" })
                         Inside(view, (FrameworkElement)view.FindName(name));
                     Assert.IsFalse(((Button)view.FindName("applyBtn")).IsEnabled);
                     if (section == 0)
                     {
+                        var diagram = (Image)view.FindName("controllerDiagram");
+                        var mapScroll = (ScrollViewer)view.FindName("controllerMapScroll");
+                        Rect diagramBounds = diagram.TransformToAncestor(view).TransformBounds(new Rect(diagram.RenderSize));
+                        // The available column changes with window width and the
+                        // scrollbar. Guard against height collapsing the map,
+                        // without imposing an unrelated absolute column width.
+                        Assert.IsTrue(diagramBounds.Width >= Math.Min(440, mapScroll.ViewportWidth) * 0.75,
+                            $"At {size}, scrolling must preserve a usable controller map rather than shrink its hit targets to icon size (actual {diagramBounds.Width:0.0} DIP in {mapScroll.ViewportWidth:0.0} DIP, extent {mapScroll.ExtentHeight:0.0}).");
+                        mapScroll.ScrollToBottom();
+                        Layout(view, size);
+                        Assert.AreEqual(mapScroll.ScrollableHeight, mapScroll.VerticalOffset, 0.1,
+                            "The lower controller controls and preset hint must remain reachable.");
+                        mapScroll.ScrollToTop();
                         var mappings = (ListBox)view.FindName("mappingListBox");
                         var edit = (Button)view.FindName("editMappingButton");
                         mappings.SelectedIndex = -1;
@@ -142,6 +181,7 @@ public class ProfileWorkspacePresentationTests
         {
             foreach (bool dark in new[] { false, true })
             foreach (int count in new[] { 0, 2, 40 })
+            foreach (Size size in new[] { new Size(672, 360), new Size(976, 540) })
             {
                 Theme(dark);
                 UserControl view = Load("MainWindow", "profilesBrowserPanel");
@@ -151,7 +191,7 @@ public class ProfileWorkspacePresentationTests
                 {
                     Name = $"Profile {i} with a long descriptive name", GameOutputDisplay = "DualShock 4", ModifiedDisplay = "08 Sep 2026 12:00"
                 }).ToArray();
-                Layout(view, new Size(704, 360));
+                Layout(view, size);
                 foreach (string name in new[] { "newProfListBtn", "editProfBtn", "dupProfBtn", "renameProfBtn", "deleteProfBtn", "importProfBtn", "exportProfBtn", "profilesSearchTextBox" })
                     Inside(view, (FrameworkElement)view.FindName(name));
                 Assert.AreEqual(count, list.Items.Count);
@@ -165,11 +205,125 @@ public class ProfileWorkspacePresentationTests
                 {
                     list.SelectedIndex = count - 1;
                     list.ScrollIntoView(list.SelectedItem);
-                    Layout(view, new Size(704, 360));
+                    Layout(view, size);
                     Assert.AreEqual(count - 1, list.SelectedIndex);
                 }
-                Preview(view, $"profiles-{count}", dark);
+                Preview(view, $"profiles-{count}-{(int)size.Width}", dark);
                 owner.Content = null;
+            }
+        });
+    }
+
+    [TestMethod]
+    public void ProfileToolbarKeepsActionsTogetherAndSearchReachableWithoutWeakeningItsBorder()
+    {
+        WpfTestHost.Run(() =>
+        {
+            foreach (bool dark in new[] { false, true })
+            foreach (Size size in new[] { new Size(672, 360), new Size(976, 540) })
+            {
+                Theme(dark);
+                UserControl view = Load("MainWindow", "profilesBrowserPanel");
+                var owner = new Window { Content = view };
+                try
+                {
+                    Layout(view, size);
+                    var toolbar = (ActionGroupPanel)view.FindName("profOptsToolbar");
+                    Assert.AreEqual(2, toolbar.Children.Count);
+                    var actions = ((WrapPanel)toolbar.Children[0]).Children.Cast<Button>().ToArray();
+                    Assert.AreEqual(7, actions.Length);
+                    Rect Bounds(FrameworkElement element) =>
+                        element.TransformToAncestor(view).TransformBounds(new Rect(element.RenderSize));
+                    Rect first = Bounds(actions[0]);
+                    foreach (Button action in actions)
+                    {
+                        Inside(view, action);
+                        Assert.AreEqual(first.Top, Bounds(action).Top, 0.1,
+                            "The library's action group must not split around the search field.");
+                    }
+                    var search = (Border)view.FindName("profilesSearchBorder");
+                    Inside(view, search);
+                    Rect searchBounds = Bounds(search);
+                    Assert.AreEqual(view.ActualWidth, searchBounds.Right, 0.1);
+                    if (size.Width < 800)
+                        Assert.IsTrue(searchBounds.Top >= first.Bottom + 8 - 0.1,
+                            "Compact layout puts the intact search group below the intact actions.");
+                    else
+                        Assert.AreEqual(first.Top, searchBounds.Top, 0.1,
+                            "Wide layout keeps actions and search on one line.");
+                    Assert.AreEqual(((SolidColorBrush)Application.Current.FindResource("BorderDefaultBrush")).Color,
+                        ((SolidColorBrush)search.BorderBrush).Color,
+                        "Only decorative dividers are quietened; search remains an interactive field.");
+                    Assert.IsTrue(search.Style.Triggers.OfType<Trigger>().Any(trigger =>
+                        trigger.Property == UIElement.IsKeyboardFocusWithinProperty &&
+                        trigger.Setters.OfType<Setter>().Any(setter => setter.Property == Border.BorderBrushProperty)),
+                        "Keyboard focus must still outline the complete search field.");
+                    Size emptySearchSize = search.RenderSize;
+                    var query = (TextBox)view.FindName("profilesSearchTextBox");
+                    var clear = (Button)view.FindName("clearProfilesSearchBtn");
+                    var hint = ((Grid)search.Child).Children.OfType<TextBlock>().Single(text => text.Text == "Search profiles");
+                    foreach (string text in new[] { "Default and custom strategy profiles", "" })
+                    {
+                        query.Text = text;
+                        // Mirror only the clear-button visibility owned by the
+                        // search handler; never construct the live MainWindow.
+                        clear.Visibility = text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+                        Layout(view, size);
+                        Assert.AreEqual(emptySearchSize, search.RenderSize,
+                            "Typing and revealing Clear must not resize the search field.");
+                        Assert.AreEqual(text, query.Text);
+                        Assert.AreEqual(text.Length > 0 ? Visibility.Collapsed : Visibility.Visible, hint.Visibility);
+                        if (clear.Visibility == Visibility.Visible) Inside(search, clear);
+                    }
+                }
+                finally { owner.Content = null; }
+            }
+        });
+    }
+
+    [TestMethod]
+    public void ProfileHeadingAndEditableNameKeepActionsReachableAndTextIntact()
+    {
+        WpfTestHost.Run(() =>
+        {
+            foreach (bool dark in new[] { false, true })
+            foreach (Size size in new[] { new Size(704, 360), new Size(1008, 540) })
+            {
+                Theme(dark);
+                UserControl view = Load("ProfileEditor");
+                var owner = new Window { Content = view, DataContext = new EditorFixture() };
+                try
+                {
+                    var name = (TextBox)view.FindName("profileNameTxt");
+                    var heading = (TextBlock)view.FindName("profileNameHeading");
+                    foreach (string text in new[] { "Default", "A long profile name for strategy games and custom controller mappings" })
+                    foreach (bool editable in new[] { true, false, true })
+                    {
+                        name.Text = text;
+                        name.IsEnabled = editable;
+                        Layout(view, size);
+                        Assert.AreEqual(text, name.Text);
+                        Assert.AreEqual(text, heading.Text);
+                        Assert.AreEqual(text, heading.ToolTip);
+                        Assert.AreEqual(editable ? Visibility.Visible : Visibility.Collapsed, name.Visibility);
+                        Assert.AreEqual(editable ? Visibility.Hidden : Visibility.Visible, heading.Visibility,
+                            "Keep the existing inverse converter's stable-layout visibility semantics.");
+                        Inside(view, editable ? name : heading);
+                        if (!editable)
+                        {
+                            Assert.AreEqual(20d, heading.FontSize);
+                            Assert.IsTrue(heading.IsEnabled, "The title must not inherit disabled field styling.");
+                            Assert.AreEqual(1d, heading.Opacity);
+                            Assert.AreEqual(((SolidColorBrush)Application.Current.FindResource("TextPrimaryBrush")).Color,
+                                ((SolidColorBrush)heading.Foreground).Color);
+                        }
+                        foreach (string action in new[] { "presetBtn", "applyBtn", "cancelBtn", "saveBtn" })
+                            Inside(view, (Button)view.FindName(action));
+                        Assert.IsFalse(((Button)view.FindName("applyBtn")).IsEnabled,
+                            "Presentation must not activate Apply before the real change-tracking logic does.");
+                    }
+                }
+                finally { owner.Content = null; }
             }
         });
     }
@@ -378,7 +532,7 @@ public class ProfileWorkspacePresentationTests
             "The input must give way when the name cannot be edited here.");
         XElement heading = box.Parent.Elements(Wpf + "TextBlock").Single();
         Assert.AreEqual("{Binding Text, ElementName=profileNameTxt}", (string)heading.Attribute("Text"));
-        Assert.AreEqual("{StaticResource FoundationGroupTitleStyle}", (string)heading.Attribute("Style"));
+        Assert.AreEqual("{StaticResource FoundationPageTitleStyle}", (string)heading.Attribute("Style"));
         Assert.IsTrue(((string)heading.Attribute("Visibility")).Contains("InvertBoolToVisibilityConverter"));
     }
 
@@ -390,7 +544,7 @@ public class ProfileWorkspacePresentationTests
         return XElement.Load(Path.Combine(directory.FullName, "PureDS4", "DS4Forms", name + ".xaml"));
     }
 
-    private static UserControl Load(string name, string subtree = null)
+    internal static UserControl Load(string name, string subtree = null)
     {
         System.Reflection.Assembly.Load("WPFLocalizeExtension");
         System.Reflection.Assembly.Load(typeof(Xceed.Wpf.Toolkit.DoubleUpDown).Assembly.FullName);
@@ -420,7 +574,7 @@ public class ProfileWorkspacePresentationTests
         return (UserControl)XamlReader.Parse(text);
     }
 
-    private static void Theme(bool dark)
+    internal static void Theme(bool dark)
     {
         Application.Current.Resources.MergedDictionaries.Clear();
         foreach (string name in new[] { dark ? "DarkTheme" : "DefaultTheme", "Foundation", "BridgeShellStyles" })
@@ -467,15 +621,15 @@ public class ProfileWorkspacePresentationTests
         encoder.Save(stream);
     }
 
-    public sealed class EditorFixture
+    public class EditorFixture
     {
         public string ProfileName { get; set; } = "Disposable layout fixture";
         public int SelectedIndex { get; set; }
         public int ActionTypeIndex { get; set; } = 2;
         public string ActionName { get; set; } = "Example action";
         public double LSDeadZone { get; set; } = 0.15;
-        public int LSOutputIndex { get; set; } = 1;
-        public int RSOutputIndex { get; set; } = 1;
+        public virtual int LSOutputIndex { get; set; } = 1;
+        public virtual int RSOutputIndex { get; set; } = 1;
         public object[] Mappings { get; } = Enumerable.Range(1, 30).Select(i => (object)new
         {
             ControlName = "Control " + i, MappingName = "Action with a longer descriptive name", IsAvailableOnPhysicalController = i != 30,

@@ -73,26 +73,26 @@
                         <ColumnDefinition Width="76" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Row="0" Text="R" VerticalAlignment="Center" />
-                    <Slider x:Name="PART_RSlider" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="255"
+                    <Slider x:Name="PART_RSlider" Style="{StaticResource FoundationHorizontalSliderStyle}" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="255"
                             SmallChange="1" LargeChange="10" Margin="8,4" VerticalAlignment="Center"
                             AutomationProperties.Name="R channel" Value="{Binding R, RelativeSource={RelativeSource TemplatedParent}}" />
-                    <xctk:ByteUpDown x:Name="RValue" Grid.Row="0" Grid.Column="2" Padding="4,0" Margin="0,4"
+                    <xctk:ByteUpDown x:Name="RValue" Style="{StaticResource FoundationNumericInputStyle}" Grid.Row="0" Grid.Column="2" Padding="4,0" Margin="0,4"
                                      MinHeight="{StaticResource ControlHeightDefault}" VerticalContentAlignment="Center"
                                      Background="{DynamicResource SurfaceInsetBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
                                      AutomationProperties.Name="R value, 0 to 255" Value="{Binding Value, ElementName=PART_RSlider}" />
                     <TextBlock Grid.Row="1" Text="G" VerticalAlignment="Center" />
-                    <Slider x:Name="PART_GSlider" Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="255"
+                    <Slider x:Name="PART_GSlider" Style="{StaticResource FoundationHorizontalSliderStyle}" Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="255"
                             SmallChange="1" LargeChange="10" Margin="8,4" VerticalAlignment="Center"
                             AutomationProperties.Name="G channel" Value="{Binding G, RelativeSource={RelativeSource TemplatedParent}}" />
-                    <xctk:ByteUpDown x:Name="GValue" Grid.Row="1" Grid.Column="2" Padding="4,0" Margin="0,4"
+                    <xctk:ByteUpDown x:Name="GValue" Style="{StaticResource FoundationNumericInputStyle}" Grid.Row="1" Grid.Column="2" Padding="4,0" Margin="0,4"
                                      MinHeight="{StaticResource ControlHeightDefault}" VerticalContentAlignment="Center"
                                      Background="{DynamicResource SurfaceInsetBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
                                      AutomationProperties.Name="G value, 0 to 255" Value="{Binding Value, ElementName=PART_GSlider}" />
                     <TextBlock Grid.Row="2" Text="B" VerticalAlignment="Center" />
-                    <Slider x:Name="PART_BSlider" Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="255"
+                    <Slider x:Name="PART_BSlider" Style="{StaticResource FoundationHorizontalSliderStyle}" Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="255"
                             SmallChange="1" LargeChange="10" Margin="8,4" VerticalAlignment="Center"
                             AutomationProperties.Name="B channel" Value="{Binding B, RelativeSource={RelativeSource TemplatedParent}}" />
-                    <xctk:ByteUpDown x:Name="BValue" Grid.Row="2" Grid.Column="2" Padding="4,0" Margin="0,4"
+                    <xctk:ByteUpDown x:Name="BValue" Style="{StaticResource FoundationNumericInputStyle}" Grid.Row="2" Grid.Column="2" Padding="4,0" Margin="0,4"
                                      MinHeight="{StaticResource ControlHeightDefault}" VerticalContentAlignment="Center"
                                      Background="{DynamicResource SurfaceInsetBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
                                      AutomationProperties.Name="B value, 0 to 255" Value="{Binding Value, ElementName=PART_BSlider}" />
