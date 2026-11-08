@@ -1,57 +1,39 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:DS4WinWPF.DS4Forms.Themes" xmlns:system="clr-namespace:System;assembly=mscorlib">
-    <!-- Brushes -->
-    <SolidColorBrush x:Key="ForegroundColor" Color="#FF20272C" />
-    <SolidColorBrush x:Key="SecondaryColor" Color="#FFC8D9E5"  />
-    <SolidColorBrush x:Key="AccentColor" Color="#FF2E647F" />
-    <SolidColorBrush x:Key="BorderColor" Color="#FF65727C" />
-    <SolidColorBrush x:Key="BackgroundColor" Color="#FFE0E6EA"/>
-    <SolidColorBrush x:Key="SurfaceBackgroundColor" Color="#FFE0E6EA" />
-    <SolidColorBrush x:Key="SidebarBackgroundColor" Color="#FFFFFFFF" />
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="PaletteLight.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+    <!-- Legacy compatibility brushes; new controls use the shared palette. -->
+    <SolidColorBrush x:Key="ForegroundColor" Color="#FF202830" />
+    <SolidColorBrush x:Key="SecondaryColor" Color="#FFD3E2EE" />
+    <SolidColorBrush x:Key="AccentColor" Color="#FF285F8C" />
+    <SolidColorBrush x:Key="BorderColor" Color="#FF737E8A" />
+    <SolidColorBrush x:Key="BackgroundColor" Color="#FFE1E6EB" />
+    <SolidColorBrush x:Key="SurfaceBackgroundColor" Color="#FFE1E6EB" />
+    <SolidColorBrush x:Key="SidebarBackgroundColor" Color="#FFE1E6EB" />
     <SolidColorBrush x:Key="CardBackgroundColor" Color="#FFFFFFFF" />
-    <SolidColorBrush x:Key="RaisedBackgroundColor" Color="#FFF1F4F6" />
-    <SolidColorBrush x:Key="NavigationSelectionColor" Color="#FFC8D9E5" />
-    <SolidColorBrush x:Key="MutedForegroundColor" Color="#FF515E67" />
-    <SolidColorBrush x:Key="SuccessColor" Color="#FF1F6B3A" />
-    <SolidColorBrush x:Key="DangerColor" Color="#FFA42831" />
+    <SolidColorBrush x:Key="RaisedBackgroundColor" Color="#FFF7F9FB" />
+    <SolidColorBrush x:Key="NavigationSelectionColor" Color="#FFD3E2EE" />
+    <SolidColorBrush x:Key="MutedForegroundColor" Color="#FF4D5B69" />
+    <SolidColorBrush x:Key="SuccessColor" Color="#FF0F6C3E" />
+    <SolidColorBrush x:Key="DangerColor" Color="#FFB42318" />
 
-    <!-- Gate 7 semantic palette. Component styles consume these roles so light
-         and dark modes share geometry, hierarchy, and interaction states. -->
-    <SolidColorBrush x:Key="SurfaceBaseBrush" Color="#FFE0E6EA" />
-    <SolidColorBrush x:Key="SurfaceRaisedBrush" Color="#FFFFFFFF" />
-    <SolidColorBrush x:Key="SurfaceInsetBrush" Color="#FFF1F4F6" />
-    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#FFD8E3EA" />
-    <SolidColorBrush x:Key="SurfaceSelectedBrush" Color="#FFC8D9E5" />
-    <SolidColorBrush x:Key="BorderDefaultBrush" Color="#FF65727C" />
-    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FF20272C" />
-    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FF515E67" />
-    <SolidColorBrush x:Key="TextDisabledBrush" Color="#FF6F7B84" />
-    <SolidColorBrush x:Key="AccentBrush" Color="#FF2E647F" />
-    <SolidColorBrush x:Key="AccentHoverBrush" Color="#FF25526B" />
-    <SolidColorBrush x:Key="AccentPressedBrush" Color="#FF1D4358" />
-    <SolidColorBrush x:Key="AccentForegroundBrush" Color="#FFFFFFFF" />
-    <SolidColorBrush x:Key="FocusBrush" Color="#FF245F8C" />
-    <SolidColorBrush x:Key="StateNeutralBrush" Color="#FF515E67" />
-    <SolidColorBrush x:Key="StateSuccessBrush" Color="#FF1F6B3A" />
-    <SolidColorBrush x:Key="StateWarningBrush" Color="#FF7A5200" />
-    <SolidColorBrush x:Key="StateErrorBrush" Color="#FFA42831" />
-    <SolidColorBrush x:Key="StateRecoveryBrush" Color="#FF245F8C" />
 
     <!-- Opt-in classic-derived foundation. These semantic tokens intentionally do
          not replace legacy control colors until each surface is migrated. -->
-    <SolidColorBrush x:Key="ClassicWorkspaceBrush" Color="#FFE0E6EA" />
+    <SolidColorBrush x:Key="ClassicWorkspaceBrush" Color="#FFE1E6EB" />
     <SolidColorBrush x:Key="ClassicSurfaceBrush" Color="#FFFFFFFF" />
-    <SolidColorBrush x:Key="ClassicSelectedSurfaceBrush" Color="#FFC8D9E5" />
-    <SolidColorBrush x:Key="ClassicDividerBrush" Color="#FF65727C" />
-    <SolidColorBrush x:Key="ClassicPrimaryTextBrush" Color="#FF20272C" />
-    <SolidColorBrush x:Key="ClassicSecondaryTextBrush" Color="#FF515E67" />
-    <SolidColorBrush x:Key="ClassicDisabledTextBrush" Color="#FF6F7B84" />
-    <SolidColorBrush x:Key="ClassicAccentBrush" Color="#FF2E647F" />
-    <SolidColorBrush x:Key="ClassicFocusBrush" Color="#FF245F8C" />
-    <SolidColorBrush x:Key="ClassicReadyBrush" Color="#FF1F6B3A" />
-    <SolidColorBrush x:Key="ClassicWarningBrush" Color="#FF7A5200" />
-    <SolidColorBrush x:Key="ClassicErrorBrush" Color="#FFA42831" />
+    <SolidColorBrush x:Key="ClassicSelectedSurfaceBrush" Color="#FFD3E2EE" />
+    <SolidColorBrush x:Key="ClassicDividerBrush" Color="#FF737E8A" />
+    <SolidColorBrush x:Key="ClassicPrimaryTextBrush" Color="#FF202830" />
+    <SolidColorBrush x:Key="ClassicSecondaryTextBrush" Color="#FF4D5B69" />
+    <SolidColorBrush x:Key="ClassicDisabledTextBrush" Color="#FF707B87" />
+    <SolidColorBrush x:Key="ClassicAccentBrush" Color="#FF285F8C" />
+    <SolidColorBrush x:Key="ClassicFocusBrush" Color="#FF285F8C" />
+    <SolidColorBrush x:Key="ClassicReadyBrush" Color="#FF0F6C3E" />
+    <SolidColorBrush x:Key="ClassicWarningBrush" Color="#FF805600" />
+    <SolidColorBrush x:Key="ClassicErrorBrush" Color="#FFB42318" />
 
     <system:String x:Key="KeyImageImg">key-solid.png</system:String>
     <system:String x:Key="CancelImg">cancel.png</system:String>

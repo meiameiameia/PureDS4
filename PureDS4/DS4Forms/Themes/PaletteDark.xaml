@@ -1,0 +1,28 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Shared by the application and installer. No product startup or state. -->
+    <SolidColorBrush x:Key="SurfaceBaseBrush" Color="#FF1D2127" />
+    <SolidColorBrush x:Key="SurfaceRaisedBrush" Color="#FF303741" />
+    <SolidColorBrush x:Key="SurfaceInsetBrush" Color="#FF252B33" />
+    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#FF414C59" />
+    <SolidColorBrush x:Key="SurfaceBaseHoverBrush" Color="#FF414C59" />
+    <SolidColorBrush x:Key="SurfaceSelectedBrush" Color="#FF36516B" />
+    <SolidColorBrush x:Key="SurfaceSelectedHoverBrush" Color="#FF3C5872" />
+    <SolidColorBrush x:Key="SurfacePressedBrush" Color="#FF37414D" />
+    <SolidColorBrush x:Key="BorderDefaultBrush" Color="#FF98A4B2" />
+    <!-- Decorative separators are distinct from accessible interactive borders. -->
+    <SolidColorBrush x:Key="SurfaceDividerBrush" Color="#FF485461" />
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFF1F4F8" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FFC5CFDA" />
+    <SolidColorBrush x:Key="TextDisabledBrush" Color="#FFA4AFBC" />
+    <SolidColorBrush x:Key="AccentBrush" Color="#FF94BFDF" />
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="#FFAFD0E8" />
+    <SolidColorBrush x:Key="AccentPressedBrush" Color="#FF80ACCE" />
+    <SolidColorBrush x:Key="AccentForegroundBrush" Color="#FF101B24" />
+    <SolidColorBrush x:Key="FocusBrush" Color="#FF94BFDF" />
+    <SolidColorBrush x:Key="StateNeutralBrush" Color="#FFC5CFDA" />
+    <SolidColorBrush x:Key="StateSuccessBrush" Color="#FF6CCB5F" />
+    <SolidColorBrush x:Key="StateWarningBrush" Color="#FFFFB900" />
+    <SolidColorBrush x:Key="StateErrorBrush" Color="#FFFF99A4" />
+    <SolidColorBrush x:Key="StateRecoveryBrush" Color="#FF94BFDF" />
+</ResourceDictionary>

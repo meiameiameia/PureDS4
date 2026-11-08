@@ -162,11 +162,21 @@ namespace DS4WindowsTests
             {
                 Style = (Style)application.FindResource("FoundationControllerRowStyle")
             }.MinHeight);
+            Assert.AreEqual(new CornerRadius(4), application.FindResource("RadiusSmall"));
+            Assert.AreEqual(new CornerRadius(8), application.FindResource("RadiusSurface"));
+            Assert.AreEqual(20d, application.FindResource("TypePageTitleSize"));
+            Assert.AreEqual("Segoe Fluent Icons, Segoe MDL2 Assets",
+                ((FontFamily)application.FindResource("TypeIconFontFamily")).Source);
+            Assert.IsNotNull(GetBrush(application, "SurfaceDividerBrush", themeName));
 
             AssertContrast(application, themeName,
                 "SurfaceBaseBrush", "SurfaceRaisedBrush", 1.25);
             AssertContrast(application, themeName,
                 "SurfaceHoverBrush", "SurfaceRaisedBrush", 1.25);
+            AssertContrast(application, themeName,
+                "SurfaceBaseHoverBrush", "SurfaceBaseBrush", 1.15);
+            AssertContrast(application, themeName,
+                "TextSecondaryBrush", "SurfaceBaseHoverBrush", 4.5);
             AssertContrast(application, themeName,
                 "SurfaceSelectedBrush", "SurfaceRaisedBrush", 1.25);
 
@@ -181,6 +191,11 @@ namespace DS4WindowsTests
                 "TextPrimaryBrush", "SurfaceSelectedBrush", 4.5);
             AssertContrast(application, themeName,
                 "TextSecondaryBrush", "SurfaceSelectedBrush", 4.5);
+            foreach (string interactionSurface in new[] { "SurfaceSelectedHoverBrush", "SurfacePressedBrush" })
+            {
+                AssertContrast(application, themeName, "TextPrimaryBrush", interactionSurface, 4.5);
+                AssertContrast(application, themeName, "TextSecondaryBrush", interactionSurface, 4.5);
+            }
             AssertContrast(application, themeName,
                 "BorderDefaultBrush", "SurfaceBaseBrush", 3.0);
             AssertContrast(application, themeName,
@@ -197,6 +212,12 @@ namespace DS4WindowsTests
                 "AccentForegroundBrush", "AccentHoverBrush", 4.5);
             AssertContrast(application, themeName,
                 "AccentForegroundBrush", "AccentPressedBrush", 4.5);
+            // Links and recovery labels can sit directly on the workspace,
+            // unlike the accent foreground that sits on a filled button.
+            AssertContrast(application, themeName,
+                "AccentBrush", "SurfaceBaseBrush", 4.5);
+            AssertContrast(application, themeName,
+                "AccentBrush", "SurfaceRaisedBrush", 4.5);
 
             string[] stateKeys =
             {

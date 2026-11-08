@@ -74,7 +74,7 @@ internal static class PresentationHarness
     {
         System.Reflection.Assembly.Load("WPFLocalizeExtension");
         System.Reflection.Assembly.Load(typeof(Xceed.Wpf.Toolkit.DoubleUpDown).Assembly.FullName);
-        foreach (string property in new[] { "Title", "Height", "Width", "MinHeight", "MinWidth", "Style", "ResizeMode", "WindowStartupLocation", "ShowInTaskbar", "SizeToContent", "WindowStyle" })
+        foreach (string property in new[] { "Title", "Icon", "Height", "Width", "MinHeight", "MinWidth", "Style", "ResizeMode", "WindowStartupLocation", "ShowInTaskbar", "SizeToContent", "WindowStyle" })
             source.Attribute(property)?.Remove();
         foreach (XAttribute a in source.DescendantsAndSelf().Attributes().ToArray())
         {
@@ -110,6 +110,42 @@ internal static class PresentationHarness
         Rect b = child.TransformToAncestor(root).TransformBounds(new Rect(child.RenderSize));
         Assert.IsTrue(b.Left >= -1 && b.Right <= root.ActualWidth + 1,
             where + ": " + child.Name + "/" + child.GetType().Name + ": " + b + " outside " + root.ActualWidth);
+    }
+
+    /// <summary>Root/scroll-extent bounds, not proof of focus, clicks or hardware interaction.</summary>
+    internal static void AssertReachable(FrameworkElement root, FrameworkElement child, string where)
+    {
+        AssertInside(root, child, where);
+        Rect bounds = child.TransformToAncestor(root).TransformBounds(new Rect(child.RenderSize));
+        if (bounds.Top >= -1 && bounds.Bottom <= root.ActualHeight + 1) return;
+        for (DependencyObject parent = VisualTreeHelper.GetParent(child);
+             parent != null && parent != root; parent = VisualTreeHelper.GetParent(parent))
+        {
+            // Content below the viewport is valid only when the real layout
+            // supplies vertical scrolling. Clipped non-scrolling content fails.
+            if (parent is ScrollViewer viewer && viewer.ScrollableHeight > 0 &&
+                viewer.VerticalScrollBarVisibility != ScrollBarVisibility.Disabled &&
+                viewer.Content is FrameworkElement content && content.IsAncestorOf(child))
+            {
+                // Pixel-scrolled virtualizing panels keep a viewport-sized
+                // presenter plus cached rows outside it. The scroll extent,
+                // not the presenter's RenderSize, determines reachability.
+                if (viewer.CanContentScroll && content is ItemsPresenter &&
+                    Descendants<VirtualizingStackPanel>(content).FirstOrDefault() is { } panel &&
+                    ItemsControl.GetItemsOwner(panel) is { } owner &&
+                    VirtualizingPanel.GetScrollUnit(owner) == ScrollUnit.Pixel)
+                {
+                    Rect viewportBounds = child.TransformToAncestor(viewer).TransformBounds(new Rect(child.RenderSize));
+                    if (viewportBounds.Top + viewer.VerticalOffset >= -1 &&
+                        viewportBounds.Bottom + viewer.VerticalOffset <= viewer.ExtentHeight + 1) return;
+                }
+                Rect contentBounds = child.TransformToAncestor(content).TransformBounds(new Rect(child.RenderSize));
+                if (contentBounds.Top >= -1 && contentBounds.Bottom <= content.ActualHeight + 1) return;
+                break; // An outer scroll viewer cannot reveal content clipped by this one.
+            }
+        }
+        Assert.Fail(where + ": " + child.Name + "/" + child.GetType().Name +
+            ": " + bounds + " is vertically unreachable in " + root.RenderSize);
     }
 
     internal static bool Participates(DependencyObject element)
