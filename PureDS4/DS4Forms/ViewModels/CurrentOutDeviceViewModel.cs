@@ -302,8 +302,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             }
         }
 
-        public event EventHandler InputSlotNumChanged;
-
         public string InputSlotDisplayString
         {
             get
