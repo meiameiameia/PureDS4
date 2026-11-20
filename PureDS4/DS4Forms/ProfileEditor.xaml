@@ -1898,7 +1898,9 @@
                                     <xctk:IntegerUpDown Style="{StaticResource FoundationPropertyNumericStyle}" Value="{Binding DualSenseSpeakerBassBoost}" Minimum="0" Maximum="6" AutomationProperties.Name="Bass/body boost" />
                                 </HeaderedContentControl>
                                 <TextBlock Text="Microphone" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,16,0,6" />
-                                <HeaderedContentControl Header="{Binding Content, ElementName=advancedToggle7}" Style="{StaticResource FoundationPropertyRowControlStyle}" ToolTip="{Binding ControllerMicrophoneDescription}">
+                                <!-- Fixed text: a row Header must not change while the editor clears its DataContext
+                                     (Cancel, Save, preset apply), or WPF throws during the tree walk. -->
+                                <HeaderedContentControl Header="Enable headset microphone input" Style="{StaticResource FoundationPropertyRowControlStyle}" ToolTip="{Binding ControllerMicrophoneDescription}">
                                     <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" x:Name="advancedToggle7" Content="{Binding ControllerMicrophoneToggleLabel}" IsChecked="{Binding DualSenseEnableMicrophonePassthrough}" AutomationProperties.Name="{Binding Content, RelativeSource={RelativeSource Self}}" IsEnabled="{Binding CanChangeControllerMicrophoneInput}" />
                                 </HeaderedContentControl>
                                 <TextBlock Text="{Binding ControllerMicrophoneAvailabilityText}" Visibility="{Binding ShowControllerMicrophoneAvailabilityMessage, Converter={StaticResource BooleanToVisibilityConverter}}" Style="{StaticResource FoundationPropertyNoteStyle}" />
