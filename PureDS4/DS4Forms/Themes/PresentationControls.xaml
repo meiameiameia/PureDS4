@@ -1,4 +1,4 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:system="clr-namespace:System;assembly=mscorlib"
                     xmlns:local="clr-namespace:DS4WinWPF.DS4Forms">
@@ -1388,6 +1388,121 @@
            BasedOn="{StaticResource FoundationSettingRowStyle}">
         <Setter Property="MinHeight" Value="40" />
         <Setter Property="Padding" Value="36,6,12,6" />
+    </Style>
+
+    <!-- Profile property pages: one label on the left, one control column with a
+         shared right edge, and a narrow fixed column after it for the unit. Every
+         option in the profile editor's Axis Config, Touchpad, Gyro and Advanced
+         pages is one of these rows, so the right edge, the control widths and the
+         unit column do not drift from row to row or page to page.
+         Header = label (no colon), Content = the control(s), Tag = unit text.
+         The explanatory tooltip, when there is one, goes on the row. -->
+    <GridLength x:Key="PropertyControlColumnWidth">196</GridLength>
+    <GridLength x:Key="PropertyUnitColumnWidth">56</GridLength>
+    <GridLength x:Key="PropertyNumericColumnWidth">96</GridLength>
+    <system:Double x:Key="PropertyControlWidth">196</system:Double>
+    <system:Double x:Key="PropertyNumericWidth">96</system:Double>
+    <system:Double x:Key="PropertyButtonWidth">96</system:Double>
+
+    <Style x:Key="FoundationPropertyNumericStyle" TargetType="Control"
+           BasedOn="{StaticResource FoundationNumericInputStyle}">
+        <Setter Property="Width" Value="{StaticResource PropertyNumericWidth}" />
+        <Setter Property="HorizontalAlignment" Value="Right" />
+    </Style>
+
+    <Style x:Key="FoundationPropertyComboStyle" TargetType="ComboBox"
+           BasedOn="{StaticResource FoundationComboBoxStyle}">
+        <Setter Property="Width" Value="{StaticResource PropertyControlWidth}" />
+        <Setter Property="HorizontalAlignment" Value="Right" />
+    </Style>
+
+    <!-- A short choice (a number of degrees) that shares a row with a button. -->
+    <Style x:Key="FoundationPropertyShortComboStyle" TargetType="ComboBox"
+           BasedOn="{StaticResource FoundationComboBoxStyle}">
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="Width" Value="{StaticResource PropertyNumericWidth}" />
+    </Style>
+    <Style x:Key="FoundationPropertyButtonStyle" TargetType="Button"
+           BasedOn="{StaticResource FoundationButtonStyle}">
+        <Setter Property="MinWidth" Value="{StaticResource PropertyButtonWidth}" />
+        <Setter Property="HorizontalAlignment" Value="Right" />
+    </Style>
+
+    <!-- Wraps like the other property labels, but carries no tooltip: one that
+         equals the label only adds noise. -->
+
+    <Style x:Key="FoundationPropertyRowLabelStyle" TargetType="Label"
+           BasedOn="{StaticResource FoundationPropertyLabelStyle}">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="ContentTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <AccessText Text="{Binding}" TextWrapping="Wrap" />
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="FoundationPropertyRowControlStyle" TargetType="HeaderedContentControl">
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="HeaderedContentControl">
+                    <Border Style="{StaticResource FoundationPropertyRowStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="{StaticResource PropertyControlColumnWidth}" />
+                                <ColumnDefinition Width="{StaticResource PropertyUnitColumnWidth}" />
+                            </Grid.ColumnDefinitions>
+                            <Label Style="{StaticResource FoundationPropertyRowLabelStyle}"
+                                   Content="{TemplateBinding Header}"
+                                   Target="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"
+                                   Margin="0,0,16,0" VerticalAlignment="Center" />
+                            <ContentPresenter Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Text="{TemplateBinding Tag}" Margin="8,0,0,0"
+                                       VerticalAlignment="Center" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- The same row, nested under the switch it depends on. -->
+    <Style x:Key="FoundationPropertySubRowControlStyle" TargetType="HeaderedContentControl">
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="HeaderedContentControl">
+                    <Border Style="{StaticResource FoundationSettingSubRowStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="{StaticResource PropertyControlColumnWidth}" />
+                                <ColumnDefinition Width="{StaticResource PropertyUnitColumnWidth}" />
+                            </Grid.ColumnDefinitions>
+                            <Label Style="{StaticResource FoundationPropertyRowLabelStyle}"
+                                   Content="{TemplateBinding Header}"
+                                   Target="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"
+                                   Margin="0,0,16,0" VerticalAlignment="Center" />
+                            <ContentPresenter Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Text="{TemplateBinding Tag}" Margin="8,0,0,0"
+                                       VerticalAlignment="Center" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- A sentence that explains the rows around it, not a row itself. -->
+    <Style x:Key="FoundationPropertyNoteStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource FoundationSecondaryTextStyle}">
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="Margin" Value="12,6,12,8" />
     </Style>
 
     <Style x:Key="FoundationSettingTitleStyle" TargetType="TextBlock"
