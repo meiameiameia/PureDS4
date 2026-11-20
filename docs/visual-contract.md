@@ -299,7 +299,22 @@ Lightbar properties scroll inside the editor; Apply, Save and Cancel stay outsid
 that viewport. Whole-window previews use disposable profile fields, not real
 controller output or the owner's profile.
 
-Axis Config, Touchpad and Gyro use bounded property columns and the shared
+Axis Config, Touchpad, Gyro and Advanced are built from one property row
+(`FoundationPropertyRowControlStyle`, a `HeaderedContentControl`): the label on the
+left without a trailing colon, the control right-aligned in one shared 196 DIP
+column so every row of a page has the same right edge, and the unit (`Tag`) in a
+fixed narrow column after it. Numeric boxes are 96 DIP wide and choices 196 DIP
+(`FoundationPropertyNumericStyle`, `FoundationPropertyComboStyle`); on/off options
+use the shared switch. No option sits outside a row. Rows are grouped under short
+section headings (stick, trigger, motion axis, mode groups). An option that only
+applies while a switch is on is an indented sub-row
+(`FoundationPropertySubRowControlStyle`) that is hidden, not greyed, while the
+switch is off; the only rows that stay visible but disabled are the program-launch
+switch (Browse is what turns it on) and the read-only controller number. Explanatory
+tooltips sit on the row; a tooltip that only repeats the label is not added.
+`ProfilePropertyPageLayoutTests` enforces the shared edge, the widths, the absence
+of bare controls and trailing colons, and the hide-instead-of-grey rule.
+They use bounded property columns and the shared
 compact property-row surface. Numeric parsing, ranges and LostFocus commits,
 output-mode order, nested modes, trigger menus and calibration actions stay
 unchanged. Touchpad's mouse-gesture options use named switches beside their
