@@ -93,6 +93,8 @@ public class ProfilePropertyPageLayoutTests
                     {
                         if (row.Content is ComboBox combo)
                             Assert.AreEqual(196, combo.ActualWidth, 0.6, $"{where}: combo '{combo.Name}' in '{row.Header}'.");
+                        Assert.AreEqual(FontWeights.Normal, PresentationHarness.Descendants<Label>(row).First().FontWeight,
+                            $"{where}: the label of '{row.Header}' must be regular weight, like Settings titles.");
                         string header = row.Header as string ?? string.Empty;
                         Assert.IsFalse(header.TrimEnd().EndsWith(":"), $"{where}: label '{header}' ends with a colon.");
                     }

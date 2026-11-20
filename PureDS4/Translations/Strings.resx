@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -348,7 +348,7 @@ Changes to this option takes effect at the gamepad connection time.</value>
     <value>Send game feedback to physical controller</value>
   </data>
   <data name="SendGameFeedbackToPhysicalControllerTip" xml:space="preserve">
-    <value>Recommended. Sends rumble, converted DualSense haptics, compatible adaptive-trigger effects, and controller lighting from games to the connected physical controller. Turn this off only when a controller cannot receive output; disabling it removes those game-feedback effects. Reconnect the controller after changing this setting.</value>
+    <value>Recommended. Sends rumble and controller lighting from games to the connected physical controller. Turn this off only when a controller cannot receive output; disabling it removes those game-feedback effects. Reconnect the controller after changing this setting.</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>Apply</value>

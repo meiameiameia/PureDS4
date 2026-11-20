@@ -1449,7 +1449,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="HeaderedContentControl">
-                    <Border Style="{StaticResource FoundationPropertyRowStyle}">
+                    <Border Style="{StaticResource FoundationPropertyRowStyle}" TextElement.FontWeight="Normal">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -1477,7 +1477,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="HeaderedContentControl">
-                    <Border Style="{StaticResource FoundationSettingSubRowStyle}">
+                    <Border Style="{StaticResource FoundationSettingSubRowStyle}" TextElement.FontWeight="Normal">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -1503,6 +1503,7 @@
            BasedOn="{StaticResource FoundationSecondaryTextStyle}">
         <Setter Property="TextWrapping" Value="Wrap" />
         <Setter Property="Margin" Value="12,6,12,8" />
+        <Setter Property="FontWeight" Value="Normal" />
     </Style>
 
     <Style x:Key="FoundationSettingTitleStyle" TargetType="TextBlock"

@@ -623,7 +623,7 @@
                                     <HeaderedContentControl Header="Invert" Style="{StaticResource FoundationPropertySubRowControlStyle}" ToolTip="{lex:Loc StickOuterBindInvertTooltip}">
                                         <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" IsChecked="{Binding LSOuterBindInvert}" AutomationProperties.Name="Invert outer button" />
                                     </HeaderedContentControl>
-                                    <TextBlock Text="{lex:Loc StickCalibration}" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,16,0,6" />
+                                    <TextBlock Text="Stick calibration" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,16,0,6" />
                                     <HeaderedContentControl Header="{lex:Loc XAxisOffset}" Style="{StaticResource FoundationPropertyRowControlStyle}">
                                         <xctk:SByteUpDown Style="{StaticResource FoundationPropertyNumericStyle}" Value="{Binding LeftStickDriftXAxis,UpdateSourceTrigger=LostFocus}" Maximum="127" Minimum="-127" Increment="1" />
                                     </HeaderedContentControl>
@@ -633,7 +633,7 @@
                                     <HeaderedContentControl Header="Automatic calibration" Style="{StaticResource FoundationPropertyRowControlStyle}">
                                         <Button Style="{StaticResource FoundationPropertyButtonStyle}" Content="{lex:Loc AutomaticallyRecalibrateStick}" Click="CalibrateStick_OnClick" Tag="0" />
                                     </HeaderedContentControl>
-                                    <TextBlock Text="{lex:Loc DeltaAcceleration}" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,16,0,6" />
+                                    <TextBlock Text="Delta acceleration" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,16,0,6" />
                                     <HeaderedContentControl Header="{lex:Loc Enabled}" Style="{StaticResource FoundationPropertyRowControlStyle}">
                                         <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" IsChecked="{Binding LSDeltaAccelEnabled}" AutomationProperties.Name="Delta acceleration" />
                                     </HeaderedContentControl>
@@ -770,7 +770,7 @@
                                     <HeaderedContentControl Header="Invert" Style="{StaticResource FoundationPropertySubRowControlStyle}" ToolTip="{lex:Loc StickOuterBindInvertTooltip}">
                                         <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" IsChecked="{Binding RSOuterBindInvert}" AutomationProperties.Name="Invert outer button" />
                                     </HeaderedContentControl>
-                                    <TextBlock Text="{lex:Loc StickCalibration}" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,16,0,6" />
+                                    <TextBlock Text="Stick calibration" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,16,0,6" />
                                     <HeaderedContentControl Header="{lex:Loc XAxisOffset}" Style="{StaticResource FoundationPropertyRowControlStyle}">
                                         <xctk:SByteUpDown Style="{StaticResource FoundationPropertyNumericStyle}" Value="{Binding RightStickDriftXAxis,UpdateSourceTrigger=LostFocus}" Maximum="127" Minimum="-127" Increment="1" />
                                     </HeaderedContentControl>
@@ -780,7 +780,7 @@
                                     <HeaderedContentControl Header="Automatic calibration" Style="{StaticResource FoundationPropertyRowControlStyle}">
                                         <Button Style="{StaticResource FoundationPropertyButtonStyle}" Content="{lex:Loc AutomaticallyRecalibrateStick}" Click="CalibrateStick_OnClick" Tag="1" />
                                     </HeaderedContentControl>
-                                    <TextBlock Text="{lex:Loc DeltaAcceleration}" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,16,0,6" />
+                                    <TextBlock Text="Delta acceleration" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,16,0,6" />
                                     <HeaderedContentControl Header="{lex:Loc Enabled}" Style="{StaticResource FoundationPropertyRowControlStyle}">
                                         <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" IsChecked="{Binding RSDeltaAccelEnabled}" AutomationProperties.Name="Delta acceleration" />
                                     </HeaderedContentControl>
@@ -1825,7 +1825,7 @@
             <TabItem Header="Advanced" Tag="Output device, rumble, audio, latency, compatibility, and custom hooks">
                 <ScrollViewer x:Name="advancedPropertiesScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Left">
                     <StackPanel Width="{Binding ViewportWidth, ElementName=advancedPropertiesScroll}" MaxWidth="760">
-                        <TextBlock Text="{lex:Loc VirtualControllerSettings}" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,0,0,6" />
+                        <TextBlock Text="Virtual controller" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,0,0,6" />
                         <HeaderedContentControl Header="{lex:Loc EmulatedController}" Style="{StaticResource FoundationPropertyRowControlStyle}" ToolTip="{lex:Loc OutContNotice}">
                             <ComboBox Style="{StaticResource FoundationPropertyComboStyle}" SelectedIndex="{Binding TempControllerIndex, FallbackValue=0}" AutomationProperties.Name="{lex:Loc EmulatedController}" x:Name="outConTypeCombo" IsEnabled="{Binding DInputOnly, Converter={StaticResource InverseBoolConverter}}">
                                 <ComboBoxItem Content="DualShock 4" />
@@ -1842,7 +1842,7 @@
                                     </Style.Triggers>
                                 </Style>
                             </Border.Style>
-                            <TextBlock x:Name="outputControllerHintText" TextWrapping="Wrap" Style="{StaticResource FoundationSecondaryTextStyle}" />
+                            <TextBlock x:Name="outputControllerHintText" TextWrapping="Wrap" FontWeight="Normal" Style="{StaticResource FoundationSecondaryTextStyle}" />
                         </Border>
                         <HeaderedContentControl Header="{Binding Content, ElementName=advancedToggle2}" Style="{StaticResource FoundationPropertyRowControlStyle}" ToolTip="{lex:Loc DisableVirtualControllerTip}">
                             <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" x:Name="advancedToggle2" Content="{lex:Loc DisableVirtualController}" IsChecked="{Binding DInputOnly}" AutomationProperties.Name="{Binding Content, RelativeSource={RelativeSource Self}}" />
@@ -1854,7 +1854,7 @@
                         <HeaderedContentControl Header="Ignore repeats within" Style="{StaticResource FoundationPropertyRowControlStyle}" Tag="ms">
                             <xctk:IntegerUpDown Style="{StaticResource FoundationPropertyNumericStyle}" x:Name="Debouncing" Value="{Binding DebouncingMs}" Minimum="0" Maximum="1000" AutomationProperties.Name="Debounce time in milliseconds" />
                         </HeaderedContentControl>
-                        <TextBlock Text="{lex:Loc Rumble}" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,16,0,6" />
+                        <TextBlock Text="Rumble" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,16,0,6" />
                         <HeaderedContentControl Header="Strength" Style="{StaticResource FoundationPropertyRowControlStyle}" Tag="%">
                             <xctk:IntegerUpDown Style="{StaticResource FoundationPropertyNumericStyle}" x:Name="RumbleBoostIUD" Value="{Binding RumbleBoost}" Minimum="0" Maximum="200" Increment="10" />
                         </HeaderedContentControl>
@@ -1873,7 +1873,7 @@
                         <StackPanel Visibility="{Binding ShowPlayStationControllerSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel Visibility="{Binding ShowControllerAudioSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <TextBlock Text="{Binding ControllerAudioHeader}" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,16,0,6" />
-                                <TextBlock Text="{Binding ControllerAudioDescription}" Style="{StaticResource FoundationSecondaryTextStyle}" TextWrapping="Wrap" Margin="0,0,0,8" />
+                                <TextBlock Text="{Binding ControllerAudioDescription}" Style="{StaticResource FoundationSecondaryTextStyle}" FontWeight="Normal" TextWrapping="Wrap" Margin="0,0,0,8" />
                                 <HeaderedContentControl Header="{Binding Content, ElementName=advancedToggle5}" Style="{StaticResource FoundationPropertyRowControlStyle}" ToolTip="Streams the selected audio to the controller. Uses its built-in speaker unless Headset only routes it exclusively to the AUX port.">
                                     <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" x:Name="advancedToggle5" Content="Stream audio to controller" IsChecked="{Binding DualSenseEnableSpeakerOutput}" AutomationProperties.Name="{Binding Content, RelativeSource={RelativeSource Self}}" />
                                 </HeaderedContentControl>
@@ -1969,9 +1969,14 @@
                         <TextBlock Text="Keeps this profile and its native output active. Only mapped input is temporarily sent through an Xbox-compatible companion while Game Bar is open; audio, haptics, lighting, and microphone routing stay untouched." Style="{StaticResource FoundationPropertyNoteStyle}" />
                         <TextBlock Text="Launch and connection" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,16,0,6" />
                         <HeaderedContentControl Header="{Binding Content, ElementName=launchProgCk}" Style="{StaticResource FoundationPropertyRowControlStyle}" ToolTip="{Binding ToolTip, ElementName=launchProgCk}">
-                            <StackPanel Orientation="Horizontal">
-                                <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" x:Name="launchProgCk" Content="{lex:Loc LaunchProgramWithProfile}" IsChecked="{Binding LaunchProgramExists}" IsEnabled="{Binding LaunchProgramExists}" AutomationProperties.Name="{Binding Content, RelativeSource={RelativeSource Self}}" />
-                                <Button Style="{StaticResource FoundationButtonStyle}" x:Name="launchProgBrowseBtn" Click="LaunchProgBrowseBtn_Click" Width="112" Margin="8,0,0,0" ToolTip="{Binding LaunchProgramName}">
+                            <Grid Width="196">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Grid.Column="2" Style="{StaticResource FoundationToggleSwitchStyle}" x:Name="launchProgCk" Content="{lex:Loc LaunchProgramWithProfile}" IsChecked="{Binding LaunchProgramExists}" IsEnabled="{Binding LaunchProgramExists}" AutomationProperties.Name="{Binding Content, RelativeSource={RelativeSource Self}}" />
+                                <Button Grid.Column="0" Style="{StaticResource FoundationButtonStyle}" x:Name="launchProgBrowseBtn" Click="LaunchProgBrowseBtn_Click" Margin="0,0,8,0" ToolTip="{Binding LaunchProgramName}">
                                     <Button.Content>
                                         <PriorityBinding>
                                             <Binding Path="LaunchProgramName" />
@@ -1979,12 +1984,12 @@
                                         </PriorityBinding>
                                     </Button.Content>
                                 </Button>
-                                <Border x:Name="launchProgIconBtn" Width="20" Height="20" Margin="8,0,0,0">
+                                <Border Grid.Column="1" x:Name="launchProgIconBtn" Width="20" Height="20" Margin="0,0,8,0">
                                     <Border.Background>
                                         <ImageBrush ImageSource="{Binding LaunchProgramIcon}" />
                                     </Border.Background>
                                 </Border>
-                            </StackPanel>
+                            </Grid>
                         </HeaderedContentControl>
                         <HeaderedContentControl Header="{Binding Content, ElementName=advancedToggle1}" Style="{StaticResource FoundationPropertyRowControlStyle}">
                             <CheckBox Style="{StaticResource FoundationToggleSwitchStyle}" x:Name="advancedToggle1" Content="{lex:Loc IdleDisconnect}" IsChecked="{Binding IdleDisconnectExists}" AutomationProperties.Name="{Binding Content, RelativeSource={RelativeSource Self}}" />
@@ -2013,7 +2018,7 @@
                                 <ComboBoxItem Content="62 Hz (16 ms)" />
                             </ComboBox>
                         </HeaderedContentControl>
-                        <TextBlock Text="{lex:Loc AbsoluteMouseOptions}" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,16,0,6" />
+                        <TextBlock Text="Absolute mouse options" Style="{StaticResource FoundationSectionHeadingStyle}" Margin="0,16,0,6" />
                         <Expander IsExpanded="False" Header="Settings">
                             <StackPanel>
                                 <HeaderedContentControl Header="{lex:Loc Width}" Style="{StaticResource FoundationPropertyRowControlStyle}">
