@@ -362,7 +362,7 @@ public class ProfileWorkspacePresentationTests
         Assert.AreEqual("Auto", (string)scroll.Attribute("VerticalScrollBarVisibility"));
         Assert.AreEqual("Disabled", (string)scroll.Attribute("HorizontalScrollBarVisibility"));
         Assert.AreEqual("False", (string)scroll.Attribute("CanContentScroll"));
-        Assert.AreEqual("DockPanel", scroll.Elements().Single().Name.LocalName,
+        Assert.AreEqual("Grid", scroll.Elements().Single().Name.LocalName,
             "All readings must remain inside the vertical viewport instead of being clipped below it.");
     }
 
@@ -377,6 +377,9 @@ public class ProfileWorkspacePresentationTests
                 Theme(dark);
                 UserControl view = PresentationHarness.LoadControl("ControllerReadingsControl");
                 var owner = new Window { Content = view };
+                // The code-behind swaps the empty state for the readings once a report arrives.
+                ((UIElement)view.FindName("readingsEmptyState")).Visibility = Visibility.Collapsed;
+                ((UIElement)view.FindName("readingsContent")).Visibility = Visibility.Visible;
                 Layout(view, new Size(width, width == 1600 ? 600 : 240));
 
                 var left = (Canvas)view.FindName("lsCanvas");
@@ -385,36 +388,26 @@ public class ProfileWorkspacePresentationTests
                 Rect Bounds(FrameworkElement element) =>
                     element.TransformToAncestor(view).TransformBounds(new Rect(element.RenderSize));
 
+                // The two sticks side by side, the tilt view in the motion section below them.
                 Assert.IsTrue(Bounds(left).Right + 8 <= Bounds(right).Left,
                     $"Left and right charts overlap at {width} DIP: {Bounds(left)}, {Bounds(right)}.");
-                Assert.IsTrue(Bounds(right).Right + 8 <= Bounds(motion).Left,
-                    $"Right and motion charts overlap at {width} DIP: {Bounds(right)}, {Bounds(motion)}.");
                 Assert.AreEqual(Bounds(left).Top, Bounds(right).Top, 1);
-                Assert.AreEqual(Bounds(right).Top, Bounds(motion).Top, 1);
+                Assert.IsTrue(Bounds(motion).Top > Bounds(left).Bottom,
+                    $"The tilt view should sit below the sticks at {width} DIP.");
 
                 foreach (var pair in new[]
                 {
-                    ("lxOutValLb", "rxInValLb"), ("lyOutValLb", "ryInValLb"),
-                    ("rxOutValLb", "sixAxisXInValLb"), ("ryOutValLb", "sixAxisZInValLb")
+                    ("lxInValLb", "lxOutValLb"), ("lxOutValLb", "rxInValLb"), ("lyOutValLb", "ryInValLb"),
+                    ("sixAxisXInValLb", "sixAxisXOutValLb"), ("l2InValLb", "l2OutValLb"),
                 })
                     Assert.IsTrue(Bounds((FrameworkElement)view.FindName(pair.Item1)).Right + 2 <=
                         Bounds((FrameworkElement)view.FindName(pair.Item2)).Left,
                         $"{pair.Item1} and {pair.Item2} overlap at {width} DIP.");
 
-                var chartGrid = PresentationHarness.Descendants<Grid>(view)
-                    .Single(grid => grid.MaxWidth == 660);
-                var sensorGrid = PresentationHarness.Descendants<Grid>(view)
-                    .Single(grid => grid.MaxWidth == 700);
-                Assert.IsTrue(chartGrid.ActualWidth <= 660);
-                Assert.IsTrue(sensorGrid.ActualWidth <= 700);
+                var page = (FrameworkElement)((FrameworkElement)view.FindName("readingsContent")).Parent;
+                Assert.IsTrue(page.ActualWidth <= 760.5, $"Readings should stop growing at 760 DIP, not {page.ActualWidth}.");
                 if (width == 1600)
-                {
-                    double viewportWidth = ((ScrollViewer)view.FindName("readingsScroll")).ViewportWidth;
-                    Assert.AreEqual((viewportWidth - chartGrid.ActualWidth) / 2, Bounds(chartGrid).Left, 2,
-                        "The bounded charts should remain centered on wide windows.");
-                    Assert.AreEqual((viewportWidth - sensorGrid.ActualWidth) / 2, Bounds(sensorGrid).Left, 2,
-                        "The lower readings should remain centered on wide windows.");
-                }
+                    Assert.AreEqual(0, Bounds(page).Left, 1, "The bounded readings stay aligned with the page title on wide windows.");
                 if (width == 480)
                     Assert.IsTrue(((ScrollViewer)view.FindName("readingsScroll")).ScrollableHeight > 0,
                         "Small windows must scroll to the lower readings.");

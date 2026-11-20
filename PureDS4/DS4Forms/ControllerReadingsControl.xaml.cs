@@ -208,7 +208,10 @@ namespace DS4WinWPF.DS4Forms
         private DS4StateExposed exposeState;
         private const int CANVAS_WIDTH = 130;
         private const int CANVAS_MIDPOINT = CANVAS_WIDTH / 2;
-        private const double TRIG_LB_TRANSFORM_OFFSETY = 66.0;
+        // Half sizes of the input ring and output dot drawn in the round fields.
+        private const double INPUT_DOT_RADIUS = 5.0;
+        private const double OUTPUT_DOT_RADIUS = 3.0;
+        private volatile bool showingReadings;
 
         public ControllerReadingsControl()
         {
@@ -218,7 +221,7 @@ namespace DS4WinWPF.DS4Forms
             inpuDelayForeBrush.Color = textColor;
             l2ValLbBrush.Color = textColor;
             r2ValLbBrush.Color = textColor;
-            inputContNum.Content = $"#{deviceNum + 1}";
+            inputContNum.Content = ControllerTitle();
             exposeState = new DS4StateExposed(baseState);
 
             readingTimer = new NonFormTimer();
@@ -242,12 +245,24 @@ namespace DS4WinWPF.DS4Forms
             SixAxisDeadXChanged += ChangeSixAxisDeadControls;
             SixAxisDeadZChanged += ChangeSixAxisDeadControls;
 
+            L2DeadChanged += (_, _) => ShowTriggerDeadZone(l2DeadColumn, l2LiveColumn, l2Dead);
+            R2DeadChanged += (_, _) => ShowTriggerDeadZone(r2DeadColumn, r2LiveColumn, r2Dead);
+
             DeviceNumChanged += ControllerReadingsControl_DeviceNumChanged;
+        }
+
+        private string ControllerTitle() => $"Controller {deviceNum + 1}";
+
+        private static void ShowTriggerDeadZone(ColumnDefinition dead, ColumnDefinition live, double fraction)
+        {
+            fraction = Math.Clamp(fraction, 0.0, 1.0);
+            dead.Width = new GridLength(fraction, GridUnitType.Star);
+            live.Width = new GridLength(1.0 - fraction, GridUnitType.Star);
         }
 
         private void ControllerReadingsControl_DeviceNumChanged(object sender, EventArgs e)
         {
-            inputContNum.Content = $"#{deviceNum + 1}";
+            inputContNum.Content = ControllerTitle();
         }
 
         private void ChangeSixAxisDeadControls(object sender, EventArgs e)
@@ -264,6 +279,8 @@ namespace DS4WinWPF.DS4Forms
             rsDriftEllipse.Height = rsDeadY * CANVAS_WIDTH;
             Canvas.SetLeft(rsDriftEllipse, (1 + (RsDriftX / 127.0) - rsDeadX) * CANVAS_MIDPOINT);
             Canvas.SetTop(rsDriftEllipse, (1 + (RsDriftY / 127.0) - rsDeadY) * CANVAS_MIDPOINT);
+            // Only worth drawing when it is off centre; otherwise it repeats the dead zone ring.
+            rsDriftEllipse.Visibility = RsDriftX == 0 && RsDriftY == 0 ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private void ChangeLsDriftControls(object sender, EventArgs e)
@@ -272,6 +289,8 @@ namespace DS4WinWPF.DS4Forms
             lsDriftEllipse.Height = lsDeadY * CANVAS_WIDTH;
             Canvas.SetLeft(lsDriftEllipse, (1 + (LsDriftX / 127.0) - lsDeadX) * CANVAS_MIDPOINT);
             Canvas.SetTop(lsDriftEllipse, (1 + (LsDriftY / 127.0) - lsDeadY) * CANVAS_MIDPOINT);
+            // Only worth drawing when it is off centre; otherwise it repeats the dead zone ring.
+            lsDriftEllipse.Visibility = LsDriftX == 0 && LsDriftY == 0 ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private void ChangeRsDeadControls(object sender, EventArgs e)
@@ -342,122 +361,137 @@ namespace DS4WinWPF.DS4Forms
                 // Done with copying. Allow input thread to resume
                 ds.ReadWaitEv.Set();
 
-                Dispatcher.Invoke(() =>
-                {
-                    int x = baseState.LX;
-                    int y = baseState.LY;
-
-                    Canvas.SetLeft(lsValRec, x / 255.0 * CANVAS_WIDTH - 3);
-                    Canvas.SetTop(lsValRec, y / 255.0 * CANVAS_WIDTH - 3);
-                    //bool mappedLS = interState.LX != x || interState.LY != y;
-                    //if (mappedLS)
-                    //{
-                    Canvas.SetLeft(lsMapValRec, interState.LX / 255.0 * CANVAS_WIDTH - 3);
-                    Canvas.SetTop(lsMapValRec, interState.LY / 255.0 * CANVAS_WIDTH - 3);
-                    //}
-
-                    x = baseState.RX;
-                    y = baseState.RY;
-                    Canvas.SetLeft(rsValRec, x / 255.0 * CANVAS_WIDTH - 3);
-                    Canvas.SetTop(rsValRec, y / 255.0 * CANVAS_WIDTH - 3);
-                    Canvas.SetLeft(rsMapValRec, interState.RX / 255.0 * CANVAS_WIDTH - 3);
-                    Canvas.SetTop(rsMapValRec, interState.RY / 255.0 * CANVAS_WIDTH - 3);
-
-                    x = exposeState.getAccelX() + 127;
-                    y = exposeState.getAccelZ() + 127;
-                    Canvas.SetLeft(sixAxisValRec, x / 255.0 * CANVAS_WIDTH - 3);
-                    Canvas.SetTop(sixAxisValRec, y / 255.0 * CANVAS_WIDTH - 3);
-                    Canvas.SetLeft(sixAxisMapValRec, Math.Min(Math.Max(interState.Motion.outputAccelX + 127.0, 0), 255.0) / 255.0 * CANVAS_WIDTH - 3);
-                    Canvas.SetTop(sixAxisMapValRec, Math.Min(Math.Max(interState.Motion.outputAccelZ + 127.0, 0), 255.0) / 255.0 * CANVAS_WIDTH - 3);
-
-                    l2Slider.Value = baseState.L2;
-                    l2ValLbTrans.Y = Math.Min(interState.L2, Math.Max(0, 255)) / 255.0 * -70.0 + TRIG_LB_TRANSFORM_OFFSETY;
-                    if (interState.L2 >= 255)
-                    {
-                        l2ValLbBrush.Color = ThemeColor("StateSuccessBrush",
-                            Colors.Green);
-                    }
-                    else if (interState.L2 == 0)
-                    {
-                        l2ValLbBrush.Color = ThemeColor("StateErrorBrush",
-                            Colors.Red);
-                    }
-                    else
-                    {
-                        l2ValLbBrush.Color = ThemeColor("TextPrimaryBrush",
-                            SystemColors.WindowTextColor);
-                    }
-
-                    r2Slider.Value = baseState.R2;
-                    r2ValLbTrans.Y = Math.Min(interState.R2, Math.Max(0, 255)) / 255.0 * -70.0 + TRIG_LB_TRANSFORM_OFFSETY;
-                    if (interState.R2 >= 255)
-                    {
-                        r2ValLbBrush.Color = ThemeColor("StateSuccessBrush",
-                            Colors.Green);
-                    }
-                    else if (interState.R2 == 0)
-                    {
-                        r2ValLbBrush.Color = ThemeColor("StateErrorBrush",
-                            Colors.Red);
-                    }
-                    else
-                    {
-                        r2ValLbBrush.Color = ThemeColor("TextPrimaryBrush",
-                            SystemColors.WindowTextColor);
-                    }
-
-                    gyroYawSlider.Value = baseState.Motion.gyroYawFull;
-                    gyroPitchSlider.Value = baseState.Motion.gyroPitchFull;
-                    gyroRollSlider.Value = baseState.Motion.gyroRollFull;
-
-                    accelXSlider.Value = exposeState.getAccelX();
-                    accelYSlider.Value = exposeState.getAccelY();
-                    accelZSlider.Value = exposeState.getAccelZ();
-
-                    touchXValLb.Content = baseState.TrackPadTouch0.X;
-                    touchYValLb.Content = baseState.TrackPadTouch0.Y;
-
-                    double latency = ds.Latency;
-                    int warnInterval = ds.getWarnInterval();
-                    inputDelayLb.Content = string.Format(Properties.Resources.InputDelay,
-                        latency);
-
-                    if (latency > warnInterval)
-                    {
-                        warnMode = LatencyWarnMode.Warn;
-                        inputDelayLb.Content = $"Warning — {inputDelayLb.Content}";
-                        inpuDelayBackBrush.Color = Colors.Transparent;
-                        inpuDelayForeBrush.Color = ThemeColor(
-                            "StateErrorBrush", Colors.Red);
-                    }
-                    else if (latency > (warnInterval * 0.5))
-                    {
-                        warnMode = LatencyWarnMode.Caution;
-                        inputDelayLb.Content = $"Caution — {inputDelayLb.Content}";
-                        inpuDelayBackBrush.Color = Colors.Transparent;
-                        inpuDelayForeBrush.Color = ThemeColor(
-                            "StateWarningBrush", Colors.DarkGoldenrod);
-                    }
-                    else
-                    {
-                        warnMode = LatencyWarnMode.None;
-                        inpuDelayBackBrush.Color = Colors.Transparent;
-                        inpuDelayForeBrush.Color = ThemeColor(
-                            "TextPrimaryBrush", SystemColors.WindowTextColor);
-                    }
-
-                    prevWarnMode = warnMode;
-
-                    batteryLvlLb.Content = $"{Translations.Strings.Battery}: {baseState.Battery}%";
-                    gyroCalEllipse.Visibility = cntCalibrating > 0 && ((cntCalibrating / 250) % 2 == 1) ? Visibility.Visible : Visibility.Hidden;
-                    UpdateCoordLabels(baseState, interState, exposeState);
-                });
+                double latency = ds.Latency;
+                int warnInterval = ds.getWarnInterval();
+                ConnectionType connection = ds.getConnectionType();
+                Dispatcher.Invoke(() => ShowReadings(latency, warnInterval, cntCalibrating, connection));
+            }
+            else if (showingReadings)
+            {
+                Dispatcher.Invoke(ShowNoController);
             }
 
             if (useTimer)
             {
                 readingTimer.Start();
             }
+        }
+
+        /// <summary>
+        /// Draws the latest copy of the controller state (baseState, interState).
+        /// Runs on the UI thread; the preview tests call it with a fake state.
+        /// </summary>
+        internal void ShowReadings(double latency, int warnInterval, long cntCalibrating, ConnectionType connection)
+        {
+            if (!showingReadings)
+            {
+                showingReadings = true;
+                readingsEmptyState.Visibility = Visibility.Collapsed;
+                readingsContent.Visibility = Visibility.Visible;
+            }
+            readingsTransportLb.Content = connection switch
+            {
+                ConnectionType.USB => "USB",
+                ConnectionType.BT => "Bluetooth",
+                _ => "Wireless adapter",
+            };
+
+            int x = baseState.LX;
+            int y = baseState.LY;
+
+            Canvas.SetLeft(lsValRec, x / 255.0 * CANVAS_WIDTH - INPUT_DOT_RADIUS);
+            Canvas.SetTop(lsValRec, y / 255.0 * CANVAS_WIDTH - INPUT_DOT_RADIUS);
+            //bool mappedLS = interState.LX != x || interState.LY != y;
+            //if (mappedLS)
+            //{
+            Canvas.SetLeft(lsMapValRec, interState.LX / 255.0 * CANVAS_WIDTH - OUTPUT_DOT_RADIUS);
+            Canvas.SetTop(lsMapValRec, interState.LY / 255.0 * CANVAS_WIDTH - OUTPUT_DOT_RADIUS);
+            //}
+
+            x = baseState.RX;
+            y = baseState.RY;
+            Canvas.SetLeft(rsValRec, x / 255.0 * CANVAS_WIDTH - INPUT_DOT_RADIUS);
+            Canvas.SetTop(rsValRec, y / 255.0 * CANVAS_WIDTH - INPUT_DOT_RADIUS);
+            Canvas.SetLeft(rsMapValRec, interState.RX / 255.0 * CANVAS_WIDTH - OUTPUT_DOT_RADIUS);
+            Canvas.SetTop(rsMapValRec, interState.RY / 255.0 * CANVAS_WIDTH - OUTPUT_DOT_RADIUS);
+
+            x = exposeState.getAccelX() + 127;
+            y = exposeState.getAccelZ() + 127;
+            Canvas.SetLeft(sixAxisValRec, x / 255.0 * CANVAS_WIDTH - INPUT_DOT_RADIUS);
+            Canvas.SetTop(sixAxisValRec, y / 255.0 * CANVAS_WIDTH - INPUT_DOT_RADIUS);
+            Canvas.SetLeft(sixAxisMapValRec, Math.Min(Math.Max(interState.Motion.outputAccelX + 127.0, 0), 255.0) / 255.0 * CANVAS_WIDTH - OUTPUT_DOT_RADIUS);
+            Canvas.SetTop(sixAxisMapValRec, Math.Min(Math.Max(interState.Motion.outputAccelZ + 127.0, 0), 255.0) / 255.0 * CANVAS_WIDTH - OUTPUT_DOT_RADIUS);
+
+            l2Slider.Value = baseState.L2;
+            l2ValLbTrans.X = interState.L2 / 255.0 * Math.Max(0.0, l2Slider.ActualWidth - l2OutputMarker.Width);
+
+            r2Slider.Value = baseState.R2;
+            r2ValLbTrans.X = interState.R2 / 255.0 * Math.Max(0.0, r2Slider.ActualWidth - r2OutputMarker.Width);
+
+            gyroYawSlider.Value = baseState.Motion.gyroYawFull;
+            gyroPitchSlider.Value = baseState.Motion.gyroPitchFull;
+            gyroRollSlider.Value = baseState.Motion.gyroRollFull;
+
+            accelXSlider.Value = exposeState.getAccelX();
+            accelYSlider.Value = exposeState.getAccelY();
+            accelZSlider.Value = exposeState.getAccelZ();
+
+            gyroYawValueText.Text = baseState.Motion.gyroYawFull.ToString();
+            gyroPitchValueText.Text = baseState.Motion.gyroPitchFull.ToString();
+            gyroRollValueText.Text = baseState.Motion.gyroRollFull.ToString();
+            accelXValueText.Text = exposeState.getAccelX().ToString();
+            accelYValueText.Text = exposeState.getAccelY().ToString();
+            accelZValueText.Text = exposeState.getAccelZ().ToString();
+
+            touchXValLb.Content = baseState.TrackPadTouch0.X;
+            touchYValLb.Content = baseState.TrackPadTouch0.Y;
+
+            inputDelayLb.Content = string.Format(Properties.Resources.InputDelay,
+                latency);
+
+            if (latency > warnInterval)
+            {
+                warnMode = LatencyWarnMode.Warn;
+                inputDelayLb.Content = $"Warning — {inputDelayLb.Content}";
+                inpuDelayBackBrush.Color = Colors.Transparent;
+                inpuDelayForeBrush.Color = ThemeColor(
+                    "StateErrorBrush", Colors.Red);
+            }
+            else if (latency > (warnInterval * 0.5))
+            {
+                warnMode = LatencyWarnMode.Caution;
+                inputDelayLb.Content = $"Caution — {inputDelayLb.Content}";
+                inpuDelayBackBrush.Color = Colors.Transparent;
+                inpuDelayForeBrush.Color = ThemeColor(
+                    "StateWarningBrush", Colors.DarkGoldenrod);
+            }
+            else
+            {
+                warnMode = LatencyWarnMode.None;
+                inpuDelayBackBrush.Color = Colors.Transparent;
+                inpuDelayForeBrush.Color = ThemeColor(
+                    "TextPrimaryBrush", SystemColors.WindowTextColor);
+            }
+
+            prevWarnMode = warnMode;
+
+            batteryLvlLb.Content = $"{Translations.Strings.Battery}: {baseState.Battery}%";
+            gyroCalEllipse.Visibility = cntCalibrating > 0 && ((cntCalibrating / 250) % 2 == 1) ? Visibility.Visible : Visibility.Hidden;
+            UpdateCoordLabels(baseState, interState, exposeState);
+        }
+
+        /// <summary>One calm empty state instead of N/A, 0% and blank values.</summary>
+        internal void ShowNoController()
+        {
+            showingReadings = false;
+            readingsContent.Visibility = Visibility.Collapsed;
+            readingsEmptyState.Visibility = Visibility.Visible;
+        }
+
+        internal void SetPreviewState(DS4State input, DS4State output)
+        {
+            input.CopyTo(baseState);
+            output.CopyTo(interState);
         }
 
         private Color ThemeColor(string resourceKey, Color fallback)
