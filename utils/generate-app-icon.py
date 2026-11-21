@@ -1,4 +1,4 @@
-"""LEGACY: superseded by branding/brand-pad/generate.ps1 (5.2.0 icon); do not run over
+"""LEGACY: superseded by branding/brand-pad/generate.ps1 (26.11.0 icon); do not run over
 the shipped icon files. Composed a Windows ICO from the old PureDS4 tile master.
 
 Usage: python utils/generate-app-icon.py SOURCE.png OUTPUT_DIRECTORY [--preview] [--retune]

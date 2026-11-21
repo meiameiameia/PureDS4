@@ -511,6 +511,33 @@ clean-install, rollback, failure, and recovery matrix required for release.
 
 ## Version contract
 
+### Year-based versions from 26.11.0 (owner decision 2026-11-20)
+
+PureDS4 is a separate product based on DS4Windows, and the DS4Windows 5.x line
+continues in Pav-Osmolski/DS4Windows. To stop PureDS4 numbers reading as part of
+that line, public versions now use **`YY.MM.PATCH`**: two-digit year, month of the
+release, and a patch number for fixes released later from the same line
+(`26.11.0`, then `26.11.1`; the next feature release takes its own month, for
+example `27.2.0`). The release planned as 5.2.0 ships as **26.11.0**.
+
+| Surface | Value |
+| --- | --- |
+| Public/display version and tag | `26.11.0` / `v26.11.0` |
+| Burn bundle and MSI product version | `26.11.0` |
+| Assembly and file version | `26.11.0.0` |
+
+Every year-based version is numerically higher than any 5.x, so Windows Installer
+upgrades 5.1.x/5.2.0 installations in place (same UpgradeCodes) and the in-app
+update checker, which compares numbers, offers 26.11.0 to 5.1.x users
+(`ReleaseChannelPolicyTests.YearBasedReleaseIsAnUpdateForFiveDotXBuilds`). The
+MSI limits (major and minor at most 255, build at most 65535) hold until 2255.
+Restarting at 1.0 was rejected: installed 5.x builds would treat it as a
+downgrade and never be offered it. Prerelease and CI labelling below is
+unchanged; only the numbers change. Earlier sections keep their historical
+5.x numbers.
+
+### First public release (historical)
+
 The owner selected **`5.1.0` as the target for the first public release**.
 This is a version decision, not a readiness claim or permission to publish.
 The exact installer bearing this version must satisfy the remaining gates

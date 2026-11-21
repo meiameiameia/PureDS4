@@ -29,7 +29,7 @@ calculate `releaseReady: true`; this does not establish final package/hardware
 acceptance or authorize installation. Earlier dirty-tree outputs are superseded.
 
 The 5.1.1 .NET migration pinned SDK `10.0.302`, Core/Desktop runtime packs and
-apphost `10.0.12`; 5.2.0 raises the runtime packs and apphost to `10.0.14`
+apphost `10.0.12`; 26.11.0 (planned as 5.2.0) raises the runtime packs and apphost to `10.0.14`
 (owner-approved 2026-11-08, SDK pin unchanged). The Windows SDK projection is `10.0.19041.57`; its shipped
 terms and acceptance identifier are unchanged. The SDK's own shared runtime
 is not the payload identity: verify restore assets for all managed hosts and
@@ -264,7 +264,7 @@ and licenses are not release inputs for PureDS4.
 `PureDS4/Resources/ControllerArtwork.NOTICE.txt` remains the controller
 artwork attribution and is copied into published output.
 
-## Application icon (5.2.0)
+## Application icon (26.11.0)
 
 The application mark ("Brand Pad", chosen by the owner on 2026-11-20) is original
 work authored for PureDS4: a simplified gamepad laid out like a real pad (d-pad and four plain buttons on top,

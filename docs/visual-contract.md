@@ -19,7 +19,7 @@ return to system defaults. The native activation/resize border is not overridden
 Mica/acrylic and a custom title bar are not part of this slice.
 Fluent-inspired styling is not a claim of full WinUI
 control parity or completed Windows accessibility/DPI validation.
-This modernization targets the planned 5.2.0 release; the published 5.1.2
+This modernization targets the planned 26.11.0 release (planned as 5.2.0); the published 5.1.2
 artifacts are not replaced by these local presentation changes.
 
 ## Product identity

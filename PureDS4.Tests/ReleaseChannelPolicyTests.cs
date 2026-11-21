@@ -78,6 +78,20 @@ namespace DS4WindowsTests
                 selected, "5.0.0", true, installedReleaseTag: null));
         }
 
+        // PureDS4 left the DS4Windows 5.x numbering for year.month versions (26.11.0).
+        // Installed 5.1.x builds must still see the first year-based release as newer.
+        [TestMethod]
+        public void YearBasedReleaseIsAnUpdateForFiveDotXBuilds()
+        {
+            GithubRelease selected = Stable(
+                "v26.11.0", "2026-11-21T00:00:00Z");
+
+            Assert.IsTrue(ReleaseChannelPolicy.ShouldUpdate(
+                selected, "5.1.2.0", false, installedReleaseTag: "v5.1.2"));
+            Assert.IsFalse(ReleaseChannelPolicy.ShouldUpdate(
+                selected, "26.11.0.0", false, installedReleaseTag: "v26.11.0"));
+        }
+
         [TestMethod]
         public void StaleStableMarkerDoesNotHideAnOlderBinary()
         {

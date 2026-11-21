@@ -259,7 +259,7 @@ function Contact-Sheet($concept, $icons, $path) {
     Put $c (Box '#FFFFFF' 520 170 8) 32 624
     Put $c (Img $icons[48] 40) 56 648
     Put $c (Text 'PureDS4 Setup' 20 '#1B1F24' 'SemiBold') 108 648
-    Put $c (Text 'Version 5.2.0' 13 '#4A5560') 108 676
+    Put $c (Text 'Version 26.11.0' 13 '#4A5560') 108 676
     Put $c (Box '#285F8C' 120 30 4) 408 748; Put $c (Text 'Install' 13 '#FFFFFF' 'SemiBold') 446 754
     Put $c (Box '#202020' 560 170 8) 600 624
     foreach ($k in 0..5) {

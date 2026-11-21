@@ -3,7 +3,9 @@
 `build-installer.ps1` composes the standard x64 distribution as a WiX 5 Burn
 bundle with a custom WPF interface. It contains the managed PureDS4 MSI,
 PureDS4 VIIPER 0.1.0-pureds4.2, USB-IP 0.9.7.7, and an optional HidHide package.
-The development target is 5.2.0; 5.1.2 remains the published maintenance release.
+The development target is 26.11.0 (the release planned as 5.2.0; see the
+version contract in `docs/RELEASE_CONTRACT.md`); 5.1.2 remains the published
+maintenance release.
 The application and managed setup hosts
 use self-contained .NET 10.0.14, independently pinned from SDK 10.0.302.
 The backend is built from clean source commit
@@ -26,9 +28,9 @@ has no tray icon or independent update/autostart channel.
 ```powershell
 .\installer\build-installer.ps1 `
   -PublishRoot .\bin\x64\Release\output `
-  -ProductVersion 5.2.0 `
-  -BundleVersion 5.2.0 `
-  -DisplayVersion 5.2.0 `
+  -ProductVersion 26.11.0 `
+  -BundleVersion 26.11.0 `
+  -DisplayVersion 26.11.0 `
   -SkipApplicationPublish
 ```
 
@@ -43,8 +45,8 @@ One transaction ID is preserved across Burn, setup actions, the infrastructure
 backend, and reboot resume so those logs can be correlated without timestamp
 guesswork.
 
-The output is named `PureDS4_5.2.0_Setup_x64.exe` and the installed
-executable is `PureDS4.exe`. `5.2.0` is the development target, not a
+The output is named `PureDS4_26.11.0_Setup_x64.exe` and the installed
+executable is `PureDS4.exe`. `26.11.0` is the development target, not a
 release-readiness or publication claim. For historical 5.1.0 evidence, an internal `5.1.0`
 bundle upgraded the owner's former `5.1.0-beta.2` installation, and a later
 bundle passed a same-version replacement. The eventual published file must
@@ -82,7 +84,7 @@ downloaded-candidate security check or owner approval to publish.
 To prepare the exact target-version validation artifact, manually dispatch
 `CI Build` with `release_candidate` checked. `utils/get-build-identity.ps1`
 then keeps display, Burn, and MSI versions at the application's target
-(`5.2.0` currently), with no CI suffix. Normal push/PR and manual
+(`26.11.0` currently), with no CI suffix. Normal push/PR and manual
 CI builds keep their CI labels. The candidate identity also records whether
 the artifact is a `release-candidate` or `ci` build. This option does not
 create a release/tag, remove release blockers, or authorize publication.

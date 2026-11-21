@@ -3,8 +3,10 @@
 <img src="PureDS4/Resources/AppIcon.png" alt="PureDS4 controller icon" width="80" height="80">
 
 PureDS4 is a Windows controller mapper for the DualShock 4, maintained by
-[meiameiameia](https://github.com/meiameiameia). It is a DS4-focused fork of
-[hbashton/DS4Windows](https://github.com/hbashton/DS4Windows).
+[meiameiameia](https://github.com/meiameiameia). It is a separate, DS4-focused product based on
+[hbashton/DS4Windows](https://github.com/hbashton/DS4Windows), and keeps its
+GPL licence and credits. From 26.11.0 PureDS4 uses its own year.month version
+numbers, independent of the DS4Windows 5.x line.
 
 Connect a DS4 over USB or Bluetooth, create profiles, and choose **Xbox 360**
 or **DualShock 4** game output. The app includes button remapping, stick and
@@ -86,7 +88,7 @@ The app does not use the DS4Windows update channel, download packages or
 install updates. Users on 5.1.0 need to download a newer release manually to
 get the checker.
 
-Version 5.2.0 bundles **.NET 10.0.14 LTS**, so no separate runtime installation
+Version 26.11.0 bundles **.NET 10.0.14 LTS**, so no separate runtime installation
 is needed. Runtime security fixes still require an updated PureDS4 package;
 see the
 [runtime maintenance plan](docs/RELEASE_CONTRACT.md#update-and-release-authority).
