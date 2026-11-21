@@ -56,8 +56,8 @@ $concepts = [ordered]@{}
 
 $pad = 'M 78,78 H 178 C 204,78 214,94 218,116 L 230,176 C 234,202 210,214 194,200 L 170,178 H 86 L 62,200 C 46,214 22,202 26,176 L 38,116 C 42,94 52,78 78,78 Z'
 
-# Gamepad layout: d-pad left, four plain buttons right (no PlayStation symbols), two
-# sticks low in the middle, light bar on top with clear space below it. Centred in the
+# Gamepad layout as on a real pad: d-pad upper left, four plain buttons upper right
+# (no PlayStation symbols), two sticks lower and further in, spaced from both, light bar on top with clear space below it. Centred in the
 # tile, PureDS4 blues (accent #285F8C / #94BFDF). $angle tilts it (0 = upright, chosen).
 function Brand-Pad([double]$angle, [string]$title, [string]$idea) {
     # The body spans x 22..234, y 78..214: lift it 18 so its mass sits on the tile centre.
@@ -74,10 +74,10 @@ function Brand-Pad([double]$angle, [string]$title, [string]$idea) {
         (S @{ d = (RoundRect 90 76 76 30 15); fill = '#94BFDF'; opacity = 0.22; transform = $place; min = 32 })
         (S @{ d = (RoundRect 96 80 64 22 11); fill = '#94BFDF'; opacity = 0.4; transform = $place; min = 24 })
         (S @{ d = (RoundRect 103 86 50 10 5); fill = 'url(#bar)'; transform = $place })
-        (S @{ d = ((RoundRect 71 112 14 40 3) + ' ' + (RoundRect 58 125 40 14 3)); fill = $navy; transform = $place })
-        (S @{ d = ((Circle 178 115 7) + ' ' + (Circle 178 149 7) + ' ' + (Circle 161 132 7) + ' ' + (Circle 195 132 7)); fill = $navy; transform = $place; min = 32 })
-        (S @{ d = ((Circle 104 160 16) + ' ' + (Circle 152 160 16)); fill = $navy; transform = $place })
-        (S @{ d = ((Circle 104 160 8) + ' ' + (Circle 152 160 8)); fill = '#4A9BDB'; transform = $place; min = 24 })
+        (S @{ d = ((RoundRect 68 106 12 36 3) + ' ' + (RoundRect 56 118 36 12 3)); fill = $navy; transform = $place })
+        (S @{ d = ((Circle 182 108 6) + ' ' + (Circle 182 138 6) + ' ' + (Circle 167 123 6) + ' ' + (Circle 197 123 6)); fill = $navy; transform = $place; min = 32 })
+        (S @{ d = ((Circle 103 156 14) + ' ' + (Circle 153 156 14)); fill = $navy; transform = $place })
+        (S @{ d = ((Circle 103 156 7) + ' ' + (Circle 153 156 7)); fill = '#4A9BDB'; transform = $place; min = 24 })
     )
     [pscustomobject]@{
         title = $title
