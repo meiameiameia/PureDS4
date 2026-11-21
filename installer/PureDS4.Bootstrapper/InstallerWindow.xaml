@@ -40,7 +40,7 @@
     <Grid Grid.Row="0" Margin="0,0,0,16">
       <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
       <Border Width="40" Height="40" Background="Transparent">
-        <Image Source="AppIcon.png" Width="40" Height="40" Stretch="Uniform" />
+        <Image Source="AppIcon.png" Width="40" Height="40" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" />
       </Border>
       <StackPanel Grid.Column="1" Margin="12,0,0,0">
         <TextBlock Text="PureDS4" FontSize="{StaticResource TypePageTitleSize}" FontWeight="SemiBold" />

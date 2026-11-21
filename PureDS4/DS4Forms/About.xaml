@@ -22,6 +22,7 @@
             </Grid.ColumnDefinitions>
             <Image Source="/PureDS4;component/Resources/AppIcon.png"
                    Width="56" Height="56" Margin="0,0,16,0" VerticalAlignment="Center"
+                   RenderOptions.BitmapScalingMode="HighQuality"
                    AutomationProperties.Name="PureDS4 controller icon" />
             <StackPanel Grid.Column="1">
                 <TextBlock Text="PureDS4" FontSize="22" Style="{StaticResource FoundationPageTitleStyle}" />
