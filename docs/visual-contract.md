@@ -31,13 +31,14 @@ blue accents, compact device information and clear physical/game-output states.
 Avoid decorative branding on every row or turning specialist tools into a
 generic Windows Settings replica.
 
-The product mark is a white controller with a light-blue center bridge on a
-muted slate-blue rounded tile with a transparent exterior.
-`PureDS4/Resources/AppIcon.png` is
-the 1024 px master. `utils/generate-app-icon.py` composes the multi-size
-`PureDS4/DS4W.ico` and `PureDS4/Resources/DS4W.ico` from that same mark;
-the 16-24 px frames must remain recognizable at native size on both light
-and dark Windows surfaces.
+The product mark ("Brand Pad") is an original, simplified white gamepad (d-pad,
+four plain buttons, two sticks, light-blue light bar) on a PureDS4-blue rounded
+tile with a soft top sheen and a transparent exterior. No PlayStation symbols.
+`branding/brand-pad/generate.ps1` is its only source: it writes the SVG, the
+1024 px master `PureDS4/Resources/AppIcon.png`, and the multi-size
+`PureDS4/DS4W.ico` and `PureDS4/Resources/DS4W.ico`, drawing every frame from the
+vector at its own size. The 16-24 px frames must remain recognizable at native
+size on both light and dark Windows surfaces.
 The default tray icon uses the mark; the optional battery and monochrome tray
 choices remain separate user-selected variants.
 

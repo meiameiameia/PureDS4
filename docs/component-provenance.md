@@ -263,3 +263,25 @@ and licenses are not release inputs for PureDS4.
 
 `PureDS4/Resources/ControllerArtwork.NOTICE.txt` remains the controller
 artwork attribution and is copied into published output.
+
+## Application icon (5.2.0)
+
+The application mark ("Brand Pad", chosen by the owner on 2026-11-20) is original
+work authored for PureDS4: a simplified gamepad with a d-pad, four plain buttons,
+two sticks and a light bar on a PureDS4-blue tile. It is not traced from a
+DualShock and uses no PlayStation or Sony marks (no face-button symbols, no logo),
+no stock art and no fonts. Its only source is the geometry in
+`branding/brand-pad/generate.ps1` (PowerShell + WPF, no third-party tools), which
+writes `branding/brand-pad/brand-pad.svg` and, with `-Install`, the files below.
+Every ICO frame is drawn from the vector at its own size.
+
+| File | Contents | SHA-256 |
+| --- | --- | --- |
+| `PureDS4/DS4W.ico` | 16, 20, 24, 32, 40, 48, 64, 96, 128, 256 px PNG frames | `DF248D9F9E92E9FC1AB8A2F99E941B715189803ABFE74686B634BB5917BD1872` |
+| `PureDS4/Resources/DS4W.ico` | identical copy (WPF resource, default tray icon) | `DF248D9F9E92E9FC1AB8A2F99E941B715189803ABFE74686B634BB5917BD1872` |
+| `PureDS4/Resources/AppIcon.png` | 1024 px master, transparent exterior | `E91CC3F0D97AEEA19FD8585C69161CA6C06063D4370A468BECD817C04AC986CB` |
+
+It replaces the earlier white-controller tile. `utils/generate-app-icon.py`, the
+Pillow-based composer for that tile, is kept for history but no longer produces
+the shipped icon; do not run it over these files. The battery and monochrome tray
+choices are separate assets and are unchanged.
