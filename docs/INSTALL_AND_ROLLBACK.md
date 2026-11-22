@@ -46,6 +46,14 @@ installer/runtime disagreement, not every cause of launcher or reboot failure.
 
 ## Upgrading an existing PureDS4 installation
 
+From 26.11.0 PureDS4 uses year.month version numbers. 26.11.0 is numerically
+higher than every 5.x build and keeps the same upgrade codes, so its setup
+updates 5.1.x in place like any other PureDS4 update. On the owner's PC it
+updated a 5.2.0 test build (see the
+[26.11.0 checkpoint](INSTALLER_VALIDATION_STRATEGY.md#26110-installed-candidate-checkpoint--2026-11-22));
+the update from the published 5.1.2 has not been run on hardware. The
+preparation below still applies.
+
 The first public-version target is `5.1.0`. The last full USB/Bluetooth gameplay
 baseline was the `5.1.0` candidate from commit `49ba5d2`, not `5.1.0-beta.2`.
 The beta-to-stable upgrade first passed with candidate `9c17446`; the later

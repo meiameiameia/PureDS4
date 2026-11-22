@@ -72,6 +72,41 @@ No installation, real task registration/execution or reboot was performed.
 
 ## Pinned runtime contract
 
+### 26.11.0 installed candidate checkpoint — 2026-11-22
+
+The owner ran the unsigned candidate
+`%LOCALAPPDATA%\dev-scratch\pure-ds4\20261121-candidate-26.11.0\installer\PureDS4_26.11.0_Setup_x64.exe`
+(189,091,352 bytes, SHA-256
+`D17FEFCA058FBA5BAB4C51475D516291FC11A61AF9C2EDEE9500B4275B013AF9`, built
+from clean source `5ca896f5e7cef5d1c42b7177bec35c51bbf71210`) as an update on
+2026-11-21 and accepted it on 2026-11-22. Read-only checks on 2026-11-22:
+
+- Bundle log `%TEMP%\PureDS4_20261121012354.log`: Burn ran from the candidate
+  path above, detected the related **5.2.0** bundle (Upgrade) and MSI
+  (MajorUpgrade), installed the 26.11.0 MSI, removed the 5.2.0 bundle, and
+  finished with Apply result `0x0`, restart None, exit code `0x0`. VIIPER/USB-IP
+  and HidHide were detected Present and not reinstalled.
+- Installed `C:\Program Files\PureDS4\PureDS4.exe` reports 26.11.0 and matches
+  SHA-256 `0EFF3D6DD840C1367C8CFB55643D733A73D4402AC5543AAB5CB24CA8BEC420C7`,
+  the candidate application. The candidate installer still matches its hash.
+- Both PureDS4 uninstall entries report 26.11.0; no 5.x registration remains.
+- `HKLM\SOFTWARE\PureDS4` is `Ready` for `VIIPER-0.1.0-pureds4.2+USBIP-0.9.7.7`,
+  version 26.11.0. `RunPureDS4` is Ready and `RunPureDS4VIIPER` was Running.
+
+The previous step was the 5.2.0 candidate from `2430483` (installer SHA-256
+`8C8C36A62070C5D3E083428547B8B88CB784D66E315F07621442EE5EE19717DD`), installed
+by the owner on 2026-11-08 over private **5.2.0-ui-preview.7**: Apply result
+`0x0`, no restart, installed app matched its candidate, both tasks present, and
+Roaming user data untouched. That 5.2.0 candidate was never published.
+
+Gaps: this PC went preview.7 -> 5.2.0 candidate -> 26.11.0, so the public
+in-place update **from 5.1.2 to 26.11.0** was not exercised on hardware; the
+version jump from 5.x to 26.x is covered by the installer state-machine model,
+the shared UpgradeCodes and `ReleaseChannelPolicyTests`, not by a real install.
+No user-data backup comparison, task-definition detail check or Windows
+restart was recorded for the 26.11.0 update. Clean full-bundle installation,
+real failure rollback and interrupted-install reboot/resume remain unobserved.
+
 ### 5.2.0 private preview.7 installed checkpoint — 2026-10-15
 
 The owner authorized and completed the private preview.6 -> preview.7 update,

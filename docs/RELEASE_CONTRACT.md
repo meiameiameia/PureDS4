@@ -26,6 +26,100 @@ An unexpected API account blocks new publication or uploads. Existing release
 authorship is separate from editable release text; changing it must not silently
 delete releases, replace assets or alter accepted source/tag identities.
 
+### 26.11.0 candidate acceptance — 2026-11-22
+
+The owner accepted the candidate built by `installer/build-installer.ps1` from
+clean source `5ca896f5e7cef5d1c42b7177bec35c51bbf71210` (the release planned as
+5.2.0; see the [version contract](#year-based-versions-from-26110-owner-decision-2026-11-20)).
+The owner installed it as an update and reported the requested checks passed:
+profile editor Cancel and Save, Controller Readings over USB, the new icon in
+setup, About, taskbar, Start and tray, and About showing 26.11.0. Read-only
+checks confirmed that the installed `C:\Program Files\PureDS4\PureDS4.exe`
+reports 26.11.0 and matches the candidate application below.
+
+The broader hardware batch ran on the 5.2.0 candidate from `2430483`:
+visual light/dark pass, USB, managed/native round trips, profile editing and an
+86-minute Bluetooth game session without disconnect. The commits between
+`2430483` and `5ca896f` change only XAML pages, the Controller Readings
+code-behind and a converter, one tooltip string, the icon, version numbers,
+tests and documentation; no
+device, mapping, control-service, protocol or VIIPER source changed. See
+[hardware evidence](HARDWARE_VALIDATION.md#26110-candidate-acceptance--2026-11-22)
+and [installer evidence](INSTALLER_VALIDATION_STRATEGY.md#26110-installed-candidate-checkpoint--2026-11-22).
+
+| Accepted file | Bytes | SHA-256 |
+| --- | --- | --- |
+| `PureDS4_26.11.0_Setup_x64.exe` | 189,091,352 | `D17FEFCA058FBA5BAB4C51475D516291FC11A61AF9C2EDEE9500B4275B013AF9` |
+| `PureDS4.exe` (application inside both packages) | 209,752,390 | `0EFF3D6DD840C1367C8CFB55643D733A73D4402AC5543AAB5CB24CA8BEC420C7` |
+
+The installer is unsigned. The local build produced no portable ZIP,
+`candidate-identity.json` or `SHA256SUMS.txt`. If the portable package is
+published, it must be archived from the accepted application folder without
+rebuilding, and its hash recorded here before publication. Tag `v26.11.0` must
+identify `5ca896f`, not a later documentation-only commit. The accepted
+application passed 1,182 tests (live-process audio capture excluded) and a
+Release build with 0 warnings. Not observed: the in-place update from published
+5.1.2 (this PC went preview.7 -> 5.2.0 candidate -> 26.11.0), clean full-bundle
+installation, real failure rollback, interrupted-install reboot/resume,
+another Windows PC and current DS4 speaker/headset audio. The 15-minute
+Bluetooth read stall remains a known open issue. No publication has been made.
+
+#### 26.11.0 public release notes
+
+26.11.0 is the UI release that was planned as 5.2.0. PureDS4 now uses its own
+year.month version numbers, so it no longer looks like part of the DS4Windows
+5.x line. 26.11.0 installs over 5.1.x as a normal update, and the 5.1.1/5.1.2
+update checker offers it.
+
+What is new:
+
+- A new look in light and dark across the whole app: Home, Profiles,
+  Settings, Tools, the profile editor and its pages, Controller Readings,
+  binding dialogs, setup and migration dialogs, and the installer window.
+- Profile editor pages rebuilt as aligned rows with section headings and
+  on/off switches; options that depend on a switch appear only when it is on.
+- A redesigned Controller Readings page and a new app icon.
+- Clearer setup and DS4Windows-migration dialogs.
+- Safer controller reads: a Windows read could return while the system still
+  owned its buffer; reads now wait and clean up safely.
+- If Bluetooth input stalls for more than a second, a line is written to the
+  log file naming the stage. No input values or device identifiers are
+  recorded.
+- Bundled **.NET 10.0.14 LTS**.
+
+Unchanged: DS4 only, Windows x64. Xbox 360 and DS4 game output, the drivers,
+and profile and settings files are unchanged, and Bluetooth output reports are
+the same as in 5.1.2.
+
+Known issue: on my PC, Bluetooth input pauses briefly about every 15 minutes,
+usually for under a second and sometimes up to 3 seconds, then continues. I
+didn't notice it in game. The cause is below PureDS4 (Windows Bluetooth path or
+the radio) and is still being investigated; I don't know yet whether 5.1.2
+does the same. If you see it, the log in `%AppData%\PureDS4\Logs` shows which
+stage paused.
+
+I checked the new interface in light and dark, USB readings, game output,
+rumble, lightbar, switching between game output and direct use, profile
+editing, and an 86-minute Bluetooth game session on my DS4 setup. The exact
+package installed as an update on the same PC. That update came from test
+builds, not from 5.1.2, so back up your profiles before updating. No
+performance or latency claims are made for this release.
+
+The installer is still unsigned. Clean full-bundle installation, rollback
+after a real installation failure and resuming an interrupted installation
+after reboot still need validation. Don't disable Windows protections to
+install it.
+
+Download `PureDS4_26.11.0_Setup_x64.exe` for standard setup, or
+`PureDS4_26.11.0_x64.zip` for portable use. The portable package still needs
+the machine-wide drivers. Updates remain manual.
+
+The packages were built locally from clean source
+`5ca896f5e7cef5d1c42b7177bec35c51bbf71210`. `candidate-identity.json` records
+the build; `SHA256SUMS.txt` lets you check the downloads. See the
+[installation and recovery guide](https://github.com/meiameiameia/PureDS4/blob/main/docs/INSTALL_AND_ROLLBACK.md)
+and [validation record](https://github.com/meiameiameia/PureDS4/blob/main/docs/HARDWARE_VALIDATION.md).
+
 ### 5.1.2 frozen candidate acceptance — 2026-10-05
 
 The owner accepted the unchanged clean-source candidate from

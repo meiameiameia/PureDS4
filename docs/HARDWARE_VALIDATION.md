@@ -11,6 +11,48 @@ microphone need a trick, and both are described at the end.
 
 ## Release hardware evidence
 
+### 26.11.0 candidate acceptance — 2026-11-22
+
+The owner reported "All tested and good to go" for the 26.11.0 candidate after
+installing it as an update: profile editor Cancel and Save, Controller Readings
+with the DS4 over USB, the new icon in setup, About, taskbar, Start and tray,
+and About showing 26.11.0. Read-only checks confirmed that installed
+`C:\Program Files\PureDS4\PureDS4.exe` reports 26.11.0 and matches SHA-256
+`0EFF3D6DD840C1367C8CFB55643D733A73D4402AC5543AAB5CB24CA8BEC420C7`, the
+application built from clean source `5ca896f5e7cef5d1c42b7177bec35c51bbf71210`.
+Controller: DS4 v2.1 (owner's only controller), USB for this check.
+
+The full hardware batch ran on the earlier 5.2.0 candidate from `2430483`
+(installed 2026-11-08; app SHA-256
+`CA1E0ABFF0F9F52C68C0DF845D8451B58BF8380E85FBC94AB5C4C5BC6D6D2947`):
+
+- 2026-11-15, Bluetooth, Xbox 360 output, audio off, game rumble active: a
+  session of about 86 minutes (19:24-20:50, battery 55%) with no involuntary
+  disconnect; it ended with the controller switched off and the app closed.
+  The periodic read stalls recurred on the 15-minute cadence (19:47:03 0.84 s,
+  20:02:04 a 3.0 s read timeout with input paused and resumed, 20:17:03 0.75 s,
+  20:47:03 0.71 s). The new file-only diagnostics placed every stall in the HID
+  read stage; processing, dispatch and feedback stayed near 0 ms and no effect
+  write failed. The owner did not notice the 3-second pause in game. An earlier
+  session that day at 5% battery (startup timeout, stalls, CRC failures and
+  disconnects at 16:48-16:49) is confounded by low battery and is not counted
+  either way.
+- 2026-11-19: the owner reported the visual pass (light and dark), USB checks,
+  managed -> native -> managed routing and profile editing all passed, except
+  that the profile editor property pages looked unfinished. The page polish in
+  `cfa9690`, `6e51ffe` and `462b049` addresses that; the owner accepted the
+  26.11.0 candidate containing it. Its acceptance list above names the editor's
+  Cancel and Save, not a recorded page-by-page light/dark review.
+
+The commits from `2430483` to `5ca896f` change only XAML pages, the Controller
+Readings code-behind and a converter, one tooltip string, the icon, version
+numbers, tests and documentation. No device, mapping, control-service,
+protocol or VIIPER source changed, so the hardware results above carry over;
+they were not repeated on 26.11.0. Bluetooth was not rechecked on 26.11.0.
+Current DS4 speaker/headset audio was not separately confirmed. The 15-minute
+Bluetooth stall is not worse than in the preview builds, but its cause is
+unidentified and it is unknown whether 5.1.2 shows it. No latency claim is made.
+
 ### 5.2.0 owner decision on the no-audio effect experiment — 2026-11-08
 
 The owner chose to revert only the unvalidated experiment (byte 2 of ordinary

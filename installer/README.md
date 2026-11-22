@@ -3,9 +3,10 @@
 `build-installer.ps1` composes the standard x64 distribution as a WiX 5 Burn
 bundle with a custom WPF interface. It contains the managed PureDS4 MSI,
 PureDS4 VIIPER 0.1.0-pureds4.2, USB-IP 0.9.7.7, and an optional HidHide package.
-The development target is 26.11.0 (the release planned as 5.2.0; see the
-version contract in `docs/RELEASE_CONTRACT.md`); 5.1.2 remains the published
-maintenance release.
+The current version is 26.11.0 (the release planned as 5.2.0; see the
+version contract in `docs/RELEASE_CONTRACT.md`). Its owner-accepted candidate
+and hashes are recorded there; 5.1.2 stays the published release until
+26.11.0 is published.
 The application and managed setup hosts
 use self-contained .NET 10.0.14, independently pinned from SDK 10.0.302.
 The backend is built from clean source commit
@@ -46,7 +47,7 @@ backend, and reboot resume so those logs can be correlated without timestamp
 guesswork.
 
 The output is named `PureDS4_26.11.0_Setup_x64.exe` and the installed
-executable is `PureDS4.exe`. `26.11.0` is the development target, not a
+executable is `PureDS4.exe`. A version number alone is not a
 release-readiness or publication claim. For historical 5.1.0 evidence, an internal `5.1.0`
 bundle upgraded the owner's former `5.1.0-beta.2` installation, and a later
 bundle passed a same-version replacement. The eventual published file must

@@ -25,14 +25,22 @@ with no release date. For other controller families, see
 
 ## Download and install
 
-The current release is **5.1.2**. Get the packages from
-[PureDS4 Releases](https://github.com/meiameiameia/PureDS4/releases).
+The current release is **26.11.0**, the first with PureDS4's year.month
+numbers. It follows 5.1.2 and installs over 5.1.x as a normal update. Get the
+packages from [PureDS4 Releases](https://github.com/meiameiameia/PureDS4/releases).
+
+26.11.0 gives the whole app a new look in light and dark: Home, Profiles,
+Settings, Tools, the profile editor and its pages, Controller Readings, the
+setup and migration dialogs, and the installer window. It also adds a new app
+icon, safer controller reads and a file-only log line when Bluetooth input
+stalls. Controller support, game output choices and profile files are
+unchanged.
 
 PureDS4 targets **Windows 10/11 x64**. Testing so far is limited to one Windows
 PC; see [what has been tested](#what-has-been-tested) before installing.
 
-- **Standard setup:** `PureDS4_5.1.2_Setup_x64.exe`
-- **Portable package:** `PureDS4_5.1.2_x64.zip`
+- **Standard setup:** `PureDS4_26.11.0_Setup_x64.exe`
+- **Portable package:** `PureDS4_26.11.0_x64.zip`
 - **Checksums and build details:** `SHA256SUMS.txt` and `candidate-identity.json`
 
 The installer is **unsigned and has no verified publisher**. An earlier
@@ -41,7 +49,7 @@ it. Download from this repository's Releases page and compare the file's
 SHA-256 with `SHA256SUMS.txt`:
 
 ```powershell
-Get-FileHash .\PureDS4_5.1.2_Setup_x64.exe -Algorithm SHA256
+Get-FileHash .\PureDS4_26.11.0_Setup_x64.exe -Algorithm SHA256
 ```
 
 A matching hash confirms that the file matches the published checksum; it
@@ -85,8 +93,9 @@ Downloads and installation stay manual. From 5.1.1, PureDS4 checks GitHub for
 new stable releases on startup, at most once per 24 hours. Automatic checks
 can be disabled in Settings; **Tools → Updates → Check** works manually.
 The app does not use the DS4Windows update channel, download packages or
-install updates. Users on 5.1.0 need to download a newer release manually to
-get the checker.
+install updates. The checker in 5.1.1 and 5.1.2 offers 26.11.0 as a newer
+release. Users on 5.1.0 need to download a newer release manually to get the
+checker.
 
 Version 26.11.0 bundles **.NET 10.0.14 LTS**, so no separate runtime installation
 is needed. Runtime security fixes still require an updated PureDS4 package;
@@ -158,6 +167,27 @@ guaranteed downgrade.
 ## What has been tested
 
 Testing has covered a **DS4 v2 on one Windows PC**, using USB and Bluetooth.
+
+For 26.11.0, the redesigned app was checked on that PC as an installed update.
+The new look passed a visual check in light and dark, along with USB readings,
+game output, rumble, lightbar, switching between game output and direct use,
+and profile editing. A Bluetooth session of about 86 minutes in a game ran
+without a disconnect. The exact 26.11.0 package then installed as an update
+over the earlier test build. The profile editor's Cancel and Save, Controller
+Readings over USB, the new icon and the version shown in About passed on it.
+The controller, mapping and game-output code is the same as in the build that
+passed the hardware checks; the changes after it are to the interface, the
+icon and the version number. The update was tested from earlier test builds,
+not from the published 5.1.2; the update from 5.1.2 is covered by automated
+installer models only.
+
+**Known issue in 26.11.0:** on this PC, Bluetooth input pauses briefly about
+every 15 minutes, usually for under a second and sometimes for up to 3
+seconds, and then continues. It was not noticed in game. The cause is below
+PureDS4, in the Windows Bluetooth path or the radio, and is still being
+investigated. It is not known whether 5.1.2 behaves the same. If it happens
+to you, the log in `%AppData%\PureDS4\Logs` records which stage paused.
+
 The exact 5.1.2 candidate passed the in-place update from 5.1.1, Windows restart
 without another repair, and USB/Bluetooth readings, gameplay, reconnecting and
 app close/reopen. All 29 installed application files still matched the frozen
@@ -187,7 +217,7 @@ The remaining limits matter:
   game when PureDS4 is running without elevation.
 
 The [hardware validation record](docs/HARDWARE_VALIDATION.md) and
-[installer checkpoint](docs/INSTALLER_VALIDATION_STRATEGY.md#512-installed-candidate-checkpoint--2026-10-05)
+[installer checkpoint](docs/INSTALLER_VALIDATION_STRATEGY.md#26110-installed-candidate-checkpoint--2026-11-22)
 separate observed results from procedures and untested cases.
 
 ## Troubleshooting and support
@@ -221,7 +251,7 @@ From a Windows development environment with the project's .NET SDK:
 ```powershell
 dotnet restore PureDS4.sln --locked-mode
 dotnet build PureDS4.sln -c Debug -p:Platform=x64
-dotnet test PureDS4.sln -c Debug -p:Platform=x64 --filter "FullyQualifiedName!~LiveProcessCapture"
+dotnet test PureDS4.sln -c Debug -p:Platform=x64 -r win-x64 -p:SelfContained=true --filter "FullyQualifiedName!~LiveProcessCapture"
 ```
 
 These commands build and test the application; they do not validate physical
