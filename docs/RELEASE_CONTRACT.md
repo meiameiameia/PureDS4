@@ -50,12 +50,21 @@ and [installer evidence](INSTALLER_VALIDATION_STRATEGY.md#26110-installed-candid
 | Accepted file | Bytes | SHA-256 |
 | --- | --- | --- |
 | `PureDS4_26.11.0_Setup_x64.exe` | 189,091,352 | `D17FEFCA058FBA5BAB4C51475D516291FC11A61AF9C2EDEE9500B4275B013AF9` |
+| `PureDS4_26.11.0_x64.zip` | 122,328,132 | `980F172BC25543A877F6286DBD1A88D57BC472FFCA658BD6204EA1F88726BCBA` |
 | `PureDS4.exe` (application inside both packages) | 209,752,390 | `0EFF3D6DD840C1367C8CFB55643D733A73D4402AC5543AAB5CB24CA8BEC420C7` |
 
-The installer is unsigned. The local build produced no portable ZIP,
-`candidate-identity.json` or `SHA256SUMS.txt`. If the portable package is
-published, it must be archived from the accepted application folder without
-rebuilding, and its hash recorded here before publication. Tag `v26.11.0` must
+The installer is unsigned. The local build produced only the installer, so on
+2026-11-22 the portable ZIP was archived from the same accepted application
+folder without rebuilding: the 29 package files under a top-level `PureDS4/`
+folder, as `utils/post-build.py` composes it, without the installer-only
+`package-manifest.json`. Extracting it with Windows' own archive tool matched
+all 29 files to that manifest's SHA-256 values. `candidate-identity.json`
+(kind `release-candidate`, source above, runtime packs 10.0.14 for the
+application, setup actions and bootstrapper, installer `NotSigned`) and
+`SHA256SUMS.txt` were written in the CI format and checked against both
+packages. The four public assets are under
+`%LOCALAPPDATA%\dev-scratch\pure-ds4\20261121-candidate-26.11.0\release\`.
+The portable package itself was not run. Tag `v26.11.0` must
 identify `5ca896f`, not a later documentation-only commit. The accepted
 application passed 1,182 tests (live-process audio capture excluded) and a
 Release build with 0 warnings. Not observed: the in-place update from published
