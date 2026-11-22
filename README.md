@@ -128,10 +128,10 @@ game output.
 <details>
 <summary>Profile editor: live controller readings</summary>
 
-Inspect sticks, triggers and motion sensors while editing a profile.
+Inspect sticks, triggers, touchpad and motion sensors while editing a profile.
 
 <a href="docs/images/screenshots/controller-readings.png">
-  <img src="docs/images/screenshots/controller-readings.png" alt="PureDS4 profile editor showing live stick, trigger, gyro and accelerometer readings" width="800">
+  <img src="docs/images/screenshots/controller-readings.png" alt="PureDS4 profile editor showing live stick, trigger, touchpad, gyro, accelerometer and tilt readings for a DS4 over Bluetooth" width="800">
 </a>
 
 </details>
