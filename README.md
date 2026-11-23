@@ -2,133 +2,26 @@
 
 <img src="PureDS4/Resources/AppIcon.png" alt="PureDS4 controller icon" width="80" height="80">
 
-PureDS4 is a Windows controller mapper for the DualShock 4, maintained by
-[meiameiameia](https://github.com/meiameiameia). It is a separate, DS4-focused product based on
-[hbashton/DS4Windows](https://github.com/hbashton/DS4Windows), and keeps its
-GPL licence and credits. From 26.11.0 PureDS4 uses its own year.month version
-numbers, independent of the DS4Windows 5.x line.
+PureDS4 lets you use a **DualShock 4** controller in Windows games. Connect it
+over USB or Bluetooth, pick a profile, and games see an **Xbox 360** or
+**DualShock 4** controller. You can remap buttons, adjust sticks and triggers,
+use the gyro and touchpad, and set rumble and the lightbar.
 
-Connect a DS4 over USB or Bluetooth, create profiles, and choose **Xbox 360**
-or **DualShock 4** game output. The app includes button remapping, stick and
-trigger adjustments, gyro and touchpad controls, rumble, lightbar settings,
-and live controller readings for checking input and mapped output.
+Need Steam or a game to use the real DS4 instead? Switch to
+[direct use](#use-the-ds4-directly) from Home without closing PureDS4.
 
-You can also switch a controller to [direct/native use](#use-the-physical-ds4-directly)
-from Home without closing PureDS4 or stopping its controller service. Use
-PureDS4's mapped output for some games and let Steam handle the physical DS4
-for others.
-
-**This release supports the DualShock 4 only.** DualSense, DualSense Edge,
-Switch Pro and Joy-Con are outside its scope. DualShock 3 support is planned,
-with no release date. For other controller families, see
-[DS4Windows](https://github.com/hbashton/DS4Windows).
-
-## Download and install
-
-The current release is **26.11.0**, the first with PureDS4's year.month
-numbers. It follows 5.1.2 and installs over 5.1.x as a normal update. Get the
-packages from [PureDS4 Releases](https://github.com/meiameiameia/PureDS4/releases).
-
-26.11.0 gives the whole app a new look in light and dark: Home, Profiles,
-Settings, Tools, the profile editor and its pages, Controller Readings, the
-setup and migration dialogs, and the installer window. It also adds a new app
-icon, safer controller reads and a file-only log line when Bluetooth input
-stalls. Controller support, game output choices and profile files are
-unchanged.
-
-PureDS4 targets **Windows 10/11 x64**. Testing so far is limited to one Windows
-PC; see [what has been tested](#what-has-been-tested) before installing.
-
-- **Standard setup:** `PureDS4_26.11.0_Setup_x64.exe`
-- **Portable package:** `PureDS4_26.11.0_x64.zip`
-- **Checksums and build details:** `SHA256SUMS.txt` and `candidate-identity.json`
-
-The installer is **unsigned and has no verified publisher**. An earlier
-browser download produced a SmartScreen warning, and Windows policy may block
-it. Download from this repository's Releases page and compare the file's
-SHA-256 with `SHA256SUMS.txt`:
-
-```powershell
-Get-FileHash .\PureDS4_26.11.0_Setup_x64.exe -Algorithm SHA256
-```
-
-A matching hash confirms that the file matches the published checksum; it
-does not prove the file is harmless. Do not disable Windows protections to
-install PureDS4.
-
-### Standard setup
-
-If you already use DS4Windows, read [switching from DS4Windows](#switching-from-ds4windows)
-first.
-
-1. Run the setup executable and review the included component terms.
-2. Keep the recommended HidHide option unless you have a reason to leave it
-   out. Setup detects an existing HidHide installation.
-3. Allow setup to finish, including any requested restart, then open PureDS4
-   and connect your DS4.
-4. Select a profile and game output. Check the controller's protection and
-   output status on Home before starting a game.
-
-Setup includes the app, its .NET runtime, and the components needed for
-offline installation:
-
-- **PureDS4-VIIPER** creates the virtual Xbox 360 or DS4 controller.
-- **USB-IP** provides the virtual controller's transport.
-- **HidHide** hides the physical controller from games to avoid double input.
-  It is optional, but recommended.
-
-Driver installation or repair can require administrator approval and a
-restart. The bundled VIIPER backend starts when PureDS4 needs game output;
-it has no separate tray icon, updater, or Windows logon trigger.
-
-### Portable package
-
-Extract the ZIP and read `PORTABLE-TERMS.txt` and the agreements in
-`ThirdParty/` before running `PureDS4.exe`. The runtime is included, but
-portable use still needs the machine-wide game-output components and drivers.
-Extracting the archive does not install or configure them. PureDS4 checks
-these components and offers setup or repair when needed.
-
-Downloads and installation stay manual. From 5.1.1, PureDS4 checks GitHub for
-new stable releases on startup, at most once per 24 hours. Automatic checks
-can be disabled in Settings; **Tools → Updates → Check** works manually.
-The app does not use the DS4Windows update channel, download packages or
-install updates. The checker in 5.1.1 and 5.1.2 offers 26.11.0 as a newer
-release. Users on 5.1.0 need to download a newer release manually to get the
-checker.
-
-Version 26.11.0 bundles **.NET 10.0.14 LTS**, so no separate runtime installation
-is needed. Runtime security fixes still require an updated PureDS4 package;
-see the
-[runtime maintenance plan](docs/RELEASE_CONTRACT.md#update-and-release-authority).
-
-## Use the physical DS4 directly
-
-On Home, choose **Use controller directly** to release the selected physical
-DS4 to Windows. Its virtual output stops, but PureDS4 and its controller
-service stay running. Steam, or a game with native DS4 support, can then use
-the physical controller instead of PureDS4's virtual one.
-
-Profile remapping and virtual-controller features are unavailable for that
-controller in direct mode. Choose **Use game output** to restore PureDS4's
-protected virtual output. Switching modes is manual, not automatic per game.
-
-Switch before launching the game. A game or Steam may need to be restarted
-to detect the change; immediate controller re-detection is not guaranteed.
-
-## Screenshots
-
-Home with a DS4 connected over Bluetooth, controller protection, and Xbox 360
-game output.
+PureDS4 supports the **DualShock 4 only** (no DualSense, Switch Pro or
+Joy-Con) on **Windows 10/11 x64**. It is maintained by
+[meiameiameia](https://github.com/meiameiameia) and based on
+[DS4Windows](https://github.com/hbashton/DS4Windows); for other controllers,
+use DS4Windows.
 
 <a href="docs/images/screenshots/home.png">
   <img src="docs/images/screenshots/home.png" alt="PureDS4 Home showing a DS4 connected over Bluetooth, Protected status, and Xbox 360 game output" width="800">
 </a>
 
 <details>
-<summary>Profile editor: live controller readings</summary>
-
-Inspect sticks, triggers, touchpad and motion sensors while editing a profile.
+<summary>More: live controller readings in the profile editor</summary>
 
 <a href="docs/images/screenshots/controller-readings.png">
   <img src="docs/images/screenshots/controller-readings.png" alt="PureDS4 profile editor showing live stick, trigger, touchpad, gyro, accelerometer and tilt readings for a DS4 over Bluetooth" width="800">
@@ -136,117 +29,92 @@ Inspect sticks, triggers, touchpad and motion sensors while editing a profile.
 
 </details>
 
-Click either screenshot to open the full-size image.
+## Download and install
 
-## Switching from DS4Windows
+The current version is **26.11.0**, with a new look in light and dark mode.
+Download it from [Releases](https://github.com/meiameiameia/PureDS4/releases):
 
-PureDS4 replaces DS4Windows. Keeping both installed for ongoing use, or
-running them together, is unsupported.
+- **`PureDS4_26.11.0_Setup_x64.exe`**: the normal installer (recommended).
+- **`PureDS4_26.11.0_x64.zip`**: portable version. It still needs the drivers
+  that the installer sets up; PureDS4 offers to install them.
 
-Before switching, back up your DS4Windows profiles and settings and keep a
-copy of your previous trusted installer or portable package. Close DS4Windows
-completely, including its notification-area icon. For an installed version,
-use its own uninstaller. Portable versions, including older Ryochan7 and
-schmaldeo builds, may have no uninstaller: preserve profiles and settings
-stored alongside the app, then remove only the old application files and
-startup entries. Leave shared drivers in place. PureDS4 blocks controller
-activation while a detected predecessor installation can still compete for
-the controller.
+If you use DS4Windows now, read [coming from DS4Windows](#coming-from-ds4windows)
+first. Then:
 
-Once PureDS4 is running, use **Tools → Import from DS4Windows** to copy your
-saved game profiles. The importer leaves the originals untouched and gives
-name conflicts a `(DS4Windows)` suffix. It does **not** import Auto Profiles,
-special actions, controller configurations, or every application setting.
+1. Run the installer. Keep the recommended **HidHide** option: it stops games
+   from seeing the controller twice.
+2. Restart Windows if setup asks you to.
+3. Open PureDS4, connect your DS4, and choose a profile and game output on
+   Home. When the controller shows **Ready**, start your game.
 
-See the [installation and recovery guide](docs/INSTALL_AND_ROLLBACK.md) for
-replacement, repair and rollback details. Uninstalling PureDS4 leaves its
-settings and shared HidHide/USB-IP drivers in place. Removing shared drivers
-is not a general troubleshooting step, and an older installer is not a
-guaranteed downgrade.
+The installer is **unsigned (no verified publisher)**, so Windows SmartScreen
+may warn you. Download only from the Releases page above. To check the
+download, compare its hash with `SHA256SUMS.txt` on the same page:
 
-## What has been tested
+```powershell
+Get-FileHash .\PureDS4_26.11.0_Setup_x64.exe -Algorithm SHA256
+```
 
-Testing has covered a **DS4 v2 on one Windows PC**, using USB and Bluetooth.
+Don't turn off Windows protections to install PureDS4.
 
-For 26.11.0, the redesigned app was checked on that PC as an installed update.
-The new look passed a visual check in light and dark, along with USB readings,
-game output, rumble, lightbar, switching between game output and direct use,
-and profile editing. A Bluetooth session of about 86 minutes in a game ran
-without a disconnect. The exact 26.11.0 package then installed as an update
-over the earlier test build. The profile editor's Cancel and Save, Controller
-Readings over USB, the new icon and the version shown in About passed on it.
-The controller, mapping and game-output code is the same as in the build that
-passed the hardware checks; the changes after it are to the interface, the
-icon and the version number. The update was tested from earlier test builds,
-not from the published 5.1.2; the update from 5.1.2 is covered by automated
-installer models only.
+**Updates:** PureDS4 checks for new versions once a day and tells you; you
+download and install them yourself. You can turn this off in Settings or check
+in **Tools → Updates**. Installing a new version over an old one keeps your
+profiles and settings; backing them up first is still a good idea.
 
-**Known issue in 26.11.0:** on this PC, Bluetooth input pauses briefly about
-every 15 minutes, usually for under a second and sometimes for up to 3
-seconds, and then continues. It was not noticed in game. The cause is below
-PureDS4, in the Windows Bluetooth path or the radio, and is still being
-investigated. It is not known whether 5.1.2 behaves the same. If it happens
-to you, the log in `%AppData%\PureDS4\Logs` records which stage paused.
+## Use the DS4 directly
 
-The exact 5.1.2 candidate passed the in-place update from 5.1.1, Windows restart
-without another repair, and USB/Bluetooth readings, gameplay, reconnecting and
-app close/reopen. All 29 installed application files still matched the frozen
-candidate after the restart. The hotfix corrects a mismatch between setup's
-launcher task and the app's validation. The user who reported recurring repair
-also confirmed that 5.1.2 is working on their PC and will open an issue if it
-returns; that report does not establish every setup scenario.
+On Home, choose **Use controller directly** to hand the real DS4 to Windows,
+so Steam or a game with its own DS4 support can use it. Your profile is not
+applied while in this mode. Choose **Use game output** to switch back. Do this
+before starting the game; the game or Steam may need a restart to notice.
 
-The exact 5.1.1 candidate passed USB/Bluetooth input, Xbox 360 game output,
-gameplay/rumble, disconnect/reconnect, app restart and managed/native round trips.
-A temporary-profile check confirmed that switching to native mode releases
-a held macro key and cancels its later steps. The in-place update from 5.1.0
-preserved Default, and all 29 installed application files matched the candidate
-manifest. These results do not establish physical validation of DS4 game output.
+## Coming from DS4Windows
 
-The remaining limits matter:
+PureDS4 replaces DS4Windows; don't run both. Back up your DS4Windows profiles,
+close DS4Windows completely (including its tray icon) and uninstall it. Leave
+shared drivers such as HidHide in place. Then, in PureDS4, use
+**Tools → Import from DS4Windows** to copy your game profiles. Auto Profiles,
+special actions and app settings are not imported.
 
-- Clean full-bundle installation, actual installation-failure rollback, and
-  resuming an interrupted installation after reboot have not been observed.
-  A failed installation may need manual repair.
-- Physical backend interruption, sleep/wake, and two simultaneous controllers
-  have not been validated. Automated recovery tests do not cover those
-  hardware scenarios.
-- DS4 speaker and headset audio are implemented, but have not had current
-  physical validation.
-- Keyboard and mouse mappings use SendInput. They may not reach an elevated
-  game when PureDS4 is running without elevation.
+The [installation and recovery guide](docs/INSTALL_AND_ROLLBACK.md) covers
+portable DS4Windows versions, repair and going back.
 
-The [hardware validation record](docs/HARDWARE_VALIDATION.md) and
-[installer checkpoint](docs/INSTALLER_VALIDATION_STRATEGY.md#26110-installed-candidate-checkpoint--2026-11-22)
-separate observed results from procedures and untested cases.
+## Good to know
 
-## Troubleshooting and support
+PureDS4 is tested by its maintainer on one PC with a DS4 v2, over USB and
+Bluetooth. Things to be aware of:
 
-If input is missing or behaves unexpectedly, open **Profiles → edit a profile
-→ Controller Readings**. Compare the input and output values to check whether
-the problem starts at the controller or after mapping. Run `joy.cpl` to check
-whether Windows sees the virtual game controller.
+- **Short Bluetooth pauses:** on the test PC, Bluetooth input sometimes pauses
+  for under a second (rarely up to 3 seconds) about every 15 minutes, then
+  continues. It wasn't noticeable in game, and the cause is still being
+  investigated.
+- **Not tested yet:** sleep/wake, two controllers at once, and the DS4
+  speaker and headset jack.
+- **Keyboard and mouse mappings** may not reach games running as
+  administrator unless PureDS4 also runs as administrator.
+- If an installation fails partway, it may need a manual repair.
 
-For setup or update failures, save the error and logs before trying another
-installer. Follow any restart request. Use the intended PureDS4 installer's
-repair flow rather than deleting shared drivers.
+Full test records: [hardware validation](docs/HARDWARE_VALIDATION.md) and
+[installer validation](docs/INSTALLER_VALIDATION_STRATEGY.md).
 
-Report problems through
-[PureDS4 issues](https://github.com/meiameiameia/PureDS4/issues). Include:
+## Problems and support
 
-- PureDS4 and Windows versions, and whether you used setup or the portable ZIP
-- DS4 model, USB or Bluetooth connection, and selected game output
-- The error text, steps to reproduce it, and what you expected to happen
+- Input missing or wrong? Open **Profiles → edit a profile → Controller
+  Readings** to see what the controller sends and what the game receives.
+- Setup or update failed? Save the error message, restart if asked, and run
+  the PureDS4 installer again to repair. Don't delete shared drivers.
 
-Runtime logs are in `%AppData%\PureDS4\Logs`. Setup diagnostics are in
-`%ProgramData%\PureDS4\Installer`; include a transaction ID if one is shown.
-Before posting excerpts, remove usernames, personal paths, controller
-identifiers, MAC addresses and credentials. Keep complete logs locally and
-do not post personal profiles or entire data folders publicly.
+Report problems in [Issues](https://github.com/meiameiameia/PureDS4/issues)
+with your PureDS4 and Windows versions, USB or Bluetooth, the game output you
+chose, and what happened. Logs are in `%AppData%\PureDS4\Logs` (setup logs in
+`%ProgramData%\PureDS4\Installer`); remove your username, paths and controller
+address before posting excerpts.
 
-## Build from source
+## For developers
 
-From a Windows development environment with the project's .NET SDK:
+Build and test from a Windows development environment with the project's
+.NET SDK:
 
 ```powershell
 dotnet restore PureDS4.sln --locked-mode
@@ -254,27 +122,24 @@ dotnet build PureDS4.sln -c Debug -p:Platform=x64
 dotnet test PureDS4.sln -c Debug -p:Platform=x64 -r win-x64 -p:SelfContained=true --filter "FullyQualifiedName!~LiveProcessCapture"
 ```
 
-These commands build and test the application; they do not validate physical
-hardware or the full installer. See the [installer documentation](installer/README.md)
-for packaging and the [release contract](docs/RELEASE_CONTRACT.md) for build
-identity, runtime maintenance and release details.
+These commands do not validate hardware or the full installer. See the
+[installer documentation](installer/README.md) and the
+[release contract](docs/RELEASE_CONTRACT.md) for packaging, versions
+(year.month from 26.11.0), the bundled .NET 10 runtime and release rules.
 
 ## Credits and license
 
 PureDS4 builds on [hbashton/DS4Windows](https://github.com/hbashton/DS4Windows)
 and the DS4Windows contributors before it. The upstream history, original
-copyright notices and GPL notices are preserved. The `upstream-baseline` tag
+copyright notices and GPL notices are preserved; the `upstream-baseline` tag
 records the fork's starting point.
 
-PureDS4 is licensed under **GPL-3.0-or-later**. See [COPYING](COPYING).
-Bundled third-party components retain their own licenses. Standard setup
-presents the separate Microsoft runtime and Windows SDK terms; portable users
-must read the included agreements before use. These are not an additional
-PureDS4 EULA.
-
-See [component provenance](docs/component-provenance.md) for sources and
-licenses, [managed dependency notices](PureDS4/ThirdParty/ManagedDependencies.NOTICE.txt)
-for the .NET package inventory, and
+PureDS4 is licensed under **GPL-3.0-or-later** (see [COPYING](COPYING)).
+Bundled components keep their own licenses: setup shows the Microsoft runtime
+and Windows SDK terms, and the portable ZIP includes them to read before use.
+These are not an extra PureDS4 EULA. Details:
+[component provenance](docs/component-provenance.md),
+[managed dependency notices](PureDS4/ThirdParty/ManagedDependencies.NOTICE.txt),
 [controller artwork attribution](PureDS4/Resources/ControllerArtwork.NOTICE.txt)
-for the artwork credits. The bundled backend's source is available at
+and the bundled backend's source at
 [PureDS4-VIIPER](https://github.com/meiameiameia/PureDS4-VIIPER).
