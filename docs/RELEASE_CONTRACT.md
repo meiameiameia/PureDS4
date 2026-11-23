@@ -71,7 +71,33 @@ Release build with 0 warnings. Not observed: the in-place update from published
 5.1.2 (this PC went preview.7 -> 5.2.0 candidate -> 26.11.0), clean full-bundle
 installation, real failure rollback, interrupted-install reboot/resume,
 another Windows PC and current DS4 speaker/headset audio. The 15-minute
-Bluetooth read stall remains a known open issue. No publication has been made.
+Bluetooth read stall remains a known open issue.
+
+The owner approved publication. CI on the first push of this line failed at the
+package advisory query because the single-job workflow's Release/x64 solution
+restore skipped the test project; the CI-only fix `5811bb5` restores it
+explicitly. Its [CI run](https://github.com/meiameiameia/PureDS4/actions/runs/45091889291)
+passed the advisory, release-input and notice gates, 1,182 tests (1,181 passed;
+one native-caption test is inconclusive on the Windows Server 2022 runner
+because it needs Windows 11 caption attributes, and passes locally), x64
+application/ZIP and installer composition, offline layout planning and the MSI
+install/repair/uninstall lifecycle on the disposable runner. That MSI-only
+lifecycle does not establish a consumer full-bundle clean installation or
+failure rollback.
+
+The unchanged assets were published as stable/latest
+[PureDS4 26.11.0](https://github.com/meiameiameia/PureDS4/releases/tag/v26.11.0)
+at `2026-11-23T01:18:54Z` (2026-11-22 22:18:54 in America/Sao_Paulo) by the
+verified API account `meiameiameia`, with the release notes below (wording
+unchanged, wrapped lines joined). The annotated remote tag `v26.11.0` resolves
+to `5ca896f`. Unauthenticated requests confirmed that the public latest-release
+API exposes stable `v26.11.0` and downloaded all four assets; each matched its
+local SHA-256 (`SHA256SUMS.txt`
+`52467928F18B626B6D20CA278C8CDB5AB546A57FEA771243393E594AB0DCB1AA`,
+`candidate-identity.json`
+`E6C04B78BE534905722E7044073C98461E6BABF1E9235AA6BCD92E18482EC1FC`). The 5.1.x
+update checker reads that same endpoint; no personal settings were changed to
+force a check. No announcement was posted by the agent.
 
 #### 26.11.0 public release notes
 

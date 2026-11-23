@@ -52,6 +52,9 @@ they were not repeated on 26.11.0. Bluetooth was not rechecked on 26.11.0.
 Current DS4 speaker/headset audio was not separately confirmed. The 15-minute
 Bluetooth stall is not worse than in the preview builds, but its cause is
 unidentified and it is unknown whether 5.1.2 shows it. No latency claim is made.
+These accepted packages were published unchanged as
+[PureDS4 26.11.0](https://github.com/meiameiameia/PureDS4/releases/tag/v26.11.0);
+unauthenticated downloads matched the accepted hashes.
 
 ### 5.2.0 owner decision on the no-audio effect experiment — 2026-11-08
 
