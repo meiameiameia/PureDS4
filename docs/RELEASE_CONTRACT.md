@@ -106,6 +106,12 @@ detail on what was tested. The GitHub release text was replaced with the text
 below; the tag, source commit, assets and publication time did not change.
 The detailed test results stay in `docs/HARDWARE_VALIDATION.md` and
 `docs/INSTALLER_VALIDATION_STRATEGY.md`.
+Later that day the owner also removed the short "Known issue" paragraph about
+the periodic Bluetooth read stall, because it read as a shipped PureDS4 defect
+while the evidence points to a host-side trigger on the test PC (HID read
+stage, fixed 15-minute cadence, generic-driver USB adapter) and 5.1.2 was not
+compared. The stall stays recorded as an open investigation in
+`docs/HARDWARE_VALIDATION.md`; the README keeps a general Bluetooth tip.
 
 26.11.0 is the big interface update that was planned as 5.2.0. PureDS4 now
 uses year.month version numbers, so it no longer reads like part of the
@@ -124,10 +130,6 @@ What's new:
 
 Controller support, Xbox 360 / DS4 game output, the drivers, and your profiles
 and settings are unchanged.
-
-Known issue: on my PC, Bluetooth input pauses briefly about every 15 minutes
-(usually under a second, rarely up to 3 seconds) and then continues. I didn't
-notice it in game; the cause is still being investigated.
 
 Before you install:
 

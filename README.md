@@ -85,10 +85,9 @@ portable DS4Windows versions, repair and going back.
 PureDS4 is tested by its maintainer on one PC with a DS4 v2, over USB and
 Bluetooth. Things to be aware of:
 
-- **Short Bluetooth pauses:** on the test PC, Bluetooth input sometimes pauses
-  for under a second (rarely up to 3 seconds) about every 15 minutes, then
-  continues. It wasn't noticeable in game, and the cause is still being
-  investigated.
+- **Bluetooth** quality depends on your PC's Bluetooth adapter and driver. If
+  input pauses now and then, a USB cable or another adapter may help; please
+  report it in [Issues](https://github.com/meiameiameia/PureDS4/issues).
 - **Not tested yet:** sleep/wake, two controllers at once, and the DS4
   speaker and headset jack.
 - **Keyboard and mouse mappings** may not reach games running as
