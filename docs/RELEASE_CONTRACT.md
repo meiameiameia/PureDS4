@@ -101,6 +101,55 @@ force a check. No announcement was posted by the agent.
 
 #### 26.11.0 public release notes
 
+On 2026-11-23 the owner asked for a shorter release description, mainly less
+detail on what was tested. The GitHub release text was replaced with the text
+below; the tag, source commit, assets and publication time did not change.
+The detailed test results stay in `docs/HARDWARE_VALIDATION.md` and
+`docs/INSTALLER_VALIDATION_STRATEGY.md`.
+
+26.11.0 is the big interface update that was planned as 5.2.0. PureDS4 now
+uses year.month version numbers, so it no longer reads like part of the
+DS4Windows 5.x line. It installs over 5.1.x as a normal update, and the update
+checker in 5.1.1/5.1.2 will offer it.
+
+What's new:
+
+- A new look in light and dark across the whole app and the installer.
+- Profile editor pages rebuilt as tidy, aligned rows with on/off switches.
+- A redesigned Controller Readings page and a new app icon.
+- Clearer setup and DS4Windows-migration dialogs.
+- Safer controller reads, plus a log line if Bluetooth input stalls for more
+  than a second (no input values or device IDs are recorded).
+- Bundled .NET 10.0.14 LTS.
+
+Controller support, Xbox 360 / DS4 game output, the drivers, and your profiles
+and settings are unchanged.
+
+Known issue: on my PC, Bluetooth input pauses briefly about every 15 minutes
+(usually under a second, rarely up to 3 seconds) and then continues. I didn't
+notice it in game; the cause is still being investigated.
+
+Before you install:
+
+- Tested on my own PC with a DS4 v2 over USB and Bluetooth. Back up your
+  profiles before updating.
+- The installer is unsigned, so Windows may warn you. Check the download
+  against `SHA256SUMS.txt`, and don't disable Windows protections to install
+  it.
+
+Downloads:
+
+- `PureDS4_26.11.0_Setup_x64.exe`: standard installer (recommended).
+- `PureDS4_26.11.0_x64.zip`: portable version; it still needs the drivers the
+  installer sets up.
+- `SHA256SUMS.txt` and `candidate-identity.json`: checksums and build details
+  (source `5ca896f`).
+
+More: installation and recovery guide (`docs/INSTALL_AND_ROLLBACK.md`) and
+full test records (`docs/HARDWARE_VALIDATION.md`).
+
+#### 26.11.0 original public release notes (published 2026-11-23, replaced the same day)
+
 26.11.0 is the UI release that was planned as 5.2.0. PureDS4 now uses its own
 year.month version numbers, so it no longer looks like part of the DS4Windows
 5.x line. 26.11.0 installs over 5.1.x as a normal update, and the 5.1.1/5.1.2
