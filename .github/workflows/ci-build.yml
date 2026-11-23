@@ -57,7 +57,13 @@ jobs:
       - name: Restore dependencies
         # Restore both declared RIDs to retain the committed lock graph;
         # execution and publishing below select only the supported x64 target.
-        run: dotnet restore .\PureDS4.sln --locked-mode -p:Configuration=Release -p:Platform=x64 -p:SelfContained=true
+        # The solution's Release|x64 configuration does not build the test
+        # project, so a solution restore with these properties skips it; restore
+        # it explicitly for the advisory query and the --no-restore test run.
+        run: |
+          dotnet restore .\PureDS4.sln --locked-mode -p:Configuration=Release -p:Platform=x64 -p:SelfContained=true
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet restore .\PureDS4.Tests\PureDS4.Tests.csproj --locked-mode -p:Configuration=Release -p:Platform=x64 -p:SelfContained=true
 
       - name: Check package security advisories
         shell: pwsh
