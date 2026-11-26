@@ -20,6 +20,11 @@ use DS4Windows.
   <img src="docs/images/screenshots/home.png" alt="PureDS4 Home showing a DS4 connected over Bluetooth, Protected status, and Xbox 360 game output" width="800">
 </a>
 
+The profile editor in light and dark:
+
+<a href="docs/images/screenshots/button-mapping-light.png"><img src="docs/images/screenshots/button-mapping-light.png" alt="PureDS4 profile editor in light theme showing the Button Mapping page with a DS4 controller map and the list of button mappings" width="395"></a>
+<a href="docs/images/screenshots/axis-config-dark.png"><img src="docs/images/screenshots/axis-config-dark.png" alt="PureDS4 profile editor in dark theme showing Axis Config rows for dead zone, sensitivity, output curve and on/off switches" width="395"></a>
+
 <details>
 <summary>More: live controller readings in the profile editor</summary>
 
